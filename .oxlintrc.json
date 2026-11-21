@@ -1,0 +1,110 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "vitest"],
+  "jsPlugins": ["./tools/oxlint-plugin/src/index.js"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true
+  },
+  "rules": {
+    "typescript/no-explicit-any": "error",
+    "typescript/no-deprecated": "error",
+    "typescript/no-unsafe-type-assertion": "off",
+    "typescript/no-unnecessary-type-parameters": "off",
+    "typescript/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": true,
+        "ts-expect-error": "allow-with-description",
+        "ts-nocheck": true
+      }
+    ],
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "import/no-cycle": "error",
+    "import/no-self-import": "error",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["debug", "info", "warn", "error"]
+      }
+    ],
+    "no-debugger": "error",
+    "eqeqeq": ["error", "always"],
+    "unicorn/filename-case": [
+      "error",
+      {
+        "case": "kebabCase",
+        "ignore": ["^\\$.*\\.tsx?$", "^_.*\\.tsx?$", "README\\.md$", "AGENTS\\.md$"]
+      }
+    ],
+    "unicorn/no-null": "off",
+    "no-await-in-loop": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/numeric-separators-style": "off",
+    "arch/no-cross-feature-import": "error",
+    "arch/no-deep-package-import": "error",
+    "arch/no-app-import-in-package": "error",
+    "arch/padding-lines": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/test/**", "**/tests/**"],
+      "rules": {
+        "typescript/no-non-null-assertion": "off",
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["apps/web/**/*.tsx", "apps/web/**/*.ts"],
+      "plugins": ["react", "jsx-a11y", "react-perf"],
+      "rules": {
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-no-useless-fragment": "warn"
+      }
+    },
+    {
+      "files": ["tools/**", "**/*.config.ts", "**/*.config.mjs", "**/scripts/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "**/node_modules/**",
+    ".agents/**",
+    "**/dist/**",
+    "**/routeTree.gen.ts",
+    "**/.turbo/**",
+    "**/.wrangler/**",
+    ".claude/**",
+    "**/coverage/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "**/*.d.ts",
+    "tools/architecture-check/test/fixtures/**"
+  ]
+}

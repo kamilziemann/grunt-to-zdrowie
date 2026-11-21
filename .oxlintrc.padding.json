@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [],
+  "jsPlugins": ["./tools/oxlint-plugin/src/index.js"],
+  "categories": {
+    "correctness": "off"
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true
+  },
+  "rules": {
+    "arch/padding-lines": "error"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    ".agents/**",
+    "**/dist/**",
+    "**/routeTree.gen.ts",
+    "**/.turbo/**",
+    "**/.wrangler/**",
+    ".claude/**",
+    "**/coverage/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "**/*.d.ts",
+    "tools/architecture-check/test/fixtures/**"
+  ]
+}

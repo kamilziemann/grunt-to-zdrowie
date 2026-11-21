@@ -1,0 +1,22 @@
+{
+  "name": "@app/oxlint-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reguly oxlint (JS plugin): granice architektury (cross-feature, deep import do paczek, import aplikacji w paczce) i puste linie w listach instrukcji (padding-lines, z autofixem).",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "check:types": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@types/bun": "^1.4.2",
+    "oxlint": "^1.88.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
