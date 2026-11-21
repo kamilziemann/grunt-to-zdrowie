@@ -4,3 +4,6 @@ export * from './identity';
 export * from './telemetry';
 export * from './parcel';
 export * from './place';
+export * from './crop';
+export * from './analysis';
+export * from './report';
