@@ -47,6 +47,7 @@ import {
   type SheetSnap,
 } from '../bottom-sheet';
 import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
+import { FirstSteps } from '../first-steps';
 import { HydroLegend } from '../hydro-legend';
 import { HydroToggle } from '../hydro-toggle';
 import { ParcelCandidates } from '../parcel-candidates';
@@ -133,7 +134,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [hydro, setHydro] = useState(true);
   const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
   const desktop = useSyncExternalStore(subscribeDesktop, isDesktop, notDesktop);
-  const [snap, setSnap] = useState<SheetSnap>('peek');
+  // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
+  const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 ? 'half' : 'peek');
   const [hint, setHint] = useState<MapHint | null>(null);
 
   const search = useQuery({ ...parcelSearchQuery(submitted ?? ''), enabled: submitted !== null });
@@ -350,6 +352,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const sheetLabels = useMemo(() => ({ expand: t('sheet.expand'), collapse: t('sheet.collapse') }), [t]);
 
   const step: ParcelStep = target ? 'check' : ids.length > 0 ? 'analyze' : 'find';
+  const firstVisit = ids.length === 0 && target === null && submitted === null;
   const showCandidates = submitted !== null && picked === null && !onlyMatch && search.data !== undefined;
   const hasPlaces = (places.data?.items.length ?? 0) > 0;
   const showPlaces = submitted !== null && picked === null && !onlyMatch && hasPlaces;
@@ -385,7 +388,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
           <BoundariesToggle value={boundaries} onChange={setBoundaries} />
           <HydroToggle value={hydro} onChange={setHydro} />
         </div>
-        {hydro && (
+        {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
+        {hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
           <HydroLegend key={desktop ? 'desktop' : 'phone'} status={hydroStatus} defaultOpen={desktop} />
         )}
       </div>
@@ -407,7 +411,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
               <div className="flex flex-col gap-3 max-md:flex-col-reverse">
                 <div className="flex flex-col gap-2">
                   <h1 className="text-2xl font-bold text-primary max-md:text-xl">{t('title')}</h1>
-                  <StepsHeader current={step} />
+                  {/* przy pierwszym wejsciu kroki opisuje karta nizej - pasek etapow bylby powtorzeniem */}
+                  {!firstVisit && <StepsHeader current={step} />}
                 </div>
                 <ParcelSearch
                   value={text}
@@ -416,7 +421,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
                   onFocus={expandSheet}
                   pending={search.isFetching || (target !== null && previewQuery.isFetching)}
                   error={inputError}
-                  compact={target !== null || showCandidates || showPlaces}
+                  // pierwsze wejscie: podpowiedz powtarza krok 1 karty "3 kroki" - na telefonie liczy sie miejsce
+                  compact={firstVisit || target !== null || showCandidates || showPlaces}
                 />
               </div>
 
@@ -478,6 +484,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
                   onDismiss={clearSearch}
                 />
               )}
+
+              {firstVisit && <FirstSteps />}
 
               <ParcelList
                 items={selected.items}

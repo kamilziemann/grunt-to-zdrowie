@@ -157,5 +157,24 @@
     "summaryPart": "Part of parcel {numbers}",
     "summaryArea": "{area} ha",
     "invalidArea": "The area in the link cannot be read. Draw it again."
+  },
+  "firstSteps": {
+    "title": "Check the water on your field in 3 steps",
+    "steps": {
+      "find": {
+        "title": "Find your parcel",
+        "text": "Type the parcel number or an address, or click on the map."
+      },
+      "crop": {
+        "title": "Choose the crop and day",
+        "text": "Today or any day in the last 10 years."
+      },
+      "report": {
+        "title": "Read the report",
+        "text": "Whether water is short, why, and what to do: hold water, change tillage, irrigate."
+      }
+    },
+    "example": "See an example",
+    "exampleNote": "A field in Żuławy, wheat, 15 July 2018"
   }
 }

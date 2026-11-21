@@ -157,5 +157,24 @@
     "summaryPart": "Część działki {numbers}",
     "summaryArea": "{area} ha",
     "invalidArea": "Obszaru z linku nie da się odczytać. Narysuj go jeszcze raz."
+  },
+  "firstSteps": {
+    "title": "Sprawdź wodę na swoim polu w 3 krokach",
+    "steps": {
+      "find": {
+        "title": "Znajdź działkę",
+        "text": "Wpisz numer działki albo adres, możesz też kliknąć na mapie."
+      },
+      "crop": {
+        "title": "Wybierz uprawę i dzień",
+        "text": "Dziś albo dowolny dzień z ostatnich 10 lat."
+      },
+      "report": {
+        "title": "Przeczytaj raport",
+        "text": "Czy brakuje wody, dlaczego i co zrobić: zatrzymać wodę, zmienić uprawę, podlać."
+      }
+    },
+    "example": "Zobacz przykład",
+    "exampleNote": "Pole na Żuławach, pszenica, 15 lipca 2018"
   }
 }
