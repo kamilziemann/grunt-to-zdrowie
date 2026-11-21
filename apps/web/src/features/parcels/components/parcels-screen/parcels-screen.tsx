@@ -12,7 +12,7 @@ import {
 } from '@app/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Plus } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { ProblemAlert } from '@/components/shared/problem-alert';
@@ -105,17 +105,6 @@ function insidePoland(lng: number, lat: number): boolean {
 
 const HYDRO_OFF: HydroStatus = { state: 'off', importedAt: null, truncated: false };
 
-function subscribeDesktop(onChange: () => void): () => void {
-  const query = window.matchMedia(DESKTOP_QUERY);
-
-  query.addEventListener('change', onChange);
-
-  return () => query.removeEventListener('change', onChange);
-}
-
-const isDesktop = () => window.matchMedia(DESKTOP_QUERY).matches;
-const notDesktop = () => false;
-
 export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenProps) {
   const t = useTranslations('parcels');
   const tCommon = useTranslations('common');
@@ -140,7 +129,6 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
   const [imageryChoice, setImageryChoice] = useState<ImageryChoice>('none');
   const [imageryMonth, setImageryMonth] = useState<string | null>(null);
-  const desktop = useSyncExternalStore(subscribeDesktop, isDesktop, notDesktop);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
   const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 ? 'half' : 'peek');
   const [hint, setHint] = useState<MapHint | null>(null);
@@ -431,7 +419,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
         </div>
         {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
         {hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
-          <HydroLegend key={desktop ? 'desktop' : 'phone'} status={hydroStatus} defaultOpen={desktop} />
+          <HydroLegend status={hydroStatus} />
         )}
         {imageryChoice !== 'none' && imagery.state !== 'off' && (
           <ImageryLegend

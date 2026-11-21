@@ -26,13 +26,13 @@ const SWATCHES = [
 export interface HydroLegendProps {
   status: HydroStatus;
   className?: string;
-  /** otwarta od poczatku (komputer); na telefonie zwinieta, zeby nie zaslaniala mapy */
+  /** otwarta od poczatku; domyslnie zwinieta (jeden wiersz), zeby nie zaslaniala mapy */
   defaultOpen?: boolean;
 }
 
 /**
  * Legenda warstwy "Rowy i cieki": probki stylu, zrodlo "BDOT10k, GUGiK" z data danych i stan warstwy (przybliz
- * mape, chwilowo niedostepna - widoczny takze po zwinieciu). Zwijana - na telefonie zajmuje jeden wiersz.
+ * mape, chwilowo niedostepna - widoczny takze po zwinieciu). Domyslnie zwinieta - zajmuje jeden wiersz.
  */
 export function HydroLegend({ status, className, defaultOpen = false }: HydroLegendProps) {
   const t = useTranslations('parcels.map.hydroLegend');

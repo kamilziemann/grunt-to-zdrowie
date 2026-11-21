@@ -25,7 +25,9 @@ test.describe('rowy i cieki na mapie', () => {
     await expect(legend).toHaveAttribute('data-hydro-state', 'ready', { timeout: 20_000 });
     expect(requested).toContain('9174/5399');
 
-    // na komputerze legenda jest otwarta od poczatku
+    // legenda jest domyslnie zwinieta (takze na komputerze) - rozwija sie jednym kliknieciem
+    await expect(legend).not.toHaveAttribute('open');
+    await legend.getByText('Legenda: rowy i cieki').click();
     await expect(legend).toHaveAttribute('open', '');
     await expect(legend.getByText('Rów melioracyjny')).toBeVisible();
     await expect(legend).toContainText('Mokradło, bagno');
