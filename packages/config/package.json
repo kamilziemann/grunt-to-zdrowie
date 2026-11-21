@@ -1,0 +1,21 @@
+{
+  "name": "@app/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Stale wspolne dla calego projektu: nazwa aplikacji, limity, paginacja.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "typescript": "5.9.3"
+  }
+}
