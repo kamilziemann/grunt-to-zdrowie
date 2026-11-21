@@ -7,6 +7,7 @@ import { Link } from '@/lib/navigation';
 import { cn } from '@/lib/utils/cn';
 
 import { isoDay } from '../../utils/report-data';
+import { ExportButtons } from '../export-buttons';
 
 const STATUS_STYLES: Record<SourceRef['status'], { icon: LucideIcon; badge: string }> = {
   ok: { icon: CircleCheck, badge: 'border-success/50 bg-success/10 text-foreground [&>svg]:text-success' },
@@ -123,6 +124,8 @@ export function SourcesSection({ report }: { report: WaterReport }) {
           </ul>
         )}
       </div>
+
+      <ExportButtons report={report} />
 
       <p className="text-xs text-muted-foreground">
         {t('meta', {

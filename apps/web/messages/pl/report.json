@@ -452,5 +452,11 @@
     "missing": "Wybierz co najmniej dwie działki, uprawę i dzień.",
     "change": "Zmień uprawę lub datę",
     "map": "Wróć do mapy"
+  },
+  "export": {
+    "title": "Dane dla doradcy",
+    "description": "Pobierz liczby z raportu: tabelę do arkusza kalkulacyjnego albo pełny raport w formacie JSON.",
+    "csv": "Pobierz tabelę (CSV)",
+    "json": "Pobierz dane (JSON)"
   }
 }

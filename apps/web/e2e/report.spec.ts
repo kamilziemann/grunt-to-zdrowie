@@ -137,3 +137,26 @@ test.describe('analiza i raport', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });
+
+test('eksport dla doradcy: CSV i JSON z danymi raportu', async ({ page }) => {
+  await mockAnalysisApi(page);
+  await page.goto(DROUGHT_REPORT_URL);
+  await expect(page.getByTestId('verdict')).toBeVisible();
+
+  const [csv] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Pobierz tabelę (CSV)' }).click(),
+  ]);
+
+  expect(csv.suggestedFilename()).toBe('raport-141201_1.0001.6509-2018-06-15.csv');
+  const text = await (await csv.createReadStream()).toArray();
+
+  expect(Buffer.concat(text).toString('utf8')).toContain('climaticBalance;balanceMm;-188.4;mm');
+
+  const [json] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Pobierz dane (JSON)' }).click(),
+  ]);
+
+  expect(json.suggestedFilename()).toBe('raport-141201_1.0001.6509-2018-06-15.json');
+});

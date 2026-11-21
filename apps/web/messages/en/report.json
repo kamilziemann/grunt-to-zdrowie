@@ -452,5 +452,11 @@
     "missing": "Choose at least two parcels, a crop and a day.",
     "change": "Change crop or date",
     "map": "Back to the map"
+  },
+  "export": {
+    "title": "Data for the advisor",
+    "description": "Download the numbers from the report: a table for a spreadsheet or the full report as JSON.",
+    "csv": "Download table (CSV)",
+    "json": "Download data (JSON)"
   }
 }
