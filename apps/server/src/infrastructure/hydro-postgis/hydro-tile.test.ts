@@ -31,6 +31,10 @@ describe('createPostgisHydroMapSource', () => {
     ]);
   });
 
+  it('data importu tylko dla tabeli hydrografii', () => {
+    expect(hydroTileQueries([0, 0, 1, 1], 10)[1]?.text).toContain("where table_name = 'bdot_hydro'");
+  });
+
   it('zapytanie najpierw oddaje cieki i rowy', () => {
     expect(hydroTileQueries([0, 0, 1, 1], 10)[0]?.text).toContain(
       'case when h.kind in (1, 2, 3, 4) then 0 else 1 end as priority',

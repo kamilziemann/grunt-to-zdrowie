@@ -91,5 +91,7 @@ describe('createPostgisHydroSource', () => {
     expect(queries[0]?.params[1]).toBe(500);
     expect(JSON.parse(String(queries[0]?.params[0]))).toMatchObject({ type: 'Polygon' });
     expect(queries.every((query) => /^\s*(with|select)/i.test(query.text))).toBe(true);
+    // rejestr importu jest wspolny z tabelami otoczenia - data danych tylko dla hydrografii
+    expect(queries[2]?.text).toContain("where table_name = 'bdot_hydro'");
   });
 });

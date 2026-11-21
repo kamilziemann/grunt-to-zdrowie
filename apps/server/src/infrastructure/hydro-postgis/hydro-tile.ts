@@ -33,7 +33,11 @@ order by priority, ST_Length(geom) desc, ST_Area(geom) desc
 limit $5`,
       params: [west, south, east, north, limit],
     },
-    { text: 'select max(imported_at) as imported_at from bdot_import', params: [] },
+    // data importu hydrografii - rejestr jest wspolny z tabelami otoczenia pola, wiec bez `max` z calego rejestru
+    {
+      text: "select max(imported_at) as imported_at from bdot_import where table_name = 'bdot_hydro'",
+      params: [],
+    },
   ];
 }
 

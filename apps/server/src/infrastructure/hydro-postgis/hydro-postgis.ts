@@ -61,7 +61,11 @@ order by ST_Distance(h.geom, field.geom)
 limit $3`,
       params: [geometry, SEARCH_RADIUS_M, MAP_FEATURES],
     },
-    { text: 'select max(imported_at) as imported_at from bdot_import', params: [] },
+    // data importu hydrografii - rejestr jest wspolny z tabelami otoczenia pola, wiec bez `max` z calego rejestru
+    {
+      text: "select max(imported_at) as imported_at from bdot_import where table_name = 'bdot_hydro'",
+      params: [],
+    },
   ];
 }
 
