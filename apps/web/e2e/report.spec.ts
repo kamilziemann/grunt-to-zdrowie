@@ -6,7 +6,7 @@ import {
   PARCEL_ID,
   REPORT_URL,
 } from './support/analysis-api';
-import { mockBasemap, mockHydroApi } from './support/hydro-api';
+import { DITCH_THROUGH_TILES, mockBasemap, mockHydroApi } from './support/hydro-api';
 import { expectTouchTargets } from './support/touch-targets';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
@@ -191,31 +191,48 @@ test.describe('mapa pola w raporcie', () => {
     await mockAnalysisApi(page);
   });
 
-  test('obrys pola, najbliższy rów z odległością, źródła; na wydruku obraz zamiast płótna', async ({
+  test('szkic pola: rów przez pole z linią odniesienia, legenda, podziałka; na wydruku szkic', async ({
     page,
   }) => {
-    await mockHydroApi(page);
+    await mockHydroApi(page, { tiles: DITCH_THROUGH_TILES });
     await page.goto(LOW_CONFIDENCE_REPORT_URL);
 
     const map = page.getByTestId('field-map');
+    const sketch = page.getByTestId('field-sketch');
 
     await map.scrollIntoViewIfNeeded();
     await expect(map).toHaveAttribute('data-hydro', 'ready');
+    await expect(sketch).toBeVisible();
+    await expect(sketch).toContainText('Działka 6509');
+    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^Rów przez pole, \d+ m$/);
+    await expect(page.getByTestId('field-sketch-highlight')).toBeAttached();
+    await expect(page.getByTestId('field-sketch-scale')).toContainText(/\d+ m/);
+    await expect(page.getByTestId('field-sketch-legend')).toContainText('Rów płynący przez pole');
+    await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
     await expect(page.getByTestId('field-map-nearest')).toContainText(
       'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',
     );
-    await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
+    // zdjecie lotnicze dopiero na zadanie
+    await expect(page.getByTestId('field-map-canvas')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Pokaż na zdjęciu lotniczym' }).click();
     await expect(page.getByTestId('field-map-canvas')).toBeVisible({ timeout: 20_000 });
+    await expect(sketch).toBeHidden();
 
-    const snapshot = map.locator('img');
-
-    await expect(snapshot).toHaveAttribute('src', /^data:image\/png/, { timeout: 20_000 });
+    // wydruk: zawsze szkic, bez plotna i bez przelacznika
     await page.emulateMedia({ media: 'print' });
-    await expect(snapshot).toBeVisible();
+    await expect(sketch).toBeVisible();
     await expect(page.getByTestId('field-map-canvas')).toBeHidden();
+    await expect(page.getByTestId('field-map-toggle')).toBeHidden();
+
+    await page.emulateMedia({ media: 'screen' });
+    await page.getByRole('button', { name: 'Wróć do szkicu' }).click();
+    await expect(sketch).toBeVisible();
   });
 
-  test('warstwa hydrografii nie odpowiada: sam obrys pola i spokojna informacja', async ({ page }) => {
+  test('warstwa hydrografii nie odpowiada: szkic z samym obrysem pola i spokojna informacja', async ({
+    page,
+  }) => {
     await mockHydroApi(page, { status: 503 });
     await page.goto(LOW_CONFIDENCE_REPORT_URL);
 
@@ -223,8 +240,32 @@ test.describe('mapa pola w raporcie', () => {
 
     await map.scrollIntoViewIfNeeded();
     await expect(map).toHaveAttribute('data-hydro', 'unavailable');
-    await expect(map).toContainText('Warstwa rowów i cieków jest chwilowo niedostępna');
-    await expect(page.getByTestId('field-map-canvas')).toBeVisible({ timeout: 20_000 });
+    await expect(map).toContainText('Danych o rowach i ciekach chwilowo brak');
+    await expect(page.getByTestId('field-sketch-field')).toBeAttached();
+    await expect(page.getByTestId('field-sketch-fact')).toHaveCount(0);
+  });
+
+  test('prawdziwy rów działki 6509 biegnie skrajem pola', async ({ page }) => {
+    await mockHydroApi(page);
+    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+    await page.getByTestId('field-map').scrollIntoViewIfNeeded();
+    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^Rów na skraju pola, \d+ m$/);
+  });
+
+  test('szkic na telefonie mieści się w ekranie', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockHydroApi(page);
+    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+
+    const sketch = page.getByTestId('field-sketch');
+
+    await sketch.scrollIntoViewIfNeeded();
+    await expect(page.getByTestId('field-sketch-fact')).toBeVisible();
+
+    const box = await sketch.boundingBox();
+
+    expect(box?.width ?? 0).toBeLessThanOrEqual(375);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });
 

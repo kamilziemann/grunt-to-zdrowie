@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { HYDRO_TILES } from '@/features/parcels';
@@ -40,5 +40,52 @@ describe('FieldMap', () => {
       'Brak rzek, strumieni i kanałów w promieniu 500 m.',
     );
     expect(screen.getByTestId('field-map')).toHaveTextContent('BDOT10k, GUGiK (dane z 21 lis 2026)');
+  });
+
+  it('domyslnie szkic: podpis dzialki, fakt z linia odniesienia, legenda; zdjecie dopiero po kliknieciu', () => {
+    renderWithIntl(
+      <QueryClientProvider client={clientWithTiles()}>
+        <FieldMap field={FIELD} ditchInFieldM={null} />
+      </QueryClientProvider>,
+    );
+
+    const sketch = screen.getByTestId('field-sketch');
+
+    expect(sketch).toHaveTextContent('Działka 6509');
+    expect(sketch).toHaveTextContent('100 m');
+    expect(screen.getByTestId('field-sketch-fact')).toHaveTextContent(/^Rów na skraju pola, \d+ m$/);
+    expect(screen.getByTestId('field-sketch-label').textContent).toMatch(
+      /^Szkic: Działka 6509 i woda w promieniu 250 m od pola\. Rów na skraju pola/,
+    );
+    expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Granica pola');
+    expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Rowy melioracyjne');
+    expect(screen.getByTestId('field-map')).toHaveTextContent('Szkic w skali, północ u góry');
+    expect(screen.queryByTestId('field-map-canvas')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pokaż na zdjęciu lotniczym' }));
+
+    expect(screen.getByRole('button', { name: 'Wróć do szkicu' })).toBeInTheDocument();
+  });
+
+  it('dlugosc rowu w polu z raportu na szkicu', () => {
+    renderWithIntl(
+      <QueryClientProvider client={clientWithTiles()}>
+        <FieldMap field={FIELD} ditchInFieldM={428} />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByTestId('field-sketch-fact')).toHaveTextContent('Rów na skraju pola, 428 m');
+  });
+
+  it('bez kafli hydrografii: sam obrys pola, bez faktu', () => {
+    renderWithIntl(
+      <QueryClientProvider client={new QueryClient()}>
+        <FieldMap field={FIELD} />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByTestId('field-sketch-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('field-sketch-fact')).toBeNull();
+    expect(screen.getByTestId('field-map')).toHaveTextContent('Wczytuję rowy i cieki');
   });
 });

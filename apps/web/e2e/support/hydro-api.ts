@@ -1,6 +1,7 @@
 // Podstawiona warstwa "Rowy i cieki" i podklad mapy dla e2e: trasa /api/hydro/tile powstaje na drugiej galezi,
 // a podklad (OpenFreeMap) i zdjecie (GUGiK) to uslugi zewnetrzne. Styl podkladu = samo tlo, wiec mapa laduje sie
 // bez sieci; kafle hydrografii z fixture (prawdziwe dane BDOT10k wokol dzialki testowej).
+import type { HydroTile } from '@app/contracts';
 import type { Page } from '@playwright/test';
 
 import { HYDRO_TILES } from '../../src/features/parcels/fixtures/hydro-tiles';
@@ -36,12 +37,12 @@ export async function mockBasemap(page: Page) {
 }
 
 /**
- * Kafle hydrografii: z fixture (inne kafle puste) albo blad `status` (404/503 = warstwa chwilowo niedostepna).
+ * Kafle hydrografii: z fixture albo `tiles` (inne kafle puste) albo blad `status` (404/503 = warstwa chwilowo niedostepna).
  * Zwraca liste adresow pobranych kafli ("x/y").
  */
 export async function mockHydroApi(
   page: Page,
-  { status = 200 }: { status?: number } = {},
+  { status = 200, tiles = HYDRO_TILES }: { status?: number; tiles?: Record<string, HydroTile> } = {},
 ): Promise<string[]> {
   const requested: string[] = [];
 
@@ -53,8 +54,33 @@ export async function mockHydroApi(
 
     if (status !== 200) return route.fulfill({ status, body: '' });
 
-    return route.fulfill({ json: HYDRO_TILES[key] ?? EMPTY_TILE });
+    return route.fulfill({ json: tiles[key] ?? EMPTY_TILE });
   });
 
   return requested;
 }
+
+/**
+ * Kafle z fixture plus rów przecinający środek działki 6509 (z zachodu na wschód, ok. 75 m w polu) - prawdziwy rów
+ * tej działki biegnie jej skrajem, a szkic ma pokazać też wariant "Rów przez pole".
+ */
+export const DITCH_THROUGH_TILES: Record<string, HydroTile> = {
+  ...HYDRO_TILES,
+  '9174/5399': {
+    ...(HYDRO_TILES['9174/5399'] ?? EMPTY_TILE),
+    features: [
+      ...(HYDRO_TILES['9174/5399']?.features ?? []),
+      {
+        kind: 'ditch',
+        name: null,
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [21.5888, 52.17195],
+            [21.5908, 52.17195],
+          ],
+        },
+      },
+    ],
+  },
+};
