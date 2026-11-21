@@ -1,0 +1,127 @@
+# CI: jakosc (format, lint, architektura, dokumentacja, typy, migracje), testy, build i E2E.
+# Opcjonalny zdalny cache Turborepo: sekret TURBO_TOKEN + zmienna TURBO_TEAM (bez nich turbo uzywa tylko cache lokalnego).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Format (oxfmt + puste linie)
+        run: bun run format:check
+
+      - name: Lint (oxlint, type-aware)
+        run: bun run lint
+
+      - name: Architecture (adnotacje w PR)
+        run: bun run --filter @app/architecture-check check:github
+
+      - name: Docs (sciezki, skrypty i skille z AGENTS.md i docs/ istnieja)
+        run: bun run docs:check
+
+      - name: Types
+        run: bun run check:types
+
+      - name: DB migrations match schema
+        run: bun run db:check
+
+  commitlint:
+    name: Commit messages
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: commitlint (Conventional Commits)
+        run: bunx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      # turbo uruchamia `test` w kazdej paczce: vitest (unit, jsdom dla komponentow),
+      # apps/server w workerd przez @cloudflare/vitest-plugin (lokalne D1/R2 w pamieci, migracje z packages/db),
+      # tools/architecture-check pod `bun --bun vitest`.
+      - name: Unit, component and integration tests
+        run: bun run test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Build (turbo)
+        run: bun run build
+
+      # budzet JS stron publicznych na buildzie produkcyjnym (vite preview w workerd na lokalnej D1 po migracjach)
+      - name: JS budget
+        run: |
+          bun run --cwd apps/web db:migrate
+          bun run --cwd apps/web check:js-budget
+
+      - name: Upload Worker build (diagnostyka)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-build
+          path: apps/web/dist
+          if-no-files-found: ignore
+          retention-days: 3
+
+  e2e:
+    name: E2E (Playwright)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      - name: Playwright browsers
+        working-directory: apps/web
+        run: bunx playwright install --with-deps chromium
+
+      # turbo: test:e2e zalezy od build (cache turbo, zdalny gdy skonfigurowany); Playwright sam startuje `vite dev`.
+      # Testy @visual (zrzuty) sa tu pomijane przez grepInvert w playwright.config.ts (CI=true): baseline'y sa per
+      # system, a repo ma darwin. Wlaczenie: baseline'y linuksa + E2E_VISUAL=1 (docs/architecture/testing.md).
+      - name: E2E
+        run: bun run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          if-no-files-found: ignore
+          retention-days: 7

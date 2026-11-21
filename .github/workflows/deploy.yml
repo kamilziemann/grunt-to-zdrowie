@@ -1,0 +1,134 @@
+# Deploy na Cloudflare: JEDEN Worker (apps/web: strony TanStack Start + API Hono pod /api + cron, kolejka, Workflow).
+#
+# Srodowiska (GitHub Environments: development, preview, production) - kazde ma wlasne sekrety/zmienne:
+#   sekrety:  CLOUDFLARE_API_TOKEN (token API: Workers Scripts, D1, R2, Queues - edycja; Workers AI - odczyt),
+#             CLOUDFLARE_ACCOUNT_ID
+#   zmienne:  WEB_URL (opcjonalnie, link przy deploymencie), VITE_SITE_URL (opcjonalnie: adres kanoniczny i hreflang)
+#   Sekrety Workera API nie przechodza przez CI. AUTH_SECRET jest WYMAGANY w preview/production (AUTH_ENABLED="true";
+#   bez niego kazde zapytanie API = 503 not_configured, a cron nie rusza) - ustawia go `bun run deploy` przy pierwszym
+#   deployu srodowiska albo `wrangler secret put AUTH_SECRET --env <env>` w apps/web. Opcjonalne: GEMINI_API_KEY,
+#   ANTHROPIC_API_KEY, NOTIFY_WEBHOOK_URL, SENTRY_DSN. Pierwszy deploy srodowiska rob lokalnie `bun run deploy`
+#   (zaklada baze D1, bucket i kolejki, wpisuje id bazy, ustawia AUTH_SECRET); CI robi kolejne.
+#
+# Kiedy:
+#   push na main          -> production
+#   pull_request          -> preview (tylko gdy w srodowisku preview sa sekrety; PR-y z forkow ich nie maja -> pomijane)
+#                            PR zmieniajacy packages/db/migrations nie wdraza preview (wspolna baza D1, migracje do przodu)
+#   workflow_dispatch     -> wybrane srodowisko
+# `development` wymaga bloku env.development w apps/web/wrangler.jsonc
+# (bez niego wrangler odmowi deployu). Konfiguracja srodowisk: docs/architecture/deployment.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Srodowisko docelowe
+        type: choice
+        options: [development, preview, production]
+        default: preview
+
+concurrency:
+  group: deploy-${{ github.event_name == 'push' && 'production' || github.event_name == 'pull_request' && 'preview' || inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Job dostaje to samo srodowisko co deploy, zeby widziec jego sekrety (job-level `if` nie ma dostepu do `secrets`,
+    # dlatego obecnosc sekretow sprawdzamy w kroku i przekazujemy jako output).
+    environment: ${{ github.event_name == 'push' && 'production' || github.event_name == 'pull_request' && 'preview' || inputs.environment }}
+    outputs:
+      environment: ${{ steps.plan.outputs.environment }}
+      deploy: ${{ steps.plan.outputs.deploy }}
+    steps:
+      # PR: checkout merge commitu z rodzicem (pierwszy rodzic = baza), zeby sprawdzic, czy PR zmienia migracje D1.
+      - uses: actions/checkout@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 2
+
+      - name: Wybierz srodowisko i sprawdz sekrety
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.environment }}
+          HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          HAS_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          case "$EVENT" in
+            push) environment=production ;;
+            pull_request) environment=preview ;;
+            *) environment="$REQUESTED" ;;
+          esac
+          deploy=false
+          if [ "$HAS_TOKEN" = "true" ] && [ "$HAS_ACCOUNT" = "true" ]; then deploy=true; fi
+          if [ "$deploy" = "false" ]; then
+            echo "::notice title=deploy::Brak CLOUDFLARE_API_TOKEN/CLOUDFLARE_ACCOUNT_ID w srodowisku '$environment' - deploy pominiety."
+          fi
+          # Preview ma jedna wspolna baze D1, a migracje sa tylko „do przodu”: migracja niezmergowanego PR-a zostalaby
+          # w niej na zawsze (poprawki tego pliku nie wejda, a wersja z main moze sie z nia wywrocic). Taki PR nie
+          # wdraza preview; swiadomie: workflow_dispatch -> preview. Blad gita przerywa krok (bez deployu).
+          if [ "$EVENT" = "pull_request" ] && [ "$deploy" = "true" ]; then
+            migrations=$(git diff --name-only HEAD^1 HEAD -- packages/db/migrations)
+            if [ -n "$migrations" ]; then
+              deploy=false
+              echo "::notice title=deploy::PR zmienia packages/db/migrations - preview (wspolna baza D1) pominiety. Swiadomie: workflow_dispatch -> preview."
+            fi
+          fi
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy (${{ needs.plan.outputs.environment }})
+    needs: plan
+    if: needs.plan.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ needs.plan.outputs.environment }}
+      url: ${{ vars.WEB_URL }}
+    env:
+      TARGET_ENV: ${{ needs.plan.outputs.environment }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+      # wtyczka Cloudflare dla Vite wybiera blok env z wrangler.jsonc w czasie builda
+      CLOUDFLARE_ENV: ${{ needs.plan.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+
+      # `DB` to nazwa bindingu D1 - ta sama w kazdym srodowisku (nazwy baz sie roznia: grunt-to-zdrowie / grunt-to-zdrowie-preview).
+      - name: D1 migrations (${{ env.TARGET_ENV }})
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          packageManager: bun
+          command: d1 migrations apply DB --remote --env ${{ env.TARGET_ENV }}
+
+      # Build Workera dla srodowiska (CLOUDFLARE_ENV) i deploy wygenerowanej konfiguracji (dist/), bez --env.
+      - name: Build Worker (${{ env.TARGET_ENV }})
+        run: bun run build
+
+      - name: Deploy Worker (${{ env.TARGET_ENV }})
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          packageManager: bun
+          command: deploy

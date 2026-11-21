@@ -1,0 +1,29 @@
+# Wspolny krok dla wszystkich jobow: Bun (wersja z .bun-version), Node 24 (wrangler, vite, vitest pod Node),
+# cache paczek Bun i instalacja z zamrozonym lockfile.
+name: Setup toolchain
+description: Bun + Node 24 + cache + bun install --frozen-lockfile
+
+runs:
+  using: composite
+  steps:
+    - name: Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    - name: Node 24
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+
+    - name: Cache Bun
+      uses: actions/cache@v4
+      with:
+        path: ~/.bun/install/cache
+        key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+        restore-keys: |
+          bun-${{ runner.os }}-
+
+    - name: Install
+      shell: bash
+      run: bun install --frozen-lockfile
