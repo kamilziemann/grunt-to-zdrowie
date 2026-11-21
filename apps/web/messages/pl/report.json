@@ -14,7 +14,10 @@
   "actions": {
     "print": "Drukuj / zapisz PDF",
     "change": "Zmień uprawę lub datę",
-    "map": "Wróć do mapy"
+    "map": "Wróć do mapy",
+    "copyLink": "Kopiuj link do raportu",
+    "copied": "Skopiowano link",
+    "copyManual": "Skopiuj adres raportu:"
   },
   "missing": {
     "title": "Brakuje danych do raportu",
@@ -535,5 +538,13 @@
     "sources": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK.",
     "sourcesDated": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}).",
     "highlight": "Pomarańczowy kolor – najbliższy rów i ciek."
+  },
+  "print": {
+    "header": "{app} · raport wodny pola",
+    "generated": "Wygenerowano {date}",
+    "address": "Raport: {url}",
+    "sources": "Źródła danych – {sources}.",
+    "sample": "atrapa",
+    "footerMeta": "{app} · raport {id}, silnik {version}. Licencje i zakresy dat źródeł – sekcja 7."
   }
 }

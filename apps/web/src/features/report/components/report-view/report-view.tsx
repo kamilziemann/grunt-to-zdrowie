@@ -10,6 +10,7 @@ import { CausesSection } from '../causes-section';
 import { FieldMap } from '../field-map';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
+import { PrintFooter, PrintHeader } from '../print-frame';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
 import { sampleParts } from '../../utils/report-data';
@@ -67,6 +68,7 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
 
   return (
     <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
+      <PrintHeader report={report} />
       <ReportHeader report={report} changeHref={changeHref} mapHref={mapHref} />
       <SampleBanner report={report} />
       {report.meta.status !== 'complete' && (
@@ -120,6 +122,7 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
       <ReportSection id="zrodla" number={7} title={t('sections.sources')}>
         <SourcesSection report={report} />
       </ReportSection>
+      <PrintFooter report={report} />
     </article>
   );
 }

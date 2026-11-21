@@ -14,7 +14,10 @@
   "actions": {
     "print": "Print / save PDF",
     "change": "Change crop or date",
-    "map": "Back to the map"
+    "map": "Back to the map",
+    "copyLink": "Copy report link",
+    "copied": "Link copied",
+    "copyManual": "Copy the report address:"
   },
   "missing": {
     "title": "The report is missing data",
@@ -535,5 +538,13 @@
     "sources": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK.",
     "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
     "highlight": "Orange – nearest ditch and watercourse."
+  },
+  "print": {
+    "header": "{app} · field water report",
+    "generated": "Generated {date}",
+    "address": "Report: {url}",
+    "sources": "Data sources – {sources}.",
+    "sample": "placeholder",
+    "footerMeta": "{app} · report {id}, engine {version}. Source licences and date ranges – section 7."
   }
 }

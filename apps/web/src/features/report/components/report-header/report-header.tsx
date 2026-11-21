@@ -7,6 +7,7 @@ import { Link } from '@/lib/navigation';
 import type { AppHref } from '@/lib/routes';
 
 import { isoDay } from '../../utils/report-data';
+import { CopyLinkButton } from '../copy-link-button';
 import { PrintButton } from '../print-button';
 
 // na telefonie dwa przyciski obok siebie: tekst moze sie zawinac, cel dotykowy zostaje >= 48 px
@@ -22,7 +23,7 @@ export interface ReportHeaderProps {
 
 /**
  * Naglowek raportu (ekran i A4): pole, dzialki, uprawa, dzien analizy, powierzchnia i klasy gruntu, a na ekranie
- * akcje - wydruk/PDF, zmiana uprawy lub daty, powrot do mapy (na wydruku ukryte).
+ * akcje - wydruk/PDF, zmiana uprawy lub daty, link do raportu, powrot do mapy (na wydruku ukryte).
  */
 export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps) {
   const t = useTranslations('report');
@@ -71,6 +72,7 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
             {t('actions.change')}
           </Link>
         </Button>
+        <CopyLinkButton className="max-sm:col-span-2" />
         <Button asChild size="xl" variant="ghost" className="max-sm:hidden">
           <Link href={mapHref}>
             <MapPinned aria-hidden="true" />
