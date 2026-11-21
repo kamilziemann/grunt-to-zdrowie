@@ -1,0 +1,22 @@
+// Montaz modulow pod sciezkami. Jeden lancuch wywolan, zeby typ aplikacji (AppType dla hono/client) zawieral
+// wszystkie trasy. Nowy modul = jedna linia `.route('/sciezka', modul)`.
+import type { OpenAPIHono } from '@hono/zod-openapi';
+
+import { healthModule } from '../../modules/health';
+import { meModule } from '../../modules/me';
+import { telemetryModule } from '../../modules/telemetry';
+import type { AppEnv } from '../../services/container';
+import { mountCacheRules } from './cache-rules';
+
+export function mountRoutes(app: OpenAPIHono<AppEnv>) {
+  // Cache brzegowy przed straznikami i modulami: polityki publicznych odczytow i purge po mutacjach.
+  mountCacheRules(app);
+
+  // Domyslnie wszystko jest publiczne (auth jest opcjonalne i wylaczone). Ochrona modulu to jedna linia PRZED
+  // jego zamontowaniem; przy AUTH_ENABLED=false straznik przepuszcza, wiec API dziala bez kont:
+  //   app.use('/x/*', requireAuth());                       // wymaga zalogowania (401 bez sesji)
+  //   app.use('/x/*', requirePolicy(hasAnyRole('admin')));  // wymaga polityki (401 / 403)
+  // (import `requireAuth`/`requirePolicy` z '../middlewares', polityki z '../../domain/authorization').
+
+  return app.route('/health', healthModule).route('/telemetry', telemetryModule).route('/me', meModule);
+}
