@@ -11,6 +11,11 @@ const PAGES = [
   ['strona główna (mapa działek)', '/', 'Znajdź działkę'],
   ['działki do analizy (pusta lista)', '/analiza', 'Nie wybrano żadnej działki'],
   ['formularz analizy (uprawa i dzień)', `/analiza?dzialki=${PARCEL_ID}`, 'Działki do analizy'],
+  [
+    'formularz analizy własnego obszaru',
+    `/analiza?dzialki=${PARCEL_ID}&obszar=g54jEo5t-JmDsDREpBBvBA&rodzaj=part`,
+    'Działki do analizy',
+  ],
   ['raport wodny', REPORT_URL, 'Raport wodny pola'],
   [
     'raport z prawdziwego silnika (kalendarz suszy, części przykładowe)',
