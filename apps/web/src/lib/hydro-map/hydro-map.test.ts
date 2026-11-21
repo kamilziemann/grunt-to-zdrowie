@@ -11,6 +11,7 @@ import {
   hydroWithin,
   HydroUnavailableError,
   latestImport,
+  namedWaterLabel,
   nearestHydro,
 } from './hydro-map';
 
@@ -151,5 +152,14 @@ describe('hydro-map', () => {
     );
     await expect(fetchHydroTile(1, 2)).resolves.toMatchObject({ features: [DITCH_THROUGH] });
     expect(fetchMock).toHaveBeenLastCalledWith('http://localhost/api/hydro/tile?x=1&y=2', expect.anything());
+  });
+
+  it('podpis z nazwa: bez powtorzonego rodzaju, bez wzgledu na wielkosc liter i polskie znaki', () => {
+    expect(namedWaterLabel('kanał', 'Kanał Karszyński')).toBe('Kanał Karszyński');
+    expect(namedWaterLabel('rzeka', 'Rzeka Odra')).toBe('Rzeka Odra');
+    expect(namedWaterLabel('strumień', 'Struga Lipka')).toBe('Struga Lipka');
+    expect(namedWaterLabel('kanał', 'KANAL OBRZYCKI')).toBe('KANAL OBRZYCKI');
+    expect(namedWaterLabel('rzeka', 'Wkra')).toBe('rzeka Wkra');
+    expect(namedWaterLabel('strumień', 'Rowek')).toBe('strumień Rowek');
   });
 });

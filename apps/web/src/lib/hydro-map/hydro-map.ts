@@ -13,6 +13,7 @@ import { unwrap } from '@app/rpc';
 import type { Feature, FeatureCollection, Position } from 'geojson';
 
 import { getApi } from '../api';
+import { normalizeText } from '../utils/normalize-text';
 
 export interface HydroTileIndex {
   x: number;
@@ -81,6 +82,34 @@ export async function fetchHydroTile(x: number, y: number, signal?: AbortSignal)
   if (UNAVAILABLE_STATUSES.has(response.status)) throw new HydroUnavailableError(response.status);
 
   return hydroTileSchema.parse(await unwrap<HydroTile>(response));
+}
+
+/** Pierwsze slowa nazw wlasnych, ktore same mowia, czym jest obiekt ("Kanal Karszynski", "Struga Lipka"). */
+const TYPE_WORDS = new Set([
+  'rzeka',
+  'kanal',
+  'struga',
+  'strumien',
+  'potok',
+  'row',
+  'ciek',
+  'doplyw',
+  'jezioro',
+  'staw',
+  'zbiornik',
+  'zalew',
+  'starorzecze',
+  'bagno',
+]);
+
+/**
+ * Podpis obiektu wodnego z nazwa: "rzeka Wkra", ale "Kanal Karszynski" zamiast "kanal Kanal Karszynski" - gdy nazwa
+ * zaczyna sie od rodzaju (tego samego albo innego slowa na ciek, bez wzgledu na wielkosc liter), rodzaj pomijamy.
+ */
+export function namedWaterLabel(kind: string, name: string): string {
+  const first = normalizeText(name).split(' ')[0] ?? '';
+
+  return first === normalizeText(kind) || TYPE_WORDS.has(first) ? name : `${kind} ${name}`;
 }
 
 function featureKey(feature: HydroFeature): string {

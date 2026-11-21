@@ -7,7 +7,14 @@ import { useFormatter, useTranslations } from 'use-intl';
 import { Button } from '@/components/ui/button';
 import { hydroTileQuery } from '@/features/parcels';
 import { buildFieldSketch, SKETCH_RADIUS_M } from '@/lib/field-sketch';
-import { hydroTiles, hydroWithin, latestImport, nearestHydro, type NearestHydro } from '@/lib/hydro-map';
+import {
+  hydroTiles,
+  hydroWithin,
+  latestImport,
+  namedWaterLabel,
+  nearestHydro,
+  type NearestHydro,
+} from '@/lib/hydro-map';
 import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
@@ -172,8 +179,10 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
               {aerial && (hydro.nearest.named ?? hydro.nearest.watercourse) && <Swatch />}
               {hydro.nearest.named
                 ? t('nearestNamed', {
-                    name: hydro.nearest.named.feature.name ?? '',
-                    kind: t(`kinds.${hydro.nearest.named.feature.kind}`),
+                    label: namedWaterLabel(
+                      t(`kinds.${hydro.nearest.named.feature.kind}`),
+                      hydro.nearest.named.feature.name ?? '',
+                    ),
                     distance: distance(hydro.nearest.named),
                   })
                 : hydro.nearest.watercourse

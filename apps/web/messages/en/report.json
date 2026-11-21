@@ -550,7 +550,7 @@
     "distance": "{meters} m from the field",
     "nearestDitch": "Nearest drainage ditch: {distance}.",
     "noDitch": "No drainage ditches within {radius} m.",
-    "nearestNamed": "Nearest named watercourse: {kind} {name}, {distance}.",
+    "nearestNamed": "Nearest named watercourse: {label}, {distance}.",
     "nearestWatercourse": "Nearest watercourse: unnamed {kind}, {distance}.",
     "noWatercourse": "No rivers, streams or canals within {radius} m.",
     "kinds": {

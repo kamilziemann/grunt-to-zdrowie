@@ -51,6 +51,85 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
+/** Prostokat zajety na rysunku: [x, y, szerokosc, wysokosc] w jednostkach viewBox. */
+type Rect = readonly [number, number, number, number];
+
+function overlaps(a: Rect, b: Rect): boolean {
+  return a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
+}
+
+/** Prostokat napisu wysrodkowanego w punkcie (Halo: textAnchor middle, dominantBaseline middle). */
+function textRect(text: string, at: SketchPoint, size: number): Rect {
+  const width = textWidth(text, size);
+
+  return [at[0] - width / 2, at[1] - size * 0.7, width, size * 1.4];
+}
+
+interface FactPlacement {
+  x: number;
+  y: number;
+  boxWidth: number;
+  boxHeight: number;
+}
+
+/**
+ * Gdzie stoi ramka faktu: rowu w polu - poza polem (po stronie bez podpisu pola), zeby nie zaslaniala rowu;
+ * linii wymiarowej - nad jej srodkiem. Wolne sa wszystkie rogi poza dolnym lewym (podzialka) i gornym prawym (polnoc).
+ */
+function placeFact({
+  fact,
+  text,
+  font,
+  unit,
+  width,
+  height,
+  avoidY,
+  fieldTop,
+  fieldBottom,
+}: {
+  fact: NonNullable<FieldSketchModel['fact']>;
+  text: string;
+  font: number;
+  unit: number;
+  width: number;
+  height: number;
+  avoidY: number;
+  fieldTop: number;
+  fieldBottom: number;
+}): FactPlacement {
+  const pad = 10 * unit;
+  const boxWidth = textWidth(text, font) + pad * 1.6;
+  const boxHeight = font * 1.8;
+  const placeBox = (target: SketchPoint, preferAbove: boolean): SketchPoint => {
+    const above = target[1] - boxHeight * 2.2;
+    const below = target[1] + boxHeight * 2.2;
+    const y = preferAbove && above > pad ? above : below < height - boxHeight - pad * 3 ? below : above;
+
+    return [
+      clamp(target[0] - boxWidth / 2, pad, width - boxWidth - pad * 4),
+      clamp(y - boxHeight / 2, pad, height - boxHeight - pad * 3.5),
+    ];
+  };
+
+  if (fact.kind === 'ditch_through') {
+    const nameBelow = avoidY > fact.anchor[1];
+    const outside = nameBelow ? fieldTop - boxHeight - pad * 1.5 : fieldBottom + pad * 1.5;
+    const fits = outside > pad && outside + boxHeight < height - pad * 3.5;
+    const near = placeBox(fact.anchor, nameBelow);
+
+    return {
+      x: fits ? clamp(fact.anchor[0] - boxWidth / 2, pad, width - boxWidth - pad * 4) : near[0],
+      y: fits ? outside : near[1],
+      boxWidth,
+      boxHeight,
+    };
+  }
+
+  const [x, y] = placeBox([(fact.from[0] + fact.to[0]) / 2, (fact.from[1] + fact.to[1]) / 2], true);
+
+  return { x, y, boxWidth, boxHeight };
+}
+
 /** Napis z obwodka w kolorze tla - czytelny na liniach i wypelnieniach, takze w czerni i bieli. */
 function Halo({
   x,
@@ -125,6 +204,36 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
     clamp(model.fieldCenter[0], nameWidth / 2 + pad, width - nameWidth / 2 - pad),
     nameY,
   ];
+  const placement =
+    fact && factText
+      ? placeFact({
+          fact,
+          text: factText,
+          font: labelFont,
+          unit,
+          width,
+          height,
+          avoidY: nameAt[1],
+          fieldTop,
+          fieldBottom,
+        })
+      : null;
+  // nazwy ciekow ustepuja podpisowi pola, ramce faktu, podzialce, polnocy i sobie nawzajem - pominieta nazwa
+  // zostaje w legendzie pod szkicem
+  const taken: Rect[] = [
+    textRect(fieldName, nameAt, labelFont),
+    [0, height - 12 * unit - 6 * unit - font * 1.6, model.scale.length + 24 * unit, height],
+    [width - pad * 4, 0, pad * 4, pad * 1.6 + 18 * unit + font * 1.6],
+    ...(placement ? [[placement.x, placement.y, placement.boxWidth, placement.boxHeight] as const] : []),
+  ];
+  const names = model.names.filter((name) => {
+    const rect = textRect(name.text, name.at, font);
+
+    if (taken.some((other) => overlaps(rect, other))) return false;
+    taken.push(rect);
+
+    return true;
+  });
 
   // rysunek jest ozdoba dla czytnika ekranu - tresc niesie zdanie obok (i podpis pod szkicem)
   return (
@@ -232,7 +341,7 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
             strokeLinejoin="round"
             data-testid="field-sketch-field"
           />
-          {model.names.map((name) => (
+          {names.map((name) => (
             <Halo key={name.text} x={name.at[0]} y={name.at[1]} size={font} weight={500} italic>
               {name.text}
             </Halo>
@@ -242,18 +351,8 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
           <Halo x={nameAt[0]} y={nameAt[1]} size={labelFont} weight={700}>
             {fieldName}
           </Halo>
-          {fact && factText && (
-            <FactCallout
-              fact={fact}
-              text={factText}
-              font={labelFont}
-              unit={unit}
-              width={width}
-              height={height}
-              avoidY={nameAt[1]}
-              fieldTop={fieldTop}
-              fieldBottom={fieldBottom}
-            />
+          {fact && factText && placement && (
+            <FactCallout fact={fact} text={factText} font={labelFont} unit={unit} placement={placement} />
           )}
           <ScaleBar
             meters={model.scale.meters}
@@ -275,45 +374,18 @@ function FactCallout({
   text,
   font,
   unit,
-  width,
-  height,
-  avoidY,
-  fieldTop,
-  fieldBottom,
+  placement,
 }: {
   fact: NonNullable<FieldSketchModel['fact']>;
   text: string;
   font: number;
   unit: number;
-  width: number;
-  height: number;
-  avoidY: number;
-  /** gorna i dolna krawedz pola - etykieta rowu w polu stoi poza polem, zeby nie zaslaniala rowu */
-  fieldTop: number;
-  fieldBottom: number;
+  placement: FactPlacement;
 }) {
   const pad = 10 * unit;
-  const boxWidth = textWidth(text, font) + pad * 1.6;
-  const boxHeight = font * 1.8;
-  // tylko dolny lewy rog (podzialka) i gorny prawy (polnoc) sa zajete
-  const placeBox = (target: SketchPoint, preferAbove: boolean): SketchPoint => {
-    const above = target[1] - boxHeight * 2.2;
-    const below = target[1] + boxHeight * 2.2;
-    const y = preferAbove && above > pad ? above : below < height - boxHeight - pad * 3 ? below : above;
-
-    return [
-      clamp(target[0] - boxWidth / 2, pad, width - boxWidth - pad * 4),
-      clamp(y - boxHeight / 2, pad, height - boxHeight - pad * 3.5),
-    ];
-  };
+  const { x, y, boxWidth, boxHeight } = placement;
 
   if (fact.kind === 'ditch_through') {
-    const nameBelow = avoidY > fact.anchor[1];
-    const outside = nameBelow ? fieldTop - boxHeight - pad * 1.5 : fieldBottom + pad * 1.5;
-    const fits = outside > pad && outside + boxHeight < height - pad * 3.5;
-    const near = placeBox(fact.anchor, nameBelow);
-    const x = fits ? clamp(fact.anchor[0] - boxWidth / 2, pad, width - boxWidth - pad * 4) : near[0];
-    const y = fits ? outside : near[1];
     const joinY = y + boxHeight / 2 < fact.anchor[1] ? y + boxHeight : y;
 
     return (
@@ -333,7 +405,6 @@ function FactCallout({
   }
 
   const middle: SketchPoint = [(fact.from[0] + fact.to[0]) / 2, (fact.from[1] + fact.to[1]) / 2];
-  const [x, y] = placeBox(middle, true);
   const tick = 4 * unit;
 
   return (

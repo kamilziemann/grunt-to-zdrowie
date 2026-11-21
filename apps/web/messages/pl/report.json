@@ -550,7 +550,7 @@
     "distance": "{meters} m od pola",
     "nearestDitch": "Najbliższy rów melioracyjny: {distance}.",
     "noDitch": "Brak rowów melioracyjnych w promieniu {radius} m.",
-    "nearestNamed": "Najbliższy ciek z nazwą: {kind} {name}, {distance}.",
+    "nearestNamed": "Najbliższy ciek z nazwą: {label}, {distance}.",
     "nearestWatercourse": "Najbliższy ciek: {kind} bez nazwy, {distance}.",
     "noWatercourse": "Brak rzek, strumieni i kanałów w promieniu {radius} m.",
     "kinds": {
