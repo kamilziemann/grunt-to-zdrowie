@@ -1,0 +1,27 @@
+{
+  "name": "@app/docs-check",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pilnuje zgodnosci dokumentacji dla ludzi i agentow z kodem: sciezki, reguly architektury, komendy bun i skille wymienione w AGENTS.md/docs istnieja.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check": "bun src/cli/cli.ts --root ../..",
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "bun --bun vitest run"
+  },
+  "dependencies": {
+    "@app/architecture-check": "workspace:*"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@types/bun": "^1.4.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}

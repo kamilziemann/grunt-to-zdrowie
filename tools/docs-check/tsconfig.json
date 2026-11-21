@@ -1,0 +1,6 @@
+{
+  "extends": "@app/tsconfig/node.json",
+  "compilerOptions": { "types": ["bun"] },
+  "include": ["src/**/*.ts", "vitest.config.ts"],
+  "exclude": ["node_modules"]
+}
