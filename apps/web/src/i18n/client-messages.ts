@@ -5,6 +5,7 @@ import { NAMESPACES, type Namespace } from './namespaces';
 
 export const SECTION_NAMESPACES = {
   dev: ['design'],
+  method: ['method'],
 } as const satisfies Record<string, readonly Namespace[]>;
 
 export type ClientSection = keyof typeof SECTION_NAMESPACES;

@@ -89,8 +89,14 @@ function AppShell({ children }: { children: ReactNode }) {
           >
             {children}
           </main>
-          <footer className="border-t py-4 text-center text-xs text-muted-foreground print:hidden">
-            {BRAND}
+          <footer className="flex flex-wrap items-center justify-center gap-x-4 border-t py-2 text-xs text-muted-foreground print:hidden">
+            <span>{BRAND}</span>
+            <Link
+              href={routes.method()}
+              className="inline-flex min-h-11 items-center underline-offset-4 hover:text-foreground hover:underline"
+            >
+              {t('methodLink')}
+            </Link>
           </footer>
         </>
       )}

@@ -474,7 +474,8 @@
       "partial": "Części danych z tego źródła brakuje. Wynik może być mniej dokładny.",
       "missing": "To źródło nie podało danych dla tego miejsca. Raport liczymy bez nich, a pewność oceny jest niższa."
     },
-    "advisorDetails": "Szczegóły dla doradcy"
+    "advisorDetails": "Szczegóły dla doradcy",
+    "methodLink": "Jak liczymy: źródła, metody i czego nie wiemy"
   },
   "farm": {
     "metaTitle": "Gospodarstwo – ocena działek",

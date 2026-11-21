@@ -474,7 +474,8 @@
       "partial": "Some data from this source is missing. The result may be less accurate.",
       "missing": "This source returned no data for this place. The report is computed without it and confidence is lower."
     },
-    "advisorDetails": "Details for advisors"
+    "advisorDetails": "Details for advisors",
+    "methodLink": "How we calculate: sources, methods and what we do not know"
   },
   "farm": {
     "metaTitle": "Farm – parcel assessment",

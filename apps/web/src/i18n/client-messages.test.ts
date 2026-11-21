@@ -11,6 +11,7 @@ const SRC = join(import.meta.dirname, '..');
 /** Gdzie zyja komponenty pod dostawca danej sekcji (jej layout). */
 const SECTION_DIRS: Record<ClientSection, readonly string[]> = {
   dev: ['routes/{-$locale}/_app/_dev/'],
+  method: ['routes/{-$locale}/_app/_method/'],
 };
 
 function sourceFiles(dir: string): string[] {

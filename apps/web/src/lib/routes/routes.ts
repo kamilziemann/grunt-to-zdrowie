@@ -44,6 +44,8 @@ export const routes = {
   /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
   parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
   /** Logowanie; `next` = strona, na ktora wrocic po zalogowaniu (tylko sciezka tej aplikacji, zob. `safeNextPath`). */
+  /** "Jak liczymy": zrodla danych, metody, ograniczenia (dla jury, doradcy i rolnika). */
+  method: () => routePath('/jak-liczymy'),
   signIn: (next?: string) => withQuery(routePath('/sign-in'), { next: safeNextPath(next) ?? undefined }),
   signUp: () => routePath('/sign-up'),
   account: () => routePath('/account'),

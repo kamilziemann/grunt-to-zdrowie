@@ -1,0 +1,163 @@
+{
+  "metaTitle": "Jak liczymy",
+  "metaDescription": "Skąd bierzemy dane o pogodzie, glebie, rowach i roślinach, jak powstaje ocena wody na polu, przyczyny i zalecenia – i czego nie wiemy.",
+  "title": "Jak liczymy",
+  "lead": "Raport powstaje z danych publicznych, liczony od nowa dla Twojego pola i wybranego dnia. Nikt nie wpisuje gotowej diagnozy. Poniżej po kolei: co bierzemy pod uwagę, jak z tego powstaje ocena, skąd biorą się przyczyny i zalecenia oraz czego nie wiemy.",
+  "toc": "Na tej stronie",
+  "data": {
+    "title": "Co bierzemy pod uwagę",
+    "intro": "Pięć rodzajów danych. Każde źródło jest darmowe i legalne; pełna lista z licencjami jest na dole strony.",
+    "items": {
+      "weather": {
+        "title": "Pogoda z 10 lat",
+        "text": "Opad, temperatura, nasłonecznienie, wilgotność i wiatr dzień po dniu za 10 lat wstecz od dnia analizy (NASA POWER). Gdy analizujesz dzień dzisiejszy, dokładamy prognozę na 7 dni (MET Norway)."
+      },
+      "soil": {
+        "title": "Gleba",
+        "text": "Ile piasku, iłu i próchnicy jest w glebie do 1,5 m głębokości (model SoilGrids). Z tego liczymy, ile wody gleba zatrzyma w zasięgu korzeni, i kategorię gleby: od bardzo lekkiej (I) do ciężkiej (IV)."
+      },
+      "water": {
+        "title": "Rowy, cieki i wody",
+        "text": "Rowy melioracyjne, rzeki, strumienie, stawy i mokradła w promieniu 500 m od pola (BDOT10k, GUGiK): jak daleko są i ile metrów rowów biegnie przez pole."
+      },
+      "plants": {
+        "title": "Rośliny z satelity",
+        "text": "Zieloność (NDVI) i wilgotność roślin (NDMI) ze zdjęć Sentinel-2 z ostatnich 30 dni, porównane z tą samą porą roku w 5 poprzednich latach. Bierzemy tylko dni, w których pole nie jest zasłonięte chmurami."
+      },
+      "parcels": {
+        "title": "Granice i opis działki",
+        "text": "Obrys działki z ULDK, a powierzchnia i klasy użytków z ewidencji gruntów (EGiB), obie usługi GUGiK. Możesz też narysować własne pole albo podzielić działkę."
+      }
+    }
+  },
+  "assessment": {
+    "title": "Jak powstaje ocena",
+    "kbwTitle": "Deszcz minus parowanie z 60 dni",
+    "kbw": "Sumujemy opad z ostatnich 60 dni przed dniem analizy i odejmujemy to, ile wody mogło w tym czasie wyparować. To klimatyczny bilans wodny – ta sama miara, której używa państwowy monitoring suszy rolniczej IUNG. Wynik porównujemy z oficjalnymi progami IUNG dla Twojej grupy upraw i kategorii gleby: przekroczony próg oznacza suszę.",
+    "kbwNote": "Parowanie liczymy wzorem IUNG, ale nasłonecznienie odtwarzamy z promieniowania słonecznego, więc wynik podpisujemy jako oszacowanie. Progi obowiązują od 21 marca do 30 września; poza tym czasem pokazujemy zapas wody w glebie.",
+    "rootTitle": "Woda w zasięgu korzeni, dzień po dniu",
+    "root": "Drugi rachunek prowadzi bilans wody w glebie tam, gdzie sięgają korzenie (metoda FAO-56): codziennie dolicza deszcz i odejmuje to, co roślina zużyła w swojej fazie rozwoju. Gdy łatwo dostępna woda się kończy, roślina zaczyna cierpieć – liczymy takie dni stresu i brakujące milimetry.",
+    "historyTitle": "Na tle 10 lat",
+    "history": "Te same rachunki robimy dla 10 poprzednich sezonów. Dzięki temu raport mówi, czy susza na tym polu to wyjątek, czy wraca co kilka lat, i w których okresach roku najczęściej.",
+    "plantsTitle": "Satelita jako potwierdzenie",
+    "plants": "Zdjęcie satelitarne nie wydaje wyroku samo. Niski wskaźnik przy siewie, dojrzewaniu czy po zbiorze jest normalny. O możliwym stresie wodnym mówimy tylko wtedy, gdy wilgotność roślin jest wyraźnie niższa niż w poprzednich latach i bilans wody też pokazuje niedobór."
+  },
+  "causes": {
+    "title": "Skąd biorą się przyczyny",
+    "intro": "Przyczyna trafia do raportu tylko z liczbą, która ją uzasadnia (rozwiń „Szczegóły dla doradcy” w raporcie). Sprawdzamy między innymi:",
+    "items": {
+      "rain": "mniej deszczu albo więcej parowania niż zwykle w tym samym okresie roku (na tle 10 lat),",
+      "soil": "glebę, która słabo trzyma wodę (lekka gleba albo mały zapas wody),",
+      "ditches": "rów przy samym polu albo przez pole – woda szybko odpływa,",
+      "retention": "brak stawów i mokradeł w okolicy, które trzymałyby wodę w krajobrazie,",
+      "crop": "uprawę, która na tym polu często cierpi na suszę (w wielu z 10 sezonów)."
+    },
+    "note": "Źródło oznaczone jako przykładowe nigdy nie jest dowodem przyczyny."
+  },
+  "recommendations": {
+    "title": "Jak powstają zalecenia",
+    "intro": "Każde zalecenie odpowiada na konkretną przyczynę. Kolejność jest stała:",
+    "steps": {
+      "retain": {
+        "title": "Najpierw zatrzymaj wodę",
+        "text": "zastawka na rowie, ochrona mokradła, oczko wodne, pas trawiasty, zadrzewienia. Objętość zastawki szacujemy z długości rowu w polu – to rząd wielkości, nie projekt."
+      },
+      "farm": {
+        "title": "Potem uprawa",
+        "text": "mulcz (około jednej czwartej mniej parowania z gleby), więcej materii organicznej, międzyplon, uprawa uproszczona, dobór uprawy."
+      },
+      "irrigate": {
+        "title": "Nawadnianie na końcu",
+        "text": "tylko gdy bilans pokazuje, że woda dostępna dla korzeni się kończy. Gdy prognoza zapowiada deszcz, który pokryje niedobór, albo zboże dojrzewa – nie zalecamy podlewania."
+      }
+    },
+    "legal": "Przy zastawce i oczku raport mówi o formalnościach (zgłoszenie albo pozwolenie wodnoprawne). Zawsze sprawdź je w Wodach Polskich albo w spółce wodnej."
+  },
+  "unknowns": {
+    "title": "Czego nie wiemy",
+    "items": {
+      "weather": "Pogoda pochodzi z siatki o oczkach około 50 km. Burza, która przeszła tylko nad Twoją wsią, może być niewidoczna.",
+      "soil": "Gleba pochodzi z modelu o rozdzielczości 250 m. Często myli się o jedną kategorię, dlatego raport pokazuje, czy inna kategoria zmieniłaby ocenę.",
+      "measurement": "Nie mierzymy wilgotności na Twoim polu. Najpewniejszy sprawdzian to łopata i ręka.",
+      "boundaries": "Granice działek są dzisiejsze – także wtedy, gdy analizujesz dzień sprzed kilku lat.",
+      "ditches": "Wiemy, gdzie są rowy na mapie, ale nie wiemy, czy są drożne i czy płynie w nich woda.",
+      "terrain": "Jeśli raport oznacza ukształtowanie terenu albo strefy w polu jako dane przykładowe, traktuj je poglądowo."
+    }
+  },
+  "confidence": {
+    "title": "Jak czytać pewność",
+    "intro": "Przy ocenie stoi pewność: wysoka, średnia albo niska. Zaczynamy od wysokiej i obniżamy ją, gdy:",
+    "items": {
+      "grid": "pogoda pochodzi z grubej siatki,",
+      "gaps": "w danych pogodowych są luki,",
+      "soil": "gleby nie znamy albo sąsiednia kategoria gleby dałaby inną ocenę,",
+      "conflict": "sygnały sobie przeczą (np. bilans z 60 dni i woda w glebie mówią co innego)."
+    },
+    "noBalance": "Bez bilansu wody pewność jest zawsze niska.",
+    "advice": "Niska pewność nie znaczy, że wynik jest zły. Znaczy: zanim wydasz pieniądze, sprawdź na polu."
+  },
+  "sources": {
+    "title": "Źródła danych i licencje",
+    "licence": "Licencja",
+    "use": "Do czego",
+    "open": "Strona źródła",
+    "items": {
+      "nasaPower": {
+        "name": "NASA POWER",
+        "use": "pogoda dobowa z 10 lat",
+        "licence": "CC BY 4.0 (NASA Langley Research Center, POWER Project)"
+      },
+      "metNorway": {
+        "name": "MET Norway",
+        "use": "prognoza pogody na 7 dni",
+        "licence": "CC BY 4.0 (Norwegian Meteorological Institute)"
+      },
+      "iung": {
+        "name": "IUNG-PIB, monitoring suszy rolniczej",
+        "use": "progi suszy dla upraw i kategorii gleby",
+        "licence": "progi opublikowane przez IUNG-PIB, przytaczamy ze źródłem"
+      },
+      "soilgrids": {
+        "name": "SoilGrids (ISRIC)",
+        "use": "skład gleby, zapas wody, kategoria gleby",
+        "licence": "CC BY 4.0 (ISRIC – World Soil Information)"
+      },
+      "bdot": {
+        "name": "BDOT10k, GUGiK",
+        "use": "rowy, cieki, wody, mokradła",
+        "licence": "dane publiczne GUGiK, bezpłatne, z podaniem źródła"
+      },
+      "sentinel": {
+        "name": "Copernicus Sentinel-2",
+        "use": "zieloność i wilgotność roślin",
+        "licence": "otwarte dane Copernicus (zawiera zmodyfikowane dane Copernicus Sentinel)"
+      },
+      "uldk": {
+        "name": "ULDK i EGiB, GUGiK",
+        "use": "granice, powierzchnia i klasy użytków działek",
+        "licence": "dane publiczne GUGiK, bezpłatne, z podaniem źródła"
+      },
+      "ortho": {
+        "name": "Ortofotomapa, GUGiK",
+        "use": "zdjęcie lotnicze na mapie",
+        "licence": "dane publiczne GUGiK, bezpłatne, z podaniem źródła"
+      },
+      "osm": {
+        "name": "OpenStreetMap (OpenFreeMap, Nominatim)",
+        "use": "podkład mapy i wyszukiwanie adresów",
+        "licence": "ODbL (© autorzy OpenStreetMap)"
+      }
+    }
+  },
+  "methods": {
+    "title": "Metody w skrócie (dla doradcy)",
+    "items": {
+      "kbw": "Klimatyczny bilans wodny wg IUNG: opad minus ewapotranspiracja potencjalna (wzór Doroszewskiego–Górskiego, usłonecznienie z promieniowania równaniem Ångströma), 6 dekad do daty analizy, 14 okresów 21.III–30.IX, progi z tabeli IUNG dla 14 grup upraw i 4 kategorii gleby; bez współczynnika Kc.",
+      "root": "Bilans strefy korzeniowej FAO-56: ET₀ Penman–Monteith, pojedynczy Kc z kalendarza uprawy, TAW/RAW, Ks, 10 sezonów.",
+      "soil": "Gleba: uziarnienie SoilGrids → grupa PTG 2008 → kategoria IUNG; zapas wody Saxton–Rawls (2006) dla 0–100 cm.",
+      "plants": "Satelita: NDVI i NDMI z API statystyk Copernicus Data Space, maska chmur SCL, min. 5 czystych pikseli w polu.",
+      "water": "Woda: odległości od obrysu pola w układzie PL-1992 (PostGIS), promień 500 m."
+    }
+  },
+  "backToMap": "Sprawdź swoje pole"
+}

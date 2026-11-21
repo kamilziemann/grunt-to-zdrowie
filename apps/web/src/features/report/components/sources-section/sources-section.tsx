@@ -1,9 +1,10 @@
 import type { SourceRef, WaterReport } from '@app/contracts';
-import { CircleAlert, CircleCheck, CircleX, ExternalLink, type LucideIcon } from 'lucide-react';
+import { BookOpen, CircleAlert, CircleCheck, CircleX, ExternalLink, type LucideIcon } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { APP_TIME_ZONE } from '@/lib/locale';
 import { Link } from '@/lib/navigation';
+import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
 import { isoDay } from '../../utils/report-data';
@@ -131,6 +132,15 @@ export function SourcesSection({ report }: { report: WaterReport }) {
           </ul>
         )}
       </div>
+
+      <Link
+        href={routes.method()}
+        className="inline-flex min-h-11 w-fit items-center gap-2 font-medium text-primary underline-offset-4 hover:underline print:hidden"
+        data-testid="method-link"
+      >
+        <BookOpen aria-hidden="true" className="size-4" />
+        {t('methodLink')}
+      </Link>
 
       <ExportButtons report={report} />
 

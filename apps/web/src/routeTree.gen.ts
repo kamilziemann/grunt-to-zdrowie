@@ -15,6 +15,7 @@ import { Route as Char123LocaleChar125AppRouteRouteImport } from './routes/{-$lo
 import { Route as Char123LocaleChar125AppIndexRouteImport } from './routes/{-$locale}/_app/index'
 import { Route as Char123LocaleChar125AppSplatRouteImport } from './routes/{-$locale}/_app/$'
 import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-$locale}/_app/_dev/route'
+import { Route as Char123LocaleChar125AppMethodRouteRouteImport } from './routes/{-$locale}/_app/_method/route'
 import { Route as Char123LocaleChar125AppProtectedRouteRouteImport } from './routes/{-$locale}/_app/_protected/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
 import { Route as Char123LocaleChar125AppGospodarstwoRouteImport } from './routes/{-$locale}/_app/gospodarstwo'
@@ -22,6 +23,7 @@ import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$l
 import { Route as Char123LocaleChar125AppSignInRouteImport } from './routes/{-$locale}/_app/sign-in'
 import { Route as Char123LocaleChar125AppSignUpRouteImport } from './routes/{-$locale}/_app/sign-up'
 import { Route as Char123LocaleChar125AppDevDesignRouteImport } from './routes/{-$locale}/_app/_dev/design'
+import { Route as Char123LocaleChar125AppMethodJakLiczymyRouteImport } from './routes/{-$locale}/_app/_method/jak-liczymy'
 import { Route as Char123LocaleChar125AppProtectedAccountRouteImport } from './routes/{-$locale}/_app/_protected/account'
 
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -55,6 +57,11 @@ const Char123LocaleChar125AppSplatRoute =
 const Char123LocaleChar125AppDevRouteRoute =
   Char123LocaleChar125AppDevRouteRouteImport.update({
     id: '/_dev',
+    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
+  } as any)
+const Char123LocaleChar125AppMethodRouteRoute =
+  Char123LocaleChar125AppMethodRouteRouteImport.update({
+    id: '/_method',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
 const Char123LocaleChar125AppProtectedRouteRoute =
@@ -98,6 +105,12 @@ const Char123LocaleChar125AppDevDesignRoute =
     path: '/design',
     getParentRoute: () => Char123LocaleChar125AppDevRouteRoute,
   } as any)
+const Char123LocaleChar125AppMethodJakLiczymyRoute =
+  Char123LocaleChar125AppMethodJakLiczymyRouteImport.update({
+    id: '/jak-liczymy',
+    path: '/jak-liczymy',
+    getParentRoute: () => Char123LocaleChar125AppMethodRouteRoute,
+  } as any)
 const Char123LocaleChar125AppProtectedAccountRoute =
   Char123LocaleChar125AppProtectedAccountRouteImport.update({
     id: '/account',
@@ -116,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
+  '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
   '/{-$locale}/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRoutesByTo {
@@ -128,6 +142,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
+  '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
   '/{-$locale}/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRoutesById {
@@ -136,6 +151,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/_app': typeof Char123LocaleChar125AppRouteRouteWithChildren
   '/{-$locale}/_app/_dev': typeof Char123LocaleChar125AppDevRouteRouteWithChildren
+  '/{-$locale}/_app/_method': typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
   '/{-$locale}/_app/_protected': typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
@@ -145,6 +161,7 @@ export interface FileRoutesById {
   '/{-$locale}/_app/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/_app/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/_app/_dev/design': typeof Char123LocaleChar125AppDevDesignRoute
+  '/{-$locale}/_app/_method/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
   '/{-$locale}/_app/_protected/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +177,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/sign-up'
     | '/{-$locale}/'
     | '/{-$locale}/design'
+    | '/{-$locale}/jak-liczymy'
     | '/{-$locale}/account'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,6 +190,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/sign-in'
     | '/{-$locale}/sign-up'
     | '/{-$locale}/design'
+    | '/{-$locale}/jak-liczymy'
     | '/{-$locale}/account'
   id:
     | '__root__'
@@ -179,6 +198,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/{-$locale}/_app'
     | '/{-$locale}/_app/_dev'
+    | '/{-$locale}/_app/_method'
     | '/{-$locale}/_app/_protected'
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
@@ -188,6 +208,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app/sign-up'
     | '/{-$locale}/_app/'
     | '/{-$locale}/_app/_dev/design'
+    | '/{-$locale}/_app/_method/jak-liczymy'
     | '/{-$locale}/_app/_protected/account'
   fileRoutesById: FileRoutesById
 }
@@ -240,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppDevRouteRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
+    '/{-$locale}/_app/_method': {
+      id: '/{-$locale}/_app/_method'
+      path: ''
+      fullPath: '/{-$locale}'
+      preLoaderRoute: typeof Char123LocaleChar125AppMethodRouteRouteImport
+      parentRoute: typeof Char123LocaleChar125AppRouteRoute
+    }
     '/{-$locale}/_app/_protected': {
       id: '/{-$locale}/_app/_protected'
       path: ''
@@ -289,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppDevDesignRouteImport
       parentRoute: typeof Char123LocaleChar125AppDevRouteRoute
     }
+    '/{-$locale}/_app/_method/jak-liczymy': {
+      id: '/{-$locale}/_app/_method/jak-liczymy'
+      path: '/jak-liczymy'
+      fullPath: '/{-$locale}/jak-liczymy'
+      preLoaderRoute: typeof Char123LocaleChar125AppMethodJakLiczymyRouteImport
+      parentRoute: typeof Char123LocaleChar125AppMethodRouteRoute
+    }
     '/{-$locale}/_app/_protected/account': {
       id: '/{-$locale}/_app/_protected/account'
       path: '/account'
@@ -314,6 +349,21 @@ const Char123LocaleChar125AppDevRouteRouteWithChildren =
     Char123LocaleChar125AppDevRouteRouteChildren,
   )
 
+interface Char123LocaleChar125AppMethodRouteRouteChildren {
+  Char123LocaleChar125AppMethodJakLiczymyRoute: typeof Char123LocaleChar125AppMethodJakLiczymyRoute
+}
+
+const Char123LocaleChar125AppMethodRouteRouteChildren: Char123LocaleChar125AppMethodRouteRouteChildren =
+  {
+    Char123LocaleChar125AppMethodJakLiczymyRoute:
+      Char123LocaleChar125AppMethodJakLiczymyRoute,
+  }
+
+const Char123LocaleChar125AppMethodRouteRouteWithChildren =
+  Char123LocaleChar125AppMethodRouteRoute._addFileChildren(
+    Char123LocaleChar125AppMethodRouteRouteChildren,
+  )
+
 interface Char123LocaleChar125AppProtectedRouteRouteChildren {
   Char123LocaleChar125AppProtectedAccountRoute: typeof Char123LocaleChar125AppProtectedAccountRoute
 }
@@ -331,6 +381,7 @@ const Char123LocaleChar125AppProtectedRouteRouteWithChildren =
 
 interface Char123LocaleChar125AppRouteRouteChildren {
   Char123LocaleChar125AppDevRouteRoute: typeof Char123LocaleChar125AppDevRouteRouteWithChildren
+  Char123LocaleChar125AppMethodRouteRoute: typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
   Char123LocaleChar125AppProtectedRouteRoute: typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
@@ -345,6 +396,8 @@ const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRou
   {
     Char123LocaleChar125AppDevRouteRoute:
       Char123LocaleChar125AppDevRouteRouteWithChildren,
+    Char123LocaleChar125AppMethodRouteRoute:
+      Char123LocaleChar125AppMethodRouteRouteWithChildren,
     Char123LocaleChar125AppProtectedRouteRoute:
       Char123LocaleChar125AppProtectedRouteRouteWithChildren,
     Char123LocaleChar125AppSplatRoute: Char123LocaleChar125AppSplatRoute,

@@ -1,0 +1,163 @@
+{
+  "metaTitle": "How we calculate",
+  "metaDescription": "Where our weather, soil, ditch and crop data come from, how the field water assessment, causes and recommendations are made – and what we do not know.",
+  "title": "How we calculate",
+  "lead": "The report is built from public data and calculated afresh for your field and the chosen day. Nobody types in a ready-made diagnosis. Below, step by step: what we take into account, how the assessment is made, where the causes and recommendations come from, and what we do not know.",
+  "toc": "On this page",
+  "data": {
+    "title": "What we take into account",
+    "intro": "Five kinds of data. Every source is free and legal; the full list with licences is at the bottom of the page.",
+    "items": {
+      "weather": {
+        "title": "Ten years of weather",
+        "text": "Rain, temperature, sunshine, humidity and wind day by day for 10 years before the analysis date (NASA POWER). When you analyse today, we add a 7-day forecast (MET Norway)."
+      },
+      "soil": {
+        "title": "Soil",
+        "text": "How much sand, clay and organic matter the soil holds down to 1.5 m (SoilGrids model). From this we calculate how much water the soil keeps within reach of the roots, and the soil category: from very light (I) to heavy (IV)."
+      },
+      "water": {
+        "title": "Ditches, streams and water",
+        "text": "Drainage ditches, rivers, streams, ponds and wetlands within 500 m of the field (BDOT10k, GUGiK): how far they are and how many metres of ditch run through the field."
+      },
+      "plants": {
+        "title": "Crops from satellite",
+        "text": "Greenness (NDVI) and plant moisture (NDMI) from Sentinel-2 images of the last 30 days, compared with the same time of year in the 5 previous years. We only use days when the field is not covered by clouds."
+      },
+      "parcels": {
+        "title": "Parcel boundaries and description",
+        "text": "The parcel outline from ULDK, and its area and land-use classes from the land register (EGiB), both GUGiK services. You can also draw your own field or split a parcel."
+      }
+    }
+  },
+  "assessment": {
+    "title": "How the assessment is made",
+    "kbwTitle": "Rain minus evaporation over 60 days",
+    "kbw": "We add up the rain of the last 60 days before the analysis date and subtract how much water could evaporate in that time. This is the climatic water balance – the same measure used by the national agricultural drought monitoring of IUNG. We compare the result with the official IUNG thresholds for your crop group and soil category: a crossed threshold means drought.",
+    "kbwNote": "We calculate evaporation with the IUNG formula, but sunshine duration is reconstructed from solar radiation, so the result is labelled as an estimate. The thresholds apply from 21 March to 30 September; outside that period we show the water stored in the soil.",
+    "rootTitle": "Water within reach of the roots, day by day",
+    "root": "A second calculation keeps a water balance of the soil where the roots reach (FAO-56 method): every day it adds rain and subtracts what the crop used at its growth stage. When readily available water runs out, the crop starts to suffer – we count such stress days and the missing millimetres.",
+    "historyTitle": "Against 10 years",
+    "history": "We run the same calculations for the 10 previous seasons. That is how the report tells whether drought on this field is an exception or comes back every few years, and in which parts of the year most often.",
+    "plantsTitle": "Satellite as confirmation",
+    "plants": "A satellite image never gives the verdict on its own. A low index at sowing, ripening or after harvest is normal. We speak of possible water stress only when plant moisture is clearly lower than in previous years and the water balance also shows a deficit."
+  },
+  "causes": {
+    "title": "Where the causes come from",
+    "intro": "A cause goes into the report only together with the number that supports it (open “Details for the adviser” in the report). Among other things we check:",
+    "items": {
+      "rain": "less rain or more evaporation than usual for the same time of year (against 10 years),",
+      "soil": "soil that holds water poorly (light soil or a small water store),",
+      "ditches": "a ditch right next to or through the field – water drains away quickly,",
+      "retention": "no ponds or wetlands nearby that would keep water in the landscape,",
+      "crop": "a crop that often suffers from drought on this field (in many of the 10 seasons)."
+    },
+    "note": "A source marked as sample data is never evidence for a cause."
+  },
+  "recommendations": {
+    "title": "How recommendations are made",
+    "intro": "Every recommendation answers a specific cause. The order is always the same:",
+    "steps": {
+      "retain": {
+        "title": "First, keep the water",
+        "text": "a weir on the ditch, protecting a wetland, a small pond, a grass strip, tree lines. The weir volume is estimated from the length of ditch in the field – an order of magnitude, not a design."
+      },
+      "farm": {
+        "title": "Then, farming practice",
+        "text": "mulch (about a quarter less evaporation from the soil), more organic matter, a catch crop, reduced tillage, crop choice."
+      },
+      "irrigate": {
+        "title": "Irrigation last",
+        "text": "only when the balance shows that water available to the roots is running out. When the forecast promises rain that covers the deficit, or the grain is ripening, we do not recommend watering."
+      }
+    },
+    "legal": "For a weir or a pond the report mentions the formalities (a water-law notification or permit). Always check them with Wody Polskie or the local water company."
+  },
+  "unknowns": {
+    "title": "What we do not know",
+    "items": {
+      "weather": "Weather comes from a grid of about 50 km. A storm that passed only over your village may not show up.",
+      "soil": "Soil comes from a 250 m model. It is often one category off, so the report shows whether another category would change the assessment.",
+      "measurement": "We do not measure moisture on your field. A spade and your hand are the surest check.",
+      "boundaries": "Parcel boundaries are today’s – also when you analyse a day several years ago.",
+      "ditches": "We know where ditches are on the map, but not whether they are clear or carry water.",
+      "terrain": "If the report marks the terrain or the zones in the field as sample data, treat them as illustrative."
+    }
+  },
+  "confidence": {
+    "title": "How to read confidence",
+    "intro": "Next to the assessment there is a confidence level: high, medium or low. We start from high and lower it when:",
+    "items": {
+      "grid": "the weather comes from a coarse grid,",
+      "gaps": "there are gaps in the weather data,",
+      "soil": "the soil is unknown or a neighbouring soil category would give a different assessment,",
+      "conflict": "the signals disagree (e.g. the 60-day balance and soil water say different things)."
+    },
+    "noBalance": "Without a water balance the confidence is always low.",
+    "advice": "Low confidence does not mean the result is wrong. It means: check in the field before you spend money."
+  },
+  "sources": {
+    "title": "Data sources and licences",
+    "licence": "Licence",
+    "use": "Used for",
+    "open": "Source website",
+    "items": {
+      "nasaPower": {
+        "name": "NASA POWER",
+        "use": "10 years of daily weather",
+        "licence": "CC BY 4.0 (NASA Langley Research Center, POWER Project)"
+      },
+      "metNorway": {
+        "name": "MET Norway",
+        "use": "7-day weather forecast",
+        "licence": "CC BY 4.0 (Norwegian Meteorological Institute)"
+      },
+      "iung": {
+        "name": "IUNG-PIB agricultural drought monitoring",
+        "use": "drought thresholds for crops and soil categories",
+        "licence": "thresholds published by IUNG-PIB, quoted with the source"
+      },
+      "soilgrids": {
+        "name": "SoilGrids (ISRIC)",
+        "use": "soil texture, water store, soil category",
+        "licence": "CC BY 4.0 (ISRIC – World Soil Information)"
+      },
+      "bdot": {
+        "name": "BDOT10k, GUGiK",
+        "use": "ditches, watercourses, water, wetlands",
+        "licence": "GUGiK public data, free of charge, with attribution"
+      },
+      "sentinel": {
+        "name": "Copernicus Sentinel-2",
+        "use": "crop greenness and moisture",
+        "licence": "Copernicus open data (contains modified Copernicus Sentinel data)"
+      },
+      "uldk": {
+        "name": "ULDK and EGiB, GUGiK",
+        "use": "parcel boundaries, area and land-use classes",
+        "licence": "GUGiK public data, free of charge, with attribution"
+      },
+      "ortho": {
+        "name": "Orthophoto, GUGiK",
+        "use": "aerial photo on the map",
+        "licence": "GUGiK public data, free of charge, with attribution"
+      },
+      "osm": {
+        "name": "OpenStreetMap (OpenFreeMap, Nominatim)",
+        "use": "base map and address search",
+        "licence": "ODbL (© OpenStreetMap contributors)"
+      }
+    }
+  },
+  "methods": {
+    "title": "Methods in brief (for advisers)",
+    "items": {
+      "kbw": "Climatic water balance after IUNG: precipitation minus potential evapotranspiration (Doroszewski–Górski formula, sunshine from radiation via the Ångström equation), 6 dekads up to the analysis date, 14 periods 21 Mar–30 Sep, thresholds from the IUNG table for 14 crop groups and 4 soil categories; no Kc.",
+      "root": "FAO-56 root-zone balance: Penman–Monteith ET₀, single Kc from the crop calendar, TAW/RAW, Ks, 10 seasons.",
+      "soil": "Soil: SoilGrids texture → PTG 2008 group → IUNG category; Saxton–Rawls (2006) water store for 0–100 cm.",
+      "plants": "Satellite: NDVI and NDMI from the Copernicus Data Space statistics API, SCL cloud mask, at least 5 clear pixels in the field.",
+      "water": "Water: distances from the field outline in PL-1992 (PostGIS), 500 m radius."
+    }
+  },
+  "backToMap": "Check your field"
+}
