@@ -185,6 +185,18 @@
       },
       "check": "Przed decyzją sprawdź wilgotność gleby na polu, np. łopatą na głębokości korzeni.",
       "sentenceOk": "Z dostępnych danych wynika, że rośliny mają dość wody w glebie. Wynik jest jednak niepewny."
+    },
+    "basis": "Na czym opieramy ocenę",
+    "soilBasis": {
+      "field": "Gleba z mapy gleb dla tego pola.",
+      "nearby": "W samym polu mapa gleb nie ma danych (np. las, zabudowa albo woda), więc bierzemy glebę z miejsca oddalonego o ok. {distance} m.",
+      "nearbyUnknown": "W samym polu mapa gleb nie ma danych (np. las, zabudowa albo woda), więc bierzemy glebę z najbliższego miejsca obok.",
+      "assumed_medium": "Nie znamy gleby w tym miejscu, więc przyjmujemy glebę średnią (kategoria III)."
+    },
+    "verdictBasis": {
+      "soil_category": "Próg suszy dobrany do kategorii gleby tego pola.",
+      "scenarios_agree": "Rodzaj gleby jest niepewny, ale na każdej glebie wynik wychodzi ten sam.",
+      "scenarios_disagree": "Wynik zależy od gleby: na lżejszej byłaby susza, na cięższej nie. Sprawdź glebę na polu."
     }
   },
   "history": {
@@ -199,7 +211,8 @@
       "ok": "w normie",
       "not_monitored": "nie oceniano",
       "missing": "brak danych",
-      "later": "nie liczono w tym raporcie"
+      "later": "nie liczono w tym raporcie",
+      "excess": "nadmiar wody"
     },
     "legend": "Legenda",
     "previous": "{drought, plural, =0 {W żadnym z {seasons} poprzednich sezonów nie było suszy rolniczej (wg progów IUNG).} other {Susza rolnicza (wg progów IUNG) była w # z {seasons} poprzednich sezonów.}}",
@@ -219,7 +232,10 @@
     "currentPeriod": "W okresie 60 dni do {date} susza była w {drought} z {years} poprzednich lat.",
     "regionLabel": "Kalendarz suszy – przesuń w bok, żeby zobaczyć cały sezon",
     "scrollHint": "Przesuń tabelę w bok, żeby zobaczyć cały sezon.",
-    "monthOfEnd": "Miesiąc końca okresu"
+    "monthOfEnd": "Miesiąc końca okresu",
+    "deficit": "{deficit, plural, =0 {W żadnym z {seasons} poprzednich sezonów uprawie nie zabrakło wyraźnie wody.} other {Uprawie brakowało wody w # z {seasons} poprzednich sezonów.}}",
+    "deficitNote": "Liczymy sezony, w których według bilansu wody w glebie zabrakło co najmniej 50 l/m² albo był przekroczony próg suszy IUNG.",
+    "excessSeasons": "{count, plural, one {Nadmiar wody (deszcz wyraźnie większy od parowania) był w # z {seasons} sezonów.} other {Nadmiar wody (deszcz wyraźnie większy od parowania) był w # z {seasons} sezonów.}}"
   },
   "causes": {
     "intro": "Od największego wpływu.",
@@ -293,7 +309,11 @@
       "deficit_seasons": "Sezony z niedoborem wody",
       "season_et_deficit_median": "Typowy niedobór wody w sezonie (mediana)",
       "nearest_wetland_m": "Odległość do najbliższego mokradła",
-      "organic_matter_pct": "Materia organiczna w warstwie ornej"
+      "organic_matter_pct": "Materia organiczna w warstwie ornej",
+      "registry_soil_class": "Najsłabsza klasa gleby w ewidencji",
+      "slope_share_above_5_pct": "Część pola o nachyleniu ponad 5%",
+      "depression_volume_m3": "Pojemność zagłębienia w polu",
+      "depression_area_m2": "Powierzchnia zagłębienia w polu"
     },
     "unknownMetric": "Inny wskaźnik",
     "units": {
@@ -309,7 +329,9 @@
       "seasons": "{value, plural, one {# sezon} few {# sezony} many {# sezonów} other {# sezonu}}",
       "seasonsOf": "{value} z {total} sezonów",
       "category": "{roman} ({name})",
-      "index": "{value}"
+      "index": "{value}",
+      "m2": "{value} m²",
+      "soilClass": "klasa {roman}"
     }
   },
   "recommendations": {
@@ -417,7 +439,10 @@
       "no": "Nawadnianie nie było wtedy potrzebne.",
       "consider": "Warto było wtedy rozważyć nawadnianie.",
       "yes": "Pole warto było wtedy nawodnić."
-    }
+    },
+    "plan": "Plan podlewania: {doses, plural, one {# podlanie} few {# podlania} many {# podlań} other {# podlania}} po {dose} l/m²{interval, plural, =0 {} one { co # dzień} other { co # dni}}.",
+    "planVolume": "Jedno podlanie to ok. {dose} m³ wody na całe pole, cały plan ok. {total} m³.",
+    "planNote": "Większej dawki naraz gleba nie przyjmie – woda spłynie albo ucieknie pod korzenie."
   },
   "sources": {
     "confidence": "Pewność oceny: {level}",

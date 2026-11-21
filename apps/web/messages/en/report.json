@@ -185,6 +185,18 @@
       },
       "check": "Before deciding, check soil moisture in the field, e.g. with a spade at root depth.",
       "sentenceOk": "The available data suggests the plants have enough soil water. The result is uncertain, though."
+    },
+    "basis": "What the assessment rests on",
+    "soilBasis": {
+      "field": "Soil from the soil map for this field.",
+      "nearby": "The soil map has no data inside the field (e.g. forest, buildings or water), so we use the soil from a place about {distance} m away.",
+      "nearbyUnknown": "The soil map has no data inside the field (e.g. forest, buildings or water), so we use the soil from the nearest place.",
+      "assumed_medium": "We do not know the soil here, so we assume a medium soil (category III)."
+    },
+    "verdictBasis": {
+      "soil_category": "Drought threshold chosen for this field's soil category.",
+      "scenarios_agree": "The soil type is uncertain, but the result is the same on every soil.",
+      "scenarios_disagree": "The result depends on the soil: a lighter soil would be in drought, a heavier one not. Check the soil in the field."
     }
   },
   "history": {
@@ -199,7 +211,8 @@
       "ok": "normal",
       "not_monitored": "not assessed",
       "missing": "no data",
-      "later": "not computed in this report"
+      "later": "not computed in this report",
+      "excess": "too much water"
     },
     "legend": "Legend",
     "previous": "{drought, plural, =0 {There was no agricultural drought (by IUNG thresholds) in any of the {seasons} previous seasons.} other {Agricultural drought (by IUNG thresholds) occurred in # of the {seasons} previous seasons.}}",
@@ -219,7 +232,10 @@
     "currentPeriod": "In the 60 days to {date} there was drought in {drought} of {years} previous years.",
     "regionLabel": "Drought calendar – scroll sideways to see the whole season",
     "scrollHint": "Scroll the table sideways to see the whole season.",
-    "monthOfEnd": "Month the period ends"
+    "monthOfEnd": "Month the period ends",
+    "deficit": "{deficit, plural, =0 {In none of the {seasons} previous seasons did the crop clearly run short of water.} other {The crop ran short of water in # of {seasons} previous seasons.}}",
+    "deficitNote": "We count seasons in which the soil water balance was short by at least 50 l/m² or the IUNG drought threshold was crossed.",
+    "excessSeasons": "{count, plural, one {Too much water (rain clearly above evaporation) in # of {seasons} seasons.} other {Too much water (rain clearly above evaporation) in # of {seasons} seasons.}}"
   },
   "causes": {
     "intro": "From the largest impact.",
@@ -293,7 +309,11 @@
       "deficit_seasons": "Seasons with a water deficit",
       "season_et_deficit_median": "Typical seasonal water deficit (median)",
       "nearest_wetland_m": "Distance to the nearest wetland",
-      "organic_matter_pct": "Organic matter in the topsoil"
+      "organic_matter_pct": "Organic matter in the topsoil",
+      "registry_soil_class": "Weakest soil class in the land register",
+      "slope_share_above_5_pct": "Share of the field steeper than 5%",
+      "depression_volume_m3": "Volume of the hollow in the field",
+      "depression_area_m2": "Area of the hollow in the field"
     },
     "unknownMetric": "Other indicator",
     "units": {
@@ -309,7 +329,9 @@
       "seasons": "{value, plural, one {# season} other {# seasons}}",
       "seasonsOf": "{value} of {total} seasons",
       "category": "{roman} ({name})",
-      "index": "{value}"
+      "index": "{value}",
+      "m2": "{value} m²",
+      "soilClass": "class {roman}"
     }
   },
   "recommendations": {
@@ -417,7 +439,10 @@
       "no": "Irrigation was not needed then.",
       "consider": "Irrigation was worth considering then.",
       "yes": "The field was worth irrigating then."
-    }
+    },
+    "plan": "Irrigation plan: {doses, plural, one {# application} other {# applications}} of {dose} l/m²{interval, plural, =0 {} one { every day} other { every # days}}.",
+    "planVolume": "One application is about {dose} m³ of water for the whole field, the whole plan about {total} m³.",
+    "planNote": "The soil cannot take a bigger dose at once – the water would run off or drain below the roots."
   },
   "sources": {
     "confidence": "Confidence: {level}",

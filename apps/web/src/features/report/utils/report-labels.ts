@@ -34,6 +34,10 @@ export const REPORT_METRICS = [
   'season_et_deficit_median',
   'nearest_wetland_m',
   'organic_matter_pct',
+  'registry_soil_class',
+  'slope_share_above_5_pct',
+  'depression_volume_m3',
+  'depression_area_m2',
 ] as const;
 
 export type ReportMetric = (typeof REPORT_METRICS)[number];
@@ -46,6 +50,7 @@ export type EvidenceUnit =
   | 'mm'
   | 'mmPerM'
   | 'm'
+  | 'm2'
   | 'm3'
   | 'ha'
   | 'percent'
@@ -53,6 +58,7 @@ export type EvidenceUnit =
   | 'count'
   | 'seasons'
   | 'category'
+  | 'soilClass'
   | 'index'
   | 'none';
 
@@ -83,6 +89,8 @@ export function evidenceDisplay(value: number, unit: string): { value: number; u
       return { value, unit: 'mmPerM' };
     case 'm':
       return { value, unit: 'm' };
+    case 'm2':
+      return { value, unit: 'm2' };
     case 'm3':
       return { value, unit: 'm3' };
     case 'ha':
@@ -96,9 +104,16 @@ export function evidenceDisplay(value: number, unit: string): { value: number; u
       return { value, unit: 'seasons' };
     case 'category':
       return { value, unit: 'category' };
+    case 'class':
+      return { value, unit: 'soilClass' };
     case 'index':
       return { value, unit: 'index' };
     default:
       return { value, unit: 'none' };
   }
+}
+
+/** Klasa bonitacyjna gleby 1-6 cyframi rzymskimi (silnik podaje najslabsza klase jako liczbe). */
+export function romanSoilClass(value: number): string {
+  return ['I', 'II', 'III', 'IV', 'V', 'VI'][Math.round(value) - 1] ?? String(value);
 }

@@ -13,16 +13,21 @@ import {
 } from '../../utils/report-data';
 
 type PeriodStatus = CalendarCell['status'];
-type CellKind = PeriodStatus | 'later';
+type CellKind = PeriodStatus | 'excess' | 'later';
 
 /**
  * Kolor i znak statusu - nigdy sam kolor (WCAG 1.4.1): susza ma tez wykrzyknik i ukosne paski (czytelne na wydruku
- * czarno-bialym), brak danych znak zapytania i przerywana ramke. Klasy jako literaly (Tailwind skanuje zrodla).
+ * czarno-bialym), nadmiar wody fale i poziome paski, brak danych znak zapytania i przerywana ramke. Klasy jako
+ * literaly (Tailwind skanuje zrodla).
  */
 const STATUS_STYLES: Record<CellKind, { cell: string; mark: string }> = {
   drought: {
     cell: 'bg-destructive text-destructive-foreground bg-[repeating-linear-gradient(135deg,transparent_0_3px,color-mix(in_oklab,var(--color-destructive-foreground)_40%,transparent)_3px_5px)]',
     mark: '!',
+  },
+  excess: {
+    cell: 'bg-water/35 text-foreground bg-[repeating-linear-gradient(0deg,transparent_0_3px,color-mix(in_oklab,var(--color-water)_45%,transparent)_3px_4px)]',
+    mark: '≈',
   },
   ok: { cell: 'bg-success/30 text-foreground', mark: '' },
   not_monitored: { cell: 'bg-muted text-muted-foreground', mark: '–' },
@@ -30,24 +35,42 @@ const STATUS_STYLES: Record<CellKind, { cell: string; mark: string }> = {
   later: { cell: 'border border-dotted border-border', mark: '' },
 };
 
-const LEGEND: readonly PeriodStatus[] = ['drought', 'ok', 'not_monitored', 'missing'];
+const NO_CELLS: readonly CalendarCell[] = [];
+
+const LEGEND: readonly CellKind[] = ['drought', 'excess', 'ok', 'not_monitored', 'missing'];
+
+/** Nadmiar wody (KBW > +50 mm) wazy wiecej niz "w normie" i "nie oceniano"; susza i brak danych zostaja soba. */
+function cellKind(cell: CalendarCell | null, current: boolean): CellKind {
+  if (!cell) return current ? 'later' : 'missing';
+
+  if (cell.excess && (cell.status === 'ok' || cell.status === 'not_monitored')) return 'excess';
+
+  return cell.status;
+}
 
 export interface RiskCalendarProps {
   calendar: History['calendar'];
   /** okres konczacy sie w dniu analizy (rok analizy) - wiersz "ten rok" i wyrozniona kolumna */
   current?: CalendarCell | null;
+  /** okresy roku analizy, ktore juz sie skonczyly (`history.currentCalendar`) */
+  currentYear?: readonly CalendarCell[];
 }
 
 /**
  * Kalendarz suszy (D1): lata x okresy 60-dniowe IUNG, kolumny podpisane dniem konca okresu i zgrupowane po
- * miesiacach, ostatni wiersz = rok analizy z jedynym znanym okresem, kolumna tego okresu wyrozniona ("ten rok na
- * tle 10 lat"). Tabela, wiec czytnik ekranu podaje rok, okres i status kazdej kratki. Na telefonie przewija sie
+ * miesiacach, ostatni wiersz = rok analizy (okresy zakonczone do dnia analizy), kolumna okresu z oceny wyrozniona
+ * ("ten rok na tle 10 lat"); nadmiar wody ma wlasny stan. Tabela, wiec czytnik ekranu podaje rok, okres i status kazdej kratki. Na telefonie przewija sie
  * w poziomie we wlasnym kontenerze (rok przyklejony z lewej), strona nie; na wydruku miesci sie na szerokosc.
  */
-export function RiskCalendar({ calendar, current = null }: RiskCalendarProps) {
+export function RiskCalendar({ calendar, current = null, currentYear = NO_CELLS }: RiskCalendarProps) {
   const t = useTranslations('report.history');
   const format = useFormatter();
-  const rows = calendarRows(calendar, current);
+  const rows = calendarRows(calendar, current, currentYear);
+  const legend = LEGEND.filter(
+    (kind) =>
+      kind !== 'excess' ||
+      rows.some((row) => row.cells.some((cell) => cellKind(cell, row.current) === 'excess')),
+  );
   const months = periodMonths();
   const currentNo = current?.periodNo ?? null;
   const endLabel = (periodNo: number) => {
@@ -134,7 +157,7 @@ export function RiskCalendar({ calendar, current = null }: RiskCalendarProps) {
                 </th>
                 {row.cells.map((cell, index) => {
                   const periodNo = index + 1;
-                  const kind: CellKind = cell?.status ?? (row.current ? 'later' : 'missing');
+                  const kind = cellKind(cell, row.current);
                   const style = STATUS_STYLES[kind];
 
                   return (
@@ -148,7 +171,10 @@ export function RiskCalendar({ calendar, current = null }: RiskCalendarProps) {
                         className={cn(
                           'flex h-6 items-center justify-center rounded-sm font-bold print:h-5 print:border print:border-foreground/40',
                           style.cell,
-                          row.current && cell && 'ring-2 ring-foreground ring-offset-1 ring-offset-card',
+                          row.current &&
+                            cell &&
+                            periodNo === currentNo &&
+                            'ring-2 ring-foreground ring-offset-1 ring-offset-card',
                         )}
                       >
                         {style.mark}
@@ -164,7 +190,7 @@ export function RiskCalendar({ calendar, current = null }: RiskCalendarProps) {
       </section>
       <p className="text-xs text-muted-foreground sm:hidden print:hidden">{t('scrollHint')}</p>
       <ul aria-label={t('legend')} className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-        {LEGEND.map((status) => (
+        {legend.map((status) => (
           <li key={status} className="flex items-center gap-1.5">
             <span
               aria-hidden="true"

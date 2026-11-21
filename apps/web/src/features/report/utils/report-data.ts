@@ -207,12 +207,13 @@ export function currentPeriod(report: WaterReport): CalendarCell | null {
 }
 
 /**
- * Kalendarz ryzyka jako wiersze lat (rosnaco) i kolumny okresow 1-14; rok analizy (gdy nie ma go w historii)
- * dopisany na koncu z jedynym znanym okresem.
+ * Kalendarz ryzyka jako wiersze lat (rosnaco) i kolumny okresow 1-14. Rok analizy (gdy nie ma go w historii) idzie
+ * na koniec: okresy, ktore juz sie skonczyly (`currentYear` = `history.currentCalendar`), i okres z oceny (`current`).
  */
 export function calendarRows(
   calendar: History['calendar'],
   current: CalendarCell | null = null,
+  currentYear: readonly CalendarCell[] = [],
 ): CalendarRow[] {
   const years = [...new Set(calendar.map((cell) => cell.year))].toSorted((a, b) => a - b);
   const rows = years.map((year) => ({
@@ -223,19 +224,28 @@ export function calendarRows(
     ),
     current: false,
   }));
+  const year = current?.year ?? currentYear[0]?.year;
 
-  if (!current || years.includes(current.year)) return rows;
+  if (year === undefined || years.includes(year)) return rows;
 
   return [
     ...rows,
     {
-      year: current.year,
-      cells: Array.from({ length: IUNG_PERIODS }, (_, index) =>
-        index + 1 === current.periodNo ? current : null,
+      year,
+      cells: Array.from(
+        { length: IUNG_PERIODS },
+        (_, index) =>
+          currentYear.find((cell) => cell.periodNo === index + 1) ??
+          (current?.periodNo === index + 1 ? current : null),
       ),
       current: true,
     },
   ];
+}
+
+/** Sezony (z historii), w ktorych choc jeden okres mial nadmiar wody - "nadmiar w 2 z 10 sezonow". */
+export function excessSeasons(calendar: History['calendar']): number {
+  return new Set(calendar.filter((cell) => cell.excess).map((cell) => cell.year)).size;
 }
 
 /** Ile lat (z historii) mialo susze w danym okresie - "w tym okresie susza w 3 z 10 lat". */

@@ -3,7 +3,7 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { currentPeriod, isoDay, seasonRows, stressSummary } from '../../utils/report-data';
+import { currentPeriod, excessSeasons, isoDay, seasonRows, stressSummary } from '../../utils/report-data';
 import { ReportDetails } from '../report-section';
 import { RiskCalendar } from '../risk-calendar';
 
@@ -33,9 +33,10 @@ function barWidth(value: number, scale: number): string {
 }
 
 /**
- * Sekcja 2 - historia: ile poprzednich sezonow mialo susze wg progow IUNG, jak wypada ten rok (pozycja okresu na tle
- * lat, dni z niedoborem wody od poczatku sezonu na tle calych poprzednich sezonow), miesiace ryzyka, wykres dni
- * stresu na sezon (biezacy wyrozniony) i kalendarz suszy. Sam licznik sezonow z susza IUNG bywa zerem przy
+ * Sekcja 2 - historia: w ilu poprzednich sezonach brakowalo wody (bilans gleby albo prog IUNG), ile mialo susze wg
+ * progow IUNG i nadmiar wody, jak wypada ten rok (pozycja okresu na tle lat, dni z niedoborem wody od poczatku
+ * sezonu na tle calych poprzednich sezonow), miesiace ryzyka, wykres dni stresu na sezon (biezacy wyrozniony)
+ * i kalendarz suszy. Sam licznik sezonow z susza IUNG bywa zerem przy
  * werdykcie "susza" - dlatego obok zawsze stoi biezacy sezon.
  */
 export function HistorySection({ report }: { report: WaterReport }) {
@@ -57,6 +58,7 @@ export function HistorySection({ report }: { report: WaterReport }) {
     format.dateTime(new Date(Date.UTC(2024, month - 1, 15)), { month: 'long', timeZone: 'UTC' }),
   );
   const number = (value: number) => format.number(value, { maximumFractionDigits: 0 });
+  const excess = excessSeasons(history.calendar);
 
   if (history.seasonsWithData === 0 && rows.length === 0) {
     return <p className="text-base text-muted-foreground">{t('noData')}</p>;
@@ -65,9 +67,25 @@ export function HistorySection({ report }: { report: WaterReport }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2" data-testid="history-summary">
-        <p className="text-lg font-semibold text-balance">
-          {t('previous', { drought: history.droughtSeasons, seasons: history.seasonsWithData })}
-        </p>
+        {history.deficitSeasons === undefined ? (
+          <p className="text-lg font-semibold text-balance">
+            {t('previous', { drought: history.droughtSeasons, seasons: history.seasonsWithData })}
+          </p>
+        ) : (
+          <>
+            <p className="text-lg font-semibold text-balance" data-testid="deficit-seasons">
+              {t('deficit', { deficit: history.deficitSeasons, seasons: history.seasonsWithData })}
+            </p>
+            <p className="text-base">
+              {t('previous', { drought: history.droughtSeasons, seasons: history.seasonsWithData })}
+            </p>
+          </>
+        )}
+        {excess > 0 && (
+          <p className="text-base" data-testid="excess-seasons">
+            {t('excessSeasons', { count: excess, seasons: history.seasonsWithData })}
+          </p>
+        )}
         {rank && balance && balance.periodNo !== null && (
           <p className="text-base">
             {t('current', {
@@ -160,11 +178,18 @@ export function HistorySection({ report }: { report: WaterReport }) {
       )}
 
       {history.calendar.length > 0 && (
-        <RiskCalendar calendar={history.calendar} current={currentPeriod(report)} />
+        <RiskCalendar
+          calendar={history.calendar}
+          current={currentPeriod(report)}
+          currentYear={history.currentCalendar}
+        />
       )}
 
       {previous.length > 0 && (
         <ReportDetails summary={tReport('details')}>
+          {history.deficitSeasons !== undefined && (
+            <p className="text-muted-foreground">{t('deficitNote')}</p>
+          )}
           <ul className="flex flex-col gap-0.5 text-muted-foreground">
             {history.seasons
               .toSorted((a, b) => a.year - b.year)

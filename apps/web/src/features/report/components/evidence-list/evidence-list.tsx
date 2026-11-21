@@ -2,7 +2,7 @@ import type { Evidence } from '@app/contracts';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { romanCategory } from '../../utils/report-data';
-import { evidenceDisplay, isKnownMetric, referenceRole } from '../../utils/report-labels';
+import { evidenceDisplay, isKnownMetric, referenceRole, romanSoilClass } from '../../utils/report-labels';
 
 /** Promien szukania obiektow wokol pola, gdy dowod go nie podaje (tak liczy silnik). */
 const DEFAULT_RADIUS_M = 500;
@@ -31,9 +31,11 @@ export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
           : t('evidence.units.seasonsOf', { value: shown.value, total: item.reference });
       case 'index':
         return t('evidence.units.index', { value: number(shown.value, 2) });
+      case 'soilClass':
+        return t('evidence.units.soilClass', { roman: romanSoilClass(shown.value) });
       default:
         return t(`evidence.units.${shown.unit}`, {
-          value: number(shown.value, shown.unit === 'percent' || shown.unit === 'count' ? 0 : 1),
+          value: number(shown.value, ['percent', 'count', 'm2', 'm3'].includes(shown.unit) ? 0 : 1),
         });
     }
   };

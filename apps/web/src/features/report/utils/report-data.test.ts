@@ -8,6 +8,7 @@ import {
   byWeight,
   calendarRows,
   currentPeriod,
+  excessSeasons,
   IUNG_PERIODS,
   isPastAnalysis,
   isSampleReport,
@@ -188,5 +189,37 @@ describe('wyliczenia raportu', () => {
         assessment: { ...LOW_CONFIDENCE_REPORT.assessment, level: 'out_of_season' },
       }),
     ).toBeNull();
+  });
+
+  it('kalendarz: wiersz roku analizy z okresow juz zakonczonych i okresu z oceny; nadmiar liczony po sezonach', () => {
+    const rows = calendarRows(
+      [
+        { year: 2017, periodNo: 13, status: 'ok', balanceMm: 97, excess: true },
+        { year: 2017, periodNo: 14, status: 'ok', balanceMm: 66, excess: true },
+        { year: 2016, periodNo: 1, status: 'drought', balanceMm: -150 },
+      ],
+      { year: 2018, periodNo: 3, status: 'drought', balanceMm: -120 },
+      [
+        { year: 2018, periodNo: 1, status: 'ok', balanceMm: -40 },
+        { year: 2018, periodNo: 2, status: 'ok', balanceMm: -80 },
+      ],
+    );
+    const current = rows.at(-1);
+
+    expect(current?.current).toBe(true);
+    expect(current?.cells.slice(0, 4).map((cell) => cell?.status ?? null)).toEqual([
+      'ok',
+      'ok',
+      'drought',
+      null,
+    ]);
+    expect(
+      excessSeasons([
+        { year: 2017, periodNo: 13, status: 'ok', balanceMm: 97, excess: true },
+        { year: 2017, periodNo: 14, status: 'ok', balanceMm: 66, excess: true },
+        { year: 2011, periodNo: 9, status: 'not_monitored', balanceMm: 61, excess: true },
+        { year: 2012, periodNo: 9, status: 'ok', balanceMm: 10 },
+      ]),
+    ).toBe(2);
   });
 });

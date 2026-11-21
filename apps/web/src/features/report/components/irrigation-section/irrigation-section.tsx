@@ -13,9 +13,10 @@ const ADVICE_STYLES: Record<IrrigationAdvice['advisable'], string> = {
 };
 
 /**
- * Sekcja 6 (ostatnia z zalecen) - nawadnianie: zawsze po retencji i agrotechnice. `netDepthMm` to laczny niedobor
- * do pelnego zapasu (w l/m2 i m3 na cale pole), nie jedna dawka - kontrakt nie rozbija go na podlania, wiec ekran
- * mowi to wprost. Dla dnia z przeszlosci zdanie w czasie przeszlym; brak oceny (null) = zdanie, dlaczego.
+ * Sekcja 6 (ostatnia z zalecen) - nawadnianie: zawsze po retencji i agrotechnice. Plan podlewania z silnika ("4
+ * podlania po 30 l/m2 co 6 dni") z woda na cale pole w m3 (jedna dawka i caly plan), pod nim laczny niedobor do
+ * pelnego zapasu. Starszy raport bez dawek mowi, ze niedobor to nie jedna dawka. Dla dnia z przeszlosci zdanie
+ * w czasie przeszlym; brak oceny (null) = zdanie, dlaczego.
  */
 export function IrrigationSection({ report }: { report: WaterReport }) {
   const t = useTranslations('report.irrigation');
@@ -25,6 +26,10 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
 
   if (!irrigation) return <p className="text-base text-muted-foreground">{t('none')}</p>;
   const past = isPastAnalysis(report);
+  const plan =
+    irrigation.doses !== undefined && irrigation.doseMm !== undefined
+      ? { doses: irrigation.doses, doseMm: irrigation.doseMm, intervalDays: irrigation.intervalDays ?? 0 }
+      : null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -40,6 +45,20 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
           <Droplet aria-hidden="true" className="size-5 text-water" />
           {past ? t(`advisablePast.${irrigation.advisable}`) : t(`advisable.${irrigation.advisable}`)}
         </p>
+        {irrigation.advisable !== 'no' && plan && (
+          <div className="flex flex-col gap-1" data-testid="irrigation-plan">
+            <p className="text-lg font-semibold">
+              {t('plan', { doses: plan.doses, dose: number(plan.doseMm), interval: plan.intervalDays })}
+            </p>
+            <p className="text-base">
+              {t('planVolume', {
+                dose: format.number(volumeM3(plan.doseMm, report.field.areaHa)),
+                total: format.number(volumeM3(plan.doseMm * plan.doses, report.field.areaHa)),
+              })}
+            </p>
+            <p className="text-sm text-muted-foreground">{t('planNote')}</p>
+          </div>
+        )}
         {irrigation.advisable !== 'no' && irrigation.netDepthMm !== null && (
           <>
             <p className="text-base" data-testid="irrigation-deficit">
@@ -47,9 +66,12 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
                 mm: number(irrigation.netDepthMm),
                 volume: format.number(volumeM3(irrigation.netDepthMm, report.field.areaHa)),
               })}
-              {irrigation.withinDays === null ? null : ` ${t('within', { days: irrigation.withinDays })}`}
+              {/* termin ("najlepiej dzis") ma sens tylko dla dzisiejszej analizy */}
+              {irrigation.withinDays === null || past
+                ? null
+                : ` ${t('within', { days: irrigation.withinDays })}`}
             </p>
-            <p className="text-sm text-muted-foreground">{t('deficitNote')}</p>
+            {!plan && <p className="text-sm text-muted-foreground">{t('deficitNote')}</p>}
           </>
         )}
         {irrigation.forecastPrecipMm === null ? (

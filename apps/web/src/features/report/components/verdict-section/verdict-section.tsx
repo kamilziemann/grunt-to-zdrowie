@@ -104,6 +104,20 @@ export function VerdictSection({ report }: { report: WaterReport }) {
   const soilUncertain = caveat?.reasons.some(
     (reason) => reason === 'soil_missing' || reason === 'soil_estimated',
   );
+  const soilBasis =
+    assessment.soilBasis === undefined
+      ? null
+      : assessment.soilBasis === 'nearby'
+        ? assessment.soilDistanceM === undefined
+          ? t('soilBasis.nearbyUnknown')
+          : t('soilBasis.nearby', { distance: number(assessment.soilDistanceM, 0) })
+        : t(`soilBasis.${assessment.soilBasis}`);
+  const verdictBasis = assessment.verdictBasis ? t(`verdictBasis.${assessment.verdictBasis}`) : null;
+  // w karcie werdyktu tylko to, co zmienia odbior wyniku (gleba spoza pola, wynik zalezny od gleby); reszta w szczegolach
+  const basisInCard = [
+    assessment.soilBasis && assessment.soilBasis !== 'field' ? soilBasis : null,
+    assessment.verdictBasis && assessment.verdictBasis !== 'soil_category' ? verdictBasis : null,
+  ].filter((text): text is string => text !== null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,6 +142,11 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           {caveat && assessment.level === 'ok' ? t('caveat.sentenceOk') : t(`sentences.${assessment.level}`)}
         </p>
         {caveat && <VerdictCaveat reasons={caveat.reasons} scenarios={soilUncertain ? scenarios : null} />}
+        {basisInCard.length > 0 && (
+          <p className="text-base" data-testid="verdict-basis">
+            {basisInCard.join(' ')}
+          </p>
+        )}
         <p className="text-sm text-muted-foreground">
           {t('asOf', {
             date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
@@ -194,6 +213,15 @@ export function VerdictSection({ report }: { report: WaterReport }) {
 
       <ReportDetails summary={tReport('details')}>
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[minmax(10rem,auto)_1fr]">
+          {(soilBasis || verdictBasis) && (
+            <>
+              <dt className="font-medium">{t('basis')}</dt>
+              <dd className="flex flex-col">
+                {soilBasis && <span>{soilBasis}</span>}
+                {verdictBasis && <span>{verdictBasis}</span>}
+              </dd>
+            </>
+          )}
           {balance && (
             <>
               <dt className="font-medium">{t('balance')}</dt>

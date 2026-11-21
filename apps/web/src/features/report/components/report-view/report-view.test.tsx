@@ -7,6 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { renderWithIntl, translator } from '@/test/render-intl';
 
 import { DROUGHT_REPORT } from '../../fixtures/drought-report';
+import { FIELD_REPORT } from '../../fixtures/field-report';
+import { FOREST_REPORT } from '../../fixtures/forest-report';
 import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
 import { ReportView } from './report-view';
@@ -260,6 +262,63 @@ describe('ReportView', () => {
 
       expect(screen.queryByTestId('land-use-notice')).not.toBeInTheDocument();
       expect(screen.queryByTestId('land-use')).not.toBeInTheDocument();
+    });
+  });
+
+  it.each([
+    ['pole z rowem (silnik)', FIELD_REPORT],
+    ['las (silnik)', FOREST_REPORT],
+    ['susza (silnik)', DROUGHT_REPORT],
+    ['niska pewnosc', LOW_CONFIDENCE_REPORT],
+  ])('%s: zaden surowy identyfikator (snake_case) nie trafia na ekran, takze w szczegolach', (_, report) => {
+    renderReport(report);
+
+    // adresy zrodel (na wydruku) maja wlasne identyfikatory - to nie tekst dla rolnika
+    const text = (screen.getByTestId('report').textContent ?? '').replaceAll(/https?:\/\/[^\s,)]+/g, '');
+
+    expect(text.match(/\b[a-z]+(?:_[a-z0-9]+)+\b/g) ?? []).toEqual([]);
+    expect(text).not.toContain(t('evidence.unknownMetric'));
+  });
+
+  describe('raport z pelnego silnika', () => {
+    it('nawadnianie: plan dawek i woda na cale pole zamiast jednej liczby', () => {
+      renderReport(FIELD_REPORT);
+
+      const plan = screen.getByTestId('irrigation-plan');
+
+      expect(plan).toHaveTextContent('Plan podlewania: 4 podlania po 30 l/m² co 6 dni.');
+      // 30 l/m2 na 19,35 ha = 5804 m3, cztery dawki = 23 215 m3
+      expect(plan.textContent?.replaceAll(/\s/g, ' ')).toMatch(/5804 m³.*23 215 m³/);
+      expect(screen.queryByText(t('irrigation.deficitNote'))).not.toBeInTheDocument();
+    });
+
+    it('historia: sezony z niedoborem wody, susza IUNG i nadmiar wody; kalendarz z biezacym rokiem i nadmiarem', () => {
+      renderReport(FIELD_REPORT);
+
+      expect(screen.getByTestId('deficit-seasons')).toHaveTextContent(
+        'Uprawie brakowało wody w 9 z 10 poprzednich sezonów.',
+      );
+      expect(screen.getByTestId('excess-seasons')).toHaveTextContent('Nadmiar wody');
+
+      const calendar = screen.getByTestId('risk-calendar');
+      const current = calendar.querySelector('tr[data-current]');
+
+      expect(calendar.querySelectorAll('td[data-status="excess"]').length).toBeGreaterThan(0);
+      expect(current?.querySelectorAll('td[data-status="ok"]')).toHaveLength(3);
+      expect(within(calendar).getByText('nadmiar wody', { selector: 'li' })).toBeInTheDocument();
+    });
+
+    it('gleba z sasiedztwa: zdanie w karcie oceny z odlegloscia', () => {
+      renderReport(FOREST_REPORT);
+
+      expect(screen.getByTestId('verdict-basis')).toHaveTextContent('oddalonego o ok. 250 m');
+    });
+
+    it('gleba z pola i prog dla jej kategorii: bez dodatkowego zdania w karcie, opis w szczegolach', () => {
+      renderReport(FIELD_REPORT);
+
+      expect(screen.queryByTestId('verdict-basis')).not.toBeInTheDocument();
+      expect(screen.getByText(t('verdict.verdictBasis.soil_category'))).toBeInTheDocument();
     });
   });
 });

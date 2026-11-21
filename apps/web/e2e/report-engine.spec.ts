@@ -80,3 +80,30 @@ test.describe('użytek gruntu z ewidencji', () => {
     await expect(link).toHaveAttribute('href', /data=2018-06-15/);
   });
 });
+
+test.describe('raport z pełnego silnika', () => {
+  test('dawki nawadniania, sezony z niedoborem, nadmiar wody i bieżący rok w kalendarzu', async ({
+    page,
+  }) => {
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+
+    await expect(page.getByTestId('irrigation-plan')).toContainText('4 podlania po 30 l/m² co 6 dni');
+    await expect(page.getByTestId('deficit-seasons')).toContainText('w 9 z 10 poprzednich sezonów');
+
+    const calendar = page.getByTestId('risk-calendar');
+
+    await expect(calendar.locator('td[data-status="excess"]').first()).toBeAttached();
+    await expect(calendar.locator('tr[data-current] td[data-status="ok"]')).toHaveCount(3);
+    await expect(calendar.getByRole('listitem').filter({ hasText: 'nadmiar wody' })).toBeVisible();
+  });
+
+  test('telefon: raport z silnika bez przewijania strony w poziomie', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+    await expect(page.getByTestId('irrigation-plan')).toBeVisible();
+
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+});
