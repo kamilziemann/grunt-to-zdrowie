@@ -103,5 +103,40 @@
   "places": {
     "title": "Adresy i miejscowości",
     "hint": "Wybierz miejsce. Mapa tam dojedzie, a Ty klikniesz swoją działkę."
+  },
+  "field": {
+    "intro": "Działka to nie zawsze pole",
+    "introDescription": "Uprawiasz tylko część działki albo pole obejmuje kilka działek? Wskaż na mapie dokładny obszar.",
+    "startDraw": "Narysuj własne pole",
+    "startSplit": "Podziel działkę linią",
+    "splitNeedsOne": "Żeby podzielić działkę, zostaw na liście jedną działkę.",
+    "title": "Własne pole",
+    "modeLabel": "Sposób wskazania",
+    "modes": {
+      "draw": "Rysuj obszar",
+      "split": "Podziel działkę"
+    },
+    "drawHelp": "Stukaj w mapę w narożnikach pola, po kolei wzdłuż granicy. Obszar zamyka się sam między ostatnim a pierwszym punktem.",
+    "splitHelp": "Stuknij w mapę dwa punkty po obu stronach miejsca, gdzie kończy się Twoje pole. Linia przez nie podzieli działkę {number} na dwie części.",
+    "points": "{count, plural, =0 {Brak punktów} one {# punkt} few {# punkty} many {# punktów} other {# punktu}}",
+    "area": "Powierzchnia: {area} ha",
+    "needMore": "Dodaj jeszcze {count, plural, one {# punkt} few {# punkty} many {# punktów} other {# punktu}}, żeby zamknąć obszar.",
+    "maxPoints": "Osiągnięto limit {max} punktów.",
+    "selfIntersecting": "Boki obszaru się przecinają. Cofnij ostatni punkt i postaw go w innym miejscu.",
+    "lineMissing": "{count, plural, =0 {Stuknij pierwszy punkt linii podziału.} other {Stuknij drugi punkt linii podziału.}}",
+    "lineOutside": "Linia nie przecina działki. Postaw punkty po obu stronach granicy części, którą uprawiasz.",
+    "partsLabel": "Którą część analizować?",
+    "part": "Część {letter}",
+    "partArea": "{area} ha",
+    "undo": "Cofnij punkt",
+    "clear": "Zacznij od nowa",
+    "cancel": "Wróć do listy działek",
+    "analyze": "Analizuj ten obszar",
+    "analyzeHint": "Wskaż obszar na mapie, żeby przejść do analizy.",
+    "summaryTitle": "Własny obszar",
+    "summaryDrawn": "Obszar narysowany na mapie",
+    "summaryPart": "Część działki {numbers}",
+    "summaryArea": "{area} ha",
+    "invalidArea": "Obszaru z linku nie da się odczytać. Narysuj go jeszcze raz."
   }
 }

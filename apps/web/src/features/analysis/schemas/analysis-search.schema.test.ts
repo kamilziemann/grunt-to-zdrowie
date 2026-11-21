@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { encodeRing } from '@/lib/field-geometry';
+
 import {
   analysisDateBounds,
   analysisRequestFromSearch,
@@ -56,5 +58,57 @@ describe('zakres dat', () => {
     expect(validateAnalysisDate('2026-11-22', '2026-11-21')).toBe('future');
     expect(validateAnalysisDate('2016-11-20', '2026-11-21')).toBe('tooOld');
     expect(validateAnalysisDate('', '2026-11-21')).toBe('invalid');
+  });
+});
+
+describe('wlasny obszar w adresie', () => {
+  const ring: [number, number][] = [
+    [21.5, 52.17],
+    [21.502, 52.17],
+    [21.502, 52.171],
+  ];
+
+  it('obszar ma pierwszenstwo przed dzialkami i trafia do zadania jako geometria', () => {
+    const obszar = encodeRing(ring);
+    const request = analysisRequestFromSearch({
+      dzialki: '141201_1.0001.6509',
+      obszar,
+      rodzaj: 'part',
+      uprawa: 'winter_wheat',
+      data: '2026-06-15',
+    });
+
+    // dzialki tylko w opisie: API przy niepustej liscie wybiera wariant "cale dzialki"
+    expect(request?.field).toMatchObject({ kind: 'part', parcelIds: [] });
+    expect(
+      analysisRequestFromSearch(
+        { dzialki: '141201_1.0001.6509', obszar, rodzaj: 'part', uprawa: 'winter_wheat', data: '2026-06-15' },
+        (kind, numbers) => `${kind}:${numbers.join(',')}`,
+      )?.field,
+    ).toMatchObject({ label: 'part:6509' });
+    expect(request?.field && 'geometry' in request.field ? request.field.geometry.type : null).toBe(
+      'Polygon',
+    );
+    expect(
+      analysisSearchOf({
+        parcelIds: [],
+        cropId: 'winter_wheat',
+        date: '2026-06-15',
+        obszar,
+        rodzaj: 'drawn',
+      }),
+    ).toEqual({
+      dzialki: undefined,
+      obszar,
+      rodzaj: 'drawn',
+      uprawa: 'winter_wheat',
+      data: '2026-06-15',
+    });
+  });
+
+  it('uszkodzony obszar = brak zadania (raport prosi o ponowny wybor)', () => {
+    expect(
+      analysisRequestFromSearch({ obszar: '!!', uprawa: 'winter_wheat', data: '2026-06-15' }),
+    ).toBeNull();
   });
 });

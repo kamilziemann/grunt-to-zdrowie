@@ -10,7 +10,10 @@ export {
   analysisRequestFromSearch,
   analysisSearchOf,
   analysisSearchSchema,
+  fieldAreaFromSearch,
+  parcelNumberOf,
   todayInPoland,
   validateAnalysisDate,
+  type AnalysisFieldArea,
   type AnalysisSearch,
 } from './schemas/analysis-search.schema';

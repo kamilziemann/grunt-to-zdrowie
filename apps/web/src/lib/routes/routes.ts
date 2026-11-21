@@ -2,17 +2,38 @@
 // idzie przez `routePath` ze wzorca trasy, wiec usuniecie albo zmiana nazwy trasy psuje `check:types`, nie linki.
 import { routePath, withQuery, type AppHref } from './route-path';
 
+/** Wlasny obszar w adresie (D3): zwarty zapis obrysu (`lib/field-geometry`) i rodzaj pola. */
+export interface FieldSearch {
+  obszar?: string;
+  rodzaj?: 'part' | 'drawn';
+}
+
 export const routes = {
   home: () => routePath('/'),
   /**
    * Podsumowanie dzialek i formularz analizy; `parcelIds` trafia do parametru `dzialki`, a `form` (powrot z raportu)
    * wypelnia wczesniej wybrana uprawe i dzien.
    */
-  analysis: (parcelIds?: string, form?: { uprawa?: string; data?: string }) =>
-    withQuery(routePath('/analiza'), { dzialki: parcelIds, uprawa: form?.uprawa, data: form?.data }),
-  /** Raport wodny: dzialki, uprawa i dzien analizy w adresie (link do raportu da sie wyslac i odswiezyc). */
-  report: (search?: { dzialki?: string; uprawa?: string; data?: string }) =>
-    withQuery(routePath('/raport'), { dzialki: search?.dzialki, uprawa: search?.uprawa, data: search?.data }),
+  analysis: (parcelIds?: string, form?: FieldSearch & { uprawa?: string; data?: string }) =>
+    withQuery(routePath('/analiza'), {
+      dzialki: parcelIds,
+      obszar: form?.obszar,
+      rodzaj: form?.rodzaj,
+      uprawa: form?.uprawa,
+      data: form?.data,
+    }),
+  /**
+   * Raport wodny: dzialki (albo wlasny obszar), uprawa i dzien analizy w adresie (link do raportu da sie wyslac
+   * i odswiezyc).
+   */
+  report: (search?: FieldSearch & { dzialki?: string; uprawa?: string; data?: string }) =>
+    withQuery(routePath('/raport'), {
+      dzialki: search?.dzialki,
+      obszar: search?.obszar,
+      rodzaj: search?.rodzaj,
+      uprawa: search?.uprawa,
+      data: search?.data,
+    }),
   /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
   parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
   /** Logowanie; `next` = strona, na ktora wrocic po zalogowaniu (tylko sciezka tej aplikacji, zob. `safeNextPath`). */

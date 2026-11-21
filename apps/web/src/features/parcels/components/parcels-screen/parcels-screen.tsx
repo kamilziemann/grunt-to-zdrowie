@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/navigation';
 import { toProblem } from '@/lib/problems';
-import type { AppHref } from '@/lib/routes';
+import type { AppHref, FieldSearch } from '@/lib/routes';
 
 import {
   parcelBoundariesQuery,
@@ -31,6 +31,7 @@ import {
   pointTarget,
   type ParcelTarget,
 } from '../../api/parcels.queries';
+import { useFieldDraw, type FieldDrawMode, type SplitTarget } from '../../hooks/use-field-draw';
 import { useMapLabels } from '../../hooks/use-map-labels';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
 import { validateParcelSearch, type ParcelSearchError } from '../../schemas/parcel-search.schema';
@@ -44,10 +45,11 @@ import {
   SHEET_PEEK_REM,
   type SheetSnap,
 } from '../bottom-sheet';
+import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
 import { ParcelMap, type Basemap, type MapFocus, type MapPadding } from '../parcel-map';
-import { ParcelPreview } from '../parcel-preview';
+import { ParcelPreview, useAreaFormatter } from '../parcel-preview';
 import { ParcelSearch } from '../parcel-search';
 import { PlaceResults } from '../place-results';
 import { StepsHeader, type ParcelStep } from '../steps-header';
@@ -56,14 +58,15 @@ export interface ParcelsScreenProps {
   /** identyfikatory z listy "moje dzialki" (z adresu strony) */
   ids: readonly string[];
   onIdsChange: (ids: string[]) => void;
-  /** adres nastepnego kroku dla podanej listy dzialek */
-  analysisHref: (ids: readonly string[]) => AppHref;
+  /** adres nastepnego kroku dla podanej listy dzialek (i wlasnego obszaru narysowanego na mapie) */
+  analysisHref: (ids: readonly string[], area?: FieldSearch) => AppHref;
 }
 
 const DESKTOP_QUERY = '(min-width: 48rem)';
 const PANEL_WIDTH_REM = 25;
 const MAP_MARGIN_PX = 56;
 const HINT_MS = 4000;
+const NO_PARCELS: readonly Parcel[] = [];
 
 type MapHint = 'zoomHint' | 'outsidePoland' | 'pickHint';
 
@@ -128,6 +131,16 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   // na mapie rysujemy to, co juz wiemy: pelna dzialke albo sam obrys z warstwy granic
   const previewShape = preview ?? outline;
   const selected = useSelectedParcels(ids);
+  // Podzial linia dotyczy jednej dzialki - jedynej na liscie (przy kilku nie wiadomo, ktora dzielic).
+  const onlyParcel = ids.length === 1 && selected.parcels.length === 1 ? selected.parcels[0] : undefined;
+  const splitTarget = useMemo(
+    (): SplitTarget | null =>
+      onlyParcel ? { id: onlyParcel.id, number: onlyParcel.number, geometry: onlyParcel.geometry } : null,
+    [onlyParcel],
+  );
+  const draw = useFieldDraw(splitTarget);
+  const formatArea = useAreaFormatter();
+  const drawing = draw.mode !== null;
 
   const focus = useMemo((): MapFocus | null => {
     if (shown) return shown;
@@ -206,10 +219,19 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
 
   const expandSheet = useCallback(() => setSnap('full'), []);
 
+  const { addPoint, start: startDraw } = draw;
+
   const pickOnMap = useCallback(
     (lng: number, lat: number, hit?: ParcelOutline) => {
       if (!insidePoland(lng, lat)) {
         showHint('outsidePoland');
+
+        return;
+      }
+
+      // w trybie "wlasne pole" stukniecie dodaje punkt obrysu albo linii podzialu
+      if (drawing) {
+        addPoint(lng, lat);
 
         return;
       }
@@ -225,7 +247,21 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
       setFocusPreview(!window.matchMedia(DESKTOP_QUERY).matches);
       setSnap('half');
     },
-    [showHint],
+    [showHint, drawing, addPoint],
+  );
+
+  const beginFieldDraw = useCallback(
+    (mode: FieldDrawMode) => {
+      clearSearch();
+      startDraw(mode);
+      // mapa ma byc widoczna do stukania; przy podziale dojezdzamy do dzielonej dzialki
+      setSnap('peek');
+
+      if (mode === 'split' && onlyParcel) {
+        setShown({ bbox: onlyParcel.bbox, key: `split:${onlyParcel.id}:${Date.now()}` });
+      }
+    },
+    [clearSearch, startDraw, onlyParcel],
   );
 
   const loadBoundaries = useCallback(
@@ -299,8 +335,10 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     <div ref={rootRef} className="@container-[size] relative min-h-0 flex-1 overflow-hidden">
       <div className="absolute inset-0 max-md:bottom-44">
         <ParcelMap
-          selected={selected.parcels}
-          preview={previewShape}
+          // w trybie "wlasne pole" dzialki tylko obrysem (tlo), zeby wybrana czesc odrozniala sie od reszty
+          selected={drawing ? NO_PARCELS : selected.parcels}
+          preview={drawing ? (draw.mode === 'split' ? (onlyParcel ?? null) : null) : previewShape}
+          drawing={drawing ? draw.overlay : null}
           basemap={basemap}
           boundaries={boundaries}
           loadBoundaries={loadBoundaries}
@@ -327,97 +365,142 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
 
       <BottomSheet snap={snap} onSnapChange={setSnap} labels={sheetLabels}>
         <BottomSheetBody>
-          <div className="flex flex-col gap-4 p-4 max-md:pt-0">
-            <div className="flex flex-col gap-3 max-md:flex-col-reverse">
-              <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold text-primary max-md:text-xl">{t('title')}</h1>
-                <StepsHeader current={step} />
-              </div>
-              <ParcelSearch
-                value={text}
-                onChange={changeText}
-                onSubmit={submitSearch}
-                onFocus={expandSheet}
-                pending={search.isFetching || (target !== null && previewQuery.isFetching)}
-                error={inputError}
-                compact={target !== null || showCandidates || showPlaces}
-              />
+          {drawing ? (
+            <div className="flex flex-col gap-4 p-4 max-md:pt-0">
+              <FieldDrawPanel draw={draw} splitTarget={splitTarget} />
             </div>
+          ) : (
+            <div className="flex flex-col gap-4 p-4 max-md:pt-0">
+              <div className="flex flex-col gap-3 max-md:flex-col-reverse">
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-2xl font-bold text-primary max-md:text-xl">{t('title')}</h1>
+                  <StepsHeader current={step} />
+                </div>
+                <ParcelSearch
+                  value={text}
+                  onChange={changeText}
+                  onSubmit={submitSearch}
+                  onFocus={expandSheet}
+                  pending={search.isFetching || (target !== null && previewQuery.isFetching)}
+                  error={inputError}
+                  compact={target !== null || showCandidates || showPlaces}
+                />
+              </div>
 
-            {search.isFetching && picked === null && (
-              <output className="block rounded-lg bg-muted px-3 py-3 text-sm">{t('search.slow')}</output>
-            )}
+              {search.isFetching && picked === null && (
+                <output className="block rounded-lg bg-muted px-3 py-3 text-sm">{t('search.slow')}</output>
+              )}
 
-            {search.isError && picked === null && !hasPlaces && !places.isFetching && (
-              <ProblemAlert problem={toProblem(search.error)} title={t('search.failed')}>
-                <Button variant="outline" size="sm" onClick={retrySearch}>
-                  {tCommon('tryAgain')}
-                </Button>
-              </ProblemAlert>
-            )}
+              {search.isError && picked === null && !hasPlaces && !places.isFetching && (
+                <ProblemAlert problem={toProblem(search.error)} title={t('search.failed')}>
+                  <Button variant="outline" size="sm" onClick={retrySearch}>
+                    {tCommon('tryAgain')}
+                  </Button>
+                </ProblemAlert>
+              )}
 
-            {showPlaces && places.data && <PlaceResults places={places.data.items} onChoose={choosePlace} />}
+              {showPlaces && places.data && (
+                <PlaceResults places={places.data.items} onChoose={choosePlace} />
+              )}
 
-            {showCandidates && search.data && (search.data.items.length > 0 || !hasPlaces) && (
-              <ParcelCandidates result={search.data} onChoose={chooseCandidate} />
-            )}
+              {showCandidates && search.data && (search.data.items.length > 0 || !hasPlaces) && (
+                <ParcelCandidates result={search.data} onChoose={chooseCandidate} />
+              )}
 
-            {target !== null && previewQuery.isPending && (
-              <output aria-label={t('preview.loading')} className="flex flex-col gap-2">
-                {/* numer z warstwy granic znamy od razu - reszta opisu dociaga sie w tle */}
-                {outline ? (
-                  <span className="text-xl font-semibold">
-                    {t('preview.parcel', { number: outline.number })}
-                  </span>
-                ) : (
-                  <Skeleton className="h-7 w-2/3" />
-                )}
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-12 w-full" />
-              </output>
-            )}
+              {target !== null && previewQuery.isPending && (
+                <output aria-label={t('preview.loading')} className="flex flex-col gap-2">
+                  {/* numer z warstwy granic znamy od razu - reszta opisu dociaga sie w tle */}
+                  {outline ? (
+                    <span className="text-xl font-semibold">
+                      {t('preview.parcel', { number: outline.number })}
+                    </span>
+                  ) : (
+                    <Skeleton className="h-7 w-2/3" />
+                  )}
+                  <Skeleton className="h-28 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </output>
+              )}
 
-            {target !== null && previewQuery.isError && (
-              <ProblemAlert problem={toProblem(previewQuery.error)} title={t('preview.failed')}>
-                <Button variant="outline" size="sm" onClick={retryPreview}>
-                  {tCommon('tryAgain')}
-                </Button>
-              </ProblemAlert>
-            )}
+              {target !== null && previewQuery.isError && (
+                <ProblemAlert problem={toProblem(previewQuery.error)} title={t('preview.failed')}>
+                  <Button variant="outline" size="sm" onClick={retryPreview}>
+                    {tCommon('tryAgain')}
+                  </Button>
+                </ProblemAlert>
+              )}
 
-            {previewMissing && (
-              <output className="block rounded-lg bg-muted px-3 py-3 text-sm">
-                {t(target.kind === 'point' ? 'preview.notFoundAtPoint' : 'preview.notFound')}
-              </output>
-            )}
+              {previewMissing && (
+                <output className="block rounded-lg bg-muted px-3 py-3 text-sm">
+                  {t(target.kind === 'point' ? 'preview.notFoundAtPoint' : 'preview.notFound')}
+                </output>
+              )}
 
-            {preview && (
-              <ParcelPreview
-                parcel={preview}
-                alreadyAdded={ids.includes(preview.id)}
-                listFull={ids.length >= PARCEL_LIMITS.selectionMax}
-                listMax={PARCEL_LIMITS.selectionMax}
-                onDismiss={clearSearch}
+              {preview && (
+                <ParcelPreview
+                  parcel={preview}
+                  alreadyAdded={ids.includes(preview.id)}
+                  listFull={ids.length >= PARCEL_LIMITS.selectionMax}
+                  listMax={PARCEL_LIMITS.selectionMax}
+                  onDismiss={clearSearch}
+                />
+              )}
+
+              <ParcelList
+                items={selected.items}
+                totalAreaHa={selected.totalAreaHa}
+                onShow={showOnMap}
+                onRemove={removeParcel}
               />
-            )}
 
-            <ParcelList
-              items={selected.items}
-              totalAreaHa={selected.totalAreaHa}
-              onShow={showOnMap}
-              onRemove={removeParcel}
-            />
-          </div>
+              <FieldDrawEntry splitTarget={splitTarget} onStart={beginFieldDraw} />
+            </div>
+          )}
         </BottomSheetBody>
         <BottomSheetFooter>
           {/* Pasek pokazuje glowna akcje biezacego kroku: przy podgladzie "dodaj", poza nim "analizuj". */}
-          {canAdd && (
+          {drawing && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex gap-2">
+                <FieldDrawUndo draw={draw} />
+                {draw.area ? (
+                  <Button asChild size="xl" className="min-w-0 flex-1">
+                    <Link
+                      href={analysisHref(draw.area.parcelIds, {
+                        obszar: draw.area.obszar,
+                        rodzaj: draw.area.rodzaj,
+                      })}
+                    >
+                      {t('field.analyze')}
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="xl" className="min-w-0 flex-1" disabled aria-describedby="field-analyze-hint">
+                    {t('field.analyze')}
+                    <ArrowRight aria-hidden="true" />
+                  </Button>
+                )}
+              </div>
+              {/* pole powierzchni tez w pasku: w zwinietym arkuszu na telefonie panel widac tylko u gory */}
+              {draw.area ? (
+                <p aria-hidden="true" className="text-center text-xs font-medium md:hidden">
+                  {t('field.area', { area: formatArea(draw.area.areaHa) })}
+                </p>
+              ) : (
+                <p id="field-analyze-hint" className="text-center text-xs text-muted-foreground">
+                  {t('field.analyzeHint')}
+                </p>
+              )}
+            </div>
+          )}
+          {!drawing && canAdd && (
             <Button size="xl" className="w-full" onClick={addPreview}>
               <Plus aria-hidden="true" />
               {t('preview.add')}
             </Button>
           )}
-          {!canAdd && ids.length > 0 && (
+          {!drawing && !canAdd && ids.length > 0 && (
             <Button asChild size="xl" className="w-full">
               <Link href={analysisHref(ids)}>
                 {t('analyze.cta', { count: ids.length })}
@@ -425,7 +508,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
               </Link>
             </Button>
           )}
-          {!canAdd && ids.length === 0 && (
+          {!drawing && !canAdd && ids.length === 0 && (
             <div className="flex flex-col gap-1.5">
               <Button size="xl" className="w-full" disabled aria-describedby="analyze-hint">
                 {t('analyze.cta', { count: 1 })}

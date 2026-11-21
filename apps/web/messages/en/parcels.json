@@ -103,5 +103,40 @@
   "places": {
     "title": "Addresses and places",
     "hint": "Choose a place. The map will go there and you can click your parcel."
+  },
+  "field": {
+    "intro": "A parcel is not always a field",
+    "introDescription": "Do you farm only part of a parcel, or does your field span several parcels? Mark the exact area on the map.",
+    "startDraw": "Draw your own field",
+    "startSplit": "Split a parcel with a line",
+    "splitNeedsOne": "To split a parcel, keep exactly one parcel on the list.",
+    "title": "Your own field",
+    "modeLabel": "How to mark the field",
+    "modes": {
+      "draw": "Draw an area",
+      "split": "Split the parcel"
+    },
+    "drawHelp": "Tap the map at the corners of the field, one after another along its edge. The area closes itself between the last and the first point.",
+    "splitHelp": "Tap two points on the map on both sides of where your field ends. The line through them will split parcel {number} into two parts.",
+    "points": "{count, plural, =0 {No points} one {# point} other {# points}}",
+    "area": "Area: {area} ha",
+    "needMore": "Add {count, plural, one {# more point} other {# more points}} to close the area.",
+    "maxPoints": "The limit of {max} points has been reached.",
+    "selfIntersecting": "The edges of the area cross. Undo the last point and place it elsewhere.",
+    "lineMissing": "{count, plural, =0 {Tap the first point of the dividing line.} other {Tap the second point of the dividing line.}}",
+    "lineOutside": "The line does not cross the parcel. Place the points on both sides of the edge of the part you farm.",
+    "partsLabel": "Which part should be analysed?",
+    "part": "Part {letter}",
+    "partArea": "{area} ha",
+    "undo": "Undo point",
+    "clear": "Start again",
+    "cancel": "Back to the parcel list",
+    "analyze": "Analyse this area",
+    "analyzeHint": "Mark an area on the map to continue to the analysis.",
+    "summaryTitle": "Your own area",
+    "summaryDrawn": "Area drawn on the map",
+    "summaryPart": "Part of parcel {numbers}",
+    "summaryArea": "{area} ha",
+    "invalidArea": "The area in the link cannot be read. Draw it again."
   }
 }

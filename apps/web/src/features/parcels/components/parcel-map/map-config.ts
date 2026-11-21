@@ -118,6 +118,40 @@ export const LOCAL_NAME: ExpressionSpecification = ['coalesce', ['get', 'name:pl
 
 export const SELECTED_SOURCE = 'parcels-selected';
 export const PREVIEW_SOURCE = 'parcel-preview';
+/** Szkic wlasnego pola (D3): obszary, linia podzialu albo otwarty obrys i stukniete punkty. */
+export const DRAW_SOURCE = 'field-draw';
+
+/** Warstwa szkicu wlasnego pola: role obszarow w `properties.role`, linia i punkty w `properties.kind`. */
+export function drawingCollection(drawing: {
+  areas: readonly { ring: readonly [number, number][]; role: string }[];
+  line: readonly [number, number][] | null;
+  points: readonly [number, number][];
+}): FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: [
+      ...drawing.areas.map((area) => ({
+        type: 'Feature' as const,
+        properties: { kind: 'area', role: area.role },
+        geometry: { type: 'Polygon' as const, coordinates: [[...area.ring, ...area.ring.slice(0, 1)]] },
+      })),
+      ...(drawing.line
+        ? [
+            {
+              type: 'Feature' as const,
+              properties: { kind: 'line' },
+              geometry: { type: 'LineString' as const, coordinates: [...drawing.line] },
+            },
+          ]
+        : []),
+      ...drawing.points.map((point) => ({
+        type: 'Feature' as const,
+        properties: { kind: 'point' },
+        geometry: { type: 'Point' as const, coordinates: [...point] },
+      })),
+    ],
+  };
+}
 
 /** Ponizej tego przyblizenia klikniecie jest zbyt niedokladne, zeby wskazac dzialke. */
 export const MIN_PICK_ZOOM = 13;

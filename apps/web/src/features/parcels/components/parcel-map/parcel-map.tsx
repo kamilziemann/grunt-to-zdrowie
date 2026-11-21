@@ -22,6 +22,8 @@ import {
   BOUNDARY_LAYER_IDS,
   BOUNDARY_TILE_CACHE,
   boundaryTiles,
+  DRAW_SOURCE,
+  drawingCollection,
   INITIAL_BOUNDS,
   isPoiLayer,
   LOCAL_NAME,
@@ -48,6 +50,13 @@ export interface MapFocus {
   key: string;
 }
 
+/** Szkic wlasnego pola rysowany nad dzialkami (wspolrzedne [dlugosc, szerokosc]). */
+export interface MapDrawing {
+  areas: readonly { ring: readonly [number, number][]; role: 'chosen' | 'other' | 'draft' }[];
+  line: readonly [number, number][] | null;
+  points: readonly [number, number][];
+}
+
 export interface ParcelMapLabels {
   map: string;
   loading: string;
@@ -66,6 +75,8 @@ export interface ParcelMapProps {
   selected: readonly MapParcel[];
   /** dzialka ogladana przed dodaniem */
   preview?: MapParcel | null;
+  /** szkic wlasnego pola (tryb rysowania); null = brak */
+  drawing?: MapDrawing | null;
   basemap?: Basemap;
   /** granice i numery wszystkich dzialek (widoczne i pobierane dopiero w duzym przyblizeniu) */
   boundaries?: boolean;
@@ -211,11 +222,55 @@ function addAppLayers(map: MapLibre.Map, container: HTMLElement): void {
       },
     });
   }
+
+  // Szkic wlasnego pola na samej gorze: wybrana czesc kolorem zaznaczenia, druga czesc wyszarzona, szkic przerywany.
+  const chosen = token(container, '--map-selected');
+  const draft = token(container, '--map-preview');
+  const other = token(container, '--map-boundary');
+
+  map.addSource(DRAW_SOURCE, { type: 'geojson', data: parcelCollection([]) });
+  map.addLayer({
+    id: `${DRAW_SOURCE}-fill`,
+    type: 'fill',
+    source: DRAW_SOURCE,
+    filter: ['==', ['get', 'kind'], 'area'],
+    paint: {
+      'fill-color': ['match', ['get', 'role'], 'chosen', chosen, 'other', other, draft],
+      'fill-opacity': ['match', ['get', 'role'], 'other', 0.08, 0.3],
+    },
+  });
+  map.addLayer({
+    id: `${DRAW_SOURCE}-outline`,
+    type: 'line',
+    source: DRAW_SOURCE,
+    filter: ['all', ['==', ['get', 'kind'], 'area'], ['==', ['get', 'role'], 'chosen']],
+    paint: { 'line-color': chosen, 'line-width': 3 },
+  });
+  map.addLayer({
+    id: `${DRAW_SOURCE}-line`,
+    type: 'line',
+    source: DRAW_SOURCE,
+    filter: ['==', ['get', 'kind'], 'line'],
+    paint: { 'line-color': draft, 'line-width': 2.5, 'line-dasharray': [2, 1.5] },
+  });
+  map.addLayer({
+    id: `${DRAW_SOURCE}-points`,
+    type: 'circle',
+    source: DRAW_SOURCE,
+    filter: ['==', ['get', 'kind'], 'point'],
+    paint: {
+      'circle-radius': 6,
+      'circle-color': draft,
+      'circle-stroke-color': casing,
+      'circle-stroke-width': 2,
+    },
+  });
 }
 
 export function ParcelMap({
   selected,
   preview = null,
+  drawing = null,
   basemap = 'map',
   boundaries = true,
   loadBoundaries,
@@ -422,6 +477,18 @@ export function ParcelMap({
 
     void source?.setData(parcelCollection(preview ? [preview] : []));
   }, [state, preview]);
+
+  useEffect(() => {
+    if (state !== 'ready') return;
+    const map = mapRef.current;
+
+    void map
+      ?.getSource<MapLibre.GeoJSONSource>(DRAW_SOURCE)
+      ?.setData(drawingCollection(drawing ?? { areas: [], line: null, points: [] }));
+
+    // w trybie rysowania kursor celownika - stukniecie dodaje punkt, nie wybiera dzialki
+    if (map) map.getCanvas().style.cursor = drawing ? 'crosshair' : '';
+  }, [state, drawing]);
 
   useEffect(() => {
     if (state !== 'ready') return;

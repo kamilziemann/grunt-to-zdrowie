@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { localizePath, useAppLocale } from '@/lib/locale';
 import { useRouter } from '@/lib/navigation';
-import { routes } from '@/lib/routes';
+import { routes, type FieldSearch } from '@/lib/routes';
 
 import {
   analysisDateBounds,
@@ -28,8 +28,10 @@ import { useToday } from '../../hooks/use-today';
 import { CropPicker } from '../crop-picker';
 
 export interface AnalysisFormProps {
-  /** dzialki z adresu strony - pole analizy */
+  /** dzialki z adresu strony - pole analizy (przy wlasnym obszarze: dzialki, z ktorych go wycieto) */
   parcelIds: readonly string[];
+  /** wlasny obszar z adresu (D3) - jedzie dalej do raportu bez zmian */
+  area?: FieldSearch;
   /** uprawa wybrana wczesniej (powrot z raportu "zmien uprawe lub date") */
   initialCropId?: CropId;
   initialDate?: string;
@@ -42,7 +44,7 @@ export interface AnalysisFormProps {
  * nazwy pol co parametry adresu); z JavaScriptem sprawdza pola i przechodzi bez przeladowania. Przycisk "Analizuj"
  * jest przyklejony do dolu ekranu, wiec na telefonie zawsze go widac.
  */
-export function AnalysisForm({ parcelIds, initialCropId, initialDate, children }: AnalysisFormProps) {
+export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, children }: AnalysisFormProps) {
   const t = useTranslations('analysis.form');
   const format = useFormatter();
   const locale = useAppLocale();
@@ -98,9 +100,9 @@ export function AnalysisForm({ parcelIds, initialCropId, initialDate, children }
         return;
       }
 
-      router.push(routes.report(analysisSearchOf({ parcelIds, cropId, date: chosen })));
+      router.push(routes.report(analysisSearchOf({ parcelIds, cropId, date: chosen, ...area })));
     },
-    [cropId, date, parcelIds, router, today],
+    [area, cropId, date, parcelIds, router, today],
   );
 
   return (
@@ -114,7 +116,9 @@ export function AnalysisForm({ parcelIds, initialCropId, initialDate, children }
       data-testid="analysis-form"
     >
       {children}
-      <input type="hidden" name="dzialki" value={parcelIds.join(',')} />
+      {parcelIds.length > 0 && <input type="hidden" name="dzialki" value={parcelIds.join(',')} />}
+      {area?.obszar && <input type="hidden" name="obszar" value={area.obszar} />}
+      {area?.obszar && area.rodzaj && <input type="hidden" name="rodzaj" value={area.rodzaj} />}
       <section
         aria-labelledby={`${ids}-title`}
         className="flex flex-col gap-6 rounded-xl border bg-card p-4 sm:p-6"

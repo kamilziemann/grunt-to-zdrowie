@@ -10,12 +10,20 @@ import {
   serializeParcelSelection,
   type AnalysisRequest,
   type IsoDate,
+  type ParcelGeometry,
 } from '@app/contracts';
-import type { z } from 'zod';
+import { z } from 'zod';
 
+import { decodeRing, isSimpleRing, ringGeometry } from '@/lib/field-geometry';
 import { APP_TIME_ZONE } from '@/lib/locale';
 
+/** Dlugosc zapisu obrysu w adresie: 60 punktow po kilka znakow z zapasem. */
+const AREA_TEXT_MAX = 1000;
+
 export const analysisSearchSchema = parcelSelectionSearchSchema.extend({
+  /** wlasny obszar (D3): obrys w zwartym zapisie; bez niego pole = dzialki z `dzialki` */
+  obszar: z.string().max(AREA_TEXT_MAX).optional().catch(undefined),
+  rodzaj: z.enum(['part', 'drawn']).optional().catch(undefined),
   uprawa: cropIdSchema.optional().catch(undefined),
   data: isoDateSchema.optional().catch(undefined),
 });
@@ -55,11 +63,51 @@ export function validateAnalysisDate(date: string, today: IsoDate): AnalysisDate
   return date < min ? 'tooOld' : null;
 }
 
-/** Zadanie analizy z parametrow adresu; null = czegos brakuje (raport pokazuje wtedy powrot do formularza). */
-export function analysisRequestFromSearch(search: AnalysisSearch): AnalysisRequest | null {
-  const parcelIds = parseParcelSelection(search.dzialki);
+/** Obrys wlasnego obszaru z adresu; null = brak albo zapis uszkodzony (obrys przeciety tez odrzucamy). */
+export function fieldAreaFromSearch(search: Pick<AnalysisSearch, 'obszar'>): AnalysisFieldArea | null {
+  if (!search.obszar) return null;
+  const ring = decodeRing(search.obszar);
 
-  if (parcelIds.length === 0 || !search.uprawa || !search.data) return null;
+  return ring && isSimpleRing(ring) ? { ring, geometry: ringGeometry(ring) } : null;
+}
+
+export interface AnalysisFieldArea {
+  ring: [number, number][];
+  geometry: ParcelGeometry;
+}
+
+/** Numer dzialki z identyfikatora (czesc po obrebie): 141201_1.0001.6509 -> 6509. */
+export function parcelNumberOf(id: string): string {
+  return id.split('.').slice(2).join('.') || id;
+}
+
+/**
+ * Zadanie analizy z parametrow adresu; null = czegos brakuje (raport pokazuje wtedy powrot do formularza). Wlasny
+ * obszar ma pierwszenstwo przed dzialkami: idzie jako geometria z opisem (`areaLabel`), bez identyfikatorow
+ * dzialek - schemat API przy niepustej liscie dzialek wybiera wariant "cale dzialki" i pomija geometrie.
+ */
+export function analysisRequestFromSearch(
+  search: AnalysisSearch,
+  areaLabel?: (kind: 'part' | 'drawn', parcelNumbers: string[]) => string,
+): AnalysisRequest | null {
+  const parcelIds = parseParcelSelection(search.dzialki);
+  const area = fieldAreaFromSearch(search);
+
+  if (!search.uprawa || !search.data) return null;
+
+  if (search.obszar) {
+    if (!area) return null;
+    const kind = search.rodzaj ?? 'drawn';
+    const label = areaLabel?.(kind, parcelIds.map(parcelNumberOf)).slice(0, ANALYSIS_LIMITS.labelMax);
+
+    return {
+      field: { geometry: area.geometry, kind, parcelIds: [], ...(label ? { label } : {}) },
+      cropId: search.uprawa,
+      date: search.data,
+    };
+  }
+
+  if (parcelIds.length === 0) return null;
 
   return { field: { parcelIds }, cropId: search.uprawa, date: search.data };
 }
@@ -69,6 +117,14 @@ export function analysisSearchOf(request: {
   parcelIds: readonly string[];
   cropId: AnalysisRequest['cropId'];
   date: IsoDate;
+  obszar?: string;
+  rodzaj?: 'part' | 'drawn';
 }): AnalysisSearch {
-  return { dzialki: serializeParcelSelection(request.parcelIds), uprawa: request.cropId, data: request.date };
+  return {
+    dzialki: serializeParcelSelection(request.parcelIds),
+    obszar: request.obszar,
+    rodzaj: request.obszar ? request.rodzaj : undefined,
+    uprawa: request.cropId,
+    data: request.date,
+  };
 }

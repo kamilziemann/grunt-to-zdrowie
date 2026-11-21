@@ -7,7 +7,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useCallback, useMemo } from 'react';
 
 import { ParcelsScreen } from '@/features/parcels';
-import { routes } from '@/lib/routes';
+import { routes, type FieldSearch } from '@/lib/routes';
 import { headLocale, headTranslator, pageHead } from '@/lib/seo';
 
 export const Route = createFileRoute('/{-$locale}/_app/')({
@@ -27,7 +27,8 @@ export const Route = createFileRoute('/{-$locale}/_app/')({
   component: ParcelsPage,
 });
 
-const analysisHref = (ids: readonly string[]) => routes.analysis(serializeParcelSelection(ids));
+const analysisHref = (ids: readonly string[], area?: FieldSearch) =>
+  routes.analysis(serializeParcelSelection(ids), area);
 
 function ParcelsPage() {
   const { dzialki } = Route.useSearch();

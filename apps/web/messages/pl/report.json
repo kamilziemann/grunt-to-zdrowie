@@ -7,7 +7,9 @@
     "date": "Dzień analizy",
     "area": "Powierzchnia",
     "areaValue": "{area} ha",
-    "landUse": "Klasy gruntu"
+    "landUse": "Klasy gruntu",
+    "ownAreaPart": "Część działki {numbers}",
+    "ownAreaDrawn": "Własny obszar narysowany na mapie"
   },
   "actions": {
     "print": "Drukuj / zapisz PDF",

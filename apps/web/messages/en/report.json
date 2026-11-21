@@ -7,7 +7,9 @@
     "date": "Analysis day",
     "area": "Area",
     "areaValue": "{area} ha",
-    "landUse": "Land classes"
+    "landUse": "Land classes",
+    "ownAreaPart": "Part of parcel {numbers}",
+    "ownAreaDrawn": "Your own area drawn on the map"
   },
   "actions": {
     "print": "Print / save PDF",

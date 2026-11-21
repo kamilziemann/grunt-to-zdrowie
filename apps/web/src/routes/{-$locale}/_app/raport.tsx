@@ -5,6 +5,7 @@ import { parseParcelSelection, serializeParcelSelection } from '@app/contracts';
 import { routeCache } from '@app/start-kit';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
+import { useTranslations } from 'use-intl';
 
 import { analysisRequestFromSearch, analysisSearchSchema } from '@/features/analysis';
 import { ReportMissing, ReportScreen } from '@/features/report';
@@ -26,13 +27,29 @@ export const Route = createFileRoute('/{-$locale}/_app/raport')({
 
 function ReportPage() {
   const search = Route.useSearch();
-  const request = useMemo(() => analysisRequestFromSearch(search), [search]);
+  const t = useTranslations('report.header');
+  const request = useMemo(
+    () =>
+      analysisRequestFromSearch(search, (kind, numbers) =>
+        kind === 'part' && numbers.length > 0
+          ? t('ownAreaPart', { numbers: numbers.join(', ') })
+          : t('ownAreaDrawn'),
+      ),
+    [search, t],
+  );
   const parcelIds = useMemo(() => parseParcelSelection(search.dzialki), [search.dzialki]);
   const dzialki = serializeParcelSelection(parcelIds);
-  const changeHref = routes.analysis(dzialki, { uprawa: search.uprawa, data: search.data });
+  const changeHref = routes.analysis(dzialki, {
+    obszar: search.obszar,
+    rodzaj: search.obszar ? search.rodzaj : undefined,
+    uprawa: search.uprawa,
+    data: search.data,
+  });
   const mapHref = routes.parcels(dzialki);
 
-  if (!request) return <ReportMissing changeHref={dzialki ? changeHref : null} mapHref={mapHref} />;
+  if (!request) {
+    return <ReportMissing changeHref={dzialki || search.obszar ? changeHref : null} mapHref={mapHref} />;
+  }
 
   return <ReportScreen request={request} changeHref={changeHref} mapHref={mapHref} />;
 }
