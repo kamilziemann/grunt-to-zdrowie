@@ -33,9 +33,11 @@ import { createTerrainTilesSource } from './infrastructure/terrain-tiles';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createReportsRepository } from './repositories/reports';
 import { isoDateInPoland } from './domain/iso-date';
+import { createCopernicusImagerySource } from './infrastructure/copernicus-imagery';
 import { createAnalysisService } from './services/analysis';
 import { createHydroService } from './services/hydro';
 import type { Container, ContainerDeps } from './services/container';
+import { createImageryService } from './services/imagery';
 import { createParcelsService } from './services/parcels';
 import { createPlacesService } from './services/places';
 
@@ -128,6 +130,16 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     parcels,
     places,
     hydro,
+    imagery: createImageryService({
+      parcels,
+      source: createCopernicusImagerySource(copernicusKeys(deps)),
+      now,
+    }),
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),
   };
 }
+
+const copernicusKeys = ({ vars }: ContainerDeps) => ({
+  clientId: vars.COPERNICUS_CLIENT_ID,
+  clientSecret: vars.COPERNICUS_CLIENT_SECRET,
+});

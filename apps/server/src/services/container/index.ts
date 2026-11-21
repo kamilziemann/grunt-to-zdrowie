@@ -8,6 +8,7 @@ import type { Logger, TraceContext } from '@app/logger';
 import type { EdgeCachePurger } from '../../domain/edge-cache';
 import type { AnalysisService } from '../analysis';
 import type { HydroService } from '../hydro';
+import type { ImageryService } from '../imagery';
 import type { ParcelsService } from '../parcels';
 import type { PlacesService } from '../places';
 
@@ -20,6 +21,8 @@ export interface Container {
   places: PlacesService;
   /** hydrografia BDOT10k do mapy (kafle rowow, ciekow, wod i mokradel) */
   hydro: HydroService;
+  /** obrazy pola z satelity (pokaz trybu 3D): kondycja roslin NDVI */
+  imagery: ImageryService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
   edgeCache: EdgeCachePurger;
 }
