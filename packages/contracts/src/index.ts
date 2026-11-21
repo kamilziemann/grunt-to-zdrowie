@@ -7,3 +7,4 @@ export * from './place';
 export * from './crop';
 export * from './analysis';
 export * from './report';
+export * from './hydro';

@@ -15,6 +15,8 @@ export const cacheTags = {
   parcels: () => 'parcels',
   /** Wyniki geokodowania adresow. */
   places: () => 'places',
+  /** Kafle hydrografii BDOT10k (zmieniaja sie tylko po ponownym imporcie). */
+  hydro: () => 'hydro',
   /** Strona prawie statyczna po slugu (o nas, regulamin). */
   page: (slug: string) => `page:${part(slug)}`,
 } as const;
