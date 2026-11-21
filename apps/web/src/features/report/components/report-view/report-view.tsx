@@ -10,6 +10,7 @@ import { CausesSection } from '../causes-section';
 import { FieldMap } from '../field-map';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
+import { LandUseNotice } from '../land-use-notice';
 import { PrintFooter, PrintHeader } from '../print-frame';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
@@ -23,6 +24,8 @@ export interface ReportViewProps {
   report: WaterReport;
   changeHref: AppHref;
   mapHref: AppHref;
+  /** ten sam raport z uprawa "laka lub pastwisko" - podpowiedz, gdy ewidencja mowi o samych lakach */
+  grasslandHref?: AppHref;
 }
 
 /** Na czas wydruku otwiera wszystkie szczegoly (PDF dla doradcy ma komplet liczb), potem przywraca stan. */
@@ -54,9 +57,9 @@ function useOpenDetailsForPrint(root: RefObject<HTMLElement | null>) {
 /**
  * Raport wodny w kolejnosci wymaganej w zadaniu: ocena -> historia 10 sezonow -> przyczyny -> retencja ->
  * agrotechnika -> nawadnianie (ostatnie z zalecen) -> zrodla, daty, ograniczenia i pewnosc. Ekran i wydruk A4
- * maja te sama kolejnosc; dane przykladowe i braki danych sa oznaczone na gorze.
+ * maja te sama kolejnosc; grunt nierolny wg ewidencji, dane przykladowe i braki danych sa oznaczone na gorze.
  */
-export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
+export function ReportView({ report, changeHref, mapHref, grasslandHref }: ReportViewProps) {
   const t = useTranslations('report');
   const root = useRef<HTMLElement>(null);
   // bez `sampleParts` caly raport jest przykladowy - mowi o tym baner, znaczniki przy kazdej sekcji bylyby szumem
@@ -71,6 +74,7 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
     <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
       <PrintHeader report={report} />
       <ReportHeader report={report} changeHref={changeHref} mapHref={mapHref} />
+      <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
       <SampleBanner report={report} />
       {report.meta.status !== 'complete' && (
         <Alert variant="warning" className="text-base" data-testid="report-status">

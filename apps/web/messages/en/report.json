@@ -7,9 +7,10 @@
     "date": "Analysis day",
     "area": "Area",
     "areaValue": "{area} ha",
-    "landUse": "Land classes",
+    "landUse": "Land use in the register",
     "ownAreaPart": "Part of parcel {numbers}",
-    "ownAreaDrawn": "Your own area drawn on the map"
+    "ownAreaDrawn": "Your own area drawn on the map",
+    "areaRegistry": "{area} ha in the register"
   },
   "actions": {
     "print": "Print / save PDF",
@@ -584,5 +585,38 @@
     "sources": "Data sources – {sources}.",
     "sample": "placeholder",
     "footerMeta": "{app} · report {id}, engine {version}. Source licences and date ranges – section 7."
+  },
+  "landUse": {
+    "label": "Land use in the register",
+    "kinds": {
+      "arable": "arable land",
+      "orchard": "orchard",
+      "meadow": "meadow",
+      "pasture": "pasture",
+      "farm_buildings": "farmstead",
+      "ponds": "pond",
+      "ditches": "ditch",
+      "farm_woodland": "field trees",
+      "forest": "forest",
+      "woodland": "trees or scrub",
+      "built": "built-up land",
+      "road": "road",
+      "railway": "railway",
+      "water": "water",
+      "wasteland": "wasteland",
+      "other": "other land"
+    },
+    "withClass": "{kind}, class {soilClass}",
+    "withClasses": "{kind}, classes {from}–{to}",
+    "nonAgriculturalTitle": "According to the land register this parcel is {kinds}, not a cultivated field.",
+    "nonAgriculturalText": "The figures below describe the weather and soil at this place, not a crop on this parcel. If you meant a field, check the parcel number or pick the field on the map.",
+    "nonAgriculturalMap": "Pick a field on the map",
+    "grasslandTitle": "According to the land register this parcel is {kinds}.",
+    "grasslandText": "A report for meadow and pasture describes how much water grass needs better than a report for an arable crop.",
+    "grasslandLink": "Calculate for meadow and pasture",
+    "advisorCodes": "Land use codes in the register: {codes}.",
+    "advisorClasses": "Soil quality classes of agricultural land: {classes}.",
+    "areas": "Area in the register: {registry} ha, from the parcel outline: {geometry} ha.",
+    "sourceNote": "Land use and soil classes from the land and building register (EGiB)."
   }
 }

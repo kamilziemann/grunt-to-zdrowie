@@ -15,13 +15,13 @@ const t = translator('report');
 const CHANGE = '/analiza' as AppHref;
 const MAP = '/' as AppHref;
 
-function renderReport(report: WaterReport = SAMPLE_REPORT) {
+function renderReport(report: WaterReport = SAMPLE_REPORT, grasslandHref?: AppHref) {
   // mapa pola pobiera kafle hydrografii przez TanStack Query (w jsdom bez sieci - warstwa "niedostepna")
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   return renderWithIntl(
     <QueryClientProvider client={client}>
-      <ReportView report={report} changeHref={CHANGE} mapHref={MAP} />
+      <ReportView report={report} changeHref={CHANGE} mapHref={MAP} grasslandHref={grasslandHref} />
     </QueryClientProvider>,
   );
 }
@@ -195,5 +195,71 @@ describe('ReportView', () => {
     expect(note.tagName).toBe('DETAILS');
     expect(note).not.toHaveAttribute('open');
     expect(note).toHaveTextContent(/no SoilGrids prediction/);
+  });
+
+  describe('uzytek z ewidencji', () => {
+    const landUse = (patch: Partial<NonNullable<WaterReport['landUse']>>): WaterReport => ({
+      ...realReport,
+      landUse: {
+        codes: ['RIVb', 'RV', 'RVI', 'ŁV', 'W/ŁV'],
+        kinds: ['arable', 'meadow', 'ditches'],
+        agricultural: true,
+        soilClasses: ['IVb', 'V', 'VI'],
+        cropHint: 'grassland',
+        mismatch: null,
+        registryAreaHa: 19.3485,
+        ...patch,
+      },
+    });
+
+    it('grunt nierolny: ramka na gorze raportu, przed ocena, slowami rolnika', () => {
+      renderReport(
+        landUse({ codes: ['LsV'], kinds: ['forest'], agricultural: false, mismatch: 'non_agricultural' }),
+      );
+
+      const notice = screen.getByTestId('land-use-notice');
+
+      expect(notice).toHaveTextContent(t('landUse.nonAgriculturalTitle', { kinds: 'las' }));
+      expect(notice).toHaveTextContent(t('landUse.nonAgriculturalText'));
+      expect(
+        notice.compareDocumentPosition(screen.getByTestId('verdict')) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(notice.textContent).not.toMatch(/LsV/);
+    });
+
+    it('same laki: spokojna podpowiedz z linkiem do raportu dla uzytkow zielonych', () => {
+      renderReport(
+        landUse({ codes: ['ŁIV', 'PsV'], kinds: ['meadow', 'pasture'], mismatch: 'grassland_only' }),
+        '/raport?uprawa=grassland' as AppHref,
+      );
+
+      const notice = screen.getByTestId('land-use-notice');
+
+      expect(notice).toHaveTextContent(t('landUse.grasslandTitle', { kinds: 'łąka i pastwisko' }));
+      expect(within(notice).getByRole('link', { name: t('landUse.grasslandLink') })).toHaveAttribute(
+        'href',
+        '/raport?uprawa=grassland',
+      );
+    });
+
+    it('zwykle pole: bez ramki; uzytki slowami w naglowku, kody tylko w szczegolach dla doradcy', () => {
+      renderReport(landUse({}));
+
+      expect(screen.queryByTestId('land-use-notice')).not.toBeInTheDocument();
+      expect(screen.getByTestId('report-header')).toHaveTextContent(
+        'grunty orne klasy IVb–VI, łąka klasy V i rów',
+      );
+      expect(screen.getByTestId('report-header').textContent).not.toMatch(/RIVb/);
+      expect(screen.getByTestId('land-use')).toHaveTextContent(
+        'Klasoużytki z ewidencji: RIVb, RV, RVI, ŁV, W/ŁV.',
+      );
+    });
+
+    it('brak opisu uzytku = nic nie pokazujemy', () => {
+      renderReport(realReport);
+
+      expect(screen.queryByTestId('land-use-notice')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('land-use')).not.toBeInTheDocument();
+    });
   });
 });

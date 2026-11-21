@@ -7,9 +7,10 @@
     "date": "Dzień analizy",
     "area": "Powierzchnia",
     "areaValue": "{area} ha",
-    "landUse": "Klasy gruntu",
+    "landUse": "Użytki w ewidencji",
     "ownAreaPart": "Część działki {numbers}",
-    "ownAreaDrawn": "Własny obszar narysowany na mapie"
+    "ownAreaDrawn": "Własny obszar narysowany na mapie",
+    "areaRegistry": "w ewidencji {area} ha"
   },
   "actions": {
     "print": "Drukuj / zapisz PDF",
@@ -584,5 +585,38 @@
     "sources": "Źródła danych – {sources}.",
     "sample": "atrapa",
     "footerMeta": "{app} · raport {id}, silnik {version}. Licencje i zakresy dat źródeł – sekcja 7."
+  },
+  "landUse": {
+    "label": "Użytki w ewidencji",
+    "kinds": {
+      "arable": "grunty orne",
+      "orchard": "sad",
+      "meadow": "łąka",
+      "pasture": "pastwisko",
+      "farm_buildings": "zabudowa zagrody",
+      "ponds": "staw",
+      "ditches": "rów",
+      "farm_woodland": "zadrzewienie śródpolne",
+      "forest": "las",
+      "woodland": "zadrzewienie lub zarośla",
+      "built": "teren zabudowany",
+      "road": "droga",
+      "railway": "tory kolejowe",
+      "water": "woda",
+      "wasteland": "nieużytek",
+      "other": "inny grunt"
+    },
+    "withClass": "{kind} klasy {soilClass}",
+    "withClasses": "{kind} klasy {from}–{to}",
+    "nonAgriculturalTitle": "Według ewidencji ta działka to {kinds}, nie pole uprawne.",
+    "nonAgriculturalText": "Liczby poniżej opisują pogodę i glebę w tym miejscu, a nie uprawę na tej działce. Jeśli chodziło o pole, sprawdź numer działki albo wybierz pole na mapie.",
+    "nonAgriculturalMap": "Wybierz pole na mapie",
+    "grasslandTitle": "Według ewidencji ta działka to {kinds}.",
+    "grasslandText": "Raport dla łąki i pastwiska lepiej opisze, ile wody potrzebuje trawa, niż raport dla uprawy polowej.",
+    "grasslandLink": "Policz dla łąki i pastwiska",
+    "advisorCodes": "Klasoużytki z ewidencji: {codes}.",
+    "advisorClasses": "Klasy bonitacyjne gruntów rolnych: {classes}.",
+    "areas": "Powierzchnia w ewidencji: {registry} ha, z obrysu działki: {geometry} ha.",
+    "sourceNote": "Rodzaj gruntu i klasy gleby z ewidencji gruntów i budynków (EGiB)."
   }
 }

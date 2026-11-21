@@ -7,8 +7,11 @@ import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
+import { registryArea } from '../../utils/land-use';
 import { isoDay, sampleScope } from '../../utils/report-data';
 import { ExportButtons } from '../export-buttons';
+import { useLandUseWords } from '../land-use-notice';
+import { ReportDetails } from '../report-section';
 
 const STATUS_STYLES: Record<SourceRef['status'], { icon: LucideIcon; badge: string }> = {
   ok: { icon: CircleCheck, badge: 'border-success/50 bg-success/10 text-foreground [&>svg]:text-success' },
@@ -29,16 +32,22 @@ function isWebUrl(url: string | undefined): url is `https://${string}` | `http:/
 /**
  * Sekcja 7 - wiarygodnosc: pewnosc oceny, kazde zrodlo z dostawca, stanem (brak i dane niepelne nazwane wprost
  * zdaniem z tlumaczen), znacznikiem atrapy, zakresem dat, dokladnoscia i licencja, lista ograniczen i metryczka
- * raportu. Techniczna nota silnika (bywa po angielsku) jest tylko w szczegolach dla doradcy.
+ * raportu, a nad zrodlami uzytki z ewidencji slowami (kody i powierzchnie w szczegolach). Techniczna nota silnika
+ * (bywa po angielsku) jest tylko w szczegolach dla doradcy.
  */
 export function SourcesSection({ report }: { report: WaterReport }) {
   const t = useTranslations('report.sources');
   const tVerdict = useTranslations('report.verdict');
+  const tLandUse = useTranslations('report.landUse');
   const format = useFormatter();
   const day = (date: string) => format.dateTime(isoDay(date), { dateStyle: 'medium', timeZone: 'UTC' });
   const moment = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: 'medium', timeStyle: 'short', timeZone: APP_TIME_ZONE });
   const { confidence } = report.assessment;
+  const landUseWords = useLandUseWords();
+  const { landUse } = report;
+  const registry = registryArea(report);
+  const area = (value: number) => format.number(value, { maximumFractionDigits: 4 });
 
   return (
     <div className="flex flex-col gap-5">
@@ -48,6 +57,26 @@ export function SourcesSection({ report }: { report: WaterReport }) {
         </p>
         <p className="text-base text-muted-foreground">{t(`confidenceExplain.${confidence}`)}</p>
       </div>
+
+      {landUse && landUse.codes.length > 0 && (
+        <div
+          className="flex flex-col gap-1 rounded-lg border bg-card p-4 print:break-inside-avoid"
+          data-testid="land-use"
+        >
+          <h3 className="text-base font-semibold">{tLandUse('label')}</h3>
+          <p className="text-base">{landUseWords(landUse.codes)}</p>
+          <p className="text-sm text-muted-foreground">{tLandUse('sourceNote')}</p>
+          <ReportDetails summary={t('advisorDetails')}>
+            <p>{tLandUse('advisorCodes', { codes: landUse.codes.join(', ') })}</p>
+            {landUse.soilClasses.length > 0 && (
+              <p>{tLandUse('advisorClasses', { classes: landUse.soilClasses.join(', ') })}</p>
+            )}
+            {registry !== null && (
+              <p>{tLandUse('areas', { registry: area(registry), geometry: area(report.field.areaHa) })}</p>
+            )}
+          </ReportDetails>
+        </div>
+      )}
 
       <ul aria-label={t('listLabel')} className="grid gap-3 sm:grid-cols-2">
         {report.sources.map((source) => {

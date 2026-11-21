@@ -1,5 +1,6 @@
 // Podstawione odpowiedzi API dla specow analizy i raportu: dzialka (normalnie z ULDK GUGiK) i raport (POST
 // /api/analysis liczy z zewnetrznych zrodel). Testy nie wolaja uslug zewnetrznych.
+import type { WaterReport } from '@app/contracts';
 import type { Page } from '@playwright/test';
 
 import { DROUGHT_REPORT } from '../../src/features/report/fixtures/drought-report';
@@ -75,4 +76,14 @@ export async function mockAnalysisApi(
           }),
         }),
   );
+}
+
+/** Kazda analiza oddaje ten sam raport (np. z prawdziwego silnika dla innej dzialki niz 6509). */
+export async function mockReport(page: Page, report: WaterReport) {
+  await page.route('**/api/analysis', (route) => route.fulfill({ json: report }));
+}
+
+/** Adres raportu dla dzialek, uprawy i dnia z raportu. */
+export function reportUrl(report: WaterReport): string {
+  return `/raport?dzialki=${report.field.parcelIds.join(',')}&uprawa=${report.crop.cropId}&data=${report.meta.analysisDate}`;
 }

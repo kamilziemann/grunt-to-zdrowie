@@ -46,10 +46,22 @@ function ReportPage() {
     data: search.data,
   });
   const mapHref = routes.parcels(dzialki);
+  const grasslandHref =
+    search.uprawa === 'grassland'
+      ? undefined
+      : routes.report({
+          dzialki,
+          obszar: search.obszar,
+          rodzaj: search.obszar ? search.rodzaj : undefined,
+          uprawa: 'grassland',
+          data: search.data,
+        });
 
   if (!request) {
     return <ReportMissing changeHref={dzialki || search.obszar ? changeHref : null} mapHref={mapHref} />;
   }
 
-  return <ReportScreen request={request} changeHref={changeHref} mapHref={mapHref} />;
+  return (
+    <ReportScreen request={request} changeHref={changeHref} mapHref={mapHref} grasslandHref={grasslandHref} />
+  );
 }
