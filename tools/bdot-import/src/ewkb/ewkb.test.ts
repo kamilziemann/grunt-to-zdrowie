@@ -21,6 +21,13 @@ describe('toEwkbHex', () => {
     );
   });
 
+  it('punkt: naglowek z SRID i same wspolrzedne, bez licznika', () => {
+    const hex = toEwkbHex({ type: 'Point', coordinates: [1, 2] }, 2180);
+
+    // bajt porzadku + typ 1 z flaga SRID + SRID 2180 + x=1 + y=2
+    expect(hex).toBe('010100002084080000000000000000f03f0000000000000040');
+  });
+
   it('poligon: liczba pierscieni przed punktami', () => {
     const hex = toEwkbHex(
       {

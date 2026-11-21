@@ -1,5 +1,5 @@
 // CLI: `bun run bdot:import` (z korzenia - Bun czyta wtedy DATABASE_URL z .env.local). Jednorazowy import BDOT10k do
-// Postgresa z PostGIS: tabele `bdot_hydro` (woda) i `bdot_context` (lasy, budowle pietrzace, waly, obszary chronione)
+// Postgresa z PostGIS: tabele `bdot_hydro`, `bdot_cover`, `bdot_waterworks`, `bdot_protected` (podzial: layers.ts)
 // - rodzaj, nazwa, geometria w EPSG:2180 - oraz `bdot_import` (kiedy i z czego zaladowano dana klase - raport pokazuje
 // to jako date danych). Pliki czytamy prosto z serwera GUGiK zakresami HTTP, grupa wierszy po grupie, wiec nic nie
 // laduje na dysku. Indeks i naprawa poligonow dotycza tylko tabel, do ktorych wlasnie cos ladujemy.
@@ -83,6 +83,8 @@ async function prepare(db: SQL): Promise<void> {
       tolerance_m real not null,
       imported_at timestamptz not null default now()
     )`;
+  // rejestr jest wspolny dla wszystkich tabel; kolumna mowi, ktorej tabeli dotyczy data importu
+  await db`alter table bdot_import add column if not exists table_name text`;
 }
 
 /** Paczki po najwyzej INSERT_BATCH rekordow i ok. INSERT_BATCH_CHARS znakow geometrii. */
@@ -208,9 +210,10 @@ async function importLayer(layer: BdotLayer): Promise<number> {
     const urls = layer.files.map((name) => `${BDOT_BASE_URL}${name}.parquet`).join(' ');
 
     await sql`
-      insert into bdot_import (layer, source_url, features, tolerance_m)
-      values (${layer.id}, ${urls}, ${kept}, ${toleranceM})
+      insert into bdot_import (layer, table_name, source_url, features, tolerance_m)
+      values (${layer.id}, ${layer.table}, ${urls}, ${kept}, ${toleranceM})
       on conflict (layer) do update set
+        table_name = excluded.table_name,
         source_url = excluded.source_url,
         features = excluded.features,
         tolerance_m = excluded.tolerance_m,
@@ -238,8 +241,33 @@ async function repairPolygons(db: SQL, table: BdotTable): Promise<void> {
   console.log(`${table}: naprawione poligony ${repaired[0]?.count ?? 0}, usuniete puste ${removed.length}`);
 }
 
+/** Tnie duze poligony warstwy na kawalki o ograniczonej liczbie wierzcholkow (nazwa i rodzaj zostaja). */
+async function subdivide(db: SQL, layer: BdotLayer, maxVertices: number): Promise<void> {
+  const pieces: { count: number }[] = await db`
+    with big as (
+      delete from ${db(layer.table)}
+      where kind in ${db([...layer.kinds])} and ST_NPoints(geom) > ${maxVertices}
+      returning kind, name, geom
+    ),
+    cut as (
+      insert into ${db(layer.table)} (kind, name, geom)
+      select kind, name, ST_Subdivide(geom, ${maxVertices}) from big
+      returning 1
+    )
+    select count(*)::int as count from cut`;
+
+  console.log(`${layer.id}: duze poligony pociete na ${pieces[0]?.count ?? 0} kawalkow`);
+}
+
 async function finish(db: SQL, table: BdotTable): Promise<void> {
   await repairPolygons(db, table);
+
+  for (const layer of layers) {
+    if (layer.table === table && layer.subdivideVertices !== undefined) {
+      await subdivide(db, layer, layer.subdivideVertices);
+    }
+  }
+
   console.log(`${table}: buduje indeks przestrzenny…`);
   await db.unsafe(`create index if not exists ${table}_geom_idx on ${table} using gist (geom)`);
   await db.unsafe(`analyze ${table}`);

@@ -1,7 +1,13 @@
-// Klasy BDOT10k, ktore importujemy, i ich mapowanie na rodzaje obiektow w tabelach `bdot_hydro` (woda: rowy, cieki,
-// wody, mokradla) i `bdot_context` (otoczenie pola: lasy i zadrzewienia, budowle pietrzace, waly, obszary chronione).
+// Klasy BDOT10k, ktore importujemy, i ich mapowanie na rodzaje obiektow. Tabele sa dzielone wedlug tego, jak pyta
+// o nie aplikacja, a nie wedlug klas BDOT10k:
+//   bdot_hydro      - otwarta woda (rowy, cieki, wody, mokradla): kafle mapy i "najblizszy row" w raporcie;
+//   bdot_cover      - drzewa (lasy, zadrzewienia, rzedy drzew): oslona pola od wiatru, warstwa mapy;
+//   bdot_waterworks - miejsca na sieci wodnej (jazy, zapory, sluzy, waly, odcinki w rurach, ujecia, zrodla): male
+//                     zbiory szukane w promieniu kilku kilometrow, argumenty do zalecen retencyjnych;
+//   bdot_protected  - obszary chronione: duze poligony pociete na kawalki, pytane tylko "czy pole w nich lezy".
 // Zrodlo: krajowe pliki GeoParquet GUGiK (schemat 2021, uklad PL-1992 / EPSG:2180), po jednym pliku na klase.
-// Kody `kind` sa czescia umowy z adapterem w apps/server - nie zmieniaj istniejacych, dopisuj nowe.
+// Kody `kind` sa czescia umowy z adapterem w apps/server - nie zmieniaj istniejacych, dopisuj nowe. Kod jest
+// unikalny we wszystkich tabelach, wiec sam mowi, czym jest obiekt.
 export const BDOT_BASE_URL = 'https://opendata.geoportal.gov.pl/bdot10k/schemat2021/GeoParquet/';
 export const BDOT_SRID = 2180;
 
@@ -19,8 +25,8 @@ export const HYDRO_KIND = {
 export type HydroKind = (typeof HYDRO_KIND)[keyof typeof HYDRO_KIND];
 
 /**
- * Rodzaje w tabeli `bdot_context`. Numeracja osobna od `HYDRO_KIND` (od 20), zeby kodu z jednej tabeli nie dalo sie
- * pomylic z kodem z drugiej.
+ * Rodzaje w tabelach otoczenia pola: 20-29 `bdot_cover`, 30-49 `bdot_waterworks`, 50-59 `bdot_protected`.
+ * Numeracja zaczyna sie za `HYDRO_KIND`, zeby kodu z jednej tabeli nie dalo sie pomylic z kodem z drugiej.
  */
 export const CONTEXT_KIND = {
   forest: 20,
@@ -31,7 +37,12 @@ export const CONTEXT_KIND = {
   weir: 30,
   dam: 31,
   lock: 32,
+  waterIntake: 33,
+  spring: 34,
   levee: 40,
+  pipedDitch: 41,
+  pipedWatercourse: 42,
+  pipedCanal: 43,
   natura2000: 50,
   landscapePark: 51,
   nationalPark: 52,
@@ -40,13 +51,13 @@ export const CONTEXT_KIND = {
 
 export type ContextKind = (typeof CONTEXT_KIND)[keyof typeof CONTEXT_KIND];
 
-export type BdotTable = 'bdot_hydro' | 'bdot_context';
+export type BdotTable = 'bdot_hydro' | 'bdot_cover' | 'bdot_waterworks' | 'bdot_protected';
 
 type Row = Readonly<Record<string, unknown>>;
 
 export interface BdotLayer<Kind extends number = number> {
   id: string;
-  /** tabela docelowa; woda i otoczenie sa rozdzielone, zeby lasy nie spowalnialy kafli hydrografii */
+  /** tabela docelowa (podzial wedlug sposobu uzycia - opis na gorze pliku) */
   table: BdotTable;
   /** nazwy plikow bez rozszerzenia = kody klas BDOT10k (linie i poligony tej samej klasy to osobne pliki) */
   files: readonly string[];
@@ -56,6 +67,11 @@ export interface BdotLayer<Kind extends number = number> {
   kinds: readonly Kind[];
   /** tolerancja uproszczenia w metrach, gdy inna niz domyslna (duze poligony o malo waznym przebiegu granicy) */
   toleranceM?: number;
+  /**
+   * Najwieksza liczba wierzcholkow jednego wiersza: wieksze poligony sa po imporcie ciete (`ST_Subdivide`), zeby
+   * indeks odsiewal pole lezace w prostokacie obszaru, ale poza obszarem. Jeden obszar = wiele wierszy o tej nazwie.
+   */
+  subdivideVertices?: number;
   /** rodzaj obiektu albo null, gdy obiekt pomijamy */
   classify: (row: Row) => Kind | null;
 }
@@ -141,21 +157,36 @@ function damming(row: Row): ContextKind | null {
 // Granica obszaru chronionego sluzy tylko do pytania "czy pole lezy w obszarze albo tuz obok" - 20 m wystarcza.
 const PROTECTED_TOLERANCE_M = 20;
 
+const PROTECTED_SUBDIVIDE_VERTICES = 256;
+
 const protectedArea = (id: string, file: string, kind: ContextKind): BdotLayer<ContextKind> => ({
   id,
-  table: 'bdot_context',
+  table: 'bdot_protected',
   files: [file],
   attributes: [],
   hasName: true,
   kinds: [kind],
   toleranceM: PROTECTED_TOLERANCE_M,
+  subdivideVertices: PROTECTED_SUBDIVIDE_VERTICES,
   classify: () => kind,
+});
+
+// Odcinek rowu albo cieku w rurze (pod droga, pod zabudowa): nie zatrzymuje wody i nie liczy sie jako "najblizszy
+// row", ale miejsce, w ktorym otwarty row wchodzi w rure, to naturalny punkt pietrzenia - dlatego trzymamy je osobno.
+const piped = (id: string, file: string, kind: ContextKind): BdotLayer<ContextKind> => ({
+  id,
+  table: 'bdot_waterworks',
+  files: [file],
+  attributes: ['POLOZENIE'],
+  hasName: false,
+  kinds: [kind],
+  classify: (row) => (underground(row) ? kind : null),
 });
 
 export const CONTEXT_LAYERS: readonly BdotLayer<ContextKind>[] = [
   {
     id: 'forests',
-    table: 'bdot_context',
+    table: 'bdot_cover',
     files: ['OT_PTLZ_A'],
     attributes: ['RODZAJ'],
     hasName: false,
@@ -172,7 +203,7 @@ export const CONTEXT_LAYERS: readonly BdotLayer<ContextKind>[] = [
   },
   {
     id: 'tree-rows',
-    table: 'bdot_context',
+    table: 'bdot_cover',
     files: ['OT_OIPR_L'],
     attributes: ['RODZAJ'],
     hasName: false,
@@ -187,7 +218,7 @@ export const CONTEXT_LAYERS: readonly BdotLayer<ContextKind>[] = [
   },
   {
     id: 'structures',
-    table: 'bdot_context',
+    table: 'bdot_waterworks',
     files: ['OT_BUHD_L', 'OT_BUHD_A'],
     attributes: ['RODZAJ', 'KATEGORIAISTNIENIA'],
     hasName: false,
@@ -196,7 +227,7 @@ export const CONTEXT_LAYERS: readonly BdotLayer<ContextKind>[] = [
   },
   {
     id: 'levees',
-    table: 'bdot_context',
+    table: 'bdot_waterworks',
     files: ['OT_BUZM_L'],
     attributes: ['RODZAJ', 'KATEGORIAISTNIENIA'],
     hasName: false,
@@ -205,6 +236,28 @@ export const CONTEXT_LAYERS: readonly BdotLayer<ContextKind>[] = [
     classify: (row) =>
       !defunct(row) && row.RODZAJ === 'wał przeciwpowodziowy lub grobla' ? CONTEXT_KIND.levee : null,
   },
+  {
+    id: 'intakes',
+    table: 'bdot_waterworks',
+    files: ['OT_BUIT_P'],
+    attributes: ['RODZAJ', 'KATEGORIAISTNIENIA'],
+    hasName: false,
+    kinds: [CONTEXT_KIND.waterIntake],
+    classify: (row) => (!defunct(row) && row.RODZAJ === 'ujęcie wody' ? CONTEXT_KIND.waterIntake : null),
+  },
+  {
+    id: 'springs',
+    table: 'bdot_waterworks',
+    // klasa ma 8 mln punktow, glownie drzewa - bierzemy tylko zrodla
+    files: ['OT_OIPR_P'],
+    attributes: ['RODZAJ'],
+    hasName: true,
+    kinds: [CONTEXT_KIND.spring],
+    classify: (row) => (row.RODZAJ === 'źródło' ? CONTEXT_KIND.spring : null),
+  },
+  piped('piped-ditches', 'OT_SWRM_L', CONTEXT_KIND.pipedDitch),
+  piped('piped-watercourses', 'OT_SWRS_L', CONTEXT_KIND.pipedWatercourse),
+  piped('piped-canals', 'OT_SWKN_L', CONTEXT_KIND.pipedCanal),
   protectedArea('natura2000', 'OT_TCON_A', CONTEXT_KIND.natura2000),
   protectedArea('landscape-parks', 'OT_TCPK_A', CONTEXT_KIND.landscapePark),
   protectedArea('national-parks', 'OT_TCPN_A', CONTEXT_KIND.nationalPark),

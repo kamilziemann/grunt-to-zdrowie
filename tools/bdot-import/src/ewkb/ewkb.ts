@@ -1,6 +1,6 @@
 // Zapis geometrii jako EWKB (format PostGIS: WKB + numer ukladu wspolrzednych) w postaci szesnastkowej. Po co:
 // Postgres zamienia taki napis na `geometry` jednym rzutowaniem, wiec import nie potrzebuje GDAL ani funkcji
-// posrednich po stronie bazy. Obslugiwane typy to te, ktore wystepuja w hydrografii BDOT10k.
+// posrednich po stronie bazy. Obslugiwane typy to te, ktore wystepuja w importowanych klasach BDOT10k.
 import type { Position } from '../simplify';
 
 export type LineGeometry =
@@ -11,9 +11,14 @@ export type AreaGeometry =
   | { type: 'Polygon'; coordinates: readonly (readonly Position[])[] }
   | { type: 'MultiPolygon'; coordinates: readonly (readonly (readonly Position[])[])[] };
 
-export type HydroGeometry = LineGeometry | AreaGeometry;
+export interface PointGeometry {
+  type: 'Point';
+  coordinates: Position;
+}
 
-const WKB_TYPE = { LineString: 2, Polygon: 3, MultiLineString: 5, MultiPolygon: 6 } as const;
+export type HydroGeometry = PointGeometry | LineGeometry | AreaGeometry;
+
+const WKB_TYPE = { Point: 1, LineString: 2, Polygon: 3, MultiLineString: 5, MultiPolygon: 6 } as const;
 const SRID_FLAG = 0x20_00_00_00;
 const LITTLE_ENDIAN = 1;
 
@@ -42,6 +47,13 @@ class Writer {
     this.reserve(4);
     this.view.setUint32(this.offset, value, true);
     this.offset += 4;
+  }
+
+  point([x, y]: Position): void {
+    this.reserve(16);
+    this.view.setFloat64(this.offset, x, true);
+    this.view.setFloat64(this.offset + 8, y, true);
+    this.offset += 16;
   }
 
   points(points: readonly Position[]): void {
@@ -80,6 +92,11 @@ export function toEwkbHex(geometry: HydroGeometry, srid: number): string {
   header(writer, WKB_TYPE[geometry.type], srid);
 
   switch (geometry.type) {
+    case 'Point': {
+      writer.point(geometry.coordinates);
+      break;
+    }
+
     case 'LineString': {
       writer.points(geometry.coordinates);
       break;

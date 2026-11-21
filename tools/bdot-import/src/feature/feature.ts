@@ -1,4 +1,4 @@
-// Zamiana wiersza pliku BDOT10k na rekord tabeli (`bdot_hydro` albo `bdot_context`): klasyfikacja, uproszczenie geometrii, zapis EWKB.
+// Zamiana wiersza pliku BDOT10k na rekord jednej z tabel `bdot_*`: klasyfikacja, uproszczenie geometrii, zapis EWKB.
 // Wiersz przychodzi z czytnika Parquet z geometria juz rozkodowana do postaci GeoJSON (wspolrzedne w EPSG:2180).
 import { toEwkbHex, type HydroGeometry } from '../ewkb';
 import { BDOT_SRID, type BdotLayer } from '../layers';
@@ -28,6 +28,8 @@ export function simplifyGeometry(value: unknown, toleranceM: number): HydroGeome
     return null;
 
   const { type, coordinates } = value;
+
+  if (type === 'Point' && isPosition(coordinates)) return { type, coordinates };
 
   if (type === 'LineString' && isLine(coordinates) && coordinates.length >= 2) {
     return { type, coordinates: simplifyLine(coordinates, toleranceM) };
