@@ -1,20 +1,20 @@
 // Adapter ForecastSource na MET Norway Locationforecast 2.0 (https://api.met.no/weatherapi/locationforecast/2.0/)
 // - prognoza ECMWF do ok. 9 dni, CC BY 4.0. Odpowiedz to GeoJSON z `properties.timeseries[]`: stan chwilowy
 // (`instant`) i sumy opadu na kolejne 1 albo 6 godzin (`next_1_hours`, `next_6_hours`; dalej w prognozie tylko 6 h).
-// Doba to doba w Polsce. Regulamin: aplikacja przedstawia sie w User-Agent (kontakt zespolu - do uzupelnienia),
+// Doba to doba w Polsce. Regulamin: aplikacja przedstawia sie w User-Agent (kontakt: lib/user-agent),
 // wspolrzedne maja najwyzej 4 miejsca po przecinku, odpowiedz wolno trzymac do naglowka Expires.
 import type { SourceRef } from '@app/contracts';
 
 import type { ForecastSeries, ForecastSource, Sourced } from '../../domain/analysis-ports';
 import { hargreavesEt0 } from '../../domain/evapotranspiration';
 import { addDays, isoDateInPoland } from '../../domain/iso-date';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 
 export const MET_NORWAY_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/compact';
 
 const PROVIDER = 'MET Norway Locationforecast 2.0 (ECMWF)';
 const LICENCE = 'CC BY 4.0 (Norwegian Meteorological Institute)';
 const TIMEOUT_MS = 5000;
-const USER_AGENT = 'grunt-to-zdrowie/0.1 (water management prototype)';
 const HOUR_MS = 3_600_000;
 /** doba wchodzi do prognozy, gdy sumy opadu pokrywaja wiekszosc jej godzin */
 const MIN_COVERED_HOURS = 18;
@@ -135,7 +135,7 @@ export function createMetNorwayForecastSource({
       };
       const response = await fetchImpl(url, {
         signal: AbortSignal.timeout(TIMEOUT_MS),
-        headers: { 'user-agent': USER_AGENT, accept: 'application/json' },
+        headers: { 'user-agent': OUTBOUND_USER_AGENT, accept: 'application/json' },
       }).catch((error: unknown) => (error instanceof Error ? error : new Error('MET Norway request failed')));
 
       if (response instanceof Error) return { data: null, source: { ...base, note: response.message } };

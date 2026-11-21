@@ -4,11 +4,11 @@
 import { AppError } from '@app/http';
 
 import type { PlaceRecord, PlaceSource } from '../../domain/place-source';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 
 export const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 
 const TIMEOUT_MS = 8000;
-const USER_AGENT = 'grunt-to-zdrowie/0.1 (water management prototype)';
 /** Punkt adresowy nie ma zasiegu: mapa dojezdza do okna ok. 250 m, w ktorym widac sasiednie dzialki. */
 const POINT_MARGIN_DEG = 0.0012;
 
@@ -108,7 +108,7 @@ export function createNominatimPlaceSource(
       try {
         const response = await fetchImpl(`${NOMINATIM_URL}?${params.toString()}`, {
           signal: AbortSignal.timeout(TIMEOUT_MS),
-          headers: { 'user-agent': USER_AGENT, accept: 'application/json' },
+          headers: { 'user-agent': OUTBOUND_USER_AGENT, accept: 'application/json' },
         });
 
         if (!response.ok) throw new Error(`Nominatim responded with HTTP ${response.status}`);

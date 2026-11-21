@@ -7,6 +7,7 @@ import type { SourceRef } from '@app/contracts';
 
 import type { DailyWeather, MeteoSeries, MeteoSource, Sourced } from '../../domain/analysis-ports';
 import { addDays, daysBetween } from '../../domain/iso-date';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 
 export const NASA_POWER_URL = 'https://power.larc.nasa.gov/api/temporal/daily/point';
 
@@ -16,7 +17,6 @@ const RESOLUTION = 'meteo 0,5° × 0,625° (ok. 55 × 43 km), promieniowanie 1°
 /** bok komorki siatki meteo w km (0,5 stopnia szerokosci) */
 const GRID_KM = 55;
 const TIMEOUT_MS = 11_000;
-const USER_AGENT = 'grunt-to-zdrowie/0.1 (water management prototype)';
 const FILL_VALUE = -999;
 
 /** Parametry profilu AG: opad mm/d, temperatury C, promieniowanie MJ/m2/d, wilgotnosc %, wiatr na 2 m w m/s. */
@@ -166,7 +166,7 @@ export function createNasaPowerMeteoSource({
       // blad sieci albo HTTP to tez odpowiedz "brak danych" - orkiestrator nie musi znac szczegolow dostawcy
       const response = await fetchImpl(url, {
         signal: AbortSignal.timeout(TIMEOUT_MS),
-        headers: { 'user-agent': USER_AGENT, accept: 'application/json' },
+        headers: { 'user-agent': OUTBOUND_USER_AGENT, accept: 'application/json' },
       }).catch((error: unknown) => (error instanceof Error ? error : new Error('NASA POWER request failed')));
 
       if (response instanceof Error) return { data: null, source: { ...base, note: response.message } };
