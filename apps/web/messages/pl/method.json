@@ -115,7 +115,7 @@
       "iung": {
         "name": "IUNG-PIB, monitoring suszy rolniczej",
         "use": "progi suszy dla upraw i kategorii gleby",
-        "licence": "progi opublikowane przez IUNG-PIB, przytaczamy ze źródłem"
+        "licence": "tabela progów KBW IUNG-PIB (na zlecenie MRiRW); serwis nie podaje osobnej licencji – przytaczamy progi z podaniem źródła"
       },
       "soilgrids": {
         "name": "SoilGrids (ISRIC)",
@@ -125,7 +125,7 @@
       "bdot": {
         "name": "BDOT10k, GUGiK",
         "use": "rowy, cieki, wody, mokradła",
-        "licence": "dane publiczne GUGiK, bezpłatne, z podaniem źródła"
+        "licence": "bezpłatne i do dowolnego wykorzystania (od 31 lipca 2020 r.); regulamin Geoportalu wymaga podania źródła"
       },
       "sentinel": {
         "name": "Copernicus Sentinel-2",
@@ -140,7 +140,7 @@
       "ortho": {
         "name": "Ortofotomapa, GUGiK",
         "use": "zdjęcie lotnicze na mapie",
-        "licence": "dane publiczne GUGiK, bezpłatne, z podaniem źródła"
+        "licence": "bezpłatna i do dowolnego wykorzystania; regulamin Geoportalu wymaga podania źródła"
       },
       "osm": {
         "name": "OpenStreetMap (OpenFreeMap, Nominatim)",

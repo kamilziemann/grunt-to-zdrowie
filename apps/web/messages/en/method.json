@@ -115,7 +115,7 @@
       "iung": {
         "name": "IUNG-PIB agricultural drought monitoring",
         "use": "drought thresholds for crops and soil categories",
-        "licence": "thresholds published by IUNG-PIB, quoted with the source"
+        "licence": "IUNG-PIB climatic water balance threshold table (commissioned by the Ministry of Agriculture); the service states no separate licence – we quote the thresholds with the source"
       },
       "soilgrids": {
         "name": "SoilGrids (ISRIC)",
@@ -125,7 +125,7 @@
       "bdot": {
         "name": "BDOT10k, GUGiK",
         "use": "ditches, watercourses, water, wetlands",
-        "licence": "GUGiK public data, free of charge, with attribution"
+        "licence": "free of charge and for any use (since 31 July 2020); the Geoportal terms require crediting the source"
       },
       "sentinel": {
         "name": "Copernicus Sentinel-2",
@@ -140,7 +140,7 @@
       "ortho": {
         "name": "Orthophoto, GUGiK",
         "use": "aerial photo on the map",
-        "licence": "GUGiK public data, free of charge, with attribution"
+        "licence": "free of charge and for any use; the Geoportal terms require crediting the source"
       },
       "osm": {
         "name": "OpenStreetMap (OpenFreeMap, Nominatim)",

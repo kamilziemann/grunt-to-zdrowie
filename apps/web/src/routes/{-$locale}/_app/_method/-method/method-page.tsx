@@ -35,12 +35,12 @@ const METHODS = ['kbw', 'root', 'soil', 'plants', 'water'] as const;
 const SOURCES = [
   { id: 'nasaPower', href: 'https://power.larc.nasa.gov/' },
   { id: 'metNorway', href: 'https://api.met.no/' },
-  { id: 'iung', href: 'https://susza.iung.pulawy.pl/' },
+  { id: 'iung', href: 'https://susza.iung.pulawy.pl/progi/' },
   { id: 'soilgrids', href: 'https://soilgrids.org/' },
-  { id: 'bdot', href: 'https://www.geoportal.gov.pl/' },
+  { id: 'bdot', href: 'https://www.geoportal.gov.pl/pl/dane/baza-danych-obiektow-topograficznych-bdot10k/' },
   { id: 'sentinel', href: 'https://dataspace.copernicus.eu/' },
   { id: 'uldk', href: 'https://uldk.gugik.gov.pl/' },
-  { id: 'ortho', href: 'https://www.geoportal.gov.pl/' },
+  { id: 'ortho', href: 'https://www.geoportal.gov.pl/pl/dane/ortofotomapa-orto/' },
   { id: 'osm', href: 'https://www.openstreetmap.org/copyright' },
 ] as const;
 

@@ -20,7 +20,7 @@ test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z 
   await expect(sources.filter({ hasText: 'NASA POWER' })).toContainText('CC BY 4.0');
   await expect(
     sources.filter({ hasText: 'BDOT10k' }).getByRole('link', { name: /Strona źródła/ }),
-  ).toHaveAttribute('href', /geoportal\.gov\.pl/);
+  ).toHaveAttribute('href', /geoportal\.gov\.pl\/pl\/dane\//);
 });
 
 test('raport linkuje do metodyki w sekcji źródeł', async ({ page }) => {
