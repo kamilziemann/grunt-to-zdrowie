@@ -6,6 +6,7 @@ import type { FieldArea, SourceRef } from '@app/contracts';
 
 import type { HydroContext, HydroSource, Sourced } from '../../domain/analysis-ports';
 import { hydroContextFromRows, type HydroFeatureRow, type HydroKindRow } from '../../domain/hydro-context';
+import { failureNote } from '../../lib/source-note';
 
 export const SEARCH_RADIUS_M = 500;
 
@@ -109,21 +110,26 @@ export function createPostgisHydroSource({
         resolution: RESOLUTION,
       };
 
-      if (!run) return { data: null, source: { ...base, note: 'DATABASE_URL is not configured' } };
+      if (!run)
+        return {
+          data: null,
+          source: { ...base, note: 'brak bazy hydrografii w konfiguracji (DATABASE_URL)' },
+        };
 
       const result = await run(hydroQueries(field), AbortSignal.timeout(TIMEOUT_MS)).catch(
-        (error: unknown) => (error instanceof Error ? error : new Error('hydrography query failed')),
+        (error: unknown) => new Error(failureNote('baza hydrografii', error)),
       );
 
-      if (result instanceof Error) {
-        return { data: null, source: { ...base, note: `hydrography database: ${result.message}` } };
-      }
+      if (result instanceof Error) return { data: null, source: { ...base, note: result.message } };
 
       const [summary = [], features = [], imports = []] = result;
       const imported = importedAt(imports);
 
       if (imported === null) {
-        return { data: null, source: { ...base, note: 'hydrography not imported (bdot_import is empty)' } };
+        return {
+          data: null,
+          source: { ...base, note: 'hydrografia BDOT10k nie jest zaimportowana do bazy' },
+        };
       }
 
       return {
@@ -133,7 +139,7 @@ export function createPostgisHydroSource({
           status: 'ok',
           // data importu BDOT10k do bazy - warstwa jest biezaca, dla dawnych dat to wspolczesne przyblizenie
           fetchedAt: imported,
-          note: `BDOT10k imported ${imported.slice(0, 10)}; distances from the field boundary, radius ${SEARCH_RADIUS_M} m; queried ${now().slice(0, 10)}`,
+          note: `BDOT10k zaimportowany ${imported.slice(0, 10)} (stan obecny rowów i wód); odległości od granicy pola, promień ${SEARCH_RADIUS_M} m; odczyt ${now().slice(0, 10)}`,
         },
       };
     },

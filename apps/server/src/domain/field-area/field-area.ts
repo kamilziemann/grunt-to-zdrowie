@@ -58,6 +58,26 @@ export function fieldFromParcels(parcels: readonly Parcel[]): FieldArea {
   };
 }
 
+/** Powierzchnia po polsku: 0,27 ha ponizej hektara, 1,2 ha powyzej. */
+export function formatHectares(areaHa: number): string {
+  return `${areaHa.toFixed(areaHa < 1 ? 2 : 1).replace('.', ',')} ha`;
+}
+
+/** Numer dzialki z identyfikatora TERYT (`141201_1.0001.6509` -> `6509`). */
+const parcelNumber = (id: string): string => id.slice(id.lastIndexOf('.') + 1);
+
+/** Opis pola bez etykiety od uzytkownika: "Czesc dzialki 6509" albo "Wlasny obszar, 1,2 ha". */
+function defaultLabel(kind: 'part' | 'drawn', parcelIds: readonly string[], areaHa: number): string {
+  if (kind === 'part' && parcelIds.length > 0) {
+    const numbers = parcelIds.slice(0, LABEL_PARCELS).map(parcelNumber).join(', ');
+    const more = parcelIds.length > LABEL_PARCELS ? ` +${parcelIds.length - LABEL_PARCELS}` : '';
+
+    return `${parcelIds.length === 1 ? 'Część działki' : 'Część działek'} ${numbers}${more}, ${formatHectares(areaHa)}`;
+  }
+
+  return `Własny obszar, ${formatHectares(areaHa)}`;
+}
+
 /** Pole z geometrii uzytkownika: fragment dzialki (`part`) albo obszar narysowany (`drawn`). */
 export function fieldFromGeometry(input: {
   geometry: ParcelGeometry;
@@ -65,12 +85,14 @@ export function fieldFromGeometry(input: {
   label?: string | undefined;
   parcelIds: readonly string[];
 }): FieldArea {
+  const measured = measure(input.geometry);
+
   return {
     id: `area:${shortHash(JSON.stringify(input.geometry.coordinates))}`,
     kind: input.kind,
     parcelIds: [...input.parcelIds],
-    label: input.label ?? '',
+    label: input.label ?? defaultLabel(input.kind, input.parcelIds, measured.areaHa),
     geometry: input.geometry,
-    ...measure(input.geometry),
+    ...measured,
   };
 }

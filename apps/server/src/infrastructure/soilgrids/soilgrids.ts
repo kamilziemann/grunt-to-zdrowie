@@ -11,6 +11,7 @@ import type { SoilProfile, SoilSource, Sourced } from '../../domain/analysis-por
 import { containsPoint } from '../../domain/parcel-geometry';
 import { soilProfileFromLayers, type SoilLayer } from '../../domain/soil-profile';
 import { readGeoTiff, type Raster } from './geotiff';
+import { failureNote, httpFailureNote } from '../../lib/source-note';
 
 export const SOILGRIDS_WCS_URL = 'https://maps.isric.org/mapserv';
 
@@ -185,8 +186,11 @@ async function pooled<T>(jobs: (() => Promise<T>)[], limit: number): Promise<T[]
 const MODEL_NOTE = 'globalny model uczenia maszynowego 250 m, nie mapa glebowa';
 const NO_PREDICTION = 'w polu SoilGrids nie ma predykcji (zabudowa albo woda)';
 
+/** Blad z gotowym polskim opisem (odpowiedz HTTP) - nie owijamy go drugi raz. */
+class SoilGridsFailure extends Error {}
+
 const asError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('SoilGrids request failed');
+  error instanceof SoilGridsFailure ? error : new SoilGridsFailure(failureNote('SoilGrids', error));
 
 interface DepthRasters {
   depth: (typeof SOILGRIDS_DEPTHS)[number];
@@ -205,7 +209,7 @@ async function fetchRasters(
     properties.map((property) => async () => {
       const response = await fetchImpl(coverageUrl(property, depth.label, bbox, pad), { signal });
 
-      if (!response.ok) throw new Error(`SoilGrids odpowiedział HTTP ${response.status}`);
+      if (!response.ok) throw new SoilGridsFailure(httpFailureNote('SoilGrids', response.status));
 
       return readGeoTiff(await response.arrayBuffer());
     }),

@@ -1,7 +1,7 @@
 import type { Parcel } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { fieldFromGeometry, fieldFromParcels, shortHash } from './field-area';
+import { fieldFromGeometry, formatHectares, fieldFromParcels, shortHash } from './field-area';
 
 function parcel(id: string, number: string, west: number): Parcel {
   return {
@@ -67,9 +67,20 @@ describe('pole analizy', () => {
     const { geometry } = parcel('x', '1', 21);
     const field = fieldFromGeometry({ geometry, kind: 'drawn', parcelIds: [] });
 
-    expect(field).toMatchObject({ kind: 'drawn', label: '', parcelIds: [] });
+    expect(field).toMatchObject({ kind: 'drawn', parcelIds: [] });
+    expect(field.label).toMatch(/^Własny obszar, \d+,\d+ ha$/);
     expect(field.id).toMatch(/^area:[0-9a-f]{8}$/);
     expect(shortHash('abc')).toBe(shortHash('abc'));
     expect(shortHash('abc')).not.toBe(shortHash('abd'));
+  });
+
+  it('fragment dzialki bez opisu dostaje numer dzialki i powierzchnie po polsku', () => {
+    const { geometry } = parcel('x', '1', 21);
+    const part = fieldFromGeometry({ geometry, kind: 'part', parcelIds: ['141201_1.0001.6509'] });
+    const named = fieldFromGeometry({ geometry, kind: 'part', label: 'Za stodołą', parcelIds: [] });
+
+    expect(part.label).toMatch(/^Część działki 6509, \d+,\d+ ha$/);
+    expect(named.label).toBe('Za stodołą');
+    expect([formatHectares(0.274), formatHectares(1.24)]).toEqual(['0,27 ha', '1,2 ha']);
   });
 });

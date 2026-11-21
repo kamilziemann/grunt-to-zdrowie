@@ -33,7 +33,7 @@ describe('parsePower', () => {
     expect(parsed.data?.days[11]).toMatchObject({ date: '2026-11-21', precipMm: null, tMaxC: null });
     expect(parsed.data?.elevationM).toBeCloseTo(125.44, 2);
     expect(parsed).toMatchObject({ status: 'partial', dataFrom: '2026-11-10', dataTo: '2026-11-18' });
-    expect(parsed.note).toContain('3 of 12 days');
+    expect(parsed.note).toContain('3 z 12 dni bez opadu');
     expect(parsed.note).toContain('Hargreaves');
   });
 
@@ -87,6 +87,9 @@ describe('createNasaPowerMeteoSource', () => {
       data: null,
       source: { status: 'missing', note: expect.stringContaining('422') },
     });
-    expect(network).toMatchObject({ data: null, source: { status: 'missing', note: 'connection reset' } });
+    expect(network).toMatchObject({
+      data: null,
+      source: { status: 'missing', note: 'NASA POWER: błąd połączenia (connection reset)' },
+    });
   });
 });

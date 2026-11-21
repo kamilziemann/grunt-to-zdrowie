@@ -8,6 +8,7 @@ import type { SourceRef } from '@app/contracts';
 import type { DailyWeather, MeteoSeries, MeteoSource, Sourced } from '../../domain/analysis-ports';
 import { addDays, daysBetween } from '../../domain/iso-date';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
+import { failureNote, httpFailureNote } from '../../lib/source-note';
 
 export const NASA_POWER_URL = 'https://power.larc.nasa.gov/api/temporal/daily/point';
 
@@ -121,14 +122,18 @@ export function parsePower(
   const last = complete.at(-1)?.date;
 
   if (complete.length === 0 || first === undefined || last === undefined) {
-    return { data: null, status: 'missing', note: `no daily weather between ${from} and ${to}` };
+    return { data: null, status: 'missing', note: `brak danych dobowych pogody od ${from} do ${to}` };
   }
 
   const gaps = days.length - complete.length;
   const noSolar = complete.filter((day) => day.solarMjM2 === null).length;
   const notes = [
-    gaps > 0 ? `${gaps} of ${days.length} days without precipitation or temperature` : null,
-    noSolar > 0 ? `${noSolar} days without solar radiation (ET0 by Hargreaves)` : null,
+    gaps > 0
+      ? `${gaps} z ${days.length} dni bez opadu albo temperatury (NASA POWER uzupełnia ostatnie dni z kilkudniowym opóźnieniem)`
+      : null,
+    noSolar > 0
+      ? `${noSolar} dni bez promieniowania słonecznego (parowanie policzone prostszym wzorem Hargreavesa)`
+      : null,
   ].filter((note): note is string => note !== null);
   const coordinates = response.geometry?.coordinates;
   const elevation = Array.isArray(coordinates) ? coordinates[2] : undefined;
@@ -169,10 +174,12 @@ export function createNasaPowerMeteoSource({
         headers: { 'user-agent': OUTBOUND_USER_AGENT, accept: 'application/json' },
       }).catch((error: unknown) => (error instanceof Error ? error : new Error('NASA POWER request failed')));
 
-      if (response instanceof Error) return { data: null, source: { ...base, note: response.message } };
+      if (response instanceof Error) {
+        return { data: null, source: { ...base, note: failureNote('NASA POWER', response) } };
+      }
 
       if (!response.ok) {
-        return { data: null, source: { ...base, note: `NASA POWER responded with HTTP ${response.status}` } };
+        return { data: null, source: { ...base, note: httpFailureNote('NASA POWER', response.status) } };
       }
 
       const { data, status, note, dataFrom, dataTo } = parsePower(await response.json(), from, to);

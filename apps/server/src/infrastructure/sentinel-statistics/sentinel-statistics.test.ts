@@ -201,7 +201,7 @@ describe('createSentinelStatisticsSource', () => {
     expect(result.data?.observations).toHaveLength(7);
     expect(result.data?.baseline.map((item) => item.year)).toEqual([2020, 2019, 2018]);
     expect(result.source.status).toBe('partial');
-    expect(result.source.note).toContain('1 of 5 requests refused (HTTP 429)');
+    expect(result.source.note).toContain('1 z 5 zapytań odrzuconych (HTTP 429)');
   });
 
   it('brak czystej sceny w 30 dniach: dane z lat poprzednich zostaja, status `partial`', async () => {
@@ -217,6 +217,6 @@ describe('createSentinelStatisticsSource', () => {
 
     expect(result.data).toEqual({ observations: [], baseline: [], cellSizeM: 10 });
     expect(result.source.status).toBe('partial');
-    expect(result.source.note).toContain('no clear scene');
+    expect(result.source.note).toContain('brak bezchmurnego zdjęcia');
   });
 });

@@ -13,6 +13,7 @@ import type {
   VegetationSource,
 } from '../../domain/analysis-ports';
 import { addDays, daysBetween, withYear, yearOf } from '../../domain/iso-date';
+import { failureNote, httpFailureNote } from '../../lib/source-note';
 
 export const CDSE_TOKEN_URL =
   'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
@@ -232,9 +233,11 @@ export function createSentinelStatisticsSource({
         source: { ...base, note },
       });
 
-      if (!clientId || !clientSecret) return missing('COPERNICUS_CLIENT_ID/SECRET are not configured');
+      if (!clientId || !clientSecret)
+        return missing('brak kluczy dostępu do Copernicus w konfiguracji (COPERNICUS_CLIENT_ID/SECRET)');
 
-      if (yearOf(date) < FIRST_SENTINEL_YEAR) return missing('no Sentinel-2 L2A archive before 2017');
+      if (yearOf(date) < FIRST_SENTINEL_YEAR)
+        return missing('archiwum zdjęć Sentinel-2 zaczyna się w 2017 r.');
 
       const signal = AbortSignal.timeout(TIMEOUT_MS);
 
@@ -251,11 +254,11 @@ export function createSentinelStatisticsSource({
         });
 
         if (!tokenResponse.ok)
-          return missing(`Copernicus token request failed: HTTP ${tokenResponse.status}`);
+          return missing(`logowanie do Copernicus: ${httpFailureNote('Copernicus', tokenResponse.status)}`);
 
         const { access_token: token } = (await tokenResponse.json()) as { access_token?: string };
 
-        if (!token) return missing('Copernicus token response without access_token');
+        if (!token) return missing('Copernicus nie zwrócił tokenu dostępu');
 
         const windows = windowsFor(date);
         const request = (window: Window) => () =>
@@ -283,7 +286,7 @@ export function createSentinelStatisticsSource({
         const failed = results.filter((result) => result.observations === null);
 
         if (!current || failed.length === results.length) {
-          return missing(`Copernicus statistics responded with HTTP ${failed[0]?.status ?? 'error'}`);
+          return missing(httpFailureNote('Copernicus', failed[0]?.status ?? 500));
         }
 
         const observations = (current.observations ?? []).toSorted((a, b) => b.date.localeCompare(a.date));
@@ -297,13 +300,13 @@ export function createSentinelStatisticsSource({
         });
         const notes = [
           current.observations === null
-            ? `current window failed with HTTP ${current.status}`
+            ? `zdjęcia z ostatnich ${CURRENT_WINDOW_DAYS} dni: ${httpFailureNote('Copernicus', current.status)}`
             : observations.length === 0
-              ? `no clear scene within ${CURRENT_WINDOW_DAYS} days before ${date}`
+              ? `brak bezchmurnego zdjęcia w ${CURRENT_WINDOW_DAYS} dniach przed ${date}`
               : null,
-          `same season in ${baseline.length} of ${past.length} earlier years`,
+          `porównanie z tą samą porą roku w ${baseline.length} z ${past.length} wcześniejszych lat`,
           failed.length > 0
-            ? `${failed.length} of ${results.length} requests refused (HTTP ${failed[0]?.status})`
+            ? `${failed.length} z ${results.length} zapytań odrzuconych (HTTP ${failed[0]?.status})`
             : null,
         ].filter((note): note is string => note !== null);
 
@@ -318,7 +321,7 @@ export function createSentinelStatisticsSource({
           },
         };
       } catch (error) {
-        return missing(error instanceof Error ? error.message : 'Copernicus request failed');
+        return missing(failureNote('Copernicus', error));
       }
     },
   };

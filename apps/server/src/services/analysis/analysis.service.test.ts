@@ -111,8 +111,14 @@ describe('analysis service', () => {
 
     expect(waterReportSchema.safeParse(report).error).toBeUndefined();
     expect(report.meta.status).toBe('partial');
-    expect(byId.soil).toMatchObject({ status: 'missing', note: 'soil service down' });
-    expect(byId.terrain).toMatchObject({ status: 'missing', note: 'no response within 20 ms' });
+    expect(byId.soil).toMatchObject({
+      status: 'missing',
+      note: 'gleba: błąd połączenia (soil service down)',
+    });
+    expect(byId.terrain).toMatchObject({
+      status: 'missing',
+      note: 'brak odpowiedzi w 0,02 s (limit czasu analizy)',
+    });
     expect(byId.hydro).toMatchObject({ status: 'missing', note: 'no coverage' });
     expect(report.limitations).toEqual(
       expect.arrayContaining(['soil_missing', 'terrain_missing', 'hydro_missing']),

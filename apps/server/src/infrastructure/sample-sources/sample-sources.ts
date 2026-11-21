@@ -219,7 +219,7 @@ export function createSampleSources(): DataSources {
               provider: PROVIDER,
               status: 'missing',
               sample: true,
-              note: 'no Sentinel-2 archive before 2017',
+              note: 'archiwum zdjęć Sentinel-2 zaczyna się w 2017 r.',
             },
           });
         }

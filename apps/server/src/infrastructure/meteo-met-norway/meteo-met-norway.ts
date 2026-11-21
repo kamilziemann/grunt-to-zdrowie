@@ -9,6 +9,7 @@ import type { ForecastSeries, ForecastSource, Sourced } from '../../domain/analy
 import { hargreavesEt0 } from '../../domain/evapotranspiration';
 import { addDays, isoDateInPoland } from '../../domain/iso-date';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
+import { failureNote, httpFailureNote } from '../../lib/source-note';
 
 export const MET_NORWAY_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/compact';
 
@@ -138,10 +139,12 @@ export function createMetNorwayForecastSource({
         headers: { 'user-agent': OUTBOUND_USER_AGENT, accept: 'application/json' },
       }).catch((error: unknown) => (error instanceof Error ? error : new Error('MET Norway request failed')));
 
-      if (response instanceof Error) return { data: null, source: { ...base, note: response.message } };
+      if (response instanceof Error) {
+        return { data: null, source: { ...base, note: failureNote('MET Norway', response) } };
+      }
 
       if (!response.ok) {
-        return { data: null, source: { ...base, note: `MET Norway responded with HTTP ${response.status}` } };
+        return { data: null, source: { ...base, note: httpFailureNote('MET Norway', response.status) } };
       }
 
       const series = parseForecast(await response.json(), from, days, point[1]);
@@ -149,7 +152,7 @@ export function createMetNorwayForecastSource({
       const last = series.at(-1)?.date;
 
       if (first === undefined || last === undefined) {
-        return { data: null, source: { ...base, note: `no forecast days after ${from}` } };
+        return { data: null, source: { ...base, note: `brak dni prognozy po ${from}` } };
       }
 
       return {
@@ -159,7 +162,7 @@ export function createMetNorwayForecastSource({
           status: series.length < days ? 'partial' : 'ok',
           dataFrom: first,
           dataTo: last,
-          ...(series.length < days ? { note: `forecast covers ${series.length} of ${days} days` } : {}),
+          ...(series.length < days ? { note: `prognoza obejmuje ${series.length} z ${days} dni` } : {}),
         },
       };
     },

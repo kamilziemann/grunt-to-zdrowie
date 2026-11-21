@@ -16,6 +16,7 @@ import { AppError } from '@app/http';
 import { fieldFromGeometry, fieldFromParcels, shortHash } from '../../domain/field-area';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import type { AnalysisStages, DataSources, ParcelLookup, Sourced, StageInput } from './ports';
+import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
 export const ANALYSIS_ENGINE_VERSION = '0.2.0';
@@ -62,6 +63,17 @@ export interface AnalysisServiceDeps {
   timeoutsMs?: Partial<typeof SOURCE_TIMEOUTS_MS>;
 }
 
+/** Nazwy zrodel w notatkach dla czlowieka. */
+const SOURCE_NAMES: Record<SourceId, string> = {
+  parcel: 'ewidencja gruntów',
+  meteo: 'pogoda',
+  forecast: 'prognoza',
+  soil: 'gleba',
+  terrain: 'teren',
+  hydro: 'woda w otoczeniu',
+  vegetation: 'zdjęcia satelitarne',
+};
+
 /** Zrodlo z limitem czasu: spoznienie i nieoczekiwany blad staja sie odpowiedzia `missing` z powodem. */
 async function settle<T>(
   id: SourceId,
@@ -71,16 +83,22 @@ async function settle<T>(
   let timer: ReturnType<typeof setTimeout> | undefined;
   const missing = (note: string): Sourced<T> => ({
     data: null,
-    source: { id, provider: id, status: 'missing', sample: false, note },
+    source: { id, provider: SOURCE_NAMES[id], status: 'missing', sample: false, note },
   });
   const timeout = new Promise<Sourced<T>>((resolve) => {
-    timer = setTimeout(() => resolve(missing(`no response within ${timeoutMs} ms`)), timeoutMs);
+    timer = setTimeout(
+      () =>
+        resolve(
+          missing(`brak odpowiedzi w ${String(timeoutMs / 1000).replace('.', ',')} s (limit czasu analizy)`),
+        ),
+      timeoutMs,
+    );
   });
 
   try {
     return await Promise.race([request(), timeout]);
   } catch (error) {
-    return missing(error instanceof Error ? error.message : 'source failed');
+    return missing(failureNote(SOURCE_NAMES[id], error));
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
@@ -117,7 +135,7 @@ export function createAnalysisService({
         field: fieldFromGeometry(input),
         source: {
           id: 'parcel',
-          provider: 'user-defined area',
+          provider: 'obszar wskazany na mapie (geometria od użytkownika)',
           status: 'ok',
           sample: false,
           fetchedAt: now(),
