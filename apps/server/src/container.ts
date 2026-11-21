@@ -16,6 +16,7 @@ import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway
 import { createNasaPowerMeteoSource } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
 import { createSampleSources } from './infrastructure/sample-sources';
+import { createSentinelStatisticsSource } from './infrastructure/sentinel-statistics';
 import { createSoilGridsSource } from './infrastructure/soilgrids';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createAnalysisService } from './services/analysis';
@@ -50,8 +51,8 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
 
-  // Pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids) i woda w otoczeniu (BDOT10k) sa prawdziwe, ocena
-  // i historia liczone z danych; teren i satelita to wciaz atrapy (`sample: true`, raport niesie `meta.sample`), a przyczyny, strefy i zalecenia -
+  // Pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids), woda w otoczeniu (BDOT10k) i satelita (Sentinel-2,
+  // Copernicus) sa prawdziwe; teren to wciaz atrapa (`sample: true`, raport niesie `meta.sample`), a strefy -
   // reguly przykladowe (`meta.sampleParts`). Pakiety planu docs/plans/silnik-analizy-i-raport.md podmieniaja je
   // tutaj pojedynczo. Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
   const analysis = createAnalysisService({
@@ -64,6 +65,11 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       // hydrografia BDOT10k w Postgresie (Neon); bez DATABASE_URL zrodlo zglasza brak danych
       hydro: createPostgisHydroSource({
         run: deps.vars.DATABASE_URL ? createNeonSqlRunner(deps.vars.DATABASE_URL) : null,
+      }),
+      // Sentinel-2 przez API statystyk Copernicus; bez kluczy OAuth zrodlo zglasza brak danych
+      vegetation: createSentinelStatisticsSource({
+        clientId: deps.vars.COPERNICUS_CLIENT_ID,
+        clientSecret: deps.vars.COPERNICUS_CLIENT_SECRET,
       }),
       ...overrides.analysisSources,
     },
