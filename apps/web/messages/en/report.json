@@ -1,0 +1,347 @@
+{
+  "metaTitle": "Water report",
+  "title": "Field water report",
+  "header": {
+    "parcels": "{count, plural, one {Parcel ID} other {Parcel IDs}}",
+    "crop": "Crop",
+    "date": "Analysis day",
+    "area": "Area",
+    "areaValue": "{area} ha",
+    "landUse": "Land classes"
+  },
+  "actions": {
+    "print": "Print / save PDF",
+    "change": "Change crop or date",
+    "map": "Back to the map"
+  },
+  "missing": {
+    "title": "The report is missing data",
+    "description": "The link does not contain a parcel, a crop or a date. Please choose them again.",
+    "back": "Choose crop and date",
+    "map": "Choose a parcel on the map"
+  },
+  "sample": {
+    "title": "Sample data – do not make decisions based on it",
+    "description": "Part of the data in this report is placeholder data, not measurements for your field ({sources}). The report shows what the result will look like.",
+    "allSources": "all sources"
+  },
+  "status": {
+    "partial": "Some data is missing, so the result is less certain. Details are at the end of the report.",
+    "insufficient": "There is too little data to assess this field. The list of sources is at the end of the report."
+  },
+  "sections": {
+    "verdict": "Assessment",
+    "history": "The last 10 seasons",
+    "causes": "Why water is missing",
+    "retention": "How to keep water on the field",
+    "agrotech": "Farming that saves water",
+    "irrigation": "Irrigation",
+    "sources": "Where the data comes from and how far to trust it"
+  },
+  "details": "Details for the advisor",
+  "verdict": {
+    "levels": {
+      "ok": "Water is fine",
+      "watch": "Watch the water",
+      "risk": "Drought risk",
+      "drought": "Drought",
+      "excess": "Too much water",
+      "out_of_season": "Out of season",
+      "unknown": "No assessment"
+    },
+    "sentences": {
+      "ok": "The plants have enough water in the soil right now.",
+      "watch": "The water reserve in the soil is shrinking. Keep an eye on the field in the coming days.",
+      "risk": "The soil is starting to run out of water. The plants may soon suffer from the shortage.",
+      "drought": "The field is short of water. The plants are stressed and the yield may drop.",
+      "excess": "There is too much water in the soil. Roots may suffocate and field work is better postponed.",
+      "out_of_season": "This day is outside the agricultural drought season (21 March – 30 September). Below you will find the history and advice for the next season.",
+      "unknown": "There was not enough data to assess water on this field. Below is what we could establish."
+    },
+    "facts": "Key numbers",
+    "soilWater": "Water reserve in the soil",
+    "soilWaterValue": "{percent}% of a full reserve",
+    "soilWaterNote": "{left} of {total} litres per m² available to the roots",
+    "rain": "Rain in the last {days} days",
+    "rainValue": "{sum} l/m²",
+    "rainNote": "usually {median} l/m², driest period no. {rank} of {years} years",
+    "stress": "Days when the plants lacked water",
+    "stressValue": "{days} of the last 30",
+    "plants": "Plants in satellite images",
+    "confidence": "Confidence",
+    "confidenceLevels": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "interpretation": {
+      "confirms_deficit": "look dried out",
+      "no_signal": "show no stress",
+      "not_comparable": "cannot be compared with previous years",
+      "possible_other_stress": "are weaker than usual, but the cause may not be water"
+    },
+    "balance": "Climatic water balance (CWB)",
+    "balanceValue": "{balance} mm = precipitation {precip} mm − evapotranspiration {et} mm",
+    "balancePeriod": "period {no} (60 days): {from} – {to}",
+    "balanceStatus": {
+      "ok": "calculated",
+      "out_of_season": "outside the assessment season",
+      "not_monitored": "the crop is not assessed in this period",
+      "missing": "no data"
+    },
+    "threshold": "IUNG drought threshold",
+    "thresholdValue": "{threshold} mm, soil category {category}",
+    "thresholdNone": "no threshold for this crop, soil or period",
+    "belowThreshold": "balance below the threshold – drought according to IUNG",
+    "aboveThreshold": "balance above the threshold",
+    "methods": {
+      "fao56_penman_monteith": "evapotranspiration by FAO-56 (Penman–Monteith)",
+      "hargreaves": "evapotranspiration by Hargreaves (less weather data)",
+      "iung_dg95": "IUNG method"
+    },
+    "rootZone": "Root zone (FAO-56)",
+    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, depletion Dr {depletion} mm, Ks {ks}",
+    "cropStage": "Crop stage",
+    "cropStageValue": "{stage}, Kc {kc}, roots down to {depth} m",
+    "cropStageNoKc": "{stage}",
+    "stages": {
+      "dormant": "dormant",
+      "initial": "early growth",
+      "development": "rapid growth",
+      "mid": "full growth",
+      "late": "ripening",
+      "harvested": "after harvest"
+    },
+    "vegetation": "Sentinel-2",
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; deviation from {years} years: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; clear pixels {share}% ({pixels})"
+  },
+  "history": {
+    "headline": "In {drought} of the last {seasons} seasons with data this crop was short of water.",
+    "noData": "There is no historical data for this field.",
+    "riskMonths": "Water was most often short in: {months}.",
+    "chartLabel": "Number of drought periods in each season",
+    "season": "{year}: drought in {drought} of {monitored} assessed periods",
+    "seasonNoData": "{year}: no data",
+    "stressDays": "{days} stress days",
+    "minBalance": "lowest balance {balance} mm",
+    "calendar": "Drought period calendar",
+    "calendarDescription": "Each cell is a 60-day period assessed by IUNG; period 1 starts on 21 March, the next ones every 10 days.",
+    "year": "Year",
+    "period": "Period {no}",
+    "status": {
+      "drought": "drought",
+      "ok": "normal",
+      "not_monitored": "not assessed",
+      "missing": "no data"
+    },
+    "legend": "Legend"
+  },
+  "causes": {
+    "intro": "From the largest impact.",
+    "none": "We did not find a clear cause of the water shortage.",
+    "weight": "impact {percent}%",
+    "evidence": "What this is based on",
+    "items": {
+      "precipitation_deficit": {
+        "title": "Too little rain",
+        "description": "Less rain fell than usual for this time of year."
+      },
+      "high_evaporative_demand": {
+        "title": "Heat and wind dry the field",
+        "description": "With high temperature, sun and wind, plants and soil lose more water than usual."
+      },
+      "low_soil_retention": {
+        "title": "The soil holds little water",
+        "description": "Light soil releases water quickly, so the reserve does not last long."
+      },
+      "surface_runoff": {
+        "title": "Water runs off the surface",
+        "description": "The field lies on a slope, so part of the rain runs off before it soaks in."
+      },
+      "fast_drainage": {
+        "title": "Ditches drain water quickly",
+        "description": "Ditches carry water away faster than the soil can absorb it."
+      },
+      "no_landscape_retention": {
+        "title": "Nothing nearby holds water",
+        "description": "There are no ponds, wetlands or trees nearby that hold water."
+      },
+      "crop_sensitivity": {
+        "title": "The crop is sensitive to water shortage now",
+        "description": "At this growth stage the plant needs a lot of water, so a shortage cuts the yield faster."
+      }
+    }
+  },
+  "evidence": {
+    "value": "{metric}: {value} {unit}",
+    "reference": "reference: {reference} {unit}",
+    "source": "source: {source}",
+    "metrics": {
+      "available_water_mm_per_m": "Water available to plants in 1 m of soil",
+      "slope_mean_pct": "Mean slope of the field",
+      "precip_30d": "Precipitation over 30 days",
+      "precip_60d": "Precipitation over 60 days",
+      "et0_60d": "Evapotranspiration over 60 days",
+      "balance_60d": "Water balance over 60 days",
+      "ditch_distance_m": "Distance to the nearest ditch",
+      "water_distance_m": "Distance to the nearest water",
+      "tree_cover_share": "Share of trees nearby",
+      "wetland_share": "Share of wetlands nearby",
+      "kc": "Crop coefficient Kc"
+    }
+  },
+  "recommendations": {
+    "none": {
+      "retention": "We see no need for water retention structures on this field.",
+      "agrotech": "We have no additional farming advice for this field."
+    },
+    "priority": {
+      "p1": "Start with this",
+      "p2": "Worth doing",
+      "p3": "To consider"
+    },
+    "effect": {
+      "volume_m3": "keeps about {value} m³ of water",
+      "water_mm": "about {value} l/m² more water in the soil",
+      "evaporation_pct": "about {value}% less evaporation"
+    },
+    "effort": "Effort: {level}",
+    "effortLevels": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high"
+    },
+    "legal": {
+      "none": "No formalities",
+      "notification": "Requires a water-law notification",
+      "permit": "Requires a water-law permit"
+    },
+    "answers": "Addresses: {causes}",
+    "wholeField": "Applies to the whole field",
+    "zone": "Applies to part of the field: {kind}, {area} ha",
+    "zoneKinds": {
+      "drying": "the place that dries out first",
+      "collecting": "the place where water collects",
+      "typical": "typical part of the field",
+      "depression": "a dip in the terrain",
+      "flow_path": "a water flow line",
+      "segment": "a section of the field"
+    },
+    "measures": {
+      "small_pond": {
+        "name": "Small pond",
+        "description": "A pond at the lowest point collects rain and snowmelt for dry weeks."
+      },
+      "ditch_weir": {
+        "name": "Ditch weir",
+        "description": "A simple weir raises the water level in the ditch and slows its outflow from the field."
+      },
+      "protect_wetland": {
+        "name": "Protect the wetland",
+        "description": "Leave the wet spot undrained. It works like a sponge for the whole area."
+      },
+      "grassed_waterway": {
+        "name": "Grassed waterway",
+        "description": "A grass strip where water flows holds it back and protects the soil from erosion."
+      },
+      "field_margin_trees": {
+        "name": "Tree strip on the field edge",
+        "description": "Trees and shrubs shield the field from wind and reduce evaporation."
+      },
+      "contour_farming": {
+        "name": "Farming across the slope",
+        "description": "Ploughing and sowing across the slope keep the rain on the field."
+      },
+      "cover_crop": {
+        "name": "Cover crop",
+        "description": "Plants after harvest protect the soil from drying and add organic matter."
+      },
+      "mulch_residue": {
+        "name": "Straw mulch",
+        "description": "Straw left on the field reduces evaporation from the soil."
+      },
+      "reduced_tillage": {
+        "name": "Reduced tillage",
+        "description": "Less ploughing means less dried-out soil and a better soil structure."
+      },
+      "organic_matter": {
+        "name": "More humus in the soil",
+        "description": "Manure, compost and crop residues help the soil hold water."
+      },
+      "subsoiling": {
+        "name": "Subsoiling",
+        "description": "Breaking the compacted layer under the topsoil lets water soak in deeper."
+      },
+      "crop_choice": {
+        "name": "A different crop or variety",
+        "description": "A species or variety less sensitive to drought lowers the risk of losses."
+      }
+    }
+  },
+  "irrigation": {
+    "first": "Consider irrigation only after the measures described above. Water kept on the field is cheaper.",
+    "advisable": {
+      "no": "Irrigation is not needed right now.",
+      "consider": "Consider irrigating.",
+      "yes": "The field is worth irrigating."
+    },
+    "dose": "Dose: about {mm} l/m², i.e. about {volume} m³ for the whole field.",
+    "within": "{days, plural, =0 {Ideally today.} one {Within # day.} other {Within # days.}}",
+    "forecast": "Rain forecast for the coming days: {mm} l/m².",
+    "noForecast": "There is no weather forecast for this day, so we do not suggest when to water.",
+    "none": "We do not assess irrigation in this report because data on the soil water reserve is missing."
+  },
+  "sources": {
+    "confidence": "Confidence: {level}",
+    "confidenceExplain": {
+      "high": "Data comes from all sources and is consistent.",
+      "medium": "Some data is missing or approximate.",
+      "low": "Much data is missing or estimated. Treat the result as a hint."
+    },
+    "listLabel": "Data sources",
+    "categories": {
+      "parcel": "Parcel boundaries",
+      "meteo": "10 years of weather",
+      "forecast": "Weather forecast",
+      "soil": "Soil",
+      "terrain": "Terrain",
+      "hydro": "Ditches, streams and water",
+      "vegetation": "Satellite images"
+    },
+    "status": {
+      "ok": "Data available",
+      "partial": "Incomplete data",
+      "missing": "No data"
+    },
+    "sampleBadge": "Placeholder",
+    "range": "data from {from} – {to}",
+    "rangeTo": "data up to {to}",
+    "resolution": "resolution: {value}",
+    "licence": "licence: {value}",
+    "fetched": "fetched {date}",
+    "link": "Source website: {provider}",
+    "limitations": "Limitations",
+    "limitationsNone": "No additional limitations.",
+    "limitationItems": {
+      "sample_data": "The report uses sample data. The results do not describe this field.",
+      "meteo_missing": "Weather data is missing, so the water balance cannot be calculated.",
+      "meteo_coarse_grid": "Weather comes from a grid with cells tens of kilometres wide. Local storms may not match.",
+      "soil_estimated": "The soil type is estimated from maps, not measured on the field.",
+      "soil_missing": "Soil data is missing. We assumed a typical soil for the area.",
+      "terrain_missing": "The terrain model is missing, so we do not assess runoff.",
+      "terrain_coarse": "The terrain model is coarse. Small dips may not be visible.",
+      "hydro_missing": "Data on ditches and streams nearby is missing.",
+      "vegetation_missing": "There are no cloud-free satellite images from this period.",
+      "vegetation_few_pixels": "The field is small or narrow, so the satellite image covers few points.",
+      "vegetation_before_archive": "There are no comparable satellite images for such an old date.",
+      "forecast_missing": "The weather forecast is missing, so we do not suggest when to water.",
+      "out_of_season": "This day is outside the agricultural drought season (21 March – 30 September).",
+      "crop_not_monitored": "There are no official drought thresholds for this crop. The assessment is based on the soil water reserve.",
+      "balance_estimated": "We calculate the water balance with our own method, so it may differ from IUNG reports.",
+      "current_boundaries": "The parcel boundaries are current. They may have been different on the analysis day.",
+      "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
+      "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth."
+    },
+    "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s."
+  }
+}

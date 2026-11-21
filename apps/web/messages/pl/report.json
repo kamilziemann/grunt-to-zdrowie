@@ -1,0 +1,347 @@
+{
+  "metaTitle": "Raport wodny",
+  "title": "Raport wodny pola",
+  "header": {
+    "parcels": "{count, plural, one {Działka} other {Działki}}",
+    "crop": "Uprawa",
+    "date": "Dzień analizy",
+    "area": "Powierzchnia",
+    "areaValue": "{area} ha",
+    "landUse": "Klasy gruntu"
+  },
+  "actions": {
+    "print": "Drukuj / zapisz PDF",
+    "change": "Zmień uprawę lub datę",
+    "map": "Wróć do mapy"
+  },
+  "missing": {
+    "title": "Brakuje danych do raportu",
+    "description": "Link nie zawiera działki, uprawy albo daty. Wybierz je jeszcze raz.",
+    "back": "Wybierz uprawę i datę",
+    "map": "Wybierz działkę na mapie"
+  },
+  "sample": {
+    "title": "Dane przykładowe – nie podejmuj na ich podstawie decyzji",
+    "description": "Część danych w tym raporcie to atrapy, a nie pomiary dla Twojego pola ({sources}). Raport pokazuje, jak będzie wyglądał wynik.",
+    "allSources": "wszystkie źródła"
+  },
+  "status": {
+    "partial": "Części danych zabrakło, więc wynik jest mniej pewny. Szczegóły są na końcu raportu.",
+    "insufficient": "Za mało danych, żeby ocenić to pole. Lista źródeł jest na końcu raportu."
+  },
+  "sections": {
+    "verdict": "Ocena",
+    "history": "Ostatnie 10 sezonów",
+    "causes": "Dlaczego brakuje wody",
+    "retention": "Jak zatrzymać wodę na polu",
+    "agrotech": "Uprawa, która oszczędza wodę",
+    "irrigation": "Nawadnianie",
+    "sources": "Skąd są dane i na ile im ufać"
+  },
+  "details": "Szczegóły dla doradcy",
+  "verdict": {
+    "levels": {
+      "ok": "Woda w normie",
+      "watch": "Uwaga na wodę",
+      "risk": "Ryzyko suszy",
+      "drought": "Susza",
+      "excess": "Nadmiar wody",
+      "out_of_season": "Poza sezonem",
+      "unknown": "Brak oceny"
+    },
+    "sentences": {
+      "ok": "Rośliny mają teraz dość wody w glebie.",
+      "watch": "Zapas wody w glebie maleje. Obserwuj pole w najbliższych dniach.",
+      "risk": "Wody w glebie zaczyna brakować. Rośliny mogą wkrótce cierpieć z powodu jej niedoboru.",
+      "drought": "Na polu brakuje wody. Rośliny są pod stresem i plon może spaść.",
+      "excess": "W glebie jest za dużo wody. Korzenie mogą się dusić, a prace polowe lepiej odłożyć.",
+      "out_of_season": "Ten dzień jest poza okresem oceny suszy rolniczej (21 marca – 30 września). Niżej znajdziesz historię i zalecenia na kolejny sezon.",
+      "unknown": "Zabrakło danych, żeby ocenić wodę na tym polu. Niżej jest to, co udało się ustalić."
+    },
+    "facts": "Najważniejsze liczby",
+    "soilWater": "Zapas wody w glebie",
+    "soilWaterValue": "{percent}% pełnego zapasu",
+    "soilWaterNote": "{left} z {total} litrów na m² dostępnych dla korzeni",
+    "rain": "Deszcz w ostatnich {days} dniach",
+    "rainValue": "{sum} l/m²",
+    "rainNote": "zwykle {median} l/m², {rank}. najsuchszy okres z {years} lat",
+    "stress": "Dni, w których roślinom brakowało wody",
+    "stressValue": "{days} z ostatnich 30",
+    "plants": "Rośliny na zdjęciach satelitarnych",
+    "confidence": "Pewność oceny",
+    "confidenceLevels": {
+      "high": "wysoka",
+      "medium": "średnia",
+      "low": "niska"
+    },
+    "interpretation": {
+      "confirms_deficit": "wyglądają na przesuszone",
+      "no_signal": "nie pokazują stresu",
+      "not_comparable": "nie da się ich porównać z poprzednimi latami",
+      "possible_other_stress": "są słabsze niż zwykle, ale przyczyna może być inna niż woda"
+    },
+    "balance": "Klimatyczny bilans wodny (KBW)",
+    "balanceValue": "{balance} mm = opad {precip} mm − ewapotranspiracja {et} mm",
+    "balancePeriod": "okres {no} (60 dni): {from} – {to}",
+    "balanceStatus": {
+      "ok": "policzony",
+      "out_of_season": "poza sezonem oceny",
+      "not_monitored": "uprawa nie jest oceniana w tym okresie",
+      "missing": "brak danych"
+    },
+    "threshold": "Próg suszy IUNG",
+    "thresholdValue": "{threshold} mm, kategoria gleby {category}",
+    "thresholdNone": "brak progu dla tej uprawy, gleby lub okresu",
+    "belowThreshold": "bilans poniżej progu – susza wg IUNG",
+    "aboveThreshold": "bilans powyżej progu",
+    "methods": {
+      "fao56_penman_monteith": "ewapotranspiracja wg FAO-56 (Penman–Monteith)",
+      "hargreaves": "ewapotranspiracja wg Hargreavesa (mniej danych pogodowych)",
+      "iung_dg95": "metoda IUNG"
+    },
+    "rootZone": "Strefa korzeniowa (FAO-56)",
+    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, ubytek Dr {depletion} mm, Ks {ks}",
+    "cropStage": "Faza uprawy",
+    "cropStageValue": "{stage}, Kc {kc}, korzenie do {depth} m",
+    "cropStageNoKc": "{stage}",
+    "stages": {
+      "dormant": "spoczynek",
+      "initial": "początek wzrostu",
+      "development": "intensywny wzrost",
+      "mid": "pełnia wzrostu",
+      "late": "dojrzewanie",
+      "harvested": "po zbiorze"
+    },
+    "vegetation": "Sentinel-2",
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; odchylenie od {years} lat: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; czyste piksele {share}% ({pixels})"
+  },
+  "history": {
+    "headline": "W {drought} z {seasons} ostatnich sezonów z danymi tej uprawie brakowało wody.",
+    "noData": "Brak danych historycznych dla tego pola.",
+    "riskMonths": "Najczęściej brakowało wody w miesiącach: {months}.",
+    "chartLabel": "Liczba okresów suszy w kolejnych sezonach",
+    "season": "{year}: susza w {drought} z {monitored} ocenianych okresów",
+    "seasonNoData": "{year}: brak danych",
+    "stressDays": "{days} dni stresu",
+    "minBalance": "najniższy bilans {balance} mm",
+    "calendar": "Kalendarz okresów suszy",
+    "calendarDescription": "Kratka to okres 60 dni oceniany przez IUNG; okres 1 zaczyna się 21 marca, kolejne co 10 dni.",
+    "year": "Rok",
+    "period": "Okres {no}",
+    "status": {
+      "drought": "susza",
+      "ok": "w normie",
+      "not_monitored": "nie oceniano",
+      "missing": "brak danych"
+    },
+    "legend": "Legenda"
+  },
+  "causes": {
+    "intro": "Od największego wpływu.",
+    "none": "Nie znaleźliśmy wyraźnej przyczyny niedoboru wody.",
+    "weight": "wpływ {percent}%",
+    "evidence": "Na czym to opieramy",
+    "items": {
+      "precipitation_deficit": {
+        "title": "Za mało deszczu",
+        "description": "Spadło mniej deszczu niż zwykle o tej porze roku."
+      },
+      "high_evaporative_demand": {
+        "title": "Upał i wiatr wysuszają pole",
+        "description": "Przy wysokiej temperaturze, słońcu i wietrze rośliny i gleba tracą więcej wody niż zwykle."
+      },
+      "low_soil_retention": {
+        "title": "Gleba słabo trzyma wodę",
+        "description": "Lekka gleba szybko oddaje wodę, więc zapas starcza na krótko."
+      },
+      "surface_runoff": {
+        "title": "Woda spływa po powierzchni",
+        "description": "Pole leży na spadku, więc część deszczu spływa, zanim wsiąknie."
+      },
+      "fast_drainage": {
+        "title": "Woda szybko ucieka rowami",
+        "description": "Rowy odprowadzają wodę z okolicy szybciej, niż gleba zdąży ją wchłonąć."
+      },
+      "no_landscape_retention": {
+        "title": "W okolicy nic nie zatrzymuje wody",
+        "description": "W pobliżu brakuje oczek wodnych, mokradeł i zadrzewień, które trzymają wodę."
+      },
+      "crop_sensitivity": {
+        "title": "Uprawa jest teraz wrażliwa na brak wody",
+        "description": "W tej fazie rozwoju roślina potrzebuje dużo wody, więc niedobór szybciej obniża plon."
+      }
+    }
+  },
+  "evidence": {
+    "value": "{metric}: {value} {unit}",
+    "reference": "odniesienie: {reference} {unit}",
+    "source": "źródło: {source}",
+    "metrics": {
+      "available_water_mm_per_m": "Woda dostępna dla roślin w 1 m gleby",
+      "slope_mean_pct": "Średnie nachylenie pola",
+      "precip_30d": "Opad z 30 dni",
+      "precip_60d": "Opad z 60 dni",
+      "et0_60d": "Ewapotranspiracja z 60 dni",
+      "balance_60d": "Bilans wodny z 60 dni",
+      "ditch_distance_m": "Odległość do najbliższego rowu",
+      "water_distance_m": "Odległość do najbliższej wody",
+      "tree_cover_share": "Udział zadrzewień w okolicy",
+      "wetland_share": "Udział mokradeł w okolicy",
+      "kc": "Współczynnik uprawy Kc"
+    }
+  },
+  "recommendations": {
+    "none": {
+      "retention": "Nie widzimy potrzeby budowy urządzeń zatrzymujących wodę na tym polu.",
+      "agrotech": "Nie mamy dodatkowych zaleceń uprawowych dla tego pola."
+    },
+    "priority": {
+      "p1": "Zacznij od tego",
+      "p2": "Warto zrobić",
+      "p3": "Do rozważenia"
+    },
+    "effect": {
+      "volume_m3": "zatrzyma ok. {value} m³ wody",
+      "water_mm": "ok. {value} l/m² więcej wody w glebie",
+      "evaporation_pct": "parowanie mniejsze o ok. {value}%"
+    },
+    "effort": "Nakład pracy: {level}",
+    "effortLevels": {
+      "low": "mały",
+      "medium": "średni",
+      "high": "duży"
+    },
+    "legal": {
+      "none": "Bez formalności",
+      "notification": "Wymaga zgłoszenia wodnoprawnego",
+      "permit": "Wymaga pozwolenia wodnoprawnego"
+    },
+    "answers": "Odpowiada na: {causes}",
+    "wholeField": "Dotyczy całego pola",
+    "zone": "Dotyczy części pola: {kind}, {area} ha",
+    "zoneKinds": {
+      "drying": "miejsce, które przesycha najszybciej",
+      "collecting": "miejsce, gdzie zbiera się woda",
+      "typical": "typowa część pola",
+      "depression": "obniżenie terenu",
+      "flow_path": "linia spływu wody",
+      "segment": "odcinek pola"
+    },
+    "measures": {
+      "small_pond": {
+        "name": "Małe oczko wodne",
+        "description": "Zbiornik w najniższym miejscu zbiera wodę z deszczu i roztopów na suche tygodnie."
+      },
+      "ditch_weir": {
+        "name": "Zastawka na rowie",
+        "description": "Prosta zastawka podnosi poziom wody w rowie i spowalnia jej odpływ z pola."
+      },
+      "protect_wetland": {
+        "name": "Ochrona mokradła",
+        "description": "Zostaw podmokłe miejsce bez osuszania. Działa jak gąbka dla całej okolicy."
+      },
+      "grassed_waterway": {
+        "name": "Zadarniona linia spływu",
+        "description": "Pas trawy tam, gdzie spływa woda, zatrzymuje ją i chroni glebę przed rozmyciem."
+      },
+      "field_margin_trees": {
+        "name": "Pas zadrzewień na miedzy",
+        "description": "Drzewa i krzewy osłaniają pole od wiatru i zmniejszają parowanie."
+      },
+      "contour_farming": {
+        "name": "Uprawa w poprzek stoku",
+        "description": "Orka i siew w poprzek spadku zatrzymują deszcz na polu."
+      },
+      "cover_crop": {
+        "name": "Międzyplon",
+        "description": "Rośliny po zbiorze chronią glebę przed wysychaniem i dodają materii organicznej."
+      },
+      "mulch_residue": {
+        "name": "Mulcz ze słomy",
+        "description": "Słoma zostawiona na polu ogranicza parowanie z gleby."
+      },
+      "reduced_tillage": {
+        "name": "Uprawa uproszczona",
+        "description": "Mniej orki to mniej przesuszonej gleby i lepsza jej struktura."
+      },
+      "organic_matter": {
+        "name": "Więcej próchnicy w glebie",
+        "description": "Obornik, kompost i resztki roślin pomagają glebie trzymać wodę."
+      },
+      "subsoiling": {
+        "name": "Głęboszowanie",
+        "description": "Rozbicie zbitej warstwy pod ornicą pozwala wodzie wsiąkać głębiej."
+      },
+      "crop_choice": {
+        "name": "Inna uprawa albo odmiana",
+        "description": "Gatunek lub odmiana mniej wrażliwa na suszę zmniejszy ryzyko strat."
+      }
+    }
+  },
+  "irrigation": {
+    "first": "Nawadnianie rozważ dopiero po działaniach opisanych wyżej. Woda zatrzymana na polu jest tańsza.",
+    "advisable": {
+      "no": "Nawadnianie nie jest teraz potrzebne.",
+      "consider": "Rozważ nawadnianie.",
+      "yes": "Pole warto nawodnić."
+    },
+    "dose": "Dawka: ok. {mm} l/m², czyli ok. {volume} m³ na całe pole.",
+    "within": "{days, plural, =0 {Najlepiej dziś.} one {W ciągu # dnia.} other {W ciągu # dni.}}",
+    "forecast": "Prognoza deszczu na najbliższe dni: {mm} l/m².",
+    "noForecast": "Brak prognozy pogody dla tego dnia, więc nie podajemy terminu podlewania.",
+    "none": "Nie oceniamy nawadniania w tym raporcie, bo brakuje danych o zapasie wody w glebie."
+  },
+  "sources": {
+    "confidence": "Pewność oceny: {level}",
+    "confidenceExplain": {
+      "high": "Dane pochodzą ze wszystkich źródeł i są ze sobą zgodne.",
+      "medium": "Części danych brakuje albo są przybliżone.",
+      "low": "Dużo danych brakuje albo jest szacowanych. Traktuj wynik jako wskazówkę."
+    },
+    "listLabel": "Źródła danych",
+    "categories": {
+      "parcel": "Granice działki",
+      "meteo": "Pogoda z 10 lat",
+      "forecast": "Prognoza pogody",
+      "soil": "Gleba",
+      "terrain": "Ukształtowanie terenu",
+      "hydro": "Rowy, cieki i wody",
+      "vegetation": "Zdjęcia satelitarne"
+    },
+    "status": {
+      "ok": "Dane są",
+      "partial": "Dane niepełne",
+      "missing": "Brak danych"
+    },
+    "sampleBadge": "Atrapa",
+    "range": "dane z okresu {from} – {to}",
+    "rangeTo": "dane do {to}",
+    "resolution": "dokładność: {value}",
+    "licence": "licencja: {value}",
+    "fetched": "pobrano {date}",
+    "link": "Strona źródła: {provider}",
+    "limitations": "Ograniczenia",
+    "limitationsNone": "Brak dodatkowych ograniczeń.",
+    "limitationItems": {
+      "sample_data": "Raport korzysta z danych przykładowych. Wyniki nie opisują tego pola.",
+      "meteo_missing": "Brak danych pogodowych, więc nie da się policzyć bilansu wody.",
+      "meteo_coarse_grid": "Pogoda pochodzi z siatki o oczkach kilkudziesięciu kilometrów. Lokalne burze mogą się nie zgadzać.",
+      "soil_estimated": "Rodzaj gleby jest oszacowany z map, a nie zmierzony na polu.",
+      "soil_missing": "Brak danych o glebie. Przyjęliśmy typową glebę dla okolicy.",
+      "terrain_missing": "Brak modelu terenu, więc nie oceniamy spływu wody.",
+      "terrain_coarse": "Model terenu jest mało dokładny. Małe zagłębienia mogą być niewidoczne.",
+      "hydro_missing": "Brak danych o rowach i ciekach w okolicy.",
+      "vegetation_missing": "Brak zdjęć satelitarnych bez chmur z tego okresu.",
+      "vegetation_few_pixels": "Pole jest małe albo wąskie, więc zdjęcie satelitarne obejmuje niewiele punktów.",
+      "vegetation_before_archive": "Dla tak dawnej daty nie ma porównywalnych zdjęć satelitarnych.",
+      "forecast_missing": "Brak prognozy pogody, więc nie podajemy terminu podlewania.",
+      "out_of_season": "Ten dzień jest poza okresem oceny suszy rolniczej (21 marca – 30 września).",
+      "crop_not_monitored": "Dla tej uprawy nie ma urzędowych progów suszy. Ocena opiera się na zapasie wody w glebie.",
+      "balance_estimated": "Bilans wody liczymy własną metodą, więc może się różnić od komunikatów IUNG.",
+      "current_boundaries": "Granice działki są dzisiejsze. W dniu analizy mogły być inne.",
+      "no_in_situ_measurement": "Nikt nie mierzył wilgotności gleby na miejscu. To obliczenia z danych zdalnych.",
+      "field_verification_needed": "Przed decyzją sprawdź glebę na polu, np. łopatą na głębokości korzeni."
+    },
+    "meta": "Raport {id}, silnik {version}, przygotowany {date} w {seconds} s."
+  }
+}

@@ -93,10 +93,8 @@
   "summary": {
     "metaTitle": "Działki do analizy",
     "title": "Działki do analizy",
-    "description": "Sprawdź listę działek, dla których przygotujemy ocenę sytuacji wodnej.",
+    "description": "Sprawdź działki, wybierz uprawę i dzień, a przygotujemy ocenę sytuacji wodnej.",
     "parcels": "Wybrane działki",
-    "nextTitle": "Następny krok: uprawa i data analizy",
-    "nextDescription": "Ten etap jest w budowie. Tutaj wybierzesz uprawę i datę, a aplikacja oceni sytuację wodną działki i przygotuje zalecenia. Na razie nie pokazujemy żadnych wyników.",
     "change": "Zmień działki",
     "emptyTitle": "Nie wybrano żadnej działki",
     "emptyDescription": "Wróć do mapy i dodaj co najmniej jedną działkę.",

@@ -65,7 +65,7 @@ function AppShell({ children }: { children: ReactNode }) {
       >
         {t('skipToContent')}
       </a>
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur print:hidden">
         <div
           className={cn(
             'flex w-full items-center gap-4 px-gutter',
@@ -83,10 +83,15 @@ function AppShell({ children }: { children: ReactNode }) {
         </main>
       ) : (
         <>
-          <main id="main" className="mx-auto w-full max-w-page flex-1 px-gutter py-8">
+          <main
+            id="main"
+            className="mx-auto w-full max-w-page flex-1 px-gutter py-8 print:max-w-none print:p-0"
+          >
             {children}
           </main>
-          <footer className="border-t py-4 text-center text-xs text-muted-foreground">{BRAND}</footer>
+          <footer className="border-t py-4 text-center text-xs text-muted-foreground print:hidden">
+            {BRAND}
+          </footer>
         </>
       )}
     </div>

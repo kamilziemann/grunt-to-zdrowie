@@ -1,16 +1,18 @@
-// Podsumowanie dzialek wybranych do analizy wodnej (krok po mapie). Te same identyfikatory w parametrze `dzialki`;
-// dane dociaga przegladarka, wiec HTML idzie z cache brzegowego. Wybor uprawy i sama analiza to nastepny etap.
-import { parcelSelectionSearchSchema, parseParcelSelection, serializeParcelSelection } from '@app/contracts';
+// Krok po mapie: podsumowanie wybranych dzialek i formularz analizy (uprawa + dzien). Te same identyfikatory w
+// parametrze `dzialki`; `uprawa` i `data` wracaja z raportu ("zmien uprawe lub date"). Dane dzialek dociaga
+// przegladarka, wiec HTML idzie z cache brzegowego. "Analizuj" prowadzi do `/raport` z parametrami w adresie.
+import { parseParcelSelection, serializeParcelSelection } from '@app/contracts';
 import { routeCache } from '@app/start-kit';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 
+import { AnalysisForm, analysisSearchSchema } from '@/features/analysis';
 import { AnalysisSummary } from '@/features/parcels';
 import { routes } from '@/lib/routes';
 import { headLocale, headTranslator, pageHead } from '@/lib/seo';
 
 export const Route = createFileRoute('/{-$locale}/_app/analiza')({
-  validateSearch: parcelSelectionSearchSchema,
+  validateSearch: analysisSearchSchema,
   headers: routeCache('static'),
   head: ({ matches }) =>
     pageHead({
@@ -23,8 +25,15 @@ export const Route = createFileRoute('/{-$locale}/_app/analiza')({
 });
 
 function AnalysisPage() {
-  const { dzialki } = Route.useSearch();
+  const { dzialki, uprawa, data } = Route.useSearch();
   const ids = useMemo(() => parseParcelSelection(dzialki), [dzialki]);
+  const backHref = routes.parcels(serializeParcelSelection(ids));
 
-  return <AnalysisSummary ids={ids} backHref={routes.parcels(serializeParcelSelection(ids))} />;
+  if (ids.length === 0) return <AnalysisSummary ids={ids} backHref={backHref} />;
+
+  return (
+    <AnalysisForm parcelIds={ids} initialCropId={uprawa} initialDate={data}>
+      <AnalysisSummary ids={ids} backHref={backHref} />
+    </AnalysisForm>
+  );
 }

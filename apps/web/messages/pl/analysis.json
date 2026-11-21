@@ -1,0 +1,105 @@
+{
+  "form": {
+    "title": "Co rośnie na polu?",
+    "description": "Wybierz uprawę i dzień, dla którego sprawdzimy wodę na polu.",
+    "cropLegend": "Uprawa",
+    "cropMissing": "Wybierz uprawę, żeby przejść dalej.",
+    "dateLabel": "Dzień analizy",
+    "dateHint": "Domyślnie dziś. Możesz wybrać dowolny dzień od {min}.",
+    "today": "Dziś",
+    "dateErrors": {
+      "invalid": "Wpisz poprawną datę.",
+      "future": "Nie sprawdzimy dnia z przyszłości. Wybierz dziś albo wcześniejszy dzień.",
+      "tooOld": "Sięgamy najwyżej 10 lat wstecz. Wybierz dzień od {min}."
+    },
+    "submit": "Analizuj",
+    "submitHint": "Analiza trwa zwykle do 30 sekund."
+  },
+  "crops": {
+    "winter_wheat": {
+      "name": "Zboża ozime",
+      "examples": "pszenica, żyto, pszenżyto, jęczmień ozimy"
+    },
+    "spring_barley": {
+      "name": "Zboża jare",
+      "examples": "jęczmień, owies, pszenica jara"
+    },
+    "maize_grain": {
+      "name": "Kukurydza na ziarno",
+      "examples": "także CCM"
+    },
+    "maize_silage": {
+      "name": "Kukurydza na kiszonkę",
+      "examples": "na paszę lub biogaz"
+    },
+    "winter_rapeseed": {
+      "name": "Rzepak ozimy",
+      "examples": "także rzepik"
+    },
+    "potato": {
+      "name": "Ziemniaki",
+      "examples": "jadalne, skrobiowe, sadzeniaki"
+    },
+    "sugar_beet": {
+      "name": "Buraki cukrowe",
+      "examples": "także pastewne"
+    },
+    "pulses": {
+      "name": "Strączkowe",
+      "examples": "groch, bobik, łubin, soja"
+    },
+    "strawberry": {
+      "name": "Truskawki",
+      "examples": "na plantacji w gruncie"
+    },
+    "berry_shrubs": {
+      "name": "Krzewy owocowe",
+      "examples": "porzeczki, maliny, borówki"
+    },
+    "fruit_trees": {
+      "name": "Sad",
+      "examples": "jabłonie, grusze, śliwy, wiśnie"
+    },
+    "hops": {
+      "name": "Chmiel",
+      "examples": "na konstrukcji"
+    },
+    "tobacco": {
+      "name": "Tytoń",
+      "examples": "virginia, burley"
+    },
+    "field_vegetables": {
+      "name": "Warzywa gruntowe",
+      "examples": "kapusta, marchew, cebula"
+    },
+    "grassland": {
+      "name": "Łąka lub pastwisko",
+      "examples": "trwałe użytki zielone"
+    }
+  },
+  "progress": {
+    "title": "Sprawdzam wodę na polu",
+    "hint": "To trwa zwykle do 30 sekund. Nie zamykaj strony.",
+    "elapsed": "{seconds, plural, one {# sekunda} few {# sekundy} many {# sekund} other {# sekundy}}",
+    "slow": "Źródła danych odpowiadają wolniej niż zwykle. Czekam dalej.",
+    "listLabel": "Kroki analizy",
+    "state": {
+      "done": "zrobione",
+      "active": "w toku",
+      "pending": "czeka"
+    },
+    "steps": {
+      "parcel": "Pobieram granice działek",
+      "weather": "Pobieram pogodę z 10 lat",
+      "soil": "Sprawdzam glebę i ukształtowanie terenu",
+      "water": "Szukam rowów, cieków i oczek wodnych w okolicy",
+      "satellite": "Oglądam pole na zdjęciach satelitarnych",
+      "balance": "Liczę zapas wody i przygotowuję zalecenia"
+    }
+  },
+  "error": {
+    "title": "Nie udało się przygotować raportu",
+    "retry": "Spróbuj ponownie",
+    "change": "Zmień uprawę lub datę"
+  }
+}

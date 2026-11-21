@@ -5,6 +5,7 @@ import { createTranslator, IntlProvider } from 'use-intl';
 import type { ReactElement, ReactNode } from 'react';
 
 import { FULL_CATALOG as MESSAGES } from '@/i18n/full-catalog';
+import type { Namespace } from '@/i18n/namespaces';
 import type { AppLocale } from '@/lib/locale';
 
 export function IntlTestProvider({ locale = 'pl', children }: { locale?: AppLocale; children: ReactNode }) {
@@ -23,8 +24,6 @@ export function renderWithIntl(ui: ReactElement, locale: AppLocale = 'pl'): Rend
 }
 
 /** Tlumacz poza Reactem: `translator('problems')('not_found')`. */
-export function translator<
-  N extends 'problems' | 'common' | 'nav' | 'auth' | 'errors' | 'parcels' | 'design',
->(namespace: N, locale: AppLocale = 'pl') {
+export function translator<N extends Namespace>(namespace: N, locale: AppLocale = 'pl') {
   return createTranslator({ locale, messages: MESSAGES[locale], namespace });
 }

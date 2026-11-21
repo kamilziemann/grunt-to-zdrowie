@@ -1,10 +1,9 @@
-import { ArrowLeft, Hourglass, MapPinned } from 'lucide-react';
+import { ArrowLeft, MapPinned } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/navigation';
 import type { AppHref } from '@/lib/routes';
@@ -21,8 +20,8 @@ export interface AnalysisSummaryProps {
 }
 
 /**
- * Krok po wyborze dzialek: podsumowanie tego, co pojdzie do analizy wodnej. Wybor uprawy i daty oraz sama analiza
- * to nastepny etap prac - ekran mowi o tym wprost i nie pokazuje zadnych wynikow.
+ * Krok po wyborze dzialek: podsumowanie tego, co pojdzie do analizy wodnej (lista i mapa). Wybor uprawy i daty
+ * dokleja pod nim formularz z feature "analysis" (trasa `/analiza`).
  */
 export function AnalysisSummary({ ids, backHref }: AnalysisSummaryProps) {
   const t = useTranslations('parcels');
@@ -77,11 +76,6 @@ export function AnalysisSummary({ ids, backHref }: AnalysisSummaryProps) {
           <ParcelMap selected={selected.parcels} focus={focus} interactive={false} labels={mapLabels} />
         </div>
       </div>
-      <Alert>
-        <Hourglass aria-hidden="true" />
-        <AlertTitle>{t('summary.nextTitle')}</AlertTitle>
-        <AlertDescription>{t('summary.nextDescription')}</AlertDescription>
-      </Alert>
     </div>
   );
 }

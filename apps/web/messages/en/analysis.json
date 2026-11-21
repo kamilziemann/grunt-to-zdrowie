@@ -1,0 +1,105 @@
+{
+  "form": {
+    "title": "What grows on the field?",
+    "description": "Choose the crop and the day for which we check water on the field.",
+    "cropLegend": "Crop",
+    "cropMissing": "Choose a crop to continue.",
+    "dateLabel": "Analysis day",
+    "dateHint": "Today by default. You can choose any day from {min}.",
+    "today": "Today",
+    "dateErrors": {
+      "invalid": "Enter a valid date.",
+      "future": "We cannot check a future day. Choose today or an earlier day.",
+      "tooOld": "We look back at most 10 years. Choose a day from {min}."
+    },
+    "submit": "Analyse",
+    "submitHint": "The analysis usually takes up to 30 seconds."
+  },
+  "crops": {
+    "winter_wheat": {
+      "name": "Winter cereals",
+      "examples": "wheat, rye, triticale, winter barley"
+    },
+    "spring_barley": {
+      "name": "Spring cereals",
+      "examples": "barley, oats, spring wheat"
+    },
+    "maize_grain": {
+      "name": "Grain maize",
+      "examples": "including CCM"
+    },
+    "maize_silage": {
+      "name": "Silage maize",
+      "examples": "for feed or biogas"
+    },
+    "winter_rapeseed": {
+      "name": "Winter rapeseed",
+      "examples": "including turnip rape"
+    },
+    "potato": {
+      "name": "Potatoes",
+      "examples": "table, starch, seed"
+    },
+    "sugar_beet": {
+      "name": "Sugar beet",
+      "examples": "including fodder beet"
+    },
+    "pulses": {
+      "name": "Pulses",
+      "examples": "peas, field beans, lupin, soy"
+    },
+    "strawberry": {
+      "name": "Strawberries",
+      "examples": "open-field plantation"
+    },
+    "berry_shrubs": {
+      "name": "Berry bushes",
+      "examples": "currants, raspberries, blueberries"
+    },
+    "fruit_trees": {
+      "name": "Orchard",
+      "examples": "apples, pears, plums, cherries"
+    },
+    "hops": {
+      "name": "Hops",
+      "examples": "on trellises"
+    },
+    "tobacco": {
+      "name": "Tobacco",
+      "examples": "Virginia, Burley"
+    },
+    "field_vegetables": {
+      "name": "Field vegetables",
+      "examples": "cabbage, carrots, onions"
+    },
+    "grassland": {
+      "name": "Meadow or pasture",
+      "examples": "permanent grassland"
+    }
+  },
+  "progress": {
+    "title": "Checking water on the field",
+    "hint": "This usually takes up to 30 seconds. Please keep the page open.",
+    "elapsed": "{seconds, plural, one {# second} other {# seconds}}",
+    "slow": "Data sources are responding slower than usual. Still waiting.",
+    "listLabel": "Analysis steps",
+    "state": {
+      "done": "done",
+      "active": "in progress",
+      "pending": "waiting"
+    },
+    "steps": {
+      "parcel": "Fetching parcel boundaries",
+      "weather": "Fetching 10 years of weather",
+      "soil": "Checking soil and terrain",
+      "water": "Looking for ditches, streams and ponds nearby",
+      "satellite": "Looking at the field in satellite images",
+      "balance": "Calculating the water reserve and preparing advice"
+    }
+  },
+  "error": {
+    "title": "We could not prepare the report",
+    "retry": "Try again",
+    "change": "Change crop or date"
+  }
+}

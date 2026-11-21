@@ -194,3 +194,32 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * Wydruk A4 (raport wodny -> PDF dla doradcy): zawsze jasny motyw na bialym papierze, kolory ocen zachowane,
+ * rozwijane szczegoly otwarte (pierwsza linia dla rolnika, liczby dla doradcy - na papierze oba). Elementy tylko
+ * ekranowe chowa klasa `print:hidden`.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  :root,
+  :root[data-theme='dark'],
+  :root.dark {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--card);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  details::details-content {
+    content-visibility: visible;
+    display: contents;
+  }
+}

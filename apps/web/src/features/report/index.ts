@@ -1,0 +1,9 @@
+// Publiczne API feature "report": ekran raportu wodnego (`/raport`) - ocena, historia, przyczyny, zalecenia,
+// nawadnianie, zrodla i ograniczenia, z wydrukiem A4. Dane liczy feature "analysis" (POST /api/analysis); trasa
+// `routes/{-$locale}/_app/raport.tsx` i katalog /design importuja tylko stad.
+export { SAMPLE_REPORT } from './fixtures/sample-report';
+export { ReportMissing, type ReportMissingProps } from './components/report-missing';
+export { ReportScreen, type ReportScreenProps } from './components/report-screen';
+export { ReportView, type ReportViewProps } from './components/report-view';
+export { SampleBanner } from './components/sample-banner';
+export { VerdictSection } from './components/verdict-section';

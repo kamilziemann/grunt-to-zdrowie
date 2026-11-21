@@ -17,6 +17,7 @@ import { Route as Char123LocaleChar125AppSplatRouteImport } from './routes/{-$lo
 import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-$locale}/_app/_dev/route'
 import { Route as Char123LocaleChar125AppProtectedRouteRouteImport } from './routes/{-$locale}/_app/_protected/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
+import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$locale}/_app/raport'
 import { Route as Char123LocaleChar125AppSignInRouteImport } from './routes/{-$locale}/_app/sign-in'
 import { Route as Char123LocaleChar125AppSignUpRouteImport } from './routes/{-$locale}/_app/sign-up'
 import { Route as Char123LocaleChar125AppDevDesignRouteImport } from './routes/{-$locale}/_app/_dev/design'
@@ -66,6 +67,12 @@ const Char123LocaleChar125AppAnalizaRoute =
     path: '/analiza',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
+const Char123LocaleChar125AppRaportRoute =
+  Char123LocaleChar125AppRaportRouteImport.update({
+    id: '/raport',
+    path: '/raport',
+    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
+  } as any)
 const Char123LocaleChar125AppSignInRoute =
   Char123LocaleChar125AppSignInRouteImport.update({
     id: '/sign-in',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/': typeof Char123LocaleChar125AppIndexRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
@@ -121,6 +130,7 @@ export interface FileRoutesById {
   '/{-$locale}/_app/_protected': typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/_app/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/_app/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/_app/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/_app/': typeof Char123LocaleChar125AppIndexRoute
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
+    | '/{-$locale}/raport'
     | '/{-$locale}/sign-in'
     | '/{-$locale}/sign-up'
     | '/{-$locale}/'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
+    | '/{-$locale}/raport'
     | '/{-$locale}/sign-in'
     | '/{-$locale}/sign-up'
     | '/{-$locale}/design'
@@ -158,6 +170,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app/_protected'
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
+    | '/{-$locale}/_app/raport'
     | '/{-$locale}/_app/sign-in'
     | '/{-$locale}/_app/sign-up'
     | '/{-$locale}/_app/'
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppAnalizaRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
+    '/{-$locale}/_app/raport': {
+      id: '/{-$locale}/_app/raport'
+      path: '/raport'
+      fullPath: '/{-$locale}/raport'
+      preLoaderRoute: typeof Char123LocaleChar125AppRaportRouteImport
+      parentRoute: typeof Char123LocaleChar125AppRouteRoute
+    }
     '/{-$locale}/_app/sign-in': {
       id: '/{-$locale}/_app/sign-in'
       path: '/sign-in'
@@ -294,6 +314,7 @@ interface Char123LocaleChar125AppRouteRouteChildren {
   Char123LocaleChar125AppProtectedRouteRoute: typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
+  Char123LocaleChar125AppRaportRoute: typeof Char123LocaleChar125AppRaportRoute
   Char123LocaleChar125AppSignInRoute: typeof Char123LocaleChar125AppSignInRoute
   Char123LocaleChar125AppSignUpRoute: typeof Char123LocaleChar125AppSignUpRoute
   Char123LocaleChar125AppIndexRoute: typeof Char123LocaleChar125AppIndexRoute
@@ -307,6 +328,7 @@ const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRou
       Char123LocaleChar125AppProtectedRouteRouteWithChildren,
     Char123LocaleChar125AppSplatRoute: Char123LocaleChar125AppSplatRoute,
     Char123LocaleChar125AppAnalizaRoute: Char123LocaleChar125AppAnalizaRoute,
+    Char123LocaleChar125AppRaportRoute: Char123LocaleChar125AppRaportRoute,
     Char123LocaleChar125AppSignInRoute: Char123LocaleChar125AppSignInRoute,
     Char123LocaleChar125AppSignUpRoute: Char123LocaleChar125AppSignUpRoute,
     Char123LocaleChar125AppIndexRoute: Char123LocaleChar125AppIndexRoute,
