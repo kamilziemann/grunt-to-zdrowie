@@ -28,6 +28,7 @@ export function makeApp(
   // testy nigdy nie wolaja zewnetrznych zrodel analizy: domyslnie atrapy w pamieci, test podmienia pojedyncze zrodla
   const withSources = {
     hydroMapSource: null,
+    contextMapSource: null,
     responseStore: null,
     parcelRegistry: null,
     // bez zapisu raportow, zeby testy z roznymi zrodlami nie dostawaly raportu policzonego w innym tescie;

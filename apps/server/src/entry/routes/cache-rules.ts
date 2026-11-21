@@ -8,7 +8,7 @@ import type { Context } from 'hono';
 
 import type { AppEnv } from '../../services/container';
 import { privateByDefault, publicCache, purgeOnWrite } from '../middlewares';
-import { HYDRO_PATH, PARCELS_PATH, PLACES_PATH } from './paths';
+import { CONTEXT_PATH, HYDRO_PATH, PARCELS_PATH, PLACES_PATH } from './paths';
 
 /** Publiczne odczyty z polityka i tagami. */
 const PUBLIC_READS: [
@@ -25,6 +25,8 @@ const PUBLIC_READS: [
   // Obraz pola z satelity (tryb 3D): dla przeszlego dnia sie nie zmienia, a kazde liczenie to kilka zapytan do
   // Copernicus z limitem; zalezy od granic dzialek, wiec czysci go ten sam tag co dzialki.
   ['/imagery/*', 'publicData', () => [cacheTags.parcels()]],
+  // Otoczenie pola to ta sama rodzina danych (import BDOT10k) - ten sam tag, purge razem z hydrografia.
+  [`${CONTEXT_PATH}/*`, 'publicData', () => [cacheTags.hydro()]],
 ];
 
 /**

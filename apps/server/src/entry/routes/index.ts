@@ -3,6 +3,7 @@
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
 import { analysisModule } from '../../modules/analysis';
+import { contextModule } from '../../modules/context';
 import { healthModule } from '../../modules/health';
 import { hydroModule } from '../../modules/hydro';
 import { imageryModule } from '../../modules/imagery';
@@ -33,6 +34,7 @@ export function mountRoutes(app: OpenAPIHono<AppEnv>) {
     .route('/parcels', parcelsModule)
     .route('/places', placesModule)
     .route('/hydro', hydroModule)
+    .route('/context', contextModule)
     .route('/analysis', analysisModule)
     .route('/reports', reportsModule)
     .route('/imagery', imageryModule);

@@ -5,6 +5,7 @@ import { createDb, nowIso } from '@app/db';
 
 import type { DataSources } from './domain/analysis-ports';
 import type { EdgeCachePurger } from './domain/edge-cache';
+import type { ContextMapSource } from './domain/context-map-source';
 import type { HydroMapSource } from './domain/hydro-map-source';
 import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
@@ -30,12 +31,16 @@ import { createSentinelStatisticsSource, sentinelCacheTtl } from './infrastructu
 import { createSoilGridsSource, soilGridsCacheTtl } from './infrastructure/soilgrids';
 import { STATIC_TTL_S } from './domain/source-cache-policy';
 import { createTerrainTilesSource } from './infrastructure/terrain-tiles';
-import { createPostgisSurroundingsSource } from './infrastructure/surroundings-postgis';
+import {
+  createPostgisContextMapSource,
+  createPostgisSurroundingsSource,
+} from './infrastructure/surroundings-postgis';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createReportsRepository } from './repositories/reports';
 import { isoDateInPoland } from './domain/iso-date';
 import { createCopernicusImagerySource } from './infrastructure/copernicus-imagery';
 import { createAnalysisService } from './services/analysis';
+import { createContextService } from './services/context';
 import { createHydroService } from './services/hydro';
 import type { Container, ContainerDeps } from './services/container';
 import { createImageryService } from './services/imagery';
@@ -57,6 +62,8 @@ export interface ContainerOverrides {
   placeSource?: PlaceSource;
   /** kafle hydrografii do mapy; null = brak bazy (testy: kafle w pamieci albo brak konfiguracji) */
   hydroMapSource?: HydroMapSource | null;
+  /** kafle otoczenia pola do mapy; null = brak bazy (testy: kafle w pamieci albo brak konfiguracji) */
+  contextMapSource?: ContextMapSource | null;
   /** pamiec odpowiedzi zrodel analizy; null = bez pamieci (domyslnie Cache API Workera, gdy jest) */
   responseStore?: ResponseStore | null;
   /** ewidencja (klasouzytki) dla analizy; null = bez ewidencji (testy: bez WFS GUGiK) */
@@ -83,6 +90,13 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       overrides.hydroMapSource !== undefined
         ? overrides.hydroMapSource
         : sqlRunner && createPostgisHydroMapSource({ run: sqlRunner }),
+  });
+
+  const context = createContextService({
+    source:
+      overrides.contextMapSource !== undefined
+        ? overrides.contextMapSource
+        : sqlRunner && createPostgisContextMapSource({ run: sqlRunner }),
   });
 
   // Wszystkie zrodla sa prawdziwe: pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids), teren (kafle
@@ -138,6 +152,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       source: createCopernicusImagerySource(copernicusKeys(deps)),
       now,
     }),
+    context,
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),
   };
 }

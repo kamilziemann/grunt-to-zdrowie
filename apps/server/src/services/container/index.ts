@@ -7,6 +7,7 @@ import type { Logger, TraceContext } from '@app/logger';
 
 import type { EdgeCachePurger } from '../../domain/edge-cache';
 import type { AnalysisService } from '../analysis';
+import type { ContextService } from '../context';
 import type { HydroService } from '../hydro';
 import type { ImageryService } from '../imagery';
 import type { ParcelsService } from '../parcels';
@@ -23,6 +24,8 @@ export interface Container {
   hydro: HydroService;
   /** obrazy pola z satelity (pokaz trybu 3D): kondycja roslin NDVI */
   imagery: ImageryService;
+  /** otoczenie pola BDOT10k do mapy (kafle drzew, sieci wodnej i obszarow chronionych) */
+  context: ContextService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
   edgeCache: EdgeCachePurger;
 }
