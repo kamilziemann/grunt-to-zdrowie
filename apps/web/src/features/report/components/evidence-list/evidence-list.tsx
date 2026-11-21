@@ -1,43 +1,68 @@
 import type { Evidence } from '@app/contracts';
 import { useFormatter, useTranslations } from 'use-intl';
 
-import { evidenceDisplay, isKnownMetric } from '../../utils/report-labels';
+import { romanCategory } from '../../utils/report-data';
+import { evidenceDisplay, isKnownMetric, referenceRole } from '../../utils/report-labels';
+
+/** Promien szukania obiektow wokol pola, gdy dowod go nie podaje (tak liczy silnik). */
+const DEFAULT_RADIUS_M = 500;
 
 /**
  * Liczby, na ktorych opiera sie wniosek: miara, wartosc, odniesienie i zrodlo. Nieznana miara albo jednostka nie
- * trafia na ekran jako identyfikator - zostaje ogolna nazwa i sama liczba.
+ * trafia na ekran jako identyfikator - zostaje ogolna nazwa i sama liczba. Liczba obiektow niesie promien w nazwie
+ * ("Mokradla w promieniu 500 m: 2"), sezony - z ilu sezonow ("3 z 10 sezonow").
  */
 export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
   const t = useTranslations('report');
   const format = useFormatter();
-  const withUnit = (value: number, unit: string) => {
-    const shown = evidenceDisplay(value, unit);
+  const number = (value: number, digits: number) => format.number(value, { maximumFractionDigits: digits });
+  const withUnit = (item: Evidence, value: number) => {
+    const shown = evidenceDisplay(value, item.unit);
 
-    return t(`evidence.units.${shown.unit}`, {
-      value: format.number(shown.value, { maximumFractionDigits: shown.unit === 'percent' ? 0 : 1 }),
-    });
+    switch (shown.unit) {
+      case 'category':
+        return t('evidence.units.category', {
+          roman: romanCategory(shown.value),
+          name: t(`verdict.soilNames.${String(shown.value)}` as 'verdict.soilNames.1'),
+        });
+      case 'seasons':
+        return item.reference === undefined
+          ? t('evidence.units.seasons', { value: shown.value })
+          : t('evidence.units.seasonsOf', { value: shown.value, total: item.reference });
+      case 'index':
+        return t('evidence.units.index', { value: number(shown.value, 2) });
+      default:
+        return t(`evidence.units.${shown.unit}`, {
+          value: number(shown.value, shown.unit === 'percent' || shown.unit === 'count' ? 0 : 1),
+        });
+    }
   };
 
   return (
     <ul className="flex flex-col gap-1.5">
-      {evidence.map((item) => (
-        <li key={`${item.metric}:${item.source}:${item.value}`} className="flex flex-col">
-          <span>
-            {t('evidence.value', {
-              metric: isKnownMetric(item.metric)
-                ? t(`evidence.metrics.${item.metric}`)
-                : t('evidence.unknownMetric'),
-              value: withUnit(item.value, item.unit),
-            })}
-          </span>
-          <span className="text-muted-foreground">
-            {item.reference === undefined
-              ? null
-              : `${t('evidence.reference', { reference: withUnit(item.reference, item.unit) })}; `}
-            {t('evidence.source', { source: t(`sources.categories.${item.source}`) })}
-          </span>
-        </li>
-      ))}
+      {evidence.map((item) => {
+        const role = referenceRole(evidenceDisplay(item.value, item.unit).unit);
+        const radius = role === 'radius' ? (item.reference ?? DEFAULT_RADIUS_M) : DEFAULT_RADIUS_M;
+
+        return (
+          <li key={`${item.metric}:${item.source}:${item.value}`} className="flex flex-col">
+            <span>
+              {t('evidence.value', {
+                metric: isKnownMetric(item.metric)
+                  ? t(`evidence.metrics.${item.metric}`, { radius: number(radius, 0) })
+                  : t('evidence.unknownMetric'),
+                value: withUnit(item, item.value),
+              })}
+            </span>
+            <span className="text-muted-foreground">
+              {item.reference === undefined || role !== 'reference'
+                ? null
+                : `${t('evidence.reference', { reference: withUnit(item, item.reference) })}; `}
+              {t('evidence.source', { source: t(`sources.categories.${item.source}`) })}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

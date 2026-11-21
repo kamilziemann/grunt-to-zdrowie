@@ -6,6 +6,7 @@ import {
   type Cause,
   type ClimaticBalance,
   type History,
+  type LimitationId,
   type Recommendation,
   type ReportPart,
   type RootZone,
@@ -45,6 +46,59 @@ export function needsSampleBanner(report: WaterReport): boolean {
     report.sources.some((source) => source.sample) ||
     (report.meta.sample && report.meta.sampleParts === undefined)
   );
+}
+
+/**
+ * Jak szeroko siegaja dane przykladowe: `all` = caly raport (silnik nie mowi, ktore czesci, wszystkie zrodla albo
+ * pogoda sa atrapa - na pogodzie stoi cala ocena), `some` = jedno czy dwa zrodla, reszta prawdziwa; null = baner
+ * niepotrzebny.
+ */
+export function sampleScope(report: WaterReport): 'all' | 'some' | null {
+  if (!needsSampleBanner(report)) return null;
+  const samples = sampleSources(report);
+
+  if (report.meta.sample && report.meta.sampleParts === undefined) return 'all';
+
+  if (samples.length === report.sources.length || samples.some((source) => source.id === 'meteo'))
+    return 'all';
+
+  return 'some';
+}
+
+/** Ograniczenia, ktore tlumacza niska pewnosc oceny (braki i szacunki) - w kolejnosci wagi. */
+const CAVEAT_LIMITATIONS = [
+  'meteo_missing',
+  'soil_missing',
+  'soil_estimated',
+  'hydro_missing',
+  'vegetation_missing',
+  'terrain_missing',
+  'meteo_coarse_grid',
+  'balance_estimated',
+] as const satisfies readonly LimitationId[];
+
+export type CaveatReason = (typeof CAVEAT_LIMITATIONS)[number] | 'meteo_partial';
+
+/**
+ * Zastrzezenie przy werdykcie: przy niskiej pewnosci "Woda w normie" nie moze brzmiec uspokajajaco. Zwraca powody
+ * (braki danych i szacunki) albo null, gdy pewnosc nie jest niska albo poziomu nie oceniano (poza sezonem, brak).
+ */
+export function verdictCaveat(report: WaterReport): { reasons: CaveatReason[] } | null {
+  const { level, confidence } = report.assessment;
+
+  if (confidence !== 'low' || level === 'out_of_season' || level === 'unknown') return null;
+  const limitations = new Set(report.limitations);
+  const reasons: CaveatReason[] = CAVEAT_LIMITATIONS.filter((id) => limitations.has(id));
+  const meteo = report.sources.find((source) => source.id === 'meteo');
+
+  if (meteo?.status === 'partial' && !limitations.has('meteo_missing')) reasons.splice(1, 0, 'meteo_partial');
+
+  return { reasons };
+}
+
+/** Kategoria gleby IUNG cyframi rzymskimi (I-IV). */
+export function romanCategory(category: number): string {
+  return ['I', 'II', 'III', 'IV'][category - 1] ?? String(category);
 }
 
 /** Zalecenia od najwazniejszego (priorytet 1), przy rownym priorytecie kolejnosc z silnika. */

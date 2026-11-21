@@ -26,8 +26,9 @@ function isWebUrl(url: string | undefined): url is `https://${string}` | `http:/
 }
 
 /**
- * Sekcja 7 - wiarygodnosc: pewnosc oceny, kazde zrodlo z dostawca, stanem (brak i dane niepelne nazwane wprost),
- * znacznikiem atrapy, zakresem dat, dokladnoscia i licencja, lista ograniczen i metryczka raportu.
+ * Sekcja 7 - wiarygodnosc: pewnosc oceny, kazde zrodlo z dostawca, stanem (brak i dane niepelne nazwane wprost
+ * zdaniem z tlumaczen), znacznikiem atrapy, zakresem dat, dokladnoscia i licencja, lista ograniczen i metryczka
+ * raportu. Techniczna nota silnika (bywa po angielsku) jest tylko w szczegolach dla doradcy.
  */
 export function SourcesSection({ report }: { report: WaterReport }) {
   const t = useTranslations('report.sources');
@@ -90,8 +91,14 @@ export function SourcesSection({ report }: { report: WaterReport }) {
               </div>
               <p className="font-medium">{source.provider}</p>
               {facts.length > 0 && <p className="text-muted-foreground">{facts.join(' · ')}</p>}
-              {source.note && source.status !== 'ok' && (
-                <p className="text-muted-foreground">{source.note}</p>
+              {source.status !== 'ok' && <p>{t(`statusNote.${source.status}`)}</p>}
+              {source.note && (
+                <details className="group text-muted-foreground" data-testid="source-note">
+                  <summary className="flex min-h-11 w-fit cursor-pointer items-center font-medium text-foreground print:min-h-0">
+                    {t('advisorDetails')}
+                  </summary>
+                  <p className="break-words">{source.note}</p>
+                </details>
               )}
               {isWebUrl(source.url) && (
                 <Link

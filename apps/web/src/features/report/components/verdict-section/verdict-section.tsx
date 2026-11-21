@@ -14,7 +14,15 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { isoDay, percentOf, scenarioSummary, soilWater } from '../../utils/report-data';
+import {
+  isoDay,
+  percentOf,
+  romanCategory as roman,
+  scenarioSummary,
+  soilWater,
+  verdictCaveat,
+  type CaveatReason,
+} from '../../utils/report-data';
 import { ReportDetails } from '../report-section';
 
 /** Kolor, ikona i slowo dla poziomu - nigdy sam kolor (WCAG 1.4.1). Klasy jako literaly (Tailwind skanuje zrodla). */
@@ -65,12 +73,6 @@ export function LevelBadge({ level, className }: { level: AssessmentLevel; class
   );
 }
 
-const ROMAN = ['I', 'II', 'III', 'IV'] as const;
-
-function roman(category: number): string {
-  return ROMAN[category - 1] ?? String(category);
-}
-
 function scenarioResult(belowThreshold: boolean | null): 'none' | 'drought' | 'ok' {
   if (belowThreshold === null) return 'none';
 
@@ -98,6 +100,10 @@ export function VerdictSection({ report }: { report: WaterReport }) {
   const vegetationSample = report.sources.some((source) => source.id === 'vegetation' && source.sample);
   const scenarios = scenarioSummary(balance);
   const romans = (categories: number[]) => categories.map(roman).join(', ');
+  const caveat = verdictCaveat(report);
+  const soilUncertain = caveat?.reasons.some(
+    (reason) => reason === 'soil_missing' || reason === 'soil_estimated',
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -119,8 +125,9 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           {t(`levels.${assessment.level}`)}
         </p>
         <p className="text-xl leading-snug font-semibold text-balance sm:text-2xl">
-          {t(`sentences.${assessment.level}`)}
+          {caveat && assessment.level === 'ok' ? t('caveat.sentenceOk') : t(`sentences.${assessment.level}`)}
         </p>
+        {caveat && <VerdictCaveat reasons={caveat.reasons} scenarios={soilUncertain ? scenarios : null} />}
         <p className="text-sm text-muted-foreground">
           {t('asOf', {
             date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
@@ -308,6 +315,58 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           )}
         </dl>
       </ReportDetails>
+    </div>
+  );
+}
+
+/**
+ * Zastrzezenie w karcie werdyktu przy niskiej pewnosci: co jest niepewne (braki i szacunki z `limitations`), czy
+ * rodzaj gleby zmienia wynik i co zrobic przed decyzja. Bez niego "Woda w normie" brzmi jak pewnik.
+ */
+function VerdictCaveat({
+  reasons,
+  scenarios,
+}: {
+  reasons: readonly CaveatReason[];
+  scenarios: ReturnType<typeof scenarioSummary>;
+}) {
+  const t = useTranslations('report.verdict.caveat');
+  const tVerdict = useTranslations('report.verdict');
+  const romans = (categories: number[]) => categories.map(roman).join(', ');
+  // scenariusz ma sens tylko wtedy, gdy wybor gleby zmienia werdykt
+  const scenario =
+    scenarios && (scenarios.kind === 'lighter' || scenarios.kind === 'mixed') ? scenarios : null;
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-lg border-2 border-warning bg-background/80 p-3 text-sm sm:p-4"
+      data-testid="verdict-caveat"
+    >
+      <p className="flex items-start gap-2 text-base font-semibold">
+        <TriangleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-warning" />
+        {t('title')}
+      </p>
+      {reasons.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <p>{t('why')}</p>
+          <ul className="flex list-disc flex-col gap-0.5 pl-5">
+            {reasons.map((reason) => (
+              <li key={reason} data-reason={reason}>
+                {t(`reasons.${reason}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {scenario && (
+        <p>
+          {tVerdict(`scenarioSummary.${scenario.kind}`, {
+            drought: romans(scenario.drought),
+            ok: romans(scenario.ok),
+          })}
+        </p>
+      )}
+      <p className="font-medium">{t('check')}</p>
     </div>
   );
 }

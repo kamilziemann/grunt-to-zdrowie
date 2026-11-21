@@ -22,6 +22,18 @@ export const REPORT_METRICS = [
   'depletion_share',
   'ndvi_anomaly',
   'ndmi_anomaly',
+  'precip_period',
+  'et_period',
+  'soil_category',
+  'ditch_length_in_field_m',
+  'ditches_in_radius',
+  'water_bodies_in_radius',
+  'wetlands_in_radius',
+  'drought_seasons',
+  'deficit_seasons',
+  'season_et_deficit_median',
+  'nearest_wetland_m',
+  'organic_matter_pct',
 ] as const;
 
 export type ReportMetric = (typeof REPORT_METRICS)[number];
@@ -30,7 +42,29 @@ export function isKnownMetric(metric: string): metric is ReportMetric {
   return (REPORT_METRICS as readonly string[]).includes(metric);
 }
 
-export type EvidenceUnit = 'mm' | 'mmPerM' | 'm' | 'm3' | 'ha' | 'percent' | 'days' | 'none';
+export type EvidenceUnit =
+  | 'mm'
+  | 'mmPerM'
+  | 'm'
+  | 'm3'
+  | 'ha'
+  | 'percent'
+  | 'days'
+  | 'count'
+  | 'seasons'
+  | 'category'
+  | 'index'
+  | 'none';
+
+/**
+ * Jak czytac `reference` dowodu: przy liczbie obiektow to promien szukania (w nazwie miary), przy sezonach - z ilu
+ * sezonow (w wartosci); pozostale jednostki maja zwykle odniesienie (prog, mediana, norma) w osobnej linii.
+ */
+export function referenceRole(unit: EvidenceUnit): 'radius' | 'total' | 'reference' {
+  if (unit === 'count') return 'radius';
+
+  return unit === 'seasons' ? 'total' : 'reference';
+}
 
 /**
  * Wartosc dowodu gotowa do sformatowania: udzial 0-1 (`share`) -> procent, reszta bez zmian; `unit` = klucz
@@ -56,6 +90,14 @@ export function evidenceDisplay(value: number, unit: string): { value: number; u
     case 'days':
     case 'd':
       return { value, unit: 'days' };
+    case 'count':
+      return { value, unit: 'count' };
+    case 'seasons':
+      return { value, unit: 'seasons' };
+    case 'category':
+      return { value, unit: 'category' };
+    case 'index':
+      return { value, unit: 'index' };
     default:
       return { value, unit: 'none' };
   }

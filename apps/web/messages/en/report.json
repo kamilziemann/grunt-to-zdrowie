@@ -36,7 +36,18 @@
     },
     "sectionBadge": "Sample rules",
     "sectionNote": "This part is still computed with simplified rules, not the target method. Treat it as a preview.",
-    "factBadge": "placeholder"
+    "factBadge": "placeholder",
+    "someTitle": "{count, plural, one {One data source is still a placeholder} other {# data sources are still placeholders}}: {sources}",
+    "someDescription": "The other data comes from real sources for this field. The placeholder only affects: {impacts}.",
+    "impacts": {
+      "parcel": "the field boundary",
+      "meteo": "the whole assessment",
+      "forecast": "irrigation timing",
+      "soil": "soil water and the drought threshold",
+      "terrain": "surface runoff and field zones",
+      "hydro": "advice on ditches and water",
+      "vegetation": "the satellite confirmation"
+    }
   },
   "status": {
     "partial": "Some data is missing, so the result is less certain. Details are at the end of the report.",
@@ -153,6 +164,23 @@
       "drought": "drought",
       "ok": "no drought",
       "none": "no threshold"
+    },
+    "caveat": {
+      "title": "Careful: this assessment is uncertain",
+      "why": "Confidence is low because:",
+      "reasons": {
+        "meteo_missing": "weather data is missing",
+        "meteo_partial": "the weather data has gaps",
+        "soil_missing": "there is no soil data for this field – we assumed a typical soil",
+        "soil_estimated": "the soil type is estimated from a map, not measured",
+        "hydro_missing": "there is no data on ditches and streams nearby",
+        "vegetation_missing": "there is no satellite image to confirm the result",
+        "terrain_missing": "there is no terrain model",
+        "meteo_coarse_grid": "the weather comes from a grid with cells of tens of kilometres",
+        "balance_estimated": "the water balance is our own estimate, not the IUNG bulletin"
+      },
+      "check": "Before deciding, check soil moisture in the field, e.g. with a spade at root depth.",
+      "sentenceOk": "The available data suggests the plants have enough soil water. The result is uncertain, though."
     }
   },
   "history": {
@@ -249,7 +277,19 @@
       "stress_days_30": "Water stress days in the last 30 days",
       "depletion_share": "Root-zone water depletion",
       "ndvi_anomaly": "NDVI deviation from previous years",
-      "ndmi_anomaly": "NDMI deviation from previous years"
+      "ndmi_anomaly": "NDMI deviation from previous years",
+      "precip_period": "Rainfall over 60 days",
+      "et_period": "Evaporation over 60 days (evapotranspiration)",
+      "soil_category": "Soil category (IUNG)",
+      "ditch_length_in_field_m": "Length of ditches in the field",
+      "ditches_in_radius": "Ditch sections within {radius} m",
+      "water_bodies_in_radius": "Lakes and ponds within {radius} m",
+      "wetlands_in_radius": "Wetlands within {radius} m",
+      "drought_seasons": "Seasons with agricultural drought (IUNG thresholds)",
+      "deficit_seasons": "Seasons with a water deficit",
+      "season_et_deficit_median": "Typical seasonal water deficit (median)",
+      "nearest_wetland_m": "Distance to the nearest wetland",
+      "organic_matter_pct": "Organic matter in the topsoil"
     },
     "unknownMetric": "Other indicator",
     "units": {
@@ -260,7 +300,12 @@
       "ha": "{value} ha",
       "percent": "{value}%",
       "days": "{value} days",
-      "none": "{value}"
+      "none": "{value}",
+      "count": "{value}",
+      "seasons": "{value, plural, one {# season} other {# seasons}}",
+      "seasonsOf": "{value} of {total} seasons",
+      "category": "{roman} ({name})",
+      "index": "{value}"
     }
   },
   "recommendations": {
@@ -421,7 +466,12 @@
       "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
       "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth."
     },
-    "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s."
+    "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s.",
+    "statusNote": {
+      "partial": "Some data from this source is missing. The result may be less accurate.",
+      "missing": "This source returned no data for this place. The report is computed without it and confidence is lower."
+    },
+    "advisorDetails": "Details for advisors"
   },
   "farm": {
     "metaTitle": "Farm – parcel assessment",
