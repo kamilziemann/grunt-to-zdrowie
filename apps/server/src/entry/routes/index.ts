@@ -2,6 +2,7 @@
 // wszystkie trasy. Nowy modul = jedna linia `.route('/sciezka', modul)`.
 import type { OpenAPIHono } from '@hono/zod-openapi';
 
+import { analysisModule } from '../../modules/analysis';
 import { healthModule } from '../../modules/health';
 import { meModule } from '../../modules/me';
 import { parcelsModule } from '../../modules/parcels';
@@ -27,5 +28,6 @@ export function mountRoutes(app: OpenAPIHono<AppEnv>) {
     .route('/telemetry', telemetryModule)
     .route('/me', meModule)
     .route('/parcels', parcelsModule)
-    .route('/places', placesModule);
+    .route('/places', placesModule)
+    .route('/analysis', analysisModule);
 }

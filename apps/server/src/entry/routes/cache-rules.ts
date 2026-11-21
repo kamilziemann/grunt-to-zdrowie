@@ -24,7 +24,7 @@ const PUBLIC_READS: [
 
 /**
  * Mutacje, ktore zmieniaja to, co widzi anonimowy odczyt: prefiks trasy -> tagi do wyczyszczenia. Dzis pusto - API
- * tylko czyta zrodla zewnetrzne.
+ * tylko czyta zrodla zewnetrzne, a analiza (POST) niczego publicznego nie zapisuje.
  */
 const PURGES: [prefix: string, tags: string[]][] = [];
 

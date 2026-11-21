@@ -3,14 +3,18 @@
 // podmienic infrastrukture na faki bez dotykania serwisow.
 import { nowIso } from '@app/db';
 
+import type { DataSources } from './domain/analysis-ports';
 import type { EdgeCachePurger } from './domain/edge-cache';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
 import { withFallback, type ParcelSource } from './domain/parcel-source';
+import { sampleStages } from './domain/sample-stages';
 import type { PlaceSource } from './domain/place-source';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
 import { createEgibWfsOutlineSource, createEgibWfsParcelSource } from './infrastructure/egib-wfs';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
+import { createSampleSources } from './infrastructure/sample-sources';
 import { createUldkParcelSource } from './infrastructure/uldk';
+import { createAnalysisService } from './services/analysis';
 import type { Container, ContainerDeps } from './services/container';
 import { createParcelsService } from './services/parcels';
 import { createPlacesService } from './services/places';
@@ -24,6 +28,8 @@ export interface ContainerOverrides {
   parcelSource?: ParcelSource;
   /** obrysy dzialek dla obszaru (testy: dzialki w pamieci zamiast WFS GUGiK) */
   parcelOutlineSource?: ParcelOutlineSource;
+  /** zrodla danych analizy - podmiana pojedynczych zrodel (testy: zrodlo, ktore milczy albo sie spoznia) */
+  analysisSources?: Partial<DataSources>;
   /** geokoder (testy: miejsca w pamieci zamiast Nominatim) */
   placeSource?: PlaceSource;
 }
@@ -40,7 +46,17 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
 
+  // Zrodla danych i etapy obliczen analizy to na razie wersje przykladowe (raport niesie `meta.sample`); pakiety
+  // planu docs/plans/silnik-analizy-i-raport.md podmieniaja je tutaj pojedynczo na wlasciwe adaptery i obliczenia.
+  const analysis = createAnalysisService({
+    parcels,
+    sources: { ...createSampleSources(), ...overrides.analysisSources },
+    stages: sampleStages,
+    now,
+  });
+
   return {
+    analysis,
     parcels,
     places,
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),

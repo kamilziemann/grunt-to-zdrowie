@@ -6,12 +6,15 @@ import type { RawServerEnv, ServerVars } from '@app/env/server';
 import type { Logger, TraceContext } from '@app/logger';
 
 import type { EdgeCachePurger } from '../../domain/edge-cache';
+import type { AnalysisService } from '../analysis';
 import type { ParcelsService } from '../parcels';
 import type { PlacesService } from '../places';
 
 export interface Container {
   /** dzialki ewidencyjne: wyszukiwanie i geometria (zrodlo: ULDK GUGiK) */
   parcels: ParcelsService;
+  /** analiza wodna pola: dane ze zrodel -> ocena, historia, przyczyny, zalecenia */
+  analysis: AnalysisService;
   /** miejsca po adresie albo nazwie (geokoder) */
   places: PlacesService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
