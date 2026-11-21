@@ -10,6 +10,7 @@ import {
   CDSE_TOKEN_URL,
   createSentinelStatisticsSource,
   parseRaster,
+  fieldPixelCount,
   parseStatistics,
   rasterBody,
   rasterSize,
@@ -75,6 +76,36 @@ function replay(
 }
 
 describe('parseStatistics', () => {
+  // 080904_5.0001.349/1 (Chwalim, 19,3 ha): raster 67 x 64 px, pole to ok. 45% prostokata - API liczy piksele poza
+  // poligonem jako brak danych, wiec bezchmurny dzien mial "48% czystych pikseli" i odpadal przy progu 60%
+  it('udzial czystych pikseli wzgledem pola, nie prostokata rastra (dzialka ukosna)', () => {
+    const day = (noDataCount: number) => ({
+      interval: { from: '2023-06-12T00:00:00Z' },
+      outputs: {
+        indices: {
+          bands: {
+            ndvi: { stats: { mean: 0.71, sampleCount: 4288, noDataCount } },
+            ndmi: { stats: { mean: 0.22, sampleCount: 4288, noDataCount } },
+          },
+        },
+      },
+    });
+    const chwalim = {
+      areaHa: 19.3461,
+      bbox: [15.82237, 52.03931, 15.832207, 52.04504] as [number, number, number, number],
+    };
+    const pixels = fieldPixelCount(chwalim);
+
+    expect(pixels).toBeGreaterThan(1800);
+    expect(pixels).toBeLessThan(2100);
+    // 2058 czystych pikseli z 4288 w prostokacie = 0,48 prostokata, ale cale pole
+    expect(parseStatistics({ data: [day(2230)] })).toEqual([]);
+    expect(parseStatistics({ data: [day(2230)] }, pixels)[0]).toMatchObject({ validShare: 1, pixels: 2058 });
+    // 32% prostokata bez chmur (dzien czesciowo zachmurzony) = ok. 70% pola - obserwacja sie liczy
+    expect(parseStatistics({ data: [day(2916)] }, pixels)[0]?.validShare).toBeGreaterThan(0.6);
+    expect(parseStatistics({ data: [day(3900)] }, pixels)).toEqual([]);
+  });
+
   it('zostawia dni z co najmniej 60% czystych pikseli; srednie zaokraglone, udzial i liczba pikseli', () => {
     const observations = parseStatistics(BODY);
 

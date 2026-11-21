@@ -131,6 +131,22 @@ export function windowsFor(date: string): Window[] {
   ];
 }
 
+/**
+ * Ile pikseli rastra statystyk lezy w samym polu. API liczy `sampleCount` dla calego prostokata rastra, a piksele
+ * poza poligonem oddaje jako `noDataCount` - dzialka ukosna albo trojkatna (349/1 w Chwalimiu: 45% prostokata)
+ * nigdy nie mialaby 60% "czystych" pikseli, choc niebo nad nia jest bezchmurne.
+ */
+export function fieldPixelCount(field: Pick<FieldArea, 'bbox' | 'areaHa'>): number {
+  const [west, south, east, north] = field.bbox;
+  const { width, height } = rasterSize(field.bbox);
+  const metersPerDegLat = 111_320;
+  const metersPerDegLng = metersPerDegLat * Math.cos((((south + north) / 2) * Math.PI) / 180);
+  const pixelM2 =
+    (((east - west) * metersPerDegLng) / width) * (((north - south) * metersPerDegLat) / height);
+
+  return Math.max(1, Math.min(width * height, Math.round((field.areaHa * 10_000) / pixelM2)));
+}
+
 /** Wymiary rastra w pikselach 10 m dla prostokata pola. */
 export function rasterSize(bbox: FieldArea['bbox']): { width: number; height: number } {
   const [west, south, east, north] = bbox;
@@ -260,8 +276,11 @@ export function statisticsBody(field: FieldArea, window: Window): unknown {
 
 const round = (value: number, digits = 3): number => Number(value.toFixed(digits));
 
-/** Dni z czysta scena: srednie pola, udzial i liczba czystych pikseli. */
-export function parseStatistics(body: unknown): VegetationObservation[] {
+/**
+ * Dni z czysta scena: srednie pola, udzial i liczba czystych pikseli. Udzial liczymy wzgledem pikseli pola
+ * (`fieldPixels`), nie calego prostokata rastra; bez tej liczby - wzgledem prostokata (pole prostokatne).
+ */
+export function parseStatistics(body: unknown, fieldPixels?: number): VegetationObservation[] {
   const data = (body as StatisticsResponse).data ?? [];
 
   return data.flatMap((item) => {
@@ -274,7 +293,7 @@ export function parseStatistics(body: unknown): VegetationObservation[] {
 
     if (!date || total === 0 || valid <= 0) return [];
 
-    const validShare = valid / total;
+    const validShare = Math.min(1, valid / Math.min(total, fieldPixels ?? total));
 
     if (validShare < MIN_VALID_SHARE || valid < Math.min(MIN_PIXELS, total)) return [];
 
@@ -430,7 +449,11 @@ export function createSentinelStatisticsSource({
             const response = await withRetryOn429(request(window));
 
             return response.ok
-              ? { window, observations: parseStatistics(await response.json()), status: response.status }
+              ? {
+                  window,
+                  observations: parseStatistics(await response.json(), fieldPixelCount(field)),
+                  status: response.status,
+                }
               : { window, observations: null, status: response.status };
           }),
           CONCURRENCY,
