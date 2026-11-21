@@ -38,7 +38,7 @@ test.describe('działki', () => {
     );
     await expect(examples.locator('[data-example="dry"]')).toHaveAttribute(
       'href',
-      /uprawa=spring_barley&data=2019-06-30/,
+      /uprawa=spring_barley&data=2023-06-20/,
     );
     await expect(examples.locator('[data-example="wet"]')).toHaveAttribute(
       'href',

@@ -8,15 +8,16 @@ import { cn } from '@/lib/utils/cn';
 
 /**
  * Przyklady dla jury i ciekawych - prawdziwe dzialki rolne (grunty orne wg ewidencji), kazda pokazuje inna sytuacje
- * (sprawdzone na zywo w silniku 0.3.0):
- * - `ditch`: Chwalim 349/1, pszenica ozima, 15.06.2018 - row przez pole (428 m), zastawka, 4 dawki po 30 l/m2;
- * - `dry`: Lyse (Kurpie) 254, jeczmien jary, 30.06.2019 - grunty klasy V-VI, 17% zapasu wody, ryzyko suszy;
+ * (sprawdzone na zywo w silniku 0.5.0, 2026-11-22):
+ * - `ditch`: Chwalim 349/1, pszenica ozima, 15.06.2018 - susza, row przez pole (428 m), zastawka, plan dawek;
+ * - `dry`: Lyse (Kurpie) 254, jeczmien jary, 20.06.2023 - grunty klasy V-VI, susza (30.06.2019 daje juz tylko
+ *   "obserwuj" po zmianie progow w silniku 0.5.0);
  * - `wet`: Lyse 39/2 (laki i grunty orne), laka, 20.09.2017 - nadmiar wody (KBW ok. +97 mm);
  * - `today`: Sterdyn 178, pszenica ozima, dzisiejsza data - poza sezonem raport mowi to wprost.
  */
 export const EXAMPLE_REPORTS = {
   ditch: routes.report({ dzialki: '080904_5.0001.349/1', uprawa: 'winter_wheat', data: '2018-06-15' }),
-  dry: routes.report({ dzialki: '141507_2.0019.254', uprawa: 'spring_barley', data: '2019-06-30' }),
+  dry: routes.report({ dzialki: '141507_2.0019.254', uprawa: 'spring_barley', data: '2023-06-20' }),
   wet: routes.report({ dzialki: '141507_2.0010.39/2', uprawa: 'grassland', data: '2017-09-20' }),
 } as const;
 
