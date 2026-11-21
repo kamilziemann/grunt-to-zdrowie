@@ -272,6 +272,18 @@ describe('recommend z otoczeniem pola', () => {
     );
     // bez danych o drzewach - jak dotad, zalecenie zostaje
     expect(measures({}).map((item) => item.measure)).toContain('field_margin_trees');
+
+    // ta sama miara z przyczyny i z reguly - w zaleceniu raz
+    const fromCauses = landscape.map((item) => ({
+      ...item,
+      evidence: [{ metric: 'wooded_edge_m', value: 0, unit: 'm', reference: 1900, source: 'hydro' as const }],
+    }));
+
+    expect(
+      measures({ surroundings: OPEN_FIELD }, fromCauses)
+        .find((item) => item.measure === 'field_margin_trees')
+        ?.evidence.filter((item) => item.metric === 'wooded_edge_m'),
+    ).toHaveLength(1);
   });
 
   it('zastawka: pytanie o istniejace urzadzenie, jaz 347 m z pytaniem do zarzadcy, styk rowu z rura', () => {

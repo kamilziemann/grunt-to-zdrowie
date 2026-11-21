@@ -284,4 +284,13 @@ describe('describeZone', () => {
     );
     expect(describeZone({ ...zone, kind: 'typical', ndmiDelta: 0.3 })).not.toContain('inny użytek');
   });
+
+  it('polder (Zulawy): zaglebienie z modelu terenu opisane jako obnizenie odwadniane rowami', () => {
+    const hollow: Zone = { ...zone, kind: 'depression', relief: 'hollow', position: 'nw', volumeM3: 11_037 };
+
+    expect(describeZone(hollow)).toMatch(/^Zagłębienie bez odpływu w obniżeniu/);
+    expect(describeZone(hollow, { polder: true })).toBe(
+      'Obniżenie na terenie odwadnianym rowami (polder) w obniżeniu, w północno-zachodniej części pola, ok. 4,0 ha, pojemność ok. 11037 m³',
+    );
+  });
 });

@@ -387,7 +387,14 @@ function fromRule(
 
   if (matched.length === 0 || (rule.when && !rule.when(input))) return null;
 
-  const evidence = [...matched.flatMap((cause) => cause.evidence), ...(rule.extraEvidence?.(input) ?? [])];
+  // ta sama miara z dwoch przyczyn (albo z przyczyny i reguly) idzie do zalecenia raz
+  const evidence = [
+    ...matched.flatMap((cause) => cause.evidence),
+    ...(rule.extraEvidence?.(input) ?? []),
+  ].filter(
+    (item, index, all) =>
+      all.findIndex((other) => other.metric === item.metric && other.source === item.source) === index,
+  );
   const [first, ...rest] = evidence;
 
   if (!first) return null;

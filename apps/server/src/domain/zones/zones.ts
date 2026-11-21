@@ -16,6 +16,7 @@ import {
   type GridSpec,
 } from '../field-grid';
 import { cellFeatures, type CellFeatures } from './cell-features';
+import { drainedLowland } from '../drained-lowland';
 import { compass, describeSegment, describeZone } from './describe';
 
 /** ponizej 0,5 ha strefy bylyby pojedynczymi pikselami - mowimy wprost, ze pole jest za male */
@@ -413,7 +414,20 @@ export function fieldZones(input: StageInput): ZoneMap | null {
     return { layout: 'zones', ...base, zones: [], reason: 'no_spatial_data', basis };
   }
 
-  return { layout: 'zones', ...base, basis, ...images, ...zonesFromCells(spec, cells, features) };
+  const map = zonesFromCells(spec, cells, features);
+  // polder: "zaglebienie bez odplywu" z modelu terenu odwadniaja rowy i przepompownia - opis mowi to wprost
+  const polder = drainedLowland(input).detected;
+
+  return {
+    layout: 'zones',
+    ...base,
+    basis,
+    ...images,
+    ...map,
+    zones: polder
+      ? map.zones.map((zone) => ({ ...zone, description: describeZone(zone, { polder }) }))
+      : map.zones,
+  };
 }
 
 type Pick2 = (zones: readonly Zone[]) => Zone | undefined;

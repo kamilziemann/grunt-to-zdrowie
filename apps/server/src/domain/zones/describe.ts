@@ -86,10 +86,14 @@ function otherUseNote(zone: Zone): string {
     : '';
 }
 
+/** Obnizenie na polderze to nie zaglebienie bez odplywu - wode odprowadzaja rowy i przepompownia. */
+const POLDER_DEPRESSION = 'Obniżenie na terenie odwadnianym rowami (polder)';
+
 /** "Suchsze miejsce na wzniesieniu, w północno-wschodniej części pola, przy rowie, ok. 0,8 ha". */
-export function describeZone(zone: Zone): string {
+export function describeZone(zone: Zone, { polder = false }: { polder?: boolean } = {}): string {
+  const name = polder && zone.kind === 'depression' ? POLDER_DEPRESSION : KIND[zone.kind];
   const parts = [
-    [KIND[zone.kind] ?? 'Część pola', zone.relief ? RELIEF[zone.relief] : ''].filter(Boolean).join(' '),
+    [name ?? 'Część pola', zone.relief ? RELIEF[zone.relief] : ''].filter(Boolean).join(' '),
     zone.position && zone.kind !== 'typical' ? PART[zone.position] : '',
     zone.ditchDistanceM !== undefined && zone.ditchDistanceM <= 50 ? 'przy rowie' : '',
     approxHectares(zone.areaHa),
