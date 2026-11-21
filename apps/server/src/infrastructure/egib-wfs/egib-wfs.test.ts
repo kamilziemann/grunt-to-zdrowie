@@ -5,8 +5,13 @@ import {
   createEgibWfsParcelSource,
   createEgibWfsRegistry,
   parseOutlines,
+  TRUNCATED_AT,
   type FetchLike,
 } from './egib-wfs';
+import recordedZ14 from './egib-wfs-z14.recorded.json?raw';
+
+/** Prawdziwa odpowiedz WFS dla kafla z14 9066/5250 (Rychnowo Zulawskie, 2026-11-22), z polami, ktore czytamy. */
+const RECORDED_Z14 = JSON.parse(recordedZ14) as { features: { properties: Record<string, unknown> }[] };
 
 const FEATURE = {
   type: 'Feature',
@@ -87,6 +92,31 @@ describe('createEgibWfsOutlineSource', () => {
     expect(params.get('TYPENAMES')).toBe('ms:dzialki');
     expect(params.get('OUTPUTFORMAT')).toBe('application/json');
     expect(params.get('BBOX')).toBe('52.169,21.586,52.174,21.594,urn:ogc:def:crs:EPSG::4326');
+  });
+
+  it('nagrany kafel z14 na terenie rolnym (Zulawy, 93 dzialki) nie jest obciety', async () => {
+    const fetchImpl = fakeFetch(RECORDED_Z14);
+    const result = await createEgibWfsOutlineSource(fetchImpl).inBounds([19.204, 54.125, 19.226, 54.138]);
+
+    expect(result.items).toHaveLength(93);
+    expect(result.items[0]).toMatchObject({ id: '220907_5.0007.160', number: expect.any(String) });
+    expect(result.truncated).toBe(false);
+    // usluga sama obcina odpowiedz na ok. 940 dzialkach - prosimy o niewiele wiecej
+    expect(new URL(fetchImpl.urls[0] ?? '').searchParams.get('COUNT')).toBe('1000');
+  });
+
+  it('kafel z liczba dzialek przy limicie uslugi (936 jak w Minsku Mazowieckim) jest obciety', async () => {
+    // nagrane obiekty powielone do liczby z pomiaru kafla miejskiego (cala odpowiedz ma ok. 700 kB)
+    const features = Array.from({ length: 936 }, (_, index) => {
+      const feature = RECORDED_Z14.features[index % RECORDED_Z14.features.length];
+
+      return { ...feature, properties: { ...feature?.properties, ID_DZIALKI: `id-${index}` } };
+    });
+    const result = await createEgibWfsOutlineSource(fakeFetch({ features })).inBounds([21, 52, 21.02, 52.01]);
+
+    expect(result.items).toHaveLength(936);
+    expect(result.truncated).toBe(true);
+    expect(TRUNCATED_AT).toBeLessThan(936);
   });
 
   it('blad HTTP i nieczytelna odpowiedz daja upstream_failed', async () => {

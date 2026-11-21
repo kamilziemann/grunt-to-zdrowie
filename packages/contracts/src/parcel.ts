@@ -81,16 +81,37 @@ export const parcelAtQuerySchema = z.object({
   lat: z.coerce.number().min(POLAND_BOUNDS.south).max(POLAND_BOUNDS.north),
 });
 
-/** Siatka, w ktorej mapa pobiera granice dzialek: kafle XYZ na tym poziomie (ok. 380 m boku w Polsce). */
+/**
+ * Siatka, w ktorej mapa pobiera granice dzialek: kafle XYZ na tym poziomie (ok. 380 m boku w Polsce). Domyslny
+ * poziom kafla trasy granic - stare adresy bez `z` dzialaja bez zmian.
+ */
 export const PARCEL_BOUNDARY_TILE_ZOOM = 16;
+/**
+ * Grubsza siatka (ok. 1,5 km boku): mapa pokazuje granice od tego przyblizenia, a ponizej 16 pobiera kafle tego
+ * poziomu (4-9 zapytan na widok zamiast kilkudziesieciu).
+ */
+export const PARCEL_BOUNDARY_COARSE_ZOOM = 14;
+/** Poziomy kafli, o ktore mozna pytac trase granic. */
+export const PARCEL_BOUNDARY_TILE_ZOOMS = [PARCEL_BOUNDARY_COARSE_ZOOM, PARCEL_BOUNDARY_TILE_ZOOM] as const;
 
-const tileIndexSchema = z.coerce
-  .number()
-  .int()
-  .min(0)
-  .max(2 ** PARCEL_BOUNDARY_TILE_ZOOM - 1);
+export type ParcelBoundaryTileZoom = (typeof PARCEL_BOUNDARY_TILE_ZOOMS)[number];
 
-export const parcelBoundaryTileQuerySchema = z.object({ x: tileIndexSchema, y: tileIndexSchema });
+const tileIndexSchema = z.coerce.number().int().min(0);
+
+export const parcelBoundaryTileQuerySchema = z
+  .object({
+    x: tileIndexSchema,
+    y: tileIndexSchema,
+    /** poziom kafla (14 albo 16); brak = 16 */
+    z: z.coerce
+      .number()
+      .pipe(z.union([z.literal(PARCEL_BOUNDARY_COARSE_ZOOM), z.literal(PARCEL_BOUNDARY_TILE_ZOOM)]))
+      .default(PARCEL_BOUNDARY_TILE_ZOOM),
+  })
+  .refine((tile) => tile.x < 2 ** tile.z && tile.y < 2 ** tile.z, {
+    message: 'tile index out of range for zoom',
+    path: ['x'],
+  });
 
 /** Obrys dzialki do warstwy "granice dzialek": numer, geometria i punkt na podpis. */
 export const parcelOutlineSchema = z.object({

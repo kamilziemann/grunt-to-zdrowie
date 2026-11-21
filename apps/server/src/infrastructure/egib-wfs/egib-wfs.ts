@@ -26,8 +26,13 @@ import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 export const EGIB_WFS_URL = 'https://mapy.geoportal.gov.pl/wss/service/PZGIK/EGIB/WFS/UslugaZbiorcza';
 
 const TIMEOUT_MS = 15_000;
-/** Limit obiektow na zapytanie: kafel siatki w gestej zabudowie ma kilkaset dzialek. */
-const MAX_FEATURES = 3000;
+/**
+ * Usluga sama obcina odpowiedz na ok. 940-960 dzialkach (pomiar 2026-11-22: kafle z14 w Warszawie i Minsku
+ * Mazowieckim zwracaja 936-942 przy COUNT=3000). Prosimy o troche wiecej, a kafel z co najmniej
+ * `TRUNCATED_AT` dzialkami uznajemy za obciety - mapa go nie rysuje i prosi o przyblizenie.
+ */
+const MAX_FEATURES = 1000;
+export const TRUNCATED_AT = 900;
 /** 6 miejsc po przecinku to ok. 10 cm - dokladniej niz dane, a odpowiedz jest o polowe mniejsza. */
 const COORDINATE_DECIMALS = 6;
 
@@ -125,7 +130,7 @@ export function createEgibWfsOutlineSource(
 
         const items = parseOutlines(await response.json());
 
-        return { items, truncated: items.length >= MAX_FEATURES };
+        return { items, truncated: items.length >= TRUNCATED_AT };
       } catch (error) {
         throw AppError.upstream('EGiB WFS', error);
       }

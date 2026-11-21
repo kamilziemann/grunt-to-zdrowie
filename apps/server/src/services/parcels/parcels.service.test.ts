@@ -82,6 +82,27 @@ describe('parcels service', () => {
     expect(result.items[0]?.center[0]).toBeCloseTo(21.000728, 5);
   });
 
+  it('kafel z14 pyta o czterokrotnie dluzszy bok niz kafel z16 i przekazuje flage obciecia', async () => {
+    const asked: number[][] = [];
+    const truncating = {
+      inBounds: (bounds: [number, number, number, number]) => {
+        asked.push(bounds);
+
+        return Promise.resolve({ truncated: true, items: [] });
+      },
+    };
+    const service = createParcelsService({ source: fakeSource(), outlines: truncating, now });
+
+    const coarse = await service.boundaries(9174, 5404, 14);
+
+    await service.boundaries(36_697, 21_617);
+
+    const [z14, z16] = asked;
+
+    expect(coarse.truncated).toBe(true);
+    expect(((z14?.[2] ?? 0) - (z14?.[0] ?? 0)) / ((z16?.[2] ?? 0) - (z16?.[0] ?? 1))).toBeCloseTo(4, 5);
+  });
+
   it('pelny identyfikator szuka po id, a nazwa obrebu po nazwie', async () => {
     const source = fakeSource();
     const service = createParcelsService({ source, outlines, now });

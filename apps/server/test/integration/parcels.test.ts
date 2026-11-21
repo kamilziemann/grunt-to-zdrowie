@@ -43,9 +43,10 @@ const parcelOutlineSource: ParcelOutlineSource = {
   inBounds: ([west]) =>
     Promise.resolve({
       truncated: false,
-      // kafel 36697/21617 zaczyna sie na 21,588 st. - inne kafle sa puste
+      // kafel z16 36697/21617 zaczyna sie na 21,583 st., a obejmujacy go kafel z14 9174/5404 na 21,577 st. -
+      // inne kafle sa puste
       items:
-        west > 21.58 && west < 21.59
+        west > 21.57 && west < 21.59
           ? [{ id: RECORD.id, number: RECORD.number, geometry: RECORD.geometry }]
           : [],
     }),
@@ -118,6 +119,18 @@ describe('/parcels', () => {
     expect(hit.headers.get('cache-tag')).toContain('parcels');
     expect(await empty.json()).toEqual({ truncated: false, items: [] });
     expect(invalid.status).toBe(400);
+  });
+
+  it('granice kafla z14: poziom w adresie, inny poziom albo indeks spoza siatki z14 = 400', async () => {
+    const coarse = await app.request(`/parcels/boundaries?${query({ x: '9174', y: '5404', z: '14' })}`);
+    const wrongZoom = await app.request(`/parcels/boundaries?${query({ x: '9174', y: '5404', z: '13' })}`);
+    const outside = await app.request(`/parcels/boundaries?${query({ x: '36697', y: '21617', z: '14' })}`);
+
+    expect(coarse.status).toBe(200);
+    expect(await coarse.json()).toMatchObject({ truncated: false, items: [{ id: RECORD.id }] });
+    expect(coarse.headers.get('cache-tag')).toContain('parcels');
+    expect(wrongZoom.status).toBe(400);
+    expect(outside.status).toBe(400);
   });
 
   it('zle wejscie = 400 validation_failed', async () => {

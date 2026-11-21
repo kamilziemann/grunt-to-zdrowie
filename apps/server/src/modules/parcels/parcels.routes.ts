@@ -61,7 +61,8 @@ export const getParcelBoundaries = createRoute({
   method: 'get',
   path: '/boundaries',
   tags,
-  summary: 'Obrysy i numery dzialek w kaflu XYZ siatki granic (poziom 16) - warstwa granic na mapie',
+  summary:
+    'Obrysy i numery dzialek w kaflu XYZ siatki granic (poziom 14 albo 16, domyslnie 16) - warstwa granic na mapie',
   request: { query: parcelBoundaryTileQuery },
   responses: {
     200: jsonResponse(parcelBoundariesDto, 'Dzialki przecinajace kafel'),

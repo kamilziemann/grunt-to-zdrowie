@@ -6,6 +6,7 @@ import {
   PARCEL_LIMITS,
   type Parcel,
   type ParcelBoundaries,
+  type ParcelBoundaryTileZoom,
   type ParcelCandidate,
   type ParcelSearchResult,
 } from '@app/contracts';
@@ -73,9 +74,13 @@ export function createParcelsService({ source, outlines, now }: ParcelsServiceDe
       return toParcel(record);
     },
 
-    /** Obrysy i numery dzialek w kaflu siatki granic (XYZ na poziomie PARCEL_BOUNDARY_TILE_ZOOM). */
-    async boundaries(x: number, y: number): Promise<ParcelBoundaries> {
-      const found = await outlines.inBounds(tileBounds(PARCEL_BOUNDARY_TILE_ZOOM, x, y));
+    /** Obrysy i numery dzialek w kaflu siatki granic (XYZ na poziomie 14 albo 16, domyslnie 16). */
+    async boundaries(
+      x: number,
+      y: number,
+      zoom: ParcelBoundaryTileZoom = PARCEL_BOUNDARY_TILE_ZOOM,
+    ): Promise<ParcelBoundaries> {
+      const found = await outlines.inBounds(tileBounds(zoom, x, y));
 
       return {
         truncated: found.truncated,

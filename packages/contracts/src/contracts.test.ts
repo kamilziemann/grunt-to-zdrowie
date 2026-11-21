@@ -8,6 +8,7 @@ import {
   hydroTileQuerySchema,
   hydroTileSchema,
   listQuerySchema,
+  parcelBoundaryTileQuerySchema,
   problemDetailsSchema,
   problemType,
   signInInputSchema,
@@ -116,5 +117,23 @@ describe('hydrografia na mapie', () => {
     });
 
     expect(tile.features[0]?.kind).toBe('stream');
+  });
+});
+
+describe('kafle granic dzialek', () => {
+  it('poziom 16 domyslnie (stare adresy), 14 na zyczenie; inne poziomy i indeksy spoza siatki odrzucone', () => {
+    expect(parcelBoundaryTileQuerySchema.parse({ x: '36697', y: '21617' })).toEqual({
+      x: 36697,
+      y: 21617,
+      z: 16,
+    });
+    expect(parcelBoundaryTileQuerySchema.parse({ x: '9174', y: '5404', z: '14' })).toEqual({
+      x: 9174,
+      y: 5404,
+      z: 14,
+    });
+    expect(parcelBoundaryTileQuerySchema.safeParse({ x: '1', y: '1', z: '13' }).success).toBe(false);
+    expect(parcelBoundaryTileQuerySchema.safeParse({ x: '36697', y: '1', z: '14' }).success).toBe(false);
+    expect(parcelBoundaryTileQuerySchema.safeParse({ x: '70000', y: '1' }).success).toBe(false);
   });
 });

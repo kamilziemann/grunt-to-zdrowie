@@ -17,7 +17,7 @@ export const at: RouteHandler<typeof getParcelAt, AppEnv> = async (c) => {
 };
 
 export const boundaries: RouteHandler<typeof getParcelBoundaries, AppEnv> = async (c) => {
-  const { x, y } = c.req.valid('query');
+  const { x, y, z } = c.req.valid('query');
 
-  return c.json(await c.get('container').parcels.boundaries(x, y), 200);
+  return c.json(await c.get('container').parcels.boundaries(x, y, z), 200);
 };
