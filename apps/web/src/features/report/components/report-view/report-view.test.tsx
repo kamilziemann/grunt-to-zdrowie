@@ -130,6 +130,16 @@ describe('ReportView', () => {
     expect(screen.getByText(t('irrigation.advisablePast.yes'))).toBeInTheDocument();
   });
 
+  it('jedna atrapa: ograniczenie nie mowi, ze wyniki nie opisuja pola; numer dzialki w pelnej szerokosci', () => {
+    renderReport(LOW_CONFIDENCE_REPORT);
+
+    const limitation = document.querySelector('[data-limitation="sample_data"]');
+
+    expect(limitation).toHaveTextContent('Część danych jest jeszcze przykładowa');
+    expect(limitation).not.toHaveTextContent('Wyniki nie opisują tego pola');
+    expect(screen.getByText('141201_1.0001.6509').parentElement).toHaveClass('col-span-2');
+  });
+
   it('zaden identyfikator miary ani jednostki nie trafia na ekran', () => {
     const { container } = renderReport({
       ...DROUGHT_REPORT,
