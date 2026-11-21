@@ -1,0 +1,14 @@
+{
+  "name": "@fx/server",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": {
+      "types": "./src/types.ts"
+    },
+    "./worker": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  }
+}

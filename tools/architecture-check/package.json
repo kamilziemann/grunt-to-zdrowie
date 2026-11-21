@@ -1,0 +1,26 @@
+{
+  "name": "@app/architecture-check",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Egzekwuje reguly z /architecture.config.ts: warstwy, zaleznosci paczek, deep importy, cykle, features, import type, granice server/client, folder na jednostke.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check": "bun src/cli/cli.ts --config ../../architecture.config.ts --root ../..",
+    "check:github": "bun src/cli/cli.ts --config ../../architecture.config.ts --root ../.. --format github",
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "bun --bun vitest run",
+    "test:watch": "bun --bun vitest"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@types/bun": "^1.4.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
