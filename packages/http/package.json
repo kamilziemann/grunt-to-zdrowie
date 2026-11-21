@@ -1,0 +1,36 @@
+{
+  "name": "@app/http",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wspolna obsluga bledow HTTP: AppError, Problem Details (RFC 9457), adapter dla Hono i @hono/zod-openapi.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./hono": {
+      "types": "./src/hono.ts",
+      "default": "./src/hono.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/logger": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "hono": "^4.13.13",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  },
+  "peerDependencies": {
+    "hono": ">=4.10.0"
+  }
+}
