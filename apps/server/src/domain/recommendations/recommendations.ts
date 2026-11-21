@@ -24,6 +24,8 @@ interface Rule {
   extraEvidence?: (input: StageInput) => Evidence[];
   /** szacunek efektu z danych pola (nadpisuje staly efekt) */
   effect?: (input: StageInput) => Recommendation['effect'];
+  /** formalnosci zalezne od skali (nadpisuja stale) */
+  legal?: (input: StageInput) => Recommendation['legal'];
 }
 
 /**
@@ -63,6 +65,34 @@ export function organicMatterGainMm(input: StageInput): number | null {
 
   return round(Math.max(0, more.availableWater - now.availableWater) * TOPSOIL_M * 1000);
 }
+
+/** zaglebienie mniejsze niz tyle (m3) nie jest warte oczka - wystarczy go nie zasypywac */
+const POND_MIN_M3 = 30;
+/** staw do 1000 m2 (i 3 m glebokosci) na wlasnym gruncie to zgloszenie wodnoprawne; wiekszy - pozwolenie */
+const POND_NOTIFICATION_MAX_M2 = 1000;
+
+/** Najwieksze zaglebienie bezodplywowe w polu z prawdziwego modelu terenu (atrapa nie jest dowodem). */
+function fieldDepression(input: StageInput) {
+  const largest = input.terrain?.summary.largestDepression;
+
+  return largest && !input.sampleSources?.includes('terrain') && largest.volumeM3 >= POND_MIN_M3
+    ? largest
+    : null;
+}
+
+const POND: Measure = {
+  measure: 'small_pond',
+  category: 'retention',
+  priority: 2,
+  effect: null,
+  effort: 'high',
+  // oczko/zbiornik: zgloszenie (do 1000 m2 i 3 m glebokosci) albo pozwolenie - zalezy od wielkosci i zasilania
+  legal: 'notification',
+};
+
+/** na piaskach (kategoria I albo < 90 mm/m) woda z niewyscielonego zbiornika szybko wsiaka */
+const pondHolds = ({ soil }: StageInput): boolean =>
+  soil?.category !== 1 && (soil?.availableWaterMmPerM ?? 0) >= LIGHT_SOIL_MM_PER_M;
 
 const RULES: readonly Rule[] = [
   // --- retencja: zatrzymac wode w krajobrazie i w rowach, zanim odplynie ---
@@ -107,19 +137,33 @@ const RULES: readonly Rule[] = [
       },
     ],
   },
+  // oczko w zaglebieniu pola: woda i tak sie tam zbiera - pojemnosc z modelu terenu (do poziomu przelewu)
   {
-    measure: {
-      measure: 'small_pond',
-      category: 'retention',
-      priority: 2,
-      effect: null,
-      effort: 'high',
-      // oczko/zbiornik: zgloszenie (do 1000 m2 i 3 m glebokosci) albo pozwolenie - zalezy od wielkosci i zasilania
-      legal: 'notification',
+    measure: { ...POND, priority: 1 },
+    answers: ['no_landscape_retention', 'surface_runoff', 'precipitation_deficit', 'crop_sensitivity'],
+    when: (input) => fieldDepression(input) !== null && pondHolds(input),
+    effect: (input) => {
+      const depression = fieldDepression(input);
+
+      return depression ? { kind: 'volume_m3', value: depression.volumeM3 } : null;
     },
+    legal: (input) =>
+      (fieldDepression(input)?.areaM2 ?? 0) > POND_NOTIFICATION_MAX_M2 ? 'permit' : 'notification',
+    extraEvidence: (input) => {
+      const depression = fieldDepression(input);
+
+      return depression
+        ? [
+            { metric: 'depression_volume_m3', value: depression.volumeM3, unit: 'm3', source: 'terrain' },
+            { metric: 'depression_area_m2', value: depression.areaM2, unit: 'm2', source: 'terrain' },
+          ]
+        : [];
+    },
+  },
+  {
+    measure: POND,
     answers: ['no_landscape_retention'],
-    // na piaskach (kategoria I albo < 90 mm/m) woda z niewyscielonego zbiornika szybko wsiaka
-    when: ({ soil }) => soil?.category !== 1 && (soil?.availableWaterMmPerM ?? 0) >= LIGHT_SOIL_MM_PER_M,
+    when: pondHolds,
   },
   {
     measure: {
@@ -232,6 +276,7 @@ function fromRule(rule: Rule, input: StageInput, found: readonly Cause[]): Recom
   return {
     ...rule.measure,
     ...(rule.effect ? { effect: rule.effect(input) } : {}),
+    ...(rule.legal ? { legal: rule.legal(input) } : {}),
     causes: matched.map((cause) => cause.id),
     evidence: [first, ...rest],
     // miejsca na polu wskaze dopiero podzial na strefy z modelu terenu (pakiet P12) - dzis cale pole
@@ -346,6 +391,8 @@ export function recommend(input: StageInput, assessment: Assessment, found: Caus
       .reduce((sum, cause) => sum + cause.weight, 0);
   const all = RULES.map((rule) => fromRule(rule, input, found))
     .filter((item): item is Recommendation => item !== null)
+    // jedno dzialanie raz: pierwsza pasujaca regula (np. oczko w zaglebieniu przed oczkiem "gdziekolwiek")
+    .filter((item, index, items) => items.findIndex((other) => other.measure === item.measure) === index)
     .toSorted((a, b) => a.priority - b.priority || weightOf(b) - weightOf(a));
 
   return {

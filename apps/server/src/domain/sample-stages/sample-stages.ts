@@ -23,6 +23,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { addDays, daysBetween, monthOf, withYear, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods, type IungPeriod } from '../iung-periods';
+import { terrainTooCoarse } from '../terrain';
 
 /** Uproszczone progi suszy dla kategorii gleby (mm); wlasciwa tabela IUNG zalezy tez od uprawy i okresu (P2). */
 const SAMPLE_THRESHOLD_MM: Record<SoilCategory, number> = { 1: -150, 2: -170, 3: -205, 4: -230 };
@@ -590,6 +591,9 @@ function limitations(input: StageInput, assessment: Assessment): LimitationId[] 
   if (input.soil) found.push('soil_estimated');
 
   if (assessment.vegetation && assessment.vegetation.pixels < 5) found.push('vegetation_few_pixels');
+
+  // model terenu 30 m na polu mniejszym niz ok. 2 ha - spadek i zaglebienia sa tylko przyblizeniem
+  if (input.terrain && terrainTooCoarse(input.field.areaHa)) found.push('terrain_coarse');
 
   return found;
 }

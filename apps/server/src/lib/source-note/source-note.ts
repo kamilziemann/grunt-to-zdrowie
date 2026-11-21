@@ -23,3 +23,13 @@ export function httpFailureNote(service: string, status: number): string {
 
   return `${service}: błąd HTTP ${status}`;
 }
+
+/** Polska odmiana rzeczownika po liczebniku: 1 komorka, 2-4 komorki, 5 komorek (12-14 - jak 5). */
+export function polishPlural(count: number, one: string, few: string, many: string): string {
+  const units = count % 10;
+  const tens = count % 100;
+
+  if (count === 1) return one;
+
+  return units >= 2 && units <= 4 && (tens < 12 || tens > 14) ? few : many;
+}

@@ -21,9 +21,10 @@ import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway
 import { createNasaPowerMeteoSource, nasaPowerCacheTtl } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
 import { cachedFetch, workersResponseStore, type ResponseStore } from './infrastructure/response-cache';
-import { createSampleSources } from './infrastructure/sample-sources';
 import { createSentinelStatisticsSource, sentinelCacheTtl } from './infrastructure/sentinel-statistics';
 import { createSoilGridsSource, soilGridsCacheTtl } from './infrastructure/soilgrids';
+import { STATIC_TTL_S } from './domain/source-cache-policy';
+import { createTerrainTilesSource } from './infrastructure/terrain-tiles';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { isoDateInPoland } from './domain/iso-date';
 import { createAnalysisService } from './services/analysis';
@@ -71,11 +72,11 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
         : sqlRunner && createPostgisHydroMapSource({ run: sqlRunner }),
   });
 
-  // Pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids), woda w otoczeniu (BDOT10k) i satelita (Sentinel-2,
-  // Copernicus) sa prawdziwe; teren to wciaz atrapa (`sample: true`, raport niesie `meta.sample`), a strefy -
-  // reguly przykladowe (`meta.sampleParts`). Pakiety planu docs/plans/silnik-analizy-i-raport.md podmieniaja je
-  // tutaj pojedynczo. Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
-  // pamiec odpowiedzi: kolejne analizy tego samego pola i sasiednich dzialek nie pytaja dostawcow drugi raz
+  // Wszystkie zrodla sa prawdziwe: pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids), teren (kafle
+  // wysokosci terrarium), woda w otoczeniu (BDOT10k) i satelita (Sentinel-2, Copernicus); przykladowe zostaly tylko
+  // strefy (`meta.sampleParts`). Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
+  //
+  // Pamiec odpowiedzi: kolejne analizy tego samego pola i sasiednich dzialek nie pytaja dostawcow drugi raz
   // (limity Copernicus i NASA POWER przy trybie "gospodarstwo"); historia - 30 dni, ostatnie dni - 3 h
   const store = overrides.responseStore !== undefined ? overrides.responseStore : workersResponseStore();
   const today = () => isoDateInPoland(now());
@@ -85,14 +86,13 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   const analysis = createAnalysisService({
     parcels,
     sources: {
-      ...createSampleSources(),
       meteo: createNasaPowerMeteoSource({ fetch: remember(nasaPowerCacheTtl(today)) }),
       forecast: createMetNorwayForecastSource(),
       soil: createSoilGridsSource({ fetch: remember(soilGridsCacheTtl) }),
+      // model wysokosci (kafle terrarium: EU-DEM / SRTM) - teren sie nie zmienia
+      terrain: createTerrainTilesSource({ fetch: remember(() => STATIC_TTL_S) }),
       // hydrografia BDOT10k w Postgresie (Neon); bez DATABASE_URL zrodlo zglasza brak danych
-      hydro: createPostgisHydroSource({
-        run: sqlRunner,
-      }),
+      hydro: createPostgisHydroSource({ run: sqlRunner }),
       // Sentinel-2 przez API statystyk Copernicus; bez kluczy OAuth zrodlo zglasza brak danych
       vegetation: createSentinelStatisticsSource({
         fetch: remember(sentinelCacheTtl(today)),

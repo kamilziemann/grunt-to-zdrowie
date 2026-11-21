@@ -9,6 +9,7 @@ import type { StageInput } from '../analysis-stages';
 import { yearOf } from '../iso-date';
 import { deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
+import { terrainTooCoarse } from '../terrain';
 import { assessPeriod } from '../water-indicators';
 
 const HISTORY_YEARS = 10;
@@ -28,6 +29,10 @@ const MIN_SEASONS = 5;
 /** wrazliwosc uprawy: niedobor w co najmniej 40% sezonow */
 const SENSITIVE_SHARE = 0.4;
 const SLOPE_RUNOFF_PCT = 3;
+/** albo co najmniej czwarta czesc pola na stokach > 5% - tam woda z ulewy splywa, zanim wsiaknie */
+const STEEP_SHARE_RUNOFF = 0.25;
+/** waga przyczyn z modelu terenu na polu za malym dla modelu 30 m */
+const COARSE_TERRAIN_WEIGHT = 0.5;
 
 const DEFICIT_LEVELS: ReadonlySet<Assessment['level']> = new Set(['watch', 'risk', 'drought']);
 
@@ -246,16 +251,28 @@ function landscapeCauses(input: StageInput, real: (id: SourceId) => boolean): Ca
     }
   }
 
-  if (terrain && real('terrain') && terrain.summary.slopeMeanPct >= SLOPE_RUNOFF_PCT) {
+  const steep = terrain ? terrain.summary.slopeShareAbove5Pct >= STEEP_SHARE_RUNOFF : false;
+
+  if (terrain && real('terrain') && (terrain.summary.slopeMeanPct >= SLOPE_RUNOFF_PCT || steep)) {
+    // model 30 m na malym polu: spadek to przyblizenie - przyczyna zostaje, ale z mniejsza waga
+    const coarse = terrainTooCoarse(input.field.areaHa) ? COARSE_TERRAIN_WEIGHT : 1;
+
     found.push({
       id: 'surface_runoff',
-      weight: round(clamp(terrain.summary.slopeMeanPct / 10, 0.2, 1), 2),
+      weight: round(clamp((terrain.summary.slopeMeanPct / 10) * coarse, 0.1, 1), 2),
       evidence: [
         {
           metric: 'slope_mean_pct',
           value: terrain.summary.slopeMeanPct,
           unit: '%',
           reference: SLOPE_RUNOFF_PCT,
+          source: 'terrain',
+        },
+        {
+          metric: 'slope_share_above_5_pct',
+          value: terrain.summary.slopeShareAbove5Pct,
+          unit: 'share',
+          reference: STEEP_SHARE_RUNOFF,
           source: 'terrain',
         },
       ],

@@ -125,7 +125,30 @@ function stageInput(
 const ids = (input: StageInput, assessment: Assessment = assess(input), past?: History) =>
   causes(input, assessment, past).map((cause) => cause.id);
 
+const slopedTerrain = (slopeMeanPct: number, slopeShareAbove5Pct: number) => ({
+  grid: { crs: 'test', originX: 0, originY: 0, cellSizeM: 6, cols: 1, rows: 1, elevationM: [100] },
+  summary: { elevationMinM: 95, elevationMaxM: 105, slopeMeanPct, slopeShareAbove5Pct, depressions: 0 },
+});
+
 describe('causes', () => {
+  it('splyw z prawdziwego terenu: sredni spadek albo udzial stokow > 5%; male pole - mniejsza waga', () => {
+    const runoff = (terrain: ReturnType<typeof slopedTerrain>, extra: Partial<StageInput> = {}) =>
+      causes(stageInput('2018-07-15', 70, { terrain, ...extra }), assess(stageInput('2018-07-15', 70))).find(
+        (cause) => cause.id === 'surface_runoff',
+      );
+    const small = { ...FIELD, areaHa: 0.3 };
+
+    expect(runoff(slopedTerrain(4, 0.1))?.evidence.map((item) => item.metric)).toEqual([
+      'slope_mean_pct',
+      'slope_share_above_5_pct',
+    ]);
+    expect(runoff(slopedTerrain(2, 0.3))).toBeDefined();
+    expect(runoff(slopedTerrain(2, 0.1))).toBeUndefined();
+    expect(runoff(slopedTerrain(4, 0.1), { sampleSources: ['terrain'] })).toBeUndefined();
+    expect(runoff(slopedTerrain(6, 0.5))?.weight).toBe(0.6);
+    expect(runoff(slopedTerrain(6, 0.5), { field: small })?.weight).toBe(0.3);
+  });
+
   it('susza po suchym i goracym lecie: niedobor opadu i duze parowanie wzgledem tego samego okresu z 10 lat', () => {
     const input = stageInput('2018-07-15', 70);
     const assessment = assess(input);

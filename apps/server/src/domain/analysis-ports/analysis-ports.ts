@@ -77,6 +77,8 @@ export interface TerrainGrid {
   originX: number;
   originY: number;
   cellSizeM: number;
+  /** krok siatki w jednostkach ukladu, gdy rozni sie od metrow w terenie (Web Mercator: cellSizeM / cos szerokosci) */
+  crsCellSize?: number;
   cols: number;
   rows: number;
   elevationM: number[];
@@ -93,6 +95,14 @@ export interface TerrainData {
     slopeShareAbove5Pct: number;
     /** liczba zaglebien bezodplywowych w polu */
     depressions: number;
+    /** laczna pojemnosc zaglebien w granicach pola (m3) */
+    depressionVolumeM3?: number;
+    /** najwieksze zaglebienie w polu: powierzchnia w polu, pojemnosc i glebokosc do przelewu */
+    largestDepression?: { areaM2: number; volumeM3: number; maxDepthM: number };
+    /** sredni wskaznik wilgotnosci topograficznej (TWI) pola */
+    wetnessIndexMean?: number;
+    /** bok komorki siatki obliczen (m) */
+    cellSizeM?: number;
   };
 }
 

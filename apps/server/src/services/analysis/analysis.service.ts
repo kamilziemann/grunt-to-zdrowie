@@ -19,7 +19,7 @@ import type { AnalysisStages, DataSources, ParcelLookup, Sourced, StageInput } f
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.2.0';
+export const ANALYSIS_ENGINE_VERSION = '0.3.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -30,7 +30,8 @@ export const SOURCE_TIMEOUTS_MS: Record<Exclude<SourceId, 'parcel'>, number> = {
   forecast: 6000,
   // SoilGrids: 18 malych pokryc WCS w puli po 4 - zwykle ok. 1-1,5 s
   soil: 8000,
-  terrain: 4000,
+  // kafle wysokosci: 1-4 PNG po ok. 40 KB rownolegle, potem obliczenia na siatce do 60 tys. komorek
+  terrain: 8000,
   hydro: 5000,
   vegetation: 10_000,
 };

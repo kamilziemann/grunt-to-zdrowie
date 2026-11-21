@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { failureNote, httpFailureNote } from './source-note';
+import { failureNote, httpFailureNote, polishPlural } from './source-note';
 
 describe('failureNote', () => {
   it('limit czasu, przerwanie i inny blad po polsku', () => {
@@ -23,5 +23,11 @@ describe('failureNote', () => {
     expect(httpFailureNote('Copernicus', 429)).toContain('limit zapytań');
     expect(httpFailureNote('SoilGrids', 503)).toBe('SoilGrids: awaria usługi (HTTP 503)');
     expect(httpFailureNote('NASA POWER', 404)).toBe('NASA POWER: błąd HTTP 404');
+  });
+
+  it('odmiana po liczebniku', () => {
+    expect(
+      [1, 3, 5, 12, 22, 25].map((count) => polishPlural(count, 'komórka', 'komórki', 'komórek')),
+    ).toEqual(['komórka', 'komórki', 'komórek', 'komórek', 'komórki', 'komórek']);
   });
 });

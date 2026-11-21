@@ -94,7 +94,50 @@ const ALL: Cause[] = [
   cause('crop_sensitivity', 0.5),
 ];
 
+const terrainWith = (largestDepression?: { areaM2: number; volumeM3: number; maxDepthM: number }) => ({
+  grid: { crs: 'test', originX: 0, originY: 0, cellSizeM: 6, cols: 1, rows: 1, elevationM: [100] },
+  summary: {
+    elevationMinM: 99,
+    elevationMaxM: 101,
+    slopeMeanPct: 4,
+    slopeShareAbove5Pct: 0.3,
+    depressions: largestDepression ? 1 : 0,
+    ...(largestDepression ? { largestDepression } : {}),
+  },
+});
+
 describe('recommend', () => {
+  it('oczko w zaglebieniu pola: pojemnosc z modelu terenu, jedno zalecenie oczka, nie z atrapy terenu', () => {
+    const loam = { ...SOIL, availableWaterMmPerM: 150, category: 3 as const };
+    const bowl = terrainWith({ areaM2: 900, volumeM3: 240, maxDepthM: 0.6 });
+    const causes = [cause('precipitation_deficit', 0.7), cause('no_landscape_retention', 0.3)];
+    const ponds = (extra: Partial<StageInput>) =>
+      recommend(input({ soil: loam, ...extra }), assessment('drought'), causes).retention.filter(
+        (item) => item.measure === 'small_pond',
+      );
+    const [pond, ...more] = ponds({ terrain: bowl });
+
+    expect(more).toHaveLength(0);
+    expect(pond).toMatchObject({
+      priority: 1,
+      effect: { kind: 'volume_m3', value: 240 },
+      legal: 'notification',
+    });
+    // niecka wieksza niz 1000 m2 - staw wymaga pozwolenia wodnoprawnego
+    expect(ponds({ terrain: terrainWith({ areaM2: 4600, volumeM3: 1900, maxDepthM: 0.9 }) })[0]?.legal).toBe(
+      'permit',
+    );
+    expect(pond?.evidence.map((item) => item.metric)).toContain('depression_volume_m3');
+    // atrapa terenu albo male zaglebienie: oczko tylko z braku retencji w otoczeniu, bez objetosci
+    expect(ponds({ terrain: bowl, sampleSources: ['terrain'] })[0]).toMatchObject({
+      priority: 2,
+      effect: null,
+    });
+    expect(
+      ponds({ terrain: terrainWith({ areaM2: 50, volumeM3: 10, maxDepthM: 0.2 }) })[0]?.effect,
+    ).toBeNull();
+  });
+
   it('retencja przed agrotechnika, kazde dzialanie z przyczyna z listy i jej dowodami', () => {
     const result = recommend(input(), assessment('drought'), ALL);
     const all = [...result.retention, ...result.agrotech];
