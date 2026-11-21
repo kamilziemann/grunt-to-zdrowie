@@ -1,0 +1,45 @@
+{
+  "name": "@app/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API (Hono + OpenAPI + Zod, D1 przez Drizzle, warstwy entry/modules/services/repositories/domain). Bez wlasnego Workera: apps/web montuje je pod /api (@app/server/worker).",
+  "type": "module",
+  "exports": {
+    "./types": {
+      "types": "./src/types.ts"
+    },
+    "./worker": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "admin:grant": "bun scripts/grant-role.ts"
+  },
+  "dependencies": {
+    "@app/auth": "workspace:*",
+    "@app/cache": "workspace:*",
+    "@app/contracts": "workspace:*",
+    "@app/db": "workspace:*",
+    "@app/env": "workspace:*",
+    "@app/http": "workspace:*",
+    "@app/logger": "workspace:*",
+    "@hono/zod-openapi": "^1.6.3",
+    "@sentry/cloudflare": "11.8.0",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.13",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@cloudflare/vitest-plugin": "^1.4.2",
+    "@cloudflare/workers-types": "^5.20261015.1",
+    "@types/bun": "^1.4.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11",
+    "wrangler": "^4.151.0"
+  }
+}
