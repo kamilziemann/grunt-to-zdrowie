@@ -1,0 +1,31 @@
+{
+  "name": "@app/env",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Walidowane srodowisko Workera: zmienne (server), wspolne schematy i typy bindingow Cloudflare.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@cloudflare/workers-types": "^5.20261015.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
