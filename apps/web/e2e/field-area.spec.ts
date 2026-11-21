@@ -51,7 +51,7 @@ test.describe('własne pole', () => {
 
     expect(request.field).toMatchObject({
       kind: 'part',
-      parcelIds: [],
+      parcelIds: [PARCEL_ID],
       label: 'Część działki 6509',
       geometry: { type: 'Polygon' },
     });

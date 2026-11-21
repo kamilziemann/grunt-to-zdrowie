@@ -83,8 +83,8 @@ export function parcelNumberOf(id: string): string {
 
 /**
  * Zadanie analizy z parametrow adresu; null = czegos brakuje (raport pokazuje wtedy powrot do formularza). Wlasny
- * obszar ma pierwszenstwo przed dzialkami: idzie jako geometria z opisem (`areaLabel`), bez identyfikatorow
- * dzialek - schemat API przy niepustej liscie dzialek wybiera wariant "cale dzialki" i pomija geometrie.
+ * obszar ma pierwszenstwo przed dzialkami: idzie jako geometria z opisem (`areaLabel`) i identyfikatorami dzialek,
+ * z ktorych go wycieto (kontrakt stawia geometrie przed wariantem "cale dzialki").
  */
 export function analysisRequestFromSearch(
   search: AnalysisSearch,
@@ -101,7 +101,7 @@ export function analysisRequestFromSearch(
     const label = areaLabel?.(kind, parcelIds.map(parcelNumberOf)).slice(0, ANALYSIS_LIMITS.labelMax);
 
     return {
-      field: { geometry: area.geometry, kind, parcelIds: [], ...(label ? { label } : {}) },
+      field: { geometry: area.geometry, kind, parcelIds, ...(label ? { label } : {}) },
       cropId: search.uprawa,
       date: search.data,
     };

@@ -78,8 +78,8 @@ describe('wlasny obszar w adresie', () => {
       data: '2026-06-15',
     });
 
-    // dzialki tylko w opisie: API przy niepustej liscie wybiera wariant "cale dzialki"
-    expect(request?.field).toMatchObject({ kind: 'part', parcelIds: [] });
+    // dzialki ida razem z geometria (opis zrodla obszaru); serwer liczy geometrie
+    expect(request?.field).toMatchObject({ kind: 'part', parcelIds: ['141201_1.0001.6509'] });
     expect(
       analysisRequestFromSearch(
         { dzialki: '141201_1.0001.6509', obszar, rodzaj: 'part', uprawa: 'winter_wheat', data: '2026-06-15' },
