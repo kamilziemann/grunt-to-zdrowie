@@ -5,9 +5,15 @@ import type { Page } from '@playwright/test';
 
 import { HYDRO_TILES } from '../../src/features/parcels/fixtures/hydro-tiles';
 
+// 1 x 1 px PNG: kafel zdjecia lotniczego bez sieci (odrzucone zapytanie zasmieca log bledami MapLibre)
+const BLANK_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=',
+  'base64',
+);
+
 const EMPTY_TILE = { features: [], truncated: false, importedAt: '2026-11-21T20:40:36.816Z' };
 
-/** Podklad mapy bez sieci: styl z samym tlem; czcionki i zdjecie lotnicze odrzucone. */
+/** Podklad mapy bez sieci: styl z samym tlem, puste kafle zdjecia lotniczego; czcionki odrzucone. */
 export async function mockBasemap(page: Page) {
   await page.route('https://tiles.openfreemap.org/styles/**', (route) =>
     route.fulfill({
@@ -20,7 +26,13 @@ export async function mockBasemap(page: Page) {
     }),
   );
   await page.route('https://tiles.openfreemap.org/fonts/**', (route) => route.abort());
-  await page.route('https://mapy.geoportal.gov.pl/**', (route) => route.abort());
+  await page.route('https://mapy.geoportal.gov.pl/**', (route) =>
+    route.fulfill({
+      contentType: 'image/png',
+      headers: { 'access-control-allow-origin': '*' },
+      body: BLANK_PNG,
+    }),
+  );
 }
 
 /**

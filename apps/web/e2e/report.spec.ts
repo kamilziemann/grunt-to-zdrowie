@@ -6,6 +6,7 @@ import {
   PARCEL_ID,
   REPORT_URL,
 } from './support/analysis-api';
+import { mockBasemap, mockHydroApi } from './support/hydro-api';
 import { expectTouchTargets } from './support/touch-targets';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
@@ -182,4 +183,47 @@ test('eksport dla doradcy: CSV i JSON z danymi raportu', async ({ page }) => {
   ]);
 
   expect(json.suggestedFilename()).toBe('raport-141201_1.0001.6509-2018-06-15.json');
+});
+
+test.describe('mapa pola w raporcie', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockBasemap(page);
+    await mockAnalysisApi(page);
+  });
+
+  test('obrys pola, najbliższy rów z odległością, źródła; na wydruku obraz zamiast płótna', async ({
+    page,
+  }) => {
+    await mockHydroApi(page);
+    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+
+    const map = page.getByTestId('field-map');
+
+    await map.scrollIntoViewIfNeeded();
+    await expect(map).toHaveAttribute('data-hydro', 'ready');
+    await expect(page.getByTestId('field-map-nearest')).toContainText(
+      'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',
+    );
+    await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
+    await expect(page.getByTestId('field-map-canvas')).toBeVisible({ timeout: 20_000 });
+
+    const snapshot = map.locator('img');
+
+    await expect(snapshot).toHaveAttribute('src', /^data:image\/png/, { timeout: 20_000 });
+    await page.emulateMedia({ media: 'print' });
+    await expect(snapshot).toBeVisible();
+    await expect(page.getByTestId('field-map-canvas')).toBeHidden();
+  });
+
+  test('warstwa hydrografii nie odpowiada: sam obrys pola i spokojna informacja', async ({ page }) => {
+    await mockHydroApi(page, { status: 503 });
+    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+
+    const map = page.getByTestId('field-map');
+
+    await map.scrollIntoViewIfNeeded();
+    await expect(map).toHaveAttribute('data-hydro', 'unavailable');
+    await expect(map).toContainText('Warstwa rowów i cieków jest chwilowo niedostępna');
+    await expect(page.getByTestId('field-map-canvas')).toBeVisible({ timeout: 20_000 });
+  });
 });
