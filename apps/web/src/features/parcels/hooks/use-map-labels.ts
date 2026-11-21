@@ -18,6 +18,7 @@ export function useMapLabels(variant: 'interactive' | 'static' = 'interactive'):
       locateUnavailable: t('locateUnavailable'),
       attribution: t('attribution'),
       loadingBoundaries: t('loadingBoundaries'),
+      loadingHydro: t('loadingHydro'),
     }),
     [t, variant],
   );

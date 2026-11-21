@@ -1,11 +1,18 @@
 // Zapytania dzialek ewidencyjnych (TanStack Query): jedno zrodlo kluczy (`parcelsKeys`) i funkcji pobierajacych z
 // /api/parcels. Dzialka zmienia sie rzadko, wiec odpowiedz jest swieza przez kilka minut (mniej zapytan do ULDK).
 // Brak dzialki (404 z API) = null - komponent pokazuje wtedy wlasny komunikat zamiast bledu.
-import type { Parcel, ParcelBoundaries, ParcelSearchResult, PlaceSearchResult } from '@app/contracts';
+import type {
+  HydroTile,
+  Parcel,
+  ParcelBoundaries,
+  ParcelSearchResult,
+  PlaceSearchResult,
+} from '@app/contracts';
 import { unwrap, unwrapOrNull } from '@app/rpc';
 import { queryOptions } from '@tanstack/react-query';
 
 import { getApi } from '@/lib/api';
+import { fetchHydroTile } from '@/lib/hydro-map';
 
 /** Co uzytkownik wskazal: identyfikator (z wyszukiwania) albo punkt na mapie. */
 export type ParcelTarget = { kind: 'id'; id: string } | { kind: 'point'; lng: number; lat: number };
@@ -21,6 +28,7 @@ export const parcelsKeys = {
   search: (query: string) => ['parcels', 'search', query] as const,
   places: (query: string) => ['parcels', 'places', query] as const,
   boundaries: (x: number, y: number) => ['parcels', 'boundaries', x, y] as const,
+  hydro: (x: number, y: number) => ['parcels', 'hydro', x, y] as const,
 };
 
 /** Punkt klikniecia zaokraglony do ok. 10 cm - stabilny klucz cache i adres bez szumu. */
@@ -89,6 +97,19 @@ export const parcelBoundariesQuery = (x: number, y: number) =>
     queryFn: (): Promise<ParcelBoundaries> =>
       unwrap<ParcelBoundaries>(getApi().parcels.boundaries.$get({ query: { x: String(x), y: String(y) } })),
     // granice zmieniaja sie rzadko, a kafel bywa ciezki - trzymamy go dlugo
+    staleTime: 6 * STALE_MS,
+    retry: false,
+  });
+
+/**
+ * GET /hydro/tile - rowy, cieki, wody i mokradla z BDOT10k w kaflu (warstwa "Rowy i cieki", mapa w raporcie).
+ * Zwykly `fetch` z walidacja kontraktu, dopoki typowany klient nie zna trasy (zob. `fetchHydroTile`).
+ */
+export const hydroTileQuery = (x: number, y: number) =>
+  queryOptions({
+    queryKey: parcelsKeys.hydro(x, y),
+    queryFn: ({ signal }): Promise<HydroTile> => fetchHydroTile(x, y, signal),
+    // dane BDOT10k zmieniaja sie przy imporcie (raz na jakis czas) - kafel trzymamy dlugo
     staleTime: 6 * STALE_MS,
     retry: false,
   });

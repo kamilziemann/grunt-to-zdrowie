@@ -22,6 +22,7 @@ export function BoundariesToggle({ value, onChange, className }: BoundariesToggl
     <button
       type="button"
       aria-pressed={value}
+      aria-label={t('boundaries')}
       title={t('boundariesHint')}
       onClick={toggle}
       className={cn(
@@ -39,7 +40,9 @@ export function BoundariesToggle({ value, onChange, className }: BoundariesToggl
       >
         <Grid2x2 className="size-4" />
       </span>
-      {t('boundaries')}
+      {/* na telefonie krotko - trzy przelaczniki mieszcza sie wtedy w dwoch rzedach */}
+      <span className="sm:hidden">{t('boundariesShort')}</span>
+      <span className="max-sm:hidden">{t('boundaries')}</span>
     </button>
   );
 }

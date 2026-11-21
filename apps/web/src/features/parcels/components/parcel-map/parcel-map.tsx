@@ -3,11 +3,24 @@
 // przelaczana widocznoscia, a nie `setStyle` - dzieki temu zaznaczone dzialki nie znikaja przy zmianie podkladu.
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import type { ParcelOutline } from '@app/contracts';
+import type { HydroTile, ParcelOutline } from '@app/contracts';
 import { LoaderCircle } from 'lucide-react';
 import type * as MapLibre from 'maplibre-gl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import {
+  addHydroLayers,
+  HYDRO_MIN_ZOOM,
+  HYDRO_TILE_CACHE,
+  hydroCollections,
+  hydroColors,
+  hydroTiles,
+  HydroUnavailableError,
+  latestImport,
+  MAX_HYDRO_TILES,
+  setHydroData,
+  setHydroVisible,
+} from '@/lib/hydro-map';
 import { cn } from '@/lib/utils/cn';
 
 import { loadMapLibre } from './load-maplibre';
@@ -68,6 +81,20 @@ export interface ParcelMapLabels {
   attribution: string;
   /** wskaznik na dole mapy, gdy w tle dociagaja sie granice dzialek */
   loadingBoundaries: string;
+  /** wskaznik, gdy dociagaja sie rowy i cieki */
+  loadingHydro: string;
+}
+
+/**
+ * Stan warstwy "Rowy i cieki" dla legendy: `zoom` = za male przyblizenie (nic nie pobieramy), `unavailable` = API
+ * odpowiada 404/503 (trasa jeszcze nie wdrozona albo baza nie odpowiada).
+ */
+export interface HydroStatus {
+  state: 'off' | 'zoom' | 'loading' | 'ready' | 'unavailable';
+  /** data importu BDOT10k z pobranych kafli */
+  importedAt: string | null;
+  /** ktorys kafel byl przyciety do limitu obiektow */
+  truncated: boolean;
 }
 
 export interface ParcelMapProps {
@@ -82,6 +109,12 @@ export interface ParcelMapProps {
   boundaries?: boolean;
   /** obrysy dzialek w kaflu siatki granic; brak = mapa bez warstwy granic */
   loadBoundaries?: (x: number, y: number) => Promise<readonly ParcelOutline[]>;
+  /** rowy, cieki, wody i mokradla z BDOT10k (pobierane od przyblizenia HYDRO_MIN_ZOOM) */
+  hydro?: boolean;
+  /** kafel hydrografii; brak = mapa bez tej warstwy */
+  loadHydro?: (x: number, y: number) => Promise<HydroTile>;
+  /** zmiana stanu warstwy hydrografii (legenda, komunikat o niedostepnosci) */
+  onHydroStatus?: (status: HydroStatus) => void;
   focus?: MapFocus | null;
   /**
    * Margines na panele zaslaniajace mape, liczony w chwili dojazdu (uklad zalezy od szerokosci okna i polozenia
@@ -137,6 +170,9 @@ function addAppLayers(map: MapLibre.Map, container: HTMLElement): void {
 
   const casing = token(container, '--map-casing');
   const empty = parcelCollection([]);
+
+  // Rowy i cieki nad podkladem i zdjeciem, pod granicami dzialek (obrys pola zostaje na wierzchu).
+  addHydroLayers(map, hydroColors(container), { minzoom: HYDRO_MIN_ZOOM - 1 });
 
   // Granice i numery wszystkich dzialek nad podkladem i zdjeciem, pod zaznaczeniami uzytkownika.
   map.addSource(BOUNDARIES_SOURCE, {
@@ -274,6 +310,9 @@ export function ParcelMap({
   basemap = 'map',
   boundaries = true,
   loadBoundaries,
+  hydro = false,
+  loadHydro,
+  onHydroStatus,
   focus = null,
   getPadding = defaultPadding,
   interactive = true,
@@ -289,15 +328,136 @@ export function ParcelMap({
   const focusedKeyRef = useRef<string | null>(null);
   const [state, setState] = useState<MapState>('loading');
   const [boundariesLoading, setBoundariesLoading] = useState(false);
+  const [hydroLoading, setHydroLoading] = useState(false);
   // Najnowsze wartosci dla zdarzen mapy, ktora powstaje raz - bez przepinania sluchaczy przy kazdym renderze.
-  const latest = useRef({ onPick, onZoomTooLow, getPadding, labels, boundaries, loadBoundaries });
+  const latest = useRef({
+    onPick,
+    onZoomTooLow,
+    getPadding,
+    labels,
+    boundaries,
+    loadBoundaries,
+    hydro,
+    loadHydro,
+    onHydroStatus,
+  });
   // Obrysy pobrane kaflami siatki granic: klucz "x/y" -> dzialki; kolejnosc wpisow = kolejnosc pobrania.
   const boundaryTilesRef = useRef(new Map<string, readonly ParcelOutline[]>());
   const pendingTilesRef = useRef(new Set<string>());
+  // Kafle hydrografii: klucz "x/y" -> kafel; `unavailable` = ostatnia odpowiedz 404/503 (ponowimy przy ruchu mapy).
+  const hydroRef = useRef({
+    tiles: new Map<string, HydroTile>(),
+    pending: new Set<string>(),
+    unavailable: false,
+    reported: '',
+  });
 
   useEffect(() => {
-    latest.current = { onPick, onZoomTooLow, getPadding, labels, boundaries, loadBoundaries };
+    latest.current = {
+      onPick,
+      onZoomTooLow,
+      getPadding,
+      labels,
+      boundaries,
+      loadBoundaries,
+      hydro,
+      loadHydro,
+      onHydroStatus,
+    };
   });
+
+  /** Zglasza stan warstwy hydrografii, tylko gdy sie zmienil. */
+  const reportHydro = useCallback((layerState: HydroStatus['state']) => {
+    const cache = hydroRef.current;
+    const tiles = [...cache.tiles.values()];
+    const next: HydroStatus = {
+      state: layerState,
+      importedAt: latestImport(tiles),
+      truncated: tiles.some((tile) => tile.truncated),
+    };
+    const key = JSON.stringify(next);
+
+    if (key === cache.reported) return;
+
+    cache.reported = key;
+    latest.current.onHydroStatus?.(next);
+  }, []);
+
+  /** Dociaga rowy i cieki dla widoku: tylko przy wlaczonej warstwie i od przyblizenia, przy ktorym widac pola. */
+  const refreshHydro = useCallback(() => {
+    const map = mapRef.current;
+    const { hydro: enabled, loadHydro: load } = latest.current;
+    const cache = hydroRef.current;
+
+    if (!map || !enabled || !load) {
+      reportHydro('off');
+
+      return;
+    }
+
+    const view = map.getBounds();
+    const tiles = hydroTiles(view.getWest(), view.getSouth(), view.getEast(), view.getNorth());
+
+    if (map.getZoom() < HYDRO_MIN_ZOOM || tiles.length > MAX_HYDRO_TILES) {
+      reportHydro('zoom');
+
+      return;
+    }
+
+    const visible = new Set(tiles.map((tile) => `${tile.x}/${tile.y}`));
+    const missing = tiles.filter((tile) => {
+      const key = `${tile.x}/${tile.y}`;
+
+      return !cache.tiles.has(key) && !cache.pending.has(key);
+    });
+
+    if (missing.length === 0) {
+      reportHydro(cache.pending.size > 0 ? 'loading' : cache.unavailable ? 'unavailable' : 'ready');
+
+      return;
+    }
+
+    cache.unavailable = false;
+    reportHydro('loading');
+    setHydroLoading(true);
+
+    for (const tile of missing) {
+      const key = `${tile.x}/${tile.y}`;
+
+      cache.pending.add(key);
+      load(tile.x, tile.y)
+        .then((data) => {
+          cache.tiles.set(key, data);
+
+          for (const old of cache.tiles.keys()) {
+            if (cache.tiles.size <= HYDRO_TILE_CACHE) break;
+
+            if (!visible.has(old)) cache.tiles.delete(old);
+          }
+
+          const current = mapRef.current;
+
+          if (current)
+            setHydroData(current, hydroCollections([...cache.tiles.values()].map((t) => t.features)));
+
+          return data.features.length;
+        })
+        // brak warstwy nie blokuje pracy z mapa; kafel sprobuje sie pobrac przy nastepnym ruchu
+        .catch((error: unknown) => {
+          if (error instanceof HydroUnavailableError) cache.unavailable = true;
+
+          return 0;
+        })
+        .finally(() => {
+          cache.pending.delete(key);
+
+          if (cache.pending.size > 0) return;
+
+          setHydroLoading(false);
+          reportHydro(cache.unavailable ? 'unavailable' : 'ready');
+        });
+    }
+  }, [reportHydro]);
 
   /** Dociaga granice dla widoku - tylko gdy warstwa jest wlaczona i przyblizenie pokazuje pojedyncze pola. */
   const refreshBoundaries = useCallback(() => {
@@ -353,6 +513,7 @@ export function ParcelMap({
   useEffect(() => {
     const container = containerRef.current;
     const boundaryCache = boundaryTilesRef.current;
+    const hydroCache = hydroRef.current;
     let cancelled = false;
     let map: MapLibre.Map | null = null;
 
@@ -442,6 +603,7 @@ export function ParcelMap({
 
         addAppLayers(created, target);
         created.on('moveend', refreshBoundaries);
+        created.on('moveend', refreshHydro);
         mapRef.current = created;
         setState('ready');
       });
@@ -458,9 +620,11 @@ export function ParcelMap({
       mapRef.current = null;
       focusedKeyRef.current = null;
       boundaryCache.clear();
+      hydroCache.tiles.clear();
+      hydroCache.reported = '';
       map?.remove();
     };
-  }, [interactive, refreshBoundaries]);
+  }, [interactive, refreshBoundaries, refreshHydro]);
 
   useEffect(() => {
     if (state !== 'ready') return;
@@ -506,6 +670,13 @@ export function ParcelMap({
     refreshBoundaries();
   }, [state, boundaries, refreshBoundaries]);
 
+  useEffect(() => {
+    if (state !== 'ready' || !mapRef.current) return;
+
+    setHydroVisible(mapRef.current, hydro);
+    refreshHydro();
+  }, [state, hydro, refreshHydro]);
+
   const focusKey = focus?.key ?? null;
   const [west, south, east, north] = focus?.bbox ?? [0, 0, 0, 0];
 
@@ -533,7 +704,7 @@ export function ParcelMap({
         // wymiary z rodzica, nie `absolute`: arkusz stylow MapLibre ustawia kontenerowi `position: relative`
         className="size-full"
       />
-      {state === 'ready' && (status !== null || boundariesLoading) && (
+      {state === 'ready' && (status !== null || boundariesLoading || (hydro && hydroLoading)) && (
         <output
           className={cn(
             'pointer-events-none absolute bottom-3 left-1/2 z-10 flex w-max max-w-[calc(100%-6rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-sm font-medium text-card-foreground shadow-md',
@@ -541,7 +712,7 @@ export function ParcelMap({
           )}
         >
           <LoaderCircle className="size-4 animate-spin text-primary" aria-hidden="true" />
-          {status ?? labels.loadingBoundaries}
+          {status ?? (boundariesLoading ? labels.loadingBoundaries : labels.loadingHydro)}
         </output>
       )}
       {state !== 'ready' && (

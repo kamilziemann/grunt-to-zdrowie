@@ -84,7 +84,26 @@
     "boundariesHint": "Granice i numery działek z ewidencji gruntów. Widać je po przybliżeniu mapy.",
     "loadingBoundaries": "Wczytuję granice działek…",
     "loadingParcel": "Wczytuję dane działki…",
-    "pickHint": "Kliknij swoją działkę na mapie."
+    "pickHint": "Kliknij swoją działkę na mapie.",
+    "hydro": "Rowy i cieki",
+    "hydroHint": "Rowy melioracyjne, rzeki, strumienie, kanały, wody i mokradła z BDOT10k (GUGiK). Widać je po przybliżeniu mapy.",
+    "loadingHydro": "Wczytuję rowy i cieki…",
+    "hydroLegend": {
+      "title": "Legenda: rowy i cieki",
+      "kinds": {
+        "ditch": "Rów melioracyjny",
+        "stream": "Rzeka, strumień",
+        "canal": "Kanał",
+        "water": "Jezioro, staw, szerokie koryto",
+        "wetland": "Mokradło, bagno"
+      },
+      "source": "Źródło: BDOT10k, GUGiK",
+      "sourceDated": "Źródło: BDOT10k, GUGiK · dane z {date}",
+      "truncated": "W tym miejscu pokazujemy część obiektów – przybliż mapę.",
+      "zoom": "Przybliż mapę, żeby zobaczyć rowy i cieki.",
+      "unavailable": "Warstwa rowów i cieków jest chwilowo niedostępna. Reszta mapy działa normalnie."
+    },
+    "boundariesShort": "Granice"
   },
   "sheet": {
     "expand": "Rozwiń panel",

@@ -52,6 +52,13 @@
   --map-casing: #ffffff;
   --map-boundary: #2f6fb3;
   --map-boundary-label: #153e6b;
+  /* Rowy i cieki (BDOT10k): odcienie turkusu, zeby nie mylily sie z niebieskimi granicami dzialek. */
+  --map-ditch: #0891b2;
+  --map-stream: #0e6f8f;
+  --map-water: #38bdf8;
+  --map-wetland: #0f766e;
+  --map-water-label: #0b4a5e;
+  --map-highlight: #d9480f;
 
   --radius: 0.5rem;
 }

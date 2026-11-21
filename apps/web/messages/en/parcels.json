@@ -84,7 +84,26 @@
     "boundariesHint": "Parcel boundaries and numbers from the land register. They appear when you zoom in.",
     "loadingBoundaries": "Loading parcel boundaries…",
     "loadingParcel": "Loading parcel details…",
-    "pickHint": "Click your parcel on the map."
+    "pickHint": "Click your parcel on the map.",
+    "hydro": "Ditches and streams",
+    "hydroHint": "Drainage ditches, rivers, streams, canals, water bodies and wetlands from BDOT10k (GUGiK). Visible when zoomed in.",
+    "loadingHydro": "Loading ditches and streams…",
+    "hydroLegend": {
+      "title": "Legend: ditches and streams",
+      "kinds": {
+        "ditch": "Drainage ditch",
+        "stream": "River, stream",
+        "canal": "Canal",
+        "water": "Lake, pond, wide channel",
+        "wetland": "Wetland, bog"
+      },
+      "source": "Source: BDOT10k, GUGiK",
+      "sourceDated": "Source: BDOT10k, GUGiK · data from {date}",
+      "truncated": "Only some features are shown here – zoom in.",
+      "zoom": "Zoom in to see ditches and streams.",
+      "unavailable": "The ditches and streams layer is temporarily unavailable. The rest of the map works normally."
+    },
+    "boundariesShort": "Boundaries"
   },
   "sheet": {
     "expand": "Expand panel",

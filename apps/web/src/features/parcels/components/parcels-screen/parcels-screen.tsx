@@ -12,7 +12,7 @@ import {
 } from '@app/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Plus } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { ProblemAlert } from '@/components/shared/problem-alert';
@@ -23,6 +23,7 @@ import { toProblem } from '@/lib/problems';
 import type { AppHref, FieldSearch } from '@/lib/routes';
 
 import {
+  hydroTileQuery,
   parcelBoundariesQuery,
   parcelSearchQuery,
   parcelsKeys,
@@ -46,9 +47,11 @@ import {
   type SheetSnap,
 } from '../bottom-sheet';
 import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
+import { HydroLegend } from '../hydro-legend';
+import { HydroToggle } from '../hydro-toggle';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
-import { ParcelMap, type Basemap, type MapFocus, type MapPadding } from '../parcel-map';
+import { ParcelMap, type Basemap, type HydroStatus, type MapFocus, type MapPadding } from '../parcel-map';
 import { ParcelPreview, useAreaFormatter } from '../parcel-preview';
 import { ParcelSearch } from '../parcel-search';
 import { PlaceResults } from '../place-results';
@@ -95,6 +98,19 @@ function insidePoland(lng: number, lat: number): boolean {
   );
 }
 
+const HYDRO_OFF: HydroStatus = { state: 'off', importedAt: null, truncated: false };
+
+function subscribeDesktop(onChange: () => void): () => void {
+  const query = window.matchMedia(DESKTOP_QUERY);
+
+  query.addEventListener('change', onChange);
+
+  return () => query.removeEventListener('change', onChange);
+}
+
+const isDesktop = () => window.matchMedia(DESKTOP_QUERY).matches;
+const notDesktop = () => false;
+
 export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenProps) {
   const t = useTranslations('parcels');
   const tCommon = useTranslations('common');
@@ -114,6 +130,9 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [shown, setShown] = useState<MapFocus | null>(null);
   const [basemap, setBasemap] = useState<Basemap>('map');
   const [boundaries, setBoundaries] = useState(true);
+  const [hydro, setHydro] = useState(true);
+  const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
+  const desktop = useSyncExternalStore(subscribeDesktop, isDesktop, notDesktop);
   const [snap, setSnap] = useState<SheetSnap>('peek');
   const [hint, setHint] = useState<MapHint | null>(null);
 
@@ -269,6 +288,11 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     [queryClient],
   );
 
+  const loadHydro = useCallback(
+    (x: number, y: number) => queryClient.query(hydroTileQuery(x, y)),
+    [queryClient],
+  );
+
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
   const chooseCandidate = useCallback((candidate: ParcelCandidate) => {
@@ -342,6 +366,9 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
           basemap={basemap}
           boundaries={boundaries}
           loadBoundaries={loadBoundaries}
+          hydro={hydro}
+          loadHydro={loadHydro}
+          onHydroStatus={setHydroStatus}
           focus={focus}
           getPadding={getPadding}
           onPick={pickOnMap}
@@ -352,9 +379,15 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
         />
       </div>
 
-      <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-wrap items-start gap-2 md:left-106">
-        <BasemapToggle value={basemap} onChange={setBasemap} />
-        <BoundariesToggle value={boundaries} onChange={setBoundaries} />
+      <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 md:left-106">
+        <div className="flex flex-wrap items-start gap-2">
+          <BasemapToggle value={basemap} onChange={setBasemap} />
+          <BoundariesToggle value={boundaries} onChange={setBoundaries} />
+          <HydroToggle value={hydro} onChange={setHydro} />
+        </div>
+        {hydro && (
+          <HydroLegend key={desktop ? 'desktop' : 'phone'} status={hydroStatus} defaultOpen={desktop} />
+        )}
       </div>
 
       {hint && (
