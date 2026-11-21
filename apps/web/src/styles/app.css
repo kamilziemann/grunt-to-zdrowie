@@ -1,0 +1,196 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * Jedyne zrodlo tokenow designu (ADR 0007). Warstwy:
+ *  1. :root            - tokeny koloru (jasny/ciemny w jednym miejscu przez light-dark()), promien bazowy
+ *  2. @theme inline    - mapowanie tokenow koloru i promieni na utility Tailwinda (bg-primary, rounded-lg...)
+ *  3. @theme static    - tokeny stale: typografia, cienie, odstepy, ruch (zawsze emitowane jako zmienne CSS)
+ * Komponenty uzywaja wylacznie tych tokenow - zadnych surowych kolorow (hex/rgb/paleta Tailwinda) w komponentach.
+ *
+ * Motyw: bez atrybutu `data-theme` obowiazuje ustawienie systemu (prefers-color-scheme); `data-theme="light|dark"`
+ * (albo klasa `.light`/`.dark`) wymusza motyw. Atrybut ustawia serwer z ciasteczka `theme` (bez migniecia).
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Powierzchnie i tekst. Kazda para (token / token-foreground) ma kontrast WCAG AA (min. 4.5:1). */
+  /* Kierunek "polowy" (ADR 0009): cieply papier, zielen pola jako kolor glowny, blekit wody jako akcent. */
+  --background: light-dark(#f7f6f1, #0d100e);
+  --foreground: light-dark(#1b1d1a, #ecede8);
+  --card: light-dark(#ffffff, #151a17);
+  --card-foreground: light-dark(#1b1d1a, #ecede8);
+  --popover: light-dark(#ffffff, #151a17);
+  --popover-foreground: light-dark(#1b1d1a, #ecede8);
+  --muted: light-dark(#efeee7, #1d2420);
+  --muted-foreground: light-dark(#5a5f57, #a4aaa1);
+
+  /* Kolory znaczeniowe. */
+  --primary: light-dark(#1d6b3b, #86d6a2);
+  --primary-foreground: light-dark(#ffffff, #0b140e);
+  --secondary: light-dark(#e9e8df, #232b26);
+  --secondary-foreground: light-dark(#1b1d1a, #ecede8);
+  --accent: light-dark(#e9e8df, #232b26);
+  --accent-foreground: light-dark(#1b1d1a, #ecede8);
+  --water: light-dark(#0b5f96, #7cc4f2);
+  --water-foreground: light-dark(#ffffff, #071521);
+  --destructive: light-dark(#b42318, #f97066);
+  --destructive-foreground: light-dark(#ffffff, #1f0a08);
+  --success: light-dark(#1f7a45, #4fc483);
+  --success-foreground: light-dark(#ffffff, #0a1f12);
+  --warning: light-dark(#8a5a00, #e0a030);
+  --warning-foreground: light-dark(#ffffff, #1a1405);
+
+  /* Linie, pola formularzy, focus. */
+  --border: light-dark(#dfded4, #2b332e);
+  --input: light-dark(#85897f, #5d665f);
+  --ring: light-dark(#1d6b3b, #86d6a2);
+
+  /* Warstwy na mapie. Podklad mapy jest jasny w obu motywach, wiec to stale kolory (MapLibre czyta je z CSS). */
+  --map-selected: #12703a;
+  --map-preview: #c2410c;
+  --map-casing: #ffffff;
+  --map-boundary: #2f6fb3;
+  --map-boundary-label: #153e6b;
+
+  --radius: 0.5rem;
+}
+
+:root[data-theme='light'],
+:root.light {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'],
+:root.dark {
+  color-scheme: dark;
+}
+
+/* Wariant `dark:` dla wyjatkow; zwykle wystarczy token (zmienia sie sam). Dziala przy wymuszonym motywie. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *, .dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-water: var(--water);
+  --color-water-foreground: var(--water-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+}
+
+@theme static {
+  /* Typografia: rodziny i skala (rozmiar + interlinia). */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.55;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 1.2;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1.15;
+
+  /* Odstepy: skala to wielokrotnosci --spacing (p-4, gap-6...); tokeny semantyczne dla ukladu stron. */
+  --spacing: 0.25rem;
+  --spacing-gutter: 1rem;
+  --spacing-section: 2rem;
+  --container-page: 64rem;
+
+  /* Cienie (kolor zalezy od motywu). */
+  --shadow-xs: 0 1px 2px 0 light-dark(rgb(24 24 27 / 0.08), rgb(0 0 0 / 0.3));
+  --shadow-sm:
+    0 1px 3px 0 light-dark(rgb(24 24 27 / 0.12), rgb(0 0 0 / 0.35)),
+    0 1px 2px -1px light-dark(rgb(24 24 27 / 0.1), rgb(0 0 0 / 0.3));
+  --shadow-md:
+    0 4px 8px -2px light-dark(rgb(24 24 27 / 0.14), rgb(0 0 0 / 0.4)),
+    0 2px 4px -2px light-dark(rgb(24 24 27 / 0.1), rgb(0 0 0 / 0.3));
+  --shadow-lg:
+    0 16px 32px -8px light-dark(rgb(24 24 27 / 0.22), rgb(0 0 0 / 0.5)),
+    0 4px 8px -4px light-dark(rgb(24 24 27 / 0.12), rgb(0 0 0 / 0.35));
+  --shadow-card:
+    0 1px 0 light-dark(rgb(29 107 59 / 0.06), rgb(0 0 0 / 0.25)),
+    0 8px 24px -16px light-dark(rgb(24 24 27 / 0.35), rgb(0 0 0 / 0.6));
+
+  /* Ruch: czasy i krzywe. Interakcje 100-200 ms, wejscia/wyjscia ~300 ms; ease-out dla wejsc, ease-in-out dla ruchu po ekranie. */
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-out);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  textarea {
+    @apply font-mono;
+  }
+}
+
+/* Szanuj prefers-reduced-motion: znikaja przejscia i animacje ruchu; spinner i szkielet zostaja (sygnalizuja stan). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+
+  *,
+  ::before,
+  ::after {
+    scroll-behavior: auto !important;
+  }
+
+  *:not(.animate-spin, .animate-pulse),
+  *:not(.animate-spin, .animate-pulse)::before,
+  *:not(.animate-spin, .animate-pulse)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
