@@ -103,6 +103,7 @@ export default defineArchitecture({
       'tools/architecture-check/src',
       'tools/architecture-check/src/rules',
       'tools/docs-check/src',
+      'tools/bdot-import/src',
     ],
     allowRootFiles: ['index.ts'],
     ignore: [],

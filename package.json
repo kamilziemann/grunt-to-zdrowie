@@ -30,7 +30,8 @@
     "db:migrate": "bun run --filter @app/web db:migrate",
     "db:check": "bun run --filter @app/db db:check",
     "prepare": "lefthook install",
-    "docs:check": "bun run --filter @app/docs-check check"
+    "docs:check": "bun run --filter @app/docs-check check",
+    "bdot:import": "bun tools/bdot-import/src/cli/cli.ts"
   },
   "dependencies": {
     "@neon/config": "^1.14.6",
