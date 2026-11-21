@@ -1,3 +1,4 @@
+import { mockAnalysisApi } from './support/analysis-api';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
 
@@ -8,14 +9,28 @@ test.describe('działki', () => {
     await page.goto('/');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
-    await expect(page.getByRole('list', { name: 'Etapy' }).getByRole('listitem')).toHaveText([
-      /Znajdź/,
-      /Sprawdź/,
-      /Analizuj/,
+    // pierwsze wejscie: trzy kroki i przyklad zamiast paska etapow
+    const firstSteps = page.getByTestId('first-steps');
+
+    await expect(firstSteps.getByRole('listitem')).toHaveText([
+      /Znajdź działkę/,
+      /Wybierz uprawę i dzień/,
+      /Przeczytaj raport/,
     ]);
+    await expect(firstSteps.getByRole('link', { name: /Zobacz przykład/ })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Etapy' })).toBeHidden();
     await expect(page.getByRole('application', { name: /Mapa/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeDisabled();
     await expect(page.getByText('Nie masz jeszcze żadnej działki')).toBeVisible();
+  });
+
+  test('„Zobacz przykład” prowadzi do gotowego raportu (działka i uprawa w adresie)', async ({ page }) => {
+    await mockAnalysisApi(page);
+    await page.goto('/');
+    await page.getByRole('link', { name: /Zobacz przykład/ }).click();
+
+    await expect(page).toHaveURL(/\/raport\?dzialki=221002_5\.0015\.120&uprawa=winter_wheat&data=2018-07-15/);
+    await expect(page.getByTestId('verdict')).toBeVisible();
   });
 
   test('za krótki tekst pokazuje podpowiedź zamiast wysyłać zapytanie', async ({ page }) => {
@@ -57,7 +72,7 @@ test.describe('działki', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('arkusz od dołu: zwinięty pokazuje pole i akcję, rozwija się, strona się nie przewija', async ({
+    test('arkusz od dołu: pierwsze wejście do połowy z przykładem, rozwija się, strona się nie przewija', async ({
       page,
     }) => {
       await page.goto('/');
@@ -65,13 +80,15 @@ test.describe('działki', () => {
       const panel = page.getByTestId('parcels-panel');
       const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
 
-      await expect(panel).toHaveAttribute('data-snap', 'peek');
+      // pierwsze wejscie: arkusz do polowy, "Zobacz przyklad" widoczny bez przewijania
+      await expect(panel).toHaveAttribute('data-snap', 'half');
       await expect(search).toBeInViewport();
+      await expect(page.getByRole('link', { name: /Zobacz przykład/ })).toBeInViewport();
       await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeInViewport();
+      await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeInViewport();
 
       await page.getByRole('button', { name: 'Rozwiń panel' }).click();
-      await expect(panel).toHaveAttribute('data-snap', 'half');
-      await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeInViewport();
+      await expect(panel).toHaveAttribute('data-snap', 'full');
 
       // pole 16 px: iOS nie przybliza strony przy fokusie; brak poziomego przewijania
       await expect(search).toHaveCSS('font-size', '16px');
