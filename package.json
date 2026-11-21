@@ -1,0 +1,56 @@
+{
+  "name": "grunt-to-zdrowie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Grunt to Zdrowie - analiza wodna dzialki rolnej: TanStack Start + API Hono w jednym Workerze Cloudflare.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd apps/web dev",
+    "setup:local": "bun run db:migrate",
+    "admin:grant": "bun run --cwd apps/server admin:grant",
+    "deploy": "bun tools/scripts/deploy.ts",
+    "build": "turbo run build",
+    "check": "bun run format:check && bun run lint && bun run architecture:check && bun run docs:check && bun run check:types && bun run test",
+    "check:types": "turbo run check:types",
+    "lint": "oxlint --type-aware --deny-warnings --disable-nested-config",
+    "lint:fast": "oxlint --deny-warnings --disable-nested-config",
+    "lint:fix": "oxlint --fix --disable-nested-config",
+    "format": "bun tools/scripts/oxfmt.mjs --write . && bun run format:padding",
+    "format:padding": "oxlint -c .oxlintrc.padding.json --fix",
+    "format:check": "bun tools/scripts/oxfmt.mjs --check . && oxlint -c .oxlintrc.padding.json --deny-warnings",
+    "test": "turbo run test && bun run test:scripts",
+    "test:scripts": "bun test ./tools/scripts",
+    "test:e2e": "turbo run test:e2e",
+    "architecture:check": "bun run --filter @app/architecture-check check",
+    "db:generate": "bun run --filter @app/db db:generate",
+    "db:migrate": "bun run --filter @app/web db:migrate",
+    "db:check": "bun run --filter @app/db db:check",
+    "prepare": "lefthook install",
+    "docs:check": "bun run --filter @app/docs-check check"
+  },
+  "dependencies": {
+    "@neon/config": "^1.14.6",
+    "@neon/env": "^2.1.9"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/types": "^21.2.3",
+    "@types/bun": "^1.4.2",
+    "lefthook": "^2.2.2",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
+    "oxlint-tsgolint": "^7.0.2004",
+    "turbo": "^2.11.8",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.4.0",
+    "node": ">=22.12.0"
+  },
+  "packageManager": "bun@1.4.2"
+}

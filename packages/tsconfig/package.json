@@ -1,0 +1,17 @@
+{
+  "name": "@app/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wspólne konfiguracje TypeScript dla całego monorepo.",
+  "files": [
+    "*.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./browser.json": "./browser.json",
+    "./worker.json": "./worker.json",
+    "./react-app.json": "./react-app.json",
+    "./node.json": "./node.json"
+  }
+}

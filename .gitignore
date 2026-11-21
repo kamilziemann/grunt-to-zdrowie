@@ -1,0 +1,47 @@
+# zaleznosci i cache
+node_modules/
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# buildy
+dist/
+out/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# TanStack Start (pliki tymczasowe generatora tras)
+.tanstack/
+
+# Cloudflare / wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+worker-configuration.d.ts
+
+# env
+.env
+.env.*
+!.env.example
+
+# systemowe
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# worktree agentów Claude Code
+.claude/worktrees/
+
+# wyjscia skilla design-taste-frontend (.agents/skills/design-taste-frontend/scripts)
+.taste-skill/
+/assets/
+
+# stan lokalny CLI Neon
+.neon
