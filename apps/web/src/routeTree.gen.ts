@@ -17,6 +17,7 @@ import { Route as Char123LocaleChar125AppSplatRouteImport } from './routes/{-$lo
 import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-$locale}/_app/_dev/route'
 import { Route as Char123LocaleChar125AppProtectedRouteRouteImport } from './routes/{-$locale}/_app/_protected/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
+import { Route as Char123LocaleChar125AppGospodarstwoRouteImport } from './routes/{-$locale}/_app/gospodarstwo'
 import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$locale}/_app/raport'
 import { Route as Char123LocaleChar125AppSignInRouteImport } from './routes/{-$locale}/_app/sign-in'
 import { Route as Char123LocaleChar125AppSignUpRouteImport } from './routes/{-$locale}/_app/sign-up'
@@ -67,6 +68,12 @@ const Char123LocaleChar125AppAnalizaRoute =
     path: '/analiza',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
+const Char123LocaleChar125AppGospodarstwoRoute =
+  Char123LocaleChar125AppGospodarstwoRouteImport.update({
+    id: '/gospodarstwo',
+    path: '/gospodarstwo',
+    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
+  } as any)
 const Char123LocaleChar125AppRaportRoute =
   Char123LocaleChar125AppRaportRouteImport.update({
     id: '/raport',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
@@ -130,6 +139,7 @@ export interface FileRoutesById {
   '/{-$locale}/_app/_protected': typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
+  '/{-$locale}/_app/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/_app/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/_app/sign-in': typeof Char123LocaleChar125AppSignInRoute
   '/{-$locale}/_app/sign-up': typeof Char123LocaleChar125AppSignUpRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
+    | '/{-$locale}/gospodarstwo'
     | '/{-$locale}/raport'
     | '/{-$locale}/sign-in'
     | '/{-$locale}/sign-up'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
+    | '/{-$locale}/gospodarstwo'
     | '/{-$locale}/raport'
     | '/{-$locale}/sign-in'
     | '/{-$locale}/sign-up'
@@ -170,6 +182,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app/_protected'
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
+    | '/{-$locale}/_app/gospodarstwo'
     | '/{-$locale}/_app/raport'
     | '/{-$locale}/_app/sign-in'
     | '/{-$locale}/_app/sign-up'
@@ -239,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/analiza'
       fullPath: '/{-$locale}/analiza'
       preLoaderRoute: typeof Char123LocaleChar125AppAnalizaRouteImport
+      parentRoute: typeof Char123LocaleChar125AppRouteRoute
+    }
+    '/{-$locale}/_app/gospodarstwo': {
+      id: '/{-$locale}/_app/gospodarstwo'
+      path: '/gospodarstwo'
+      fullPath: '/{-$locale}/gospodarstwo'
+      preLoaderRoute: typeof Char123LocaleChar125AppGospodarstwoRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
     '/{-$locale}/_app/raport': {
@@ -314,6 +334,7 @@ interface Char123LocaleChar125AppRouteRouteChildren {
   Char123LocaleChar125AppProtectedRouteRoute: typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
+  Char123LocaleChar125AppGospodarstwoRoute: typeof Char123LocaleChar125AppGospodarstwoRoute
   Char123LocaleChar125AppRaportRoute: typeof Char123LocaleChar125AppRaportRoute
   Char123LocaleChar125AppSignInRoute: typeof Char123LocaleChar125AppSignInRoute
   Char123LocaleChar125AppSignUpRoute: typeof Char123LocaleChar125AppSignUpRoute
@@ -328,6 +349,8 @@ const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRou
       Char123LocaleChar125AppProtectedRouteRouteWithChildren,
     Char123LocaleChar125AppSplatRoute: Char123LocaleChar125AppSplatRoute,
     Char123LocaleChar125AppAnalizaRoute: Char123LocaleChar125AppAnalizaRoute,
+    Char123LocaleChar125AppGospodarstwoRoute:
+      Char123LocaleChar125AppGospodarstwoRoute,
     Char123LocaleChar125AppRaportRoute: Char123LocaleChar125AppRaportRoute,
     Char123LocaleChar125AppSignInRoute: Char123LocaleChar125AppSignInRoute,
     Char123LocaleChar125AppSignUpRoute: Char123LocaleChar125AppSignUpRoute,

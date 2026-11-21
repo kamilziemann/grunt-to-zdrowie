@@ -60,6 +60,9 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
   // null = "dzis" (data przychodzi z przegladarki po hydratacji)
   const [date, setDate] = useState<string | null>(initialDate ?? null);
   const [cropMissing, setCropMissing] = useState(false);
+  // kilka dzialek: razem jako jedno pole (raport) albo kazda osobno (gospodarstwo, I2)
+  const canSeparate = parcelIds.length > 1 && !area?.obszar;
+  const [separate, setSeparate] = useState(false);
   const [dateError, setDateError] = useState<AnalysisDateError | null>(null);
   const bounds = today ? analysisDateBounds(today) : null;
   const value = date ?? today ?? '';
@@ -75,6 +78,10 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
     setDate(event.currentTarget.value);
     setDateError(null);
   }, []);
+  const changeMode = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setSeparate(event.currentTarget.value === 'separate'),
+    [],
+  );
   const resetDate = useCallback(() => {
     setDate(null);
     setDateError(null);
@@ -100,16 +107,18 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
         return;
       }
 
-      router.push(routes.report(analysisSearchOf({ parcelIds, cropId, date: chosen, ...area })));
+      const search = analysisSearchOf({ parcelIds, cropId, date: chosen, ...area });
+
+      router.push(canSeparate && separate ? routes.farm(search) : routes.report(search));
     },
-    [area, cropId, date, parcelIds, router, today],
+    [area, canSeparate, cropId, date, parcelIds, router, separate, today],
   );
 
   return (
     <form
       ref={formRef}
       method="get"
-      action={localizePath(routes.report(), locale)}
+      action={localizePath(canSeparate && separate ? routes.farm() : routes.report(), locale)}
       onSubmit={submit}
       noValidate
       className="flex flex-col gap-section"
@@ -143,6 +152,32 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
             </p>
           )}
         </div>
+        {canSeparate && (
+          <fieldset className="flex flex-col gap-2" data-testid="analysis-mode">
+            <legend className="mb-2 text-lg font-semibold">
+              {t('mode.legend', { count: parcelIds.length })}
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {(['together', 'separate'] as const).map((mode) => (
+                <label
+                  key={mode}
+                  className="grid min-h-16 cursor-pointer grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 rounded-lg border p-3 has-checked:border-primary has-checked:bg-primary/10 has-focus-visible:ring-2 has-focus-visible:ring-ring/60"
+                >
+                  <input
+                    type="radio"
+                    name="tryb"
+                    value={mode}
+                    checked={separate === (mode === 'separate')}
+                    onChange={changeMode}
+                    className="row-span-2 mt-1 size-5 shrink-0 accent-primary"
+                  />
+                  <span className="text-base font-semibold">{t(`mode.${mode}`)}</span>
+                  <span className="text-sm text-muted-foreground">{t(`mode.${mode}Hint`)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
         <div className="flex flex-col gap-2">
           <label htmlFor={dateId} className="text-lg font-semibold">
             {t('dateLabel')}

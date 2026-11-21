@@ -2,6 +2,7 @@
 // nawadnianie, zrodla i ograniczenia, z wydrukiem A4. Dane liczy feature "analysis" (POST /api/analysis); trasa
 // `routes/{-$locale}/_app/raport.tsx` i katalog /design importuja tylko stad.
 export { SAMPLE_REPORT } from './fixtures/sample-report';
+export { FarmScreen, type FarmScreenProps } from './components/farm-screen';
 export { ReportMissing, type ReportMissingProps } from './components/report-missing';
 export { ReportScreen, type ReportScreenProps } from './components/report-screen';
 export { ReportView, type ReportViewProps } from './components/report-view';

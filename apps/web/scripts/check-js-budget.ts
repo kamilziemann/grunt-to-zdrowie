@@ -9,11 +9,12 @@ import { gzipSync } from 'node:zlib';
 
 /** Limit gzip JS na strone (KB). Dzis 218-240 KB (Next w kontekst: 246-255); podniesienie = decyzja w PR. */
 const BUDGET_KB = 260;
-// strona glowna, formularz analizy i raport (raport bez mapy - nie moze ciagnac MapLibre)
+// strona glowna, formularz analizy, raport i gospodarstwo (raport i gospodarstwo bez mapy - nie moga ciagnac MapLibre)
 const PAGES = [
   '/',
   '/analiza?dzialki=141201_1.0001.6509',
   '/raport?dzialki=141201_1.0001.6509&uprawa=winter_wheat&data=2026-06-15',
+  '/gospodarstwo?dzialki=141201_1.0001.6509,141201_1.0001.6508&uprawa=winter_wheat&data=2026-06-15',
 ];
 const PORT = Number(process.env.JS_BUDGET_PORT ?? 3690);
 const BASE = `http://localhost:${PORT}`;

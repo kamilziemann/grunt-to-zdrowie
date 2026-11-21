@@ -13,7 +13,14 @@
       "tooOld": "We look back at most 10 years. Choose a day from {min}."
     },
     "submit": "Analyse",
-    "submitHint": "The analysis usually takes up to 30 seconds."
+    "submitHint": "The analysis usually takes up to 30 seconds.",
+    "mode": {
+      "legend": "How should the {count} parcels be analysed?",
+      "together": "Together, as one field",
+      "togetherHint": "One assessment for the whole area – when the parcels form one field with the same crop.",
+      "separate": "Each separately",
+      "separateHint": "An assessment for each parcel and the order in which to start. Takes longer – we compute two at a time."
+    }
   },
   "crops": {
     "winter_wheat": {

@@ -44,6 +44,27 @@ const LEVEL_STYLES: Record<AssessmentLevel, { icon: LucideIcon; card: string; ba
   unknown: { icon: CircleHelp, card: 'border-border bg-muted', badge: 'bg-foreground text-background' },
 };
 
+/** Poziom jako znaczek (ikona + slowo + kolor) - ten sam w ocenie raportu i w tabeli gospodarstwa. */
+export function LevelBadge({ level, className }: { level: AssessmentLevel; className?: string }) {
+  const t = useTranslations('report.verdict');
+  const style = LEVEL_STYLES[level];
+  const Icon = style.icon;
+
+  return (
+    <span
+      className={cn(
+        'inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-0.5 text-sm font-semibold print:border',
+        style.badge,
+        className,
+      )}
+      data-level={level}
+    >
+      <Icon aria-hidden="true" className="size-4" />
+      {t(`levels.${level}`)}
+    </span>
+  );
+}
+
 const ROMAN = ['I', 'II', 'III', 'IV'] as const;
 
 function roman(category: number): string {

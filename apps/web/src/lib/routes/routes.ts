@@ -34,6 +34,13 @@ export const routes = {
       uprawa: search?.uprawa,
       data: search?.data,
     }),
+  /** Gospodarstwo: kazda dzialka analizowana osobno, tabela "gdzie dzialac najpierw" (I2). */
+  farm: (search?: { dzialki?: string; uprawa?: string; data?: string }) =>
+    withQuery(routePath('/gospodarstwo'), {
+      dzialki: search?.dzialki,
+      uprawa: search?.uprawa,
+      data: search?.data,
+    }),
   /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
   parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
   /** Logowanie; `next` = strona, na ktora wrocic po zalogowaniu (tylko sciezka tej aplikacji, zob. `safeNextPath`). */

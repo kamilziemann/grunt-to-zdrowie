@@ -422,5 +422,35 @@
       "field_verification_needed": "Przed decyzją sprawdź glebę na polu, np. łopatą na głębokości korzeni."
     },
     "meta": "Raport {id}, silnik {version}, przygotowany {date} w {seconds} s."
+  },
+  "farm": {
+    "metaTitle": "Gospodarstwo – ocena działek",
+    "title": "Działki w gospodarstwie",
+    "description": "Każdą działkę oceniamy osobno, po dwie naraz. Na górze te, od których warto zacząć.",
+    "progress": "Policzono {done} z {total}",
+    "order": "Gdzie działać najpierw",
+    "headers": {
+      "rank": "Kolejność",
+      "parcel": "Działka",
+      "level": "Ocena",
+      "water": "Zapas wody",
+      "stress": "Dni bez wody (30)",
+      "confidence": "Pewność",
+      "report": "Raport"
+    },
+    "waiting": "w kolejce",
+    "running": "liczę…",
+    "failed": "nie udało się",
+    "retry": "Ponów",
+    "open": "Pełny raport",
+    "openFor": "Pełny raport działki {number}",
+    "parcel": "Działka {number}",
+    "waterValue": "{percent}%",
+    "stressValue": "{days} z 30",
+    "none": "—",
+    "sample": "Wyniki częściowo z danych przykładowych – szczegóły w raporcie każdej działki.",
+    "missing": "Wybierz co najmniej dwie działki, uprawę i dzień.",
+    "change": "Zmień uprawę lub datę",
+    "map": "Wróć do mapy"
   }
 }

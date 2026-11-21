@@ -13,7 +13,14 @@
       "tooOld": "Sięgamy najwyżej 10 lat wstecz. Wybierz dzień od {min}."
     },
     "submit": "Analizuj",
-    "submitHint": "Analiza trwa zwykle do 30 sekund."
+    "submitHint": "Analiza trwa zwykle do 30 sekund.",
+    "mode": {
+      "legend": "Jak analizować {count} działki?",
+      "together": "Razem, jako jedno pole",
+      "togetherHint": "Jedna ocena dla całego obszaru – gdy działki tworzą jedno pole z tą samą uprawą.",
+      "separate": "Każdą osobno",
+      "separateHint": "Ocena każdej działki i kolejność, od której zacząć. Trwa dłużej – liczymy po dwie naraz."
+    }
   },
   "crops": {
     "winter_wheat": {

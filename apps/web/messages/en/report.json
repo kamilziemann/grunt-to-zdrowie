@@ -422,5 +422,35 @@
       "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth."
     },
     "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s."
+  },
+  "farm": {
+    "metaTitle": "Farm – parcel assessment",
+    "title": "Parcels on the farm",
+    "description": "Each parcel is assessed separately, two at a time. The ones worth starting with are at the top.",
+    "progress": "Computed {done} of {total}",
+    "order": "Where to act first",
+    "headers": {
+      "rank": "Order",
+      "parcel": "Parcel",
+      "level": "Assessment",
+      "water": "Water reserve",
+      "stress": "Days without water (30)",
+      "confidence": "Confidence",
+      "report": "Report"
+    },
+    "waiting": "queued",
+    "running": "computing…",
+    "failed": "failed",
+    "retry": "Retry",
+    "open": "Full report",
+    "openFor": "Full report for parcel {number}",
+    "parcel": "Parcel {number}",
+    "waterValue": "{percent}%",
+    "stressValue": "{days} of 30",
+    "none": "—",
+    "sample": "Results partly from sample data – see each parcel's report for details.",
+    "missing": "Choose at least two parcels, a crop and a day.",
+    "change": "Change crop or date",
+    "map": "Back to the map"
   }
 }
