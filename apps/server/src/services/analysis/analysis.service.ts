@@ -207,8 +207,13 @@ export function createAnalysisService({
           analysisDate: date,
           generatedAt: now(),
           durationMs: Date.now() - started,
-          // bez pogody nie ma bilansu, wiec nie ma oceny; pozostale braki tylko ja oslabiaja
-          status: meteo.data === null ? 'insufficient' : missing.length > 0 ? 'partial' : 'complete',
+          // bez pogody nie ma bilansu, wiec nie ma oceny; pozostale braki (takze luki w zrodle) tylko ja oslabiaja
+          status:
+            meteo.data === null
+              ? 'insufficient'
+              : fetched.some((source) => source.status !== 'ok')
+                ? 'partial'
+                : 'complete',
           sample: reportSources.some((source) => source.sample),
           sampleParts: [...stages.sampleParts],
         },

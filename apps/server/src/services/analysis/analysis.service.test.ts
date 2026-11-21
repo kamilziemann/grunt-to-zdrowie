@@ -121,6 +121,22 @@ describe('analysis service', () => {
     expect(report.assessment.confidence).toBe('low');
   });
 
+  it('luki w zrodle (status partial) robia raport czesciowym, choc ocena jest policzona', async () => {
+    const sample = createSampleSources();
+    const report = await service({
+      meteo: {
+        series: async (point, from, to) => {
+          const full = await sample.meteo.series(point, from, to);
+
+          return { ...full, source: { ...full.source, status: 'partial', note: '3 days without data' } };
+        },
+      },
+    }).analyze(request('2026-07-20'));
+
+    expect(report.meta.status).toBe('partial');
+    expect(report.assessment.level).not.toBe('unknown');
+  });
+
   it('bez pogody nie ma oceny: status insufficient, poziom unknown, zadnych zalecen', async () => {
     const report = await service({
       meteo: {
