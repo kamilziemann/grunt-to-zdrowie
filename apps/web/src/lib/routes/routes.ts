@@ -1,0 +1,60 @@
+// Adresy stron aplikacji - jedyne miejsce, w ktorym powstaja URL-e (linki, formularze, router.push). Kazda sciezka
+// idzie przez `routePath` ze wzorca trasy, wiec usuniecie albo zmiana nazwy trasy psuje `check:types`, nie linki.
+import { routePath, withQuery, type AppHref } from './route-path';
+
+export const routes = {
+  home: () => routePath('/'),
+  /** Podsumowanie dzialek wybranych do analizy; `parcelIds` trafia do parametru `dzialki`. */
+  analysis: (parcelIds?: string) => withQuery(routePath('/analiza'), { dzialki: parcelIds }),
+  /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
+  parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
+  /** Logowanie; `next` = strona, na ktora wrocic po zalogowaniu (tylko sciezka tej aplikacji, zob. `safeNextPath`). */
+  signIn: (next?: string) => withQuery(routePath('/sign-in'), { next: safeNextPath(next) ?? undefined }),
+  signUp: () => routePath('/sign-up'),
+  account: () => routePath('/account'),
+  /** Katalog systemu designu (tylko development). */
+  design: () => routePath('/design'),
+} as const;
+
+const LOCAL_ORIGIN = 'https://app.invalid';
+
+/**
+ * Adres powrotu po logowaniu (`?next=`): tylko sciezka tej aplikacji (`/account?tab=a`). Pelny URL, `//host`
+ * albo `/\host` (przegladarka czyta je jako inny host) = null, zeby link logowania nie przekierowal na obca strone.
+ */
+export function safeNextPath(value: string | null | undefined): AppHref | null {
+  if (!value?.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return null;
+
+  try {
+    const url = new URL(value, LOCAL_ORIGIN);
+
+    // sprawdzona sciezka tej samej aplikacji (z ?next=), wiec bezpieczna jako adres linku i nawigacji
+    return url.origin === LOCAL_ORIGIN ? (`${url.pathname}${url.search}${url.hash}` as AppHref) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Klucze etykiet nawigacji: przestrzen `nav` w messages/*.json (AppNav tlumaczy je typowanym `t`). */
+export type NavLabelKey = 'design';
+
+export interface NavItem {
+  href: AppHref;
+  labelKey: NavLabelKey;
+  /** pozycja tylko w development (strony deweloperskie - poza dev to 404) */
+  devOnly?: boolean;
+}
+
+/** Pozycje nawigacji glownej (strona glowna = logo). Nowa funkcja = nowa pozycja tutaj + klucz w `nav`. */
+export const NAV_ITEMS: readonly NavItem[] = [{ href: routes.design(), labelKey: 'design', devOnly: true }];
+
+/** Sekcja jest aktywna na swojej stronie i na podstronach (`/design/x` = Design system). */
+export function isNavItemActive(item: NavItem, pathname: string): boolean {
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+/** Element sciezki nad naglowkiem strony (`Breadcrumbs`); brak `href` = biezaca strona. */
+export interface Crumb {
+  label: string;
+  href?: AppHref;
+}
