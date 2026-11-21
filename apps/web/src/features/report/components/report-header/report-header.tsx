@@ -3,6 +3,7 @@ import { ArrowLeft, MapPinned } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils/cn';
 import { Link } from '@/lib/navigation';
 import type { AppHref } from '@/lib/routes';
 
@@ -32,7 +33,12 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
   const { field } = report;
   const items = [
     field.parcelIds.length > 0
-      ? { label: t('header.parcels', { count: field.parcelIds.length }), value: field.parcelIds.join(', ') }
+      ? {
+          label: t('header.parcels', { count: field.parcelIds.length }),
+          value: field.parcelIds.join(', '),
+          // pelny identyfikator (080904_5.0001.349/1) nie miesci sie w pol szerokosci telefonu
+          wide: true,
+        }
       : null,
     { label: t('header.crop'), value: tCrops(`${report.crop.cropId}.name`) },
     {
@@ -48,7 +54,7 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
     field.landUse && field.landUse.length > 0
       ? { label: t('header.landUse'), value: field.landUse.join(', ') }
       : null,
-  ].filter((item): item is { label: string; value: string } => item !== null);
+  ].filter((item): item is { label: string; value: string; wide?: boolean } => item !== null);
 
   return (
     <header className="flex flex-col gap-4" data-testid="report-header">
@@ -58,7 +64,10 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 print:grid-cols-4">
         {items.map((item) => (
-          <div key={item.label} className="flex min-w-0 flex-col">
+          <div
+            key={item.label}
+            className={cn('flex min-w-0 flex-col', item.wide && 'col-span-2 print:col-span-2')}
+          >
             <dt className="text-sm text-muted-foreground">{item.label}</dt>
             <dd className="text-base font-semibold wrap-anywhere">{item.value}</dd>
           </div>

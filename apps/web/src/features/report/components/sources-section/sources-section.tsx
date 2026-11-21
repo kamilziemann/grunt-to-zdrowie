@@ -7,7 +7,7 @@ import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-import { isoDay } from '../../utils/report-data';
+import { isoDay, sampleScope } from '../../utils/report-data';
 import { ExportButtons } from '../export-buttons';
 
 const STATUS_STYLES: Record<SourceRef['status'], { icon: LucideIcon; badge: string }> = {
@@ -126,7 +126,10 @@ export function SourcesSection({ report }: { report: WaterReport }) {
           <ul className="flex list-disc flex-col gap-1.5 pl-5 text-base">
             {report.limitations.map((limitation) => (
               <li key={limitation} data-limitation={limitation}>
-                {t(`limitationItems.${limitation}`)}
+                {/* atrapa tylko czesci zrodel: o tym, ktorych, mowi baner na gorze - tu bez "wyniki nie opisuja pola" */}
+                {limitation === 'sample_data' && sampleScope(report) === 'some'
+                  ? t('limitationItems.sample_data_partial')
+                  : t(`limitationItems.${limitation}`)}
               </li>
             ))}
           </ul>

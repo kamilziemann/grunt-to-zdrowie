@@ -467,7 +467,8 @@
       "balance_estimated": "We calculate the water balance with our own method, so it may differ from IUNG reports.",
       "current_boundaries": "The parcel boundaries are current. They may have been different on the analysis day.",
       "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
-      "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth."
+      "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth.",
+      "sample_data_partial": "Some of the data is still sample data (the box at the top of the report says which). Treat those parts as illustrative."
     },
     "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s.",
     "statusNote": {
