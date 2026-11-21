@@ -6,6 +6,7 @@
 import { AppError } from '@app/http';
 
 import { parseWktPolygon } from '../../domain/parcel-geometry';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import type {
   ParcelDescription,
   ParcelMatches,
@@ -23,7 +24,10 @@ const ATTEMPTS = 2;
 // Szukanie po nazwie obrebu przeglada cala Polske i samo trwa ok. 6 s - dostaje jeden dlugi limit bez ponowien.
 const NAME_SEARCH_TIMEOUT_MS = 25_000;
 
-export type FetchLike = (url: string, init: { signal: AbortSignal; redirect: 'manual' }) => Promise<Response>;
+export type FetchLike = (
+  url: string,
+  init: { signal: AbortSignal; redirect: 'manual'; headers: Record<string, string> },
+) => Promise<Response>;
 
 function lines(text: string): string[] {
   return text
@@ -96,7 +100,11 @@ export function createUldkParcelSource(fetchImpl: FetchLike = (url, init) => fet
 
     for (let attempt = 0; attempt < attempts; attempt += 1) {
       try {
-        const response = await fetchImpl(url, { signal: AbortSignal.timeout(timeoutMs), redirect: 'manual' });
+        const response = await fetchImpl(url, {
+          signal: AbortSignal.timeout(timeoutMs),
+          redirect: 'manual',
+          headers: { 'user-agent': OUTBOUND_USER_AGENT },
+        });
 
         // Po przekroczeniu limitu zapytan (wieczorem 40/min na IP) ULDK odsyla przekierowanie na strone, ktora
         // przez 20 s nic nie zwraca. Nie idziemy za nim i nie ponawiamy - od razu oddajemy blad (i pole zapasowi).

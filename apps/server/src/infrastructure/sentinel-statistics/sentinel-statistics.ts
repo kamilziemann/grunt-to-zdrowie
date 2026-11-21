@@ -20,6 +20,7 @@ import { fieldGrid, gridTooLarge, type GridSpec } from '../../domain/field-grid'
 import { addDays, daysBetween, isoDate, monthOf, withYear, yearOf } from '../../domain/iso-date';
 import { readGeoTiff } from '../geotiff';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { sourceCacheTtl } from '../../domain/source-cache-policy';
 
 export const CDSE_TOKEN_URL =
@@ -388,7 +389,11 @@ export function createSentinelStatisticsSource({
         const tokenResponse = await fetchImpl(CDSE_TOKEN_URL, {
           method: 'POST',
           signal,
-          headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json' },
+          headers: {
+            'user-agent': OUTBOUND_USER_AGENT,
+            'content-type': 'application/x-www-form-urlencoded',
+            accept: 'application/json',
+          },
           body: new URLSearchParams({
             grant_type: 'client_credentials',
             client_id: clientId,
@@ -414,6 +419,7 @@ export function createSentinelStatisticsSource({
                 method: 'POST',
                 signal,
                 headers: {
+                  'user-agent': OUTBOUND_USER_AGENT,
                   authorization: `Bearer ${token}`,
                   'content-type': 'application/json',
                   accept: 'image/tiff',
@@ -438,6 +444,7 @@ export function createSentinelStatisticsSource({
             method: 'POST',
             signal,
             headers: {
+              'user-agent': OUTBOUND_USER_AGENT,
               authorization: `Bearer ${token}`,
               'content-type': 'application/json',
               accept: 'application/json',

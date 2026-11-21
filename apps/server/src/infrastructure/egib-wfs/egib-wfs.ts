@@ -21,6 +21,7 @@ import type {
   ParcelRegistryEntry,
   ParcelSource,
 } from '../../domain/parcel-source';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 
 export const EGIB_WFS_URL = 'https://mapy.geoportal.gov.pl/wss/service/PZGIK/EGIB/WFS/UslugaZbiorcza';
 
@@ -30,7 +31,10 @@ const MAX_FEATURES = 3000;
 /** 6 miejsc po przecinku to ok. 10 cm - dokladniej niz dane, a odpowiedz jest o polowe mniejsza. */
 const COORDINATE_DECIMALS = 6;
 
-export type FetchLike = (url: string, init: { signal: AbortSignal }) => Promise<Response>;
+export type FetchLike = (
+  url: string,
+  init: { signal: AbortSignal; headers?: Record<string, string> },
+) => Promise<Response>;
 
 interface WfsFeature {
   properties?: {
@@ -224,6 +228,7 @@ export function createEgibWfsParcelSource(
     try {
       const response = await fetchImpl(`${EGIB_WFS_URL}?${params.toString()}`, {
         signal: AbortSignal.timeout(TIMEOUT_MS),
+        headers: { 'user-agent': OUTBOUND_USER_AGENT },
       });
 
       if (!response.ok) throw new Error(`EGiB WFS responded with HTTP ${response.status}`);

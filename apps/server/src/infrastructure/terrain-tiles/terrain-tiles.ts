@@ -9,6 +9,7 @@ import type { Sourced, TerrainData, TerrainGrid, TerrainSource } from '../../dom
 import { containsPoint } from '../../domain/parcel-geometry';
 import { summarizeTerrain, TERRAIN_MODEL_RESOLUTION_M, terrainTooCoarse } from '../../domain/terrain';
 import { failureNote, httpFailureNote, polishPlural } from '../../lib/source-note';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { decodePng } from './png';
 
 export const TERRARIUM_URL = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium';
@@ -26,7 +27,10 @@ const MAX_ZOOM = 15;
 const MIN_ZOOM = 11;
 const TIMEOUT_MS = 6000;
 
-export type FetchLike = (url: string, init: { signal: AbortSignal }) => Promise<Response>;
+export type FetchLike = (
+  url: string,
+  init: { signal: AbortSignal; headers?: Record<string, string> },
+) => Promise<Response>;
 
 export interface TerrainTilesOptions {
   fetch?: FetchLike;
@@ -154,7 +158,10 @@ export function createTerrainTilesSource({
       const signal = AbortSignal.timeout(TIMEOUT_MS);
       const loaded = await Promise.all(
         tiles.map(async (tile) => {
-          const response = await fetchImpl(tileUrl(window.zoom, tile.x, tile.y), { signal });
+          const response = await fetchImpl(tileUrl(window.zoom, tile.x, tile.y), {
+            signal,
+            headers: { 'user-agent': OUTBOUND_USER_AGENT },
+          });
 
           if (!response.ok) throw new TerrainFailure(httpFailureNote('Terrain Tiles', response.status));
 

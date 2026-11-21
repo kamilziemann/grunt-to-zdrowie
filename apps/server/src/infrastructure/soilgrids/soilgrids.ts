@@ -12,6 +12,7 @@ import { containsPoint } from '../../domain/parcel-geometry';
 import { soilProfileFromLayers, type SoilLayer } from '../../domain/soil-profile';
 import { readGeoTiff, type Raster } from '../geotiff';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
+import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { STATIC_TTL_S } from '../../domain/source-cache-policy';
 
 export const SOILGRIDS_WCS_URL = 'https://maps.isric.org/mapserv';
@@ -42,7 +43,10 @@ const PROPERTIES = { sand: 10, clay: 10, soc: 10 } as const;
 
 type Property = keyof typeof PROPERTIES;
 
-export type FetchLike = (url: string, init: { signal: AbortSignal }) => Promise<Response>;
+export type FetchLike = (
+  url: string,
+  init: { signal: AbortSignal; headers?: Record<string, string> },
+) => Promise<Response>;
 
 export interface SoilGridsOptions {
   fetch?: FetchLike;
@@ -211,7 +215,10 @@ async function fetchRasters(
   const properties = Object.keys(PROPERTIES) as Property[];
   const jobs = SOILGRIDS_DEPTHS.flatMap((depth) =>
     properties.map((property) => async () => {
-      const response = await fetchImpl(coverageUrl(property, depth.label, bbox, pad), { signal });
+      const response = await fetchImpl(coverageUrl(property, depth.label, bbox, pad), {
+        signal,
+        headers: { 'user-agent': OUTBOUND_USER_AGENT },
+      });
 
       if (!response.ok) throw new SoilGridsFailure(httpFailureNote('SoilGrids', response.status));
 
