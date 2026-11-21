@@ -6,6 +6,7 @@ import { AppError } from '@app/http';
 
 import { addDays, isoDateInPoland } from '../../domain/iso-date';
 import { boundingBox, type BoundingBox, type PolygonGeometry } from '../../domain/parcel-geometry';
+import { mergeParcels } from './merge-parcels';
 import type { ParcelGeometryLookup, VegetationImagerySource, VegetationIndex } from './ports';
 
 /** Ile dni przed wybranym dniem szukamy zdjecia bez chmur (Sentinel-2 przelatuje co 2-5 dni). */
@@ -67,7 +68,10 @@ export function createImageryService({ parcels, source, now }: ImageryServiceDep
       }
 
       const found = await Promise.all(input.parcelIds.map((id) => parcels.get(id)));
-      const parts = found.map((parcel) => ({ geometry: parcel.geometry, bbox: paddedBbox(parcel.geometry) }));
+      // sasiednie dzialki jako jedno pole = jedno zapytanie o statystyki i jeden obraz; gdy sie nie skladaja - osobno
+      const merged = found.length > 1 ? mergeParcels(found.map((parcel) => parcel.geometry)) : null;
+      const geometries = merged ? [merged] : found.map((parcel) => parcel.geometry);
+      const parts = geometries.map((geometry) => ({ geometry, bbox: paddedBbox(geometry) }));
       const image = await source.render({
         parts,
         index: LAYER_INDEX[layer],

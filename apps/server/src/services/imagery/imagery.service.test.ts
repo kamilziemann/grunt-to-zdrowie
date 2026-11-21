@@ -69,8 +69,49 @@ function source(result: 'image' | 'none', requests: VegetationImageRequest[] = [
   };
 }
 
+/** Kwadrat 0,01 stopnia - dwa takie obok siebie maja wspolna krawedz. */
+function squareParcel(id: string, west: number): Parcel {
+  const base = parcel(id, west);
+
+  return {
+    ...base,
+    geometry: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [west, 52],
+          [west + 0.01, 52],
+          [west + 0.01, 52.01],
+          [west, 52.01],
+          [west, 52],
+        ],
+      ],
+    },
+  };
+}
+
 describe('imagery service', () => {
-  it('sklada pole z dzialek i oddaje obraz z zasiegiem i dniem sceny', async () => {
+  it('sasiednie dzialki ze wspolna granica = jedno pole, jedno zapytanie i jeden obraz', async () => {
+    const neighbours = new Map([
+      ['141201_1.0001.3', squareParcel('141201_1.0001.3', 21)],
+      ['141201_1.0001.4', squareParcel('141201_1.0001.4', 21.01)],
+    ]);
+    const requests: VegetationImageRequest[] = [];
+    const service = createImageryService({
+      parcels: { get: (id) => Promise.resolve(neighbours.get(id) ?? squareParcel(id, 0)) },
+      source: source('image', requests),
+      now: () => NOW,
+    });
+    const result = await service.vegetation({ parcelIds: [...neighbours.keys()], date: '2025-07-01' });
+
+    expect(requests[0]?.parts).toHaveLength(1);
+    expect(requests[0]?.parts[0]?.geometry.type).toBe('Polygon');
+    expect(result.images).toHaveLength(1);
+    expect(result.bbox[0]).toBeLessThan(21);
+    expect(result.bbox[2]).toBeGreaterThan(21.02);
+  });
+
+  it('dzialki stykajace sie w punkcie osobno: obraz na dzialke z zasiegiem i dniem sceny', async () => {
     const requests: VegetationImageRequest[] = [];
     const service = createImageryService({
       parcels: lookup,
