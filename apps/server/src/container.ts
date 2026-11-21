@@ -5,12 +5,14 @@ import { nowIso } from '@app/db';
 
 import type { DataSources } from './domain/analysis-ports';
 import type { EdgeCachePurger } from './domain/edge-cache';
+import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
 import { withFallback, type ParcelSource } from './domain/parcel-source';
-import { sampleStages } from './domain/sample-stages';
 import type { PlaceSource } from './domain/place-source';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
 import { createEgibWfsOutlineSource, createEgibWfsParcelSource } from './infrastructure/egib-wfs';
+import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway';
+import { createNasaPowerMeteoSource } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
 import { createSampleSources } from './infrastructure/sample-sources';
 import { createUldkParcelSource } from './infrastructure/uldk';
@@ -46,12 +48,19 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
 
-  // Zrodla danych i etapy obliczen analizy to na razie wersje przykladowe (raport niesie `meta.sample`); pakiety
-  // planu docs/plans/silnik-analizy-i-raport.md podmieniaja je tutaj pojedynczo na wlasciwe adaptery i obliczenia.
+  // Pogoda (NASA POWER) i prognoza (MET Norway) sa prawdziwe, ocena i historia liczone z danych; gleba, teren, woda
+  // i satelita to wciaz atrapy (`sample: true`, raport niesie `meta.sample`), a przyczyny, strefy i zalecenia -
+  // reguly przykladowe (`meta.sampleParts`). Pakiety planu docs/plans/silnik-analizy-i-raport.md podmieniaja je
+  // tutaj pojedynczo. Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
   const analysis = createAnalysisService({
     parcels,
-    sources: { ...createSampleSources(), ...overrides.analysisSources },
-    stages: sampleStages,
+    sources: {
+      ...createSampleSources(),
+      meteo: createNasaPowerMeteoSource(),
+      forecast: createMetNorwayForecastSource(),
+      ...overrides.analysisSources,
+    },
+    stages: engineStages,
     now,
   });
 
