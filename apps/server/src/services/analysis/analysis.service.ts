@@ -18,7 +18,7 @@ import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import type { AnalysisStages, DataSources, ParcelLookup, Sourced, StageInput } from './ports';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.1.0-sample';
+export const ANALYSIS_ENGINE_VERSION = '0.2.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -166,6 +166,9 @@ export function createAnalysisService({
       ]);
 
       const crop = stages.crop(cropId, date);
+      const fetched = [meteo, forecast, soil, terrain, hydro, vegetation].flatMap((item) =>
+        item ? [item.source] : [],
+      );
       const input: StageInput = {
         field,
         cropId,
@@ -177,13 +180,11 @@ export function createAnalysisService({
         terrain: terrain.data,
         hydro: hydro.data,
         vegetation: vegetation.data,
+        sampleSources: fetched.filter((source) => source.sample).map((source) => source.id),
       };
       const assessment = stages.assess(input);
       const causes = stages.causes(input, assessment);
       const zones = stages.zones(input);
-      const fetched = [meteo, forecast, soil, terrain, hydro, vegetation].flatMap((item) =>
-        item ? [item.source] : [],
-      );
       const reportSources = [parcelSource, ...fetched];
       const missing = fetched.filter((source) => source.status === 'missing');
       const limitations = new Set<LimitationId>(stages.limitations(input, assessment));
@@ -209,6 +210,7 @@ export function createAnalysisService({
           // bez pogody nie ma bilansu, wiec nie ma oceny; pozostale braki tylko ja oslabiaja
           status: meteo.data === null ? 'insufficient' : missing.length > 0 ? 'partial' : 'complete',
           sample: reportSources.some((source) => source.sample),
+          sampleParts: [...stages.sampleParts],
         },
         field,
         crop,

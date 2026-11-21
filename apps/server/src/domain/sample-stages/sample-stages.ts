@@ -145,7 +145,8 @@ function mean(values: (number | null)[]): number | null {
   return known.length === 0 ? null : known.reduce((sum, value) => sum + value, 0) / known.length;
 }
 
-function vegetationSignal(input: StageInput, deficit: boolean): VegetationSignal | null {
+/** Sygnal satelitarny wzgledem tej samej pory roku w latach poprzednich - uzywa go tez wlasciwa ocena. */
+export function vegetationSignal(input: StageInput, deficit: boolean): VegetationSignal | null {
   const [latest] = input.vegetation?.observations ?? [];
 
   if (!input.vegetation || !latest) return null;
@@ -178,7 +179,8 @@ function vegetationSignal(input: StageInput, deficit: boolean): VegetationSignal
   };
 }
 
-function precipitationContext(input: StageInput): Assessment['precipitation'] {
+/** Opad z ostatnich 30 dni na tle tych samych dni w 10 latach poprzednich. */
+export function precipitationContext(input: StageInput): Assessment['precipitation'] {
   const { meteo, date } = input;
 
   if (!meteo) return null;
@@ -593,6 +595,7 @@ function limitations(input: StageInput, assessment: Assessment): LimitationId[] 
 }
 
 export const sampleStages: AnalysisStages = {
+  sampleParts: ['assessment', 'history', 'causes', 'zones', 'recommendations'],
   crop: cropAtDate,
   assess,
   history,

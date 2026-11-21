@@ -9,6 +9,8 @@ import type {
   FieldArea,
   History,
   LimitationId,
+  ReportPart,
+  SourceId,
   WaterReport,
   ZoneMap,
 } from '@app/contracts';
@@ -34,11 +36,15 @@ export interface StageInput {
   terrain: TerrainData | null;
   hydro: HydroContext | null;
   vegetation: VegetationSeries | null;
+  /** zrodla, ktore oddaly dane przykladowe (atrapy) - etap nie moze przypisac im wysokiej pewnosci */
+  sampleSources?: readonly SourceId[];
 }
 
 export type Recommendations = WaterReport['recommendations'];
 
 export interface AnalysisStages {
+  /** czesci raportu liczone jeszcze przykladowymi regulami - raport mowi o tym w `meta.sampleParts` */
+  sampleParts: readonly ReportPart[];
   /** Faza i Kc uprawy w dacie analizy. */
   crop(cropId: CropId, date: string): CropAtDate;
   /** Ocena sytuacji wodnej w dacie analizy. */
