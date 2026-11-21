@@ -1,0 +1,30 @@
+{
+  "name": "@app/rpc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typowany klient Hono RPC + rozpakowywanie odpowiedzi do Problem Details. Typ aplikacji przekazuje konsument (import type).",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "hono": "^4.13.13",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  },
+  "peerDependencies": {
+    "hono": ">=4.10.0"
+  }
+}
