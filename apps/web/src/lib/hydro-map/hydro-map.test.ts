@@ -1,5 +1,8 @@
 import type { HydroFeature, ParcelGeometry } from '@app/contracts';
+import { createRpcClient } from '@app/rpc';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import type { AppType } from '../rpc/app-type';
 
 import {
   fetchHydroTile,
@@ -10,6 +13,14 @@ import {
   latestImport,
   nearestHydro,
 } from './hydro-map';
+
+// klient API jak w przegladarce (fetch do /api), bez kontekstu TanStack Start; `fetch` podmienia test
+vi.mock('../api', () => ({
+  getApi: () =>
+    createRpcClient<AppType>('http://localhost/api', {
+      fetch: (...args: Parameters<typeof fetch>) => fetch(...args),
+    }),
+}));
 
 // pole ok. 70 x 70 m kolo Minska Mazowieckiego
 const FIELD: ParcelGeometry = {
@@ -125,11 +136,13 @@ describe('hydro-map', () => {
     ).toBe('2026-11-21T08:00:00Z');
   });
 
-  it('404/503 = warstwa niedostepna, odpowiedz sprawdzana kontraktem', async () => {
+  it('404/502/503 = warstwa niedostepna, odpowiedz sprawdzana kontraktem', async () => {
     const fetchMock = vi.fn<typeof fetch>();
 
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValueOnce(new Response('', { status: 503 }));
+    await expect(fetchHydroTile(1, 2)).rejects.toBeInstanceOf(HydroUnavailableError);
+    fetchMock.mockResolvedValueOnce(new Response('', { status: 502 }));
     await expect(fetchHydroTile(1, 2)).rejects.toBeInstanceOf(HydroUnavailableError);
     fetchMock.mockResolvedValueOnce(Response.json({ features: 'zle' }));
     await expect(fetchHydroTile(1, 2)).rejects.toThrow(/expected array/i);
@@ -137,6 +150,6 @@ describe('hydro-map', () => {
       Response.json({ features: [DITCH_THROUGH], truncated: false, importedAt: '2026-11-21T08:00:00Z' }),
     );
     await expect(fetchHydroTile(1, 2)).resolves.toMatchObject({ features: [DITCH_THROUGH] });
-    expect(fetchMock).toHaveBeenLastCalledWith('/api/hydro/tile?x=1&y=2', expect.anything());
+    expect(fetchMock).toHaveBeenLastCalledWith('http://localhost/api/hydro/tile?x=1&y=2', expect.anything());
   });
 });

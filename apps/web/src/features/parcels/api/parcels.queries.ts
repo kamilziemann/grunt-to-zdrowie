@@ -103,7 +103,7 @@ export const parcelBoundariesQuery = (x: number, y: number) =>
 
 /**
  * GET /hydro/tile - rowy, cieki, wody i mokradla z BDOT10k w kaflu (warstwa "Rowy i cieki", mapa w raporcie).
- * Zwykly `fetch` z walidacja kontraktu, dopoki typowany klient nie zna trasy (zob. `fetchHydroTile`).
+ * Typowany klient z walidacja kontraktu i rozpoznaniem warstwy niedostepnej (zob. `fetchHydroTile`).
  */
 export const hydroTileQuery = (x: number, y: number) =>
   queryOptions({

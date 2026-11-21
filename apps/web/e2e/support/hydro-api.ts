@@ -1,6 +1,6 @@
-// Podstawiona warstwa "Rowy i cieki" i podklad mapy dla e2e: trasa /api/hydro/tile powstaje na drugiej galezi,
-// a podklad (OpenFreeMap) i zdjecie (GUGiK) to uslugi zewnetrzne. Styl podkladu = samo tlo, wiec mapa laduje sie
-// bez sieci; kafle hydrografii z fixture (prawdziwe dane BDOT10k wokol dzialki testowej).
+// Podstawiona warstwa "Rowy i cieki" i podklad mapy dla e2e: trasa /api/hydro/tile czyta baze PostGIS (w e2e jej
+// nie ma), a podklad (OpenFreeMap) i zdjecie (GUGiK) to uslugi zewnetrzne. Styl podkladu = samo tlo, wiec mapa
+// laduje sie bez sieci; kafle hydrografii z fixture (prawdziwe dane BDOT10k wokol dzialki testowej).
 import type { HydroTile } from '@app/contracts';
 import type { Page } from '@playwright/test';
 

@@ -9,7 +9,10 @@ import {
   type HydroTile,
   type ParcelGeometry,
 } from '@app/contracts';
+import { unwrap } from '@app/rpc';
 import type { Feature, FeatureCollection, Position } from 'geojson';
+
+import { getApi } from '../api';
 
 export interface HydroTileIndex {
   x: number;
@@ -55,7 +58,7 @@ export function hydroTiles(west: number, south: number, east: number, north: num
   return tiles;
 }
 
-/** Odpowiedz 404/501/503: trasy jeszcze nie ma albo baza nie odpowiada - warstwa "chwilowo niedostepna". */
+/** Odpowiedz 404/501/502/503: trasy nie ma albo baza nie odpowiada - warstwa "chwilowo niedostepna". */
 export class HydroUnavailableError extends Error {
   constructor(readonly status: number) {
     super(`hydro tile unavailable (${String(status)})`);
@@ -63,23 +66,21 @@ export class HydroUnavailableError extends Error {
   }
 }
 
-const UNAVAILABLE_STATUSES = new Set([404, 501, 503]);
+const UNAVAILABLE_STATUSES = new Set([404, 501, 502, 503]);
 
 /**
- * GET /api/hydro/tile - zwykly `fetch` z walidacja `hydroTileSchema`: trasa powstaje na drugiej galezi i typowany
- * klient `getApi()` jej jeszcze nie zna (do przepiecia po scaleniu).
+ * GET /api/hydro/tile przez typowany klient `getApi()`; odpowiedz dodatkowo sprawdzana `hydroTileSchema` (kafel
+ * rysujemy wprost, wiec zly ksztalt ma byc bledem, a nie pustym rysunkiem).
  */
 export async function fetchHydroTile(x: number, y: number, signal?: AbortSignal): Promise<HydroTile> {
-  const response = await fetch(`/api/hydro/tile?x=${String(x)}&y=${String(y)}`, {
-    headers: { accept: 'application/json' },
-    signal,
-  });
+  const response = await getApi().hydro.tile.$get(
+    { query: { x: String(x), y: String(y) } },
+    { init: { signal: signal ?? null } },
+  );
 
   if (UNAVAILABLE_STATUSES.has(response.status)) throw new HydroUnavailableError(response.status);
 
-  if (!response.ok) throw new Error(`hydro tile failed (${String(response.status)})`);
-
-  return hydroTileSchema.parse(await response.json());
+  return hydroTileSchema.parse(await unwrap<HydroTile>(response));
 }
 
 function featureKey(feature: HydroFeature): string {
