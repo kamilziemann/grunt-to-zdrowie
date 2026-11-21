@@ -197,5 +197,44 @@
         "note": "Poza sezonem oceny suszy raport mówi to wprost i pokazuje historię."
       }
     }
+  },
+  "imagery": {
+    "title": "Zdjęcie z satelity",
+    "choices": {
+      "none": "Brak",
+      "condition": "Kondycja roślin",
+      "moisture": "Woda w roślinach"
+    },
+    "hint": "Kolory na Twoich działkach pokazują, gdzie rośliny mają się lepiej, a gdzie gorzej. Pobieramy zdjęcie dopiero po wybraniu warstwy.",
+    "needParcel": "Najpierw wybierz działkę – zdjęcie pokazujemy tylko dla działek z listy.",
+    "month": "Z kiedy",
+    "latest": "Najnowsze zdjęcie",
+    "status": {
+      "loading": "Pobieram zdjęcie satelitarne… Za pierwszym razem trwa to do kilkunastu sekund.",
+      "noClearScene": "Brak czystego zdjęcia: przez 30 dni przed {date} nad polem były chmury albo śnieg. Wybierz inny miesiąc.",
+      "notConfigured": "Zdjęcia satelitarne nie są jeszcze włączone na tym serwerze. Reszta mapy działa normalnie.",
+      "busy": "Usługa zdjęć satelitarnych (Copernicus) teraz nie odpowiada – bywa tak przy wielu zapytaniach naraz. Spróbuj ponownie za chwilę.",
+      "failed": "Nie udało się pobrać zdjęcia satelitarnego. Reszta mapy działa normalnie."
+    },
+    "legend": {
+      "condition": "Legenda: kondycja roślin",
+      "moisture": "Legenda: woda w roślinach",
+      "worse": "słabiej",
+      "better": "lepiej",
+      "dry": "sucho",
+      "wet": "wilgotno",
+      "scene": "Zdjęcie satelitarne z {date}.",
+      "clouds": "Część pola była tego dnia pod chmurą – tam nie ma koloru.",
+      "limits": {
+        "pixel": "Jeden kwadrat to 10–20 m w terenie, więc na działce poniżej ok. 1 ha widać tylko kilkadziesiąt kwadratów.",
+        "oneDay": "To zdjęcie z jednego dnia – po deszczu, upale albo koszeniu obraz będzie inny.",
+        "plantsNotSoil": "„Woda w roślinach” to wilgotność roślin, nie gleby.",
+        "relative": "Kolory porównują miejsca w obrębie pola, a nie pola między sobą."
+      },
+      "advisor": {
+        "condition": "Dla doradcy: NDVI z Sentinel-2 (pasma B04 i B08, piksel 10 m), skala {low}–{high}.",
+        "moisture": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
+      }
+    }
   }
 }

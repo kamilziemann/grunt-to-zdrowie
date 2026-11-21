@@ -197,5 +197,44 @@
         "note": "Outside the drought season the report says so plainly and shows the history."
       }
     }
+  },
+  "imagery": {
+    "title": "Satellite image",
+    "choices": {
+      "none": "None",
+      "condition": "Crop condition",
+      "moisture": "Water in plants"
+    },
+    "hint": "Colours on your parcels show where plants are doing better and where worse. We fetch the image only after you pick a layer.",
+    "needParcel": "Pick a parcel first – we show the image only for parcels on your list.",
+    "month": "From when",
+    "latest": "Latest image",
+    "status": {
+      "loading": "Fetching the satellite image… The first time this takes up to a dozen seconds or so.",
+      "noClearScene": "No clear image: for 30 days before {date} the field was under clouds or snow. Pick another month.",
+      "notConfigured": "Satellite images are not enabled on this server yet. The rest of the map works normally.",
+      "busy": "The satellite image service (Copernicus) is not responding right now – this happens with many requests at once. Try again in a moment.",
+      "failed": "Could not fetch the satellite image. The rest of the map works normally."
+    },
+    "legend": {
+      "condition": "Legend: crop condition",
+      "moisture": "Legend: water in plants",
+      "worse": "weaker",
+      "better": "better",
+      "dry": "dry",
+      "wet": "moist",
+      "scene": "Satellite image from {date}.",
+      "clouds": "Part of the field was under a cloud that day – it has no colour there.",
+      "limits": {
+        "pixel": "One square is 10–20 m on the ground, so a parcel under about 1 ha shows only a few dozen squares.",
+        "oneDay": "This is an image from a single day – after rain, heat or mowing it will look different.",
+        "plantsNotSoil": "“Water in plants” is the moisture of the plants, not of the soil.",
+        "relative": "Colours compare places within the field, not fields with each other."
+      },
+      "advisor": {
+        "condition": "For advisors: NDVI from Sentinel-2 (bands B04 and B08, 10 m pixel), scale {low}–{high}.",
+        "moisture": "For advisors: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
+      }
+    }
   }
 }

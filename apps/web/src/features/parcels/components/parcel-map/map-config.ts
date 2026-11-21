@@ -127,6 +127,36 @@ export function drawingCollection(drawing: {
   };
 }
 
+/** Obraz z satelity (kondycja roslin, woda w roslinach) jednej czesci pola: PNG jako data URL i jego zasieg. */
+export interface ImageryOverlay {
+  image: string;
+  /** [zachod, poludnie, wschod, polnoc] */
+  bbox: readonly [number, number, number, number];
+}
+
+/** Zrodla i warstwy obrazow maja numer po prefiksie (jeden obraz na grupe sasiednich dzialek). */
+export const IMAGERY_PREFIX = 'imagery-';
+// lekka przezroczystosc: spod obrazu przebija zdjecie lotnicze, a piksele 10-20 m nie udaja ostrosci
+export const IMAGERY_PAINT = {
+  'raster-opacity': 0.88,
+  'raster-resampling': 'linear',
+  'raster-fade-duration': 300,
+} as const;
+
+/** Narozniki obrazu w kolejnosci MapLibre: lewy gorny, prawy gorny, prawy dolny, lewy dolny. */
+export function imageCorners(
+  bbox: ImageryOverlay['bbox'],
+): [[number, number], [number, number], [number, number], [number, number]] {
+  const [west, south, east, north] = bbox;
+
+  return [
+    [west, north],
+    [east, north],
+    [east, south],
+    [west, south],
+  ];
+}
+
 /** Ponizej tego przyblizenia klikniecie jest zbyt niedokladne, zeby wskazac dzialke. */
 export const MIN_PICK_ZOOM = 13;
 

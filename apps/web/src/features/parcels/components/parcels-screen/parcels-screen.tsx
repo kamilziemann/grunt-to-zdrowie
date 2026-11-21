@@ -35,7 +35,9 @@ import {
 import { useFieldDraw, type FieldDrawMode, type SplitTarget } from '../../hooks/use-field-draw';
 import { useMapLabels } from '../../hooks/use-map-labels';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
+import { useVegetationImagery, type ImageryChoice } from '../../hooks/use-vegetation-imagery';
 import { validateParcelSearch, type ParcelSearchError } from '../../schemas/parcel-search.schema';
+import { todayInPoland } from '../../utils/imagery-months';
 import { BasemapToggle } from '../basemap-toggle';
 import { BoundariesToggle } from '../boundaries-toggle';
 import {
@@ -50,6 +52,8 @@ import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-pan
 import { FirstSteps } from '../first-steps';
 import { HydroLegend } from '../hydro-legend';
 import { HydroToggle } from '../hydro-toggle';
+import { ImageryLegend } from '../imagery-legend';
+import { ImagerySwitch } from '../imagery-switch';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
 import { ParcelMap, type Basemap, type HydroStatus, type MapFocus, type MapPadding } from '../parcel-map';
@@ -118,6 +122,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const queryClient = useQueryClient();
   const mapLabels = useMapLabels();
   const rootRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
   const hintTimer = useRef<number | undefined>(undefined);
 
   const [text, setText] = useState('');
@@ -133,6 +138,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [boundaries, setBoundaries] = useState(true);
   const [hydro, setHydro] = useState(true);
   const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
+  const [imageryChoice, setImageryChoice] = useState<ImageryChoice>('none');
+  const [imageryMonth, setImageryMonth] = useState<string | null>(null);
   const desktop = useSyncExternalStore(subscribeDesktop, isDesktop, notDesktop);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
   const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 ? 'half' : 'peek');
@@ -160,6 +167,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     [onlyParcel],
   );
   const draw = useFieldDraw(splitTarget);
+  const imagery = useVegetationImagery(ids, imageryChoice, imageryMonth);
   const formatArea = useAreaFormatter();
   const drawing = draw.mode !== null;
 
@@ -186,7 +194,16 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     const visible = snap === 'peek' ? SHEET_PEEK_REM * rem : height * SHEET_HALF_FRACTION;
 
     // mapa konczy sie nad zwinietym arkuszem, wiec doliczamy tylko to, co arkusz zaslania ponad nim
-    return { ...base, bottom: Math.max(0, visible - SHEET_PEEK_REM * rem) + MAP_MARGIN_PX };
+    const bottom = Math.max(0, visible - SHEET_PEEK_REM * rem) + MAP_MARGIN_PX;
+    // u gory przelaczniki i legendy siegaja na telefonie w glab mapy - dzialka ma stanac pod nimi
+    const controls = controlsRef.current?.getBoundingClientRect().bottom ?? 0;
+    const rootTop = rootRef.current?.getBoundingClientRect().top ?? 0;
+    const top = Math.min(
+      Math.max(MAP_MARGIN_PX, controls - rootTop + MAP_MARGIN_PX / 4),
+      height - SHEET_PEEK_REM * rem - bottom - MAP_MARGIN_PX * 2,
+    );
+
+    return { ...base, top: Math.max(MAP_MARGIN_PX, top), bottom };
   }, [snap]);
 
   useEffect(() => () => window.clearTimeout(hintTimer.current), []);
@@ -297,6 +314,26 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
 
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
+  const chooseImagery = useCallback(
+    (choice: ImageryChoice) => {
+      setImageryChoice(choice);
+
+      // na telefonie arkusz zaslania mape - po wyborze warstwy chowamy go, zeby bylo widac kolory na polu
+      if (choice === 'none' || window.matchMedia(DESKTOP_QUERY).matches) return;
+
+      setSnap('peek');
+
+      // dojazd do pol: kolory maja stanac nad arkuszem i pod legenda, a nie pod nimi
+      const box = unionBbox(selected.parcels);
+
+      if (box) setShown({ bbox: box, key: `imagery:${Date.now()}` });
+
+      // fokus w schowanym arkuszu przewinalby caly ekran (kontener mapy) w strone przelacznika
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    },
+    [selected.parcels],
+  );
+
   const chooseCandidate = useCallback((candidate: ParcelCandidate) => {
     setShown(null);
     setInstant(null);
@@ -359,7 +396,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const previewMissing = target !== null && previewQuery.isSuccess && previewQuery.data === null;
 
   return (
-    <div ref={rootRef} className="@container-[size] relative min-h-0 flex-1 overflow-hidden">
+    <div ref={rootRef} className="@container-[size] relative min-h-0 flex-1 overflow-clip">
       <div className="absolute inset-0 max-md:bottom-44">
         <ParcelMap
           // w trybie "wlasne pole" dzialki tylko obrysem (tlo), zeby wybrana czesc odrozniala sie od reszty
@@ -372,6 +409,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
           hydro={hydro}
           loadHydro={loadHydro}
           onHydroStatus={setHydroStatus}
+          imagery={imagery.overlays}
           focus={focus}
           getPadding={getPadding}
           onPick={pickOnMap}
@@ -382,7 +420,10 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
         />
       </div>
 
-      <div className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 md:left-106">
+      <div
+        ref={controlsRef}
+        className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 md:left-106"
+      >
         <div className="flex flex-wrap items-start gap-2">
           <BasemapToggle value={basemap} onChange={setBasemap} />
           <BoundariesToggle value={boundaries} onChange={setBoundaries} />
@@ -391,6 +432,15 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
         {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
         {hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
           <HydroLegend key={desktop ? 'desktop' : 'phone'} status={hydroStatus} defaultOpen={desktop} />
+        )}
+        {imageryChoice !== 'none' && imagery.state !== 'off' && (
+          <ImageryLegend
+            layer={imageryChoice}
+            state={imagery.state}
+            data={imagery.data}
+            requestedDate={imagery.requestedDate}
+            onRetry={imagery.retry}
+          />
         )}
       </div>
 
@@ -492,6 +542,15 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
                 totalAreaHa={selected.totalAreaHa}
                 onShow={showOnMap}
                 onRemove={removeParcel}
+              />
+
+              <ImagerySwitch
+                value={imageryChoice}
+                onChange={chooseImagery}
+                month={imageryMonth}
+                onMonthChange={setImageryMonth}
+                today={todayInPoland()}
+                enabled={ids.length > 0}
               />
 
               <FieldDrawEntry splitTarget={splitTarget} onStart={beginFieldDraw} />

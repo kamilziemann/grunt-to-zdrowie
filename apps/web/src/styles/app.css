@@ -59,6 +59,13 @@
   --map-wetland: #0f766e;
   --map-water-label: #0b4a5e;
   --map-highlight: #d9480f;
+  /* Obrazy z satelity (kondycja roslin, woda w roslinach): te same kolory co PNG z API - legenda musi sie zgadzac. */
+  --vegetation-low: #d73027;
+  --vegetation-mid: #fee08b;
+  --vegetation-high: #1a9850;
+  --moisture-low: #8c510a;
+  --moisture-mid: #f6e8c3;
+  --moisture-high: #2166ac;
   /* Szkic "Pole i woda wokol" w raporcie (SVG na tle karty): kolory ida za motywem, wydruk zawsze jasny. */
   --sketch-field: light-dark(#1d6b3b, #86d6a2);
   --sketch-field-fill: light-dark(rgb(29 107 59 / 0.12), rgb(134 214 162 / 0.16));

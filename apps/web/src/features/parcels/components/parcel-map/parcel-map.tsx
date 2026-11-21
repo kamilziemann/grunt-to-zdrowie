@@ -15,6 +15,7 @@ import {
   hydroCollections,
   hydroColors,
   hydroTiles,
+  HYDRO_LAYER_IDS,
   HydroUnavailableError,
   latestImport,
   MAX_HYDRO_TILES,
@@ -36,6 +37,9 @@ import {
   boundaryTiles,
   DRAW_SOURCE,
   drawingCollection,
+  IMAGERY_PAINT,
+  IMAGERY_PREFIX,
+  imageCorners,
   INITIAL_BOUNDS,
   isPoiLayer,
   LOCAL_NAME,
@@ -47,9 +51,10 @@ import {
   parcelCollection,
   PREVIEW_SOURCE,
   SELECTED_SOURCE,
+  type ImageryOverlay,
 } from './map-config';
 
-export type { MapParcel };
+export type { ImageryOverlay, MapParcel };
 export type Basemap = 'map' | 'ortho';
 export type MapPadding = MapLibre.PaddingOptions;
 
@@ -112,6 +117,8 @@ export interface ParcelMapProps {
   loadHydro?: (x: number, y: number) => Promise<HydroTile>;
   /** zmiana stanu warstwy hydrografii (legenda, komunikat o niedostepnosci) */
   onHydroStatus?: (status: HydroStatus) => void;
+  /** obrazy z satelity (kondycja roslin, woda w roslinach) pod rowami i obrysem dzialek; pusta lista = brak */
+  imagery?: readonly ImageryOverlay[];
   focus?: MapFocus | null;
   /**
    * Margines na panele zaslaniajace mape, liczony w chwili dojazdu (uklad zalezy od szerokosci okna i polozenia
@@ -139,6 +146,7 @@ type MapState = 'loading' | 'ready' | 'failed';
 
 const DEFAULT_PADDING: MapPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 const defaultPadding = () => DEFAULT_PADDING;
+const NO_IMAGERY: readonly ImageryOverlay[] = [];
 
 function token(element: HTMLElement, name: string): string {
   return getComputedStyle(element).getPropertyValue(name).trim();
@@ -310,6 +318,7 @@ export function ParcelMap({
   hydro = false,
   loadHydro,
   onHydroStatus,
+  imagery = NO_IMAGERY,
   focus = null,
   getPadding = defaultPadding,
   interactive = true,
@@ -323,6 +332,7 @@ export function ParcelMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibre.Map | null>(null);
   const focusedKeyRef = useRef<string | null>(null);
+  const imageryCountRef = useRef(0);
   const [state, setState] = useState<MapState>('loading');
   const [boundariesLoading, setBoundariesLoading] = useState(false);
   const [hydroLoading, setHydroLoading] = useState(false);
@@ -616,6 +626,7 @@ export function ParcelMap({
       cancelled = true;
       mapRef.current = null;
       focusedKeyRef.current = null;
+      imageryCountRef.current = 0;
       boundaryCache.clear();
       hydroCache.tiles.clear();
       hydroCache.reported = '';
@@ -650,6 +661,32 @@ export function ParcelMap({
     // w trybie rysowania kursor celownika - stukniecie dodaje punkt, nie wybiera dzialki
     if (map) map.getCanvas().style.cursor = drawing ? 'crosshair' : '';
   }, [state, drawing]);
+
+  // Obraz z satelity: zrodla `image` (PNG z naroznikami) nad podkladem i zdjeciem lotniczym, pod rowami i granicami.
+  // Podklad przelacza tylko widocznosc warstwy zdjecia, wiec obraz przetrwa zmiane podkladu.
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (state !== 'ready' || !map) return;
+
+    for (let index = 0; index < imageryCountRef.current; index += 1) {
+      const id = `${IMAGERY_PREFIX}${index}`;
+
+      if (map.getLayer(id)) map.removeLayer(id);
+
+      if (map.getSource(id)) map.removeSource(id);
+    }
+
+    imagery.forEach((overlay, index) => {
+      const id = `${IMAGERY_PREFIX}${index}`;
+
+      map.addSource(id, { type: 'image', url: overlay.image, coordinates: imageCorners(overlay.bbox) });
+      map.addLayer({ id, type: 'raster', source: id, paint: IMAGERY_PAINT }, HYDRO_LAYER_IDS[0]);
+    });
+    imageryCountRef.current = imagery.length;
+    // zielone wypelnienie zaznaczenia zafalszowaloby kolory obrazu - zostaje sam obrys
+    map.setPaintProperty(`${SELECTED_SOURCE}-fill`, 'fill-opacity', imagery.length > 0 ? 0 : 0.22);
+  }, [state, imagery]);
 
   useEffect(() => {
     if (state !== 'ready') return;
