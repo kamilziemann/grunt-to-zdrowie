@@ -174,7 +174,28 @@
         "text": "Whether water is short, why, and what to do: hold water, change tillage, irrigate."
       }
     },
-    "example": "See an example",
-    "exampleNote": "A field in Żuławy, wheat, 15 July 2018"
+    "examplesTitle": "See an example – a ready report",
+    "examples": {
+      "ditch": {
+        "title": "Field with a drainage ditch",
+        "place": "Chwalim · winter wheat · 15.06.2018",
+        "note": "A ditch through the field: how much water a weir holds, and an irrigation plan."
+      },
+      "dry": {
+        "title": "Dry spring on poor soil",
+        "place": "Kurpie · spring barley · 30.06.2019",
+        "note": "Sandy soil of class V–VI loses water fast – drought risk."
+      },
+      "wet": {
+        "title": "Wet year: too much water",
+        "place": "Kurpie · meadow · 20.09.2017",
+        "note": "After a rainy summer: a warning about too much water, not drought."
+      },
+      "today": {
+        "title": "Report for today",
+        "place": "Sterdyń · winter wheat · today",
+        "note": "Outside the drought season the report says so plainly and shows the history."
+      }
+    }
   }
 }

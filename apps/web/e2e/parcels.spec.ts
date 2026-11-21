@@ -12,24 +12,51 @@ test.describe('działki', () => {
     // pierwsze wejscie: trzy kroki i przyklad zamiast paska etapow
     const firstSteps = page.getByTestId('first-steps');
 
-    await expect(firstSteps.getByRole('listitem')).toHaveText([
+    await expect(firstSteps.locator('ol > li')).toHaveText([
       /Znajdź działkę/,
       /Wybierz uprawę i dzień/,
       /Przeczytaj raport/,
     ]);
-    await expect(firstSteps.getByRole('link', { name: /Zobacz przykład/ })).toBeVisible();
+    await expect(firstSteps.getByRole('list', { name: /Zobacz przykład/ }).getByRole('link')).toHaveCount(4);
     await expect(page.getByRole('list', { name: 'Etapy' })).toBeHidden();
     await expect(page.getByRole('application', { name: /Mapa/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeDisabled();
     await expect(page.getByText('Nie masz jeszcze żadnej działki')).toBeVisible();
   });
 
-  test('„Zobacz przykład” prowadzi do gotowego raportu (działka i uprawa w adresie)', async ({ page }) => {
+  test('przykłady: każdy jednym kliknięciem otwiera gotowy raport (działka, uprawa i dzień w adresie)', async ({
+    page,
+  }) => {
     await mockAnalysisApi(page);
     await page.goto('/');
-    await page.getByRole('link', { name: /Zobacz przykład/ }).click();
 
-    await expect(page).toHaveURL(/\/raport\?dzialki=221002_5\.0015\.120&uprawa=winter_wheat&data=2018-07-15/);
+    const examples = page.getByTestId('examples');
+
+    await expect(examples.locator('[data-example="ditch"]')).toHaveAttribute(
+      'href',
+      '/raport?dzialki=080904_5.0001.349%2F1&uprawa=winter_wheat&data=2018-06-15',
+    );
+    await expect(examples.locator('[data-example="dry"]')).toHaveAttribute(
+      'href',
+      /uprawa=spring_barley&data=2019-06-30/,
+    );
+    await expect(examples.locator('[data-example="wet"]')).toHaveAttribute(
+      'href',
+      /uprawa=grassland&data=2017-09-20/,
+    );
+    // "dzis" liczy przegladarka - po hydratacji link prowadzi do raportu z dzisiejsza data
+    await expect(examples.locator('[data-example="today"]')).toHaveAttribute(
+      'href',
+      /^\/raport\?dzialki=142909_2\.0013\.178&uprawa=winter_wheat&data=\d{4}-\d{2}-\d{2}$/,
+    );
+    await expect(examples.getByRole('link', { name: /Mokry rok: za dużo wody/ })).toContainText(
+      'nadmiarem wody',
+    );
+
+    await examples.locator('[data-example="ditch"]').click();
+    await expect(page).toHaveURL(
+      /\/raport\?dzialki=080904_5\.0001\.349%2F1&uprawa=winter_wheat&data=2018-06-15/,
+    );
     await expect(page.getByTestId('verdict')).toBeVisible();
   });
 
@@ -80,10 +107,10 @@ test.describe('działki', () => {
       const panel = page.getByTestId('parcels-panel');
       const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
 
-      // pierwsze wejscie: arkusz do polowy, "Zobacz przyklad" widoczny bez przewijania
+      // pierwsze wejscie: arkusz do polowy, pole wyszukiwania i pierwszy przyklad widoczne bez przewijania
       await expect(panel).toHaveAttribute('data-snap', 'half');
-      await expect(search).toBeInViewport();
-      await expect(page.getByRole('link', { name: /Zobacz przykład/ })).toBeInViewport();
+      await expect(search).toBeInViewport({ ratio: 1 });
+      await expect(page.locator('[data-example="ditch"]')).toBeInViewport();
       await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeInViewport();
       await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeInViewport();
 

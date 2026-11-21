@@ -9,6 +9,7 @@ import {
   calendarRows,
   currentPeriod,
   excessSeasons,
+  rankSide,
   IUNG_PERIODS,
   isPastAnalysis,
   isSampleReport,
@@ -221,5 +222,12 @@ describe('wyliczenia raportu', () => {
         { year: 2012, periodNo: 9, status: 'ok', balanceMm: 10 },
       ]),
     ).toBe(2);
+  });
+
+  it('miejsce na tle lat: w gornej polowie liczone od najbardziej mokrego', () => {
+    expect(rankSide(1, 10)).toEqual({ side: 'dry', rank: 1, wet: 10 });
+    expect(rankSide(5, 10).side).toBe('dry');
+    expect(rankSide(11, 11)).toEqual({ side: 'wet', rank: 11, wet: 1 });
+    expect(rankSide(1, 1).side).toBe('dry');
   });
 });

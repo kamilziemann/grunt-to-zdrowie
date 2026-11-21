@@ -3,7 +3,14 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { currentPeriod, excessSeasons, isoDay, seasonRows, stressSummary } from '../../utils/report-data';
+import {
+  currentPeriod,
+  excessSeasons,
+  isoDay,
+  rankSide,
+  seasonRows,
+  stressSummary,
+} from '../../utils/report-data';
 import { ReportDetails } from '../report-section';
 import { RiskCalendar } from '../risk-calendar';
 
@@ -91,7 +98,7 @@ export function HistorySection({ report }: { report: WaterReport }) {
             {t('current', {
               year: Number(report.meta.analysisDate.slice(0, 4)),
               date: shortDay(balance.periodTo),
-              rank: rank.rank,
+              ...rankSide(rank.rank, rank.years),
               years: rank.years,
             })}
           </p>

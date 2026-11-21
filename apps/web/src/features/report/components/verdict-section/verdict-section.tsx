@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils/cn';
 import {
   isoDay,
   percentOf,
+  rankSide,
   romanCategory as roman,
   scenarioSummary,
   soilWater,
@@ -175,7 +176,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
             >
               {t('rainNote', {
                 median: number(assessment.precipitation.medianMm),
-                rank: assessment.precipitation.rank,
+                ...rankSide(assessment.precipitation.rank, assessment.precipitation.years),
                 years: assessment.precipitation.years,
               })}
             </Fact>
@@ -183,7 +184,10 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           {balance?.rankInHistory && (
             <Fact
               label={t('rank')}
-              value={t('rankValue', { rank: balance.rankInHistory.rank, years: balance.rankInHistory.years })}
+              value={t('rankValue', {
+                ...rankSide(balance.rankInHistory.rank, balance.rankInHistory.years),
+                years: balance.rankInHistory.years,
+              })}
             >
               {t('rankNote', { from: day(balance.periodFrom), to: day(balance.periodTo) })}
             </Fact>
