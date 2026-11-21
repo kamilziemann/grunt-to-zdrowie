@@ -47,6 +47,13 @@ export function fieldFromParcels(parcels: readonly Parcel[]): FieldArea {
   const numbers = parcels.slice(0, LABEL_PARCELS).map((parcel) => parcel.number);
   const more = parcels.length > LABEL_PARCELS ? ` +${parcels.length - LABEL_PARCELS}` : '';
 
+  const landUse = [...new Set(parcels.flatMap((parcel) => parcel.landUse ?? []))];
+  // powierzchnia ewidencyjna pola tylko wtedy, gdy znamy ja dla kazdej dzialki
+  const registryAreas = parcels.map((parcel) => parcel.registryAreaHa);
+  const registryAreaHa = registryAreas.every((area) => area !== undefined)
+    ? Math.round(registryAreas.reduce((sum, area) => sum + area, 0) * 10_000) / 10_000
+    : undefined;
+
   return {
     id: `parcels:${shortHash(ids.toSorted().join('|'))}`,
     kind: rest.length === 0 ? 'parcel' : 'parcels',
@@ -55,6 +62,8 @@ export function fieldFromParcels(parcels: readonly Parcel[]): FieldArea {
     label: `${numbers.join(', ')}${more} · ${first.region}`,
     geometry,
     ...measure(geometry),
+    ...(registryAreaHa === undefined ? {} : { registryAreaHa }),
+    ...(landUse.length > 0 ? { landUse } : {}),
   };
 }
 

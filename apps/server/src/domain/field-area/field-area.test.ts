@@ -84,3 +84,15 @@ describe('pole analizy', () => {
     expect([formatHectares(0.274), formatHectares(1.24)]).toEqual(['0,27 ha', '1,2 ha']);
   });
 });
+
+describe('pole z dzialek: ewidencja', () => {
+  it('laczy klasouzytki dzialek i sumuje powierzchnie ewidencyjna, gdy znana dla wszystkich', () => {
+    const a = { ...parcel('020101_2.0001.12', '12', 21), landUse: ['RIVb', 'ŁV'], registryAreaHa: 1.0012 };
+    const b = { ...parcel('020101_2.0001.13', '13', 21.002), landUse: ['ŁV', 'dr'], registryAreaHa: 0.5 };
+    const c = parcel('020101_2.0001.14', '14', 21.004);
+
+    expect(fieldFromParcels([a, b])).toMatchObject({ landUse: ['RIVb', 'ŁV', 'dr'], registryAreaHa: 1.5012 });
+    expect(fieldFromParcels([a, c]).registryAreaHa).toBeUndefined();
+    expect(fieldFromParcels([c]).landUse).toBeUndefined();
+  });
+});

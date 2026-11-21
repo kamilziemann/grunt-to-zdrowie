@@ -11,6 +11,7 @@ export type UncertaintyId =
   | 'soil_substitute'
   | 'meteo_gaps'
   | 'conflicting_signals'
+  | 'not_farmland'
   | 'no_balance';
 
 export const CONFIDENCE_RULES: Readonly<Record<UncertaintyId, number>> = {
@@ -22,6 +23,8 @@ export const CONFIDENCE_RULES: Readonly<Record<UncertaintyId, number>> = {
   soil_substitute: 1,
   meteo_gaps: 1,
   conflicting_signals: 1,
+  // wg ewidencji to nie grunt uprawny (droga, zabudowa, las, woda) - ocena dotyczy warunkow w okolicy
+  not_farmland: 1,
   // bez zadnego bilansu nie ma oceny - pewnosc zawsze niska
   no_balance: 3,
 };

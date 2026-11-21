@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createEgibWfsOutlineSource,
   createEgibWfsParcelSource,
+  createEgibWfsRegistry,
   parseOutlines,
   type FetchLike,
 } from './egib-wfs';
@@ -127,9 +128,34 @@ describe('createEgibWfsParcelSource', () => {
     expect(await empty.byId('141201_1.0001.1')).toBeNull();
   });
 
+  it('czyta klasouzytki i powierzchnie ewidencyjna (pola ze slownika uslugi)', async () => {
+    const feature = {
+      ...FEATURE,
+      properties: { ...FEATURE.properties, POLE_EWIDENYJNE: '19.3485', KLASOUZYTKI_EGIB: 'RIVb,RV, W/ŁV' },
+    };
+    const parcel = await createEgibWfsParcelSource(fakeFetch({ features: [feature] })).byId(
+      '141201_1.0001.6550/3',
+    );
+
+    expect(parcel).toMatchObject({ landUse: ['RIVb', 'RV', 'W/ŁV'], registryAreaHa: 19.3485 });
+  });
+
   it('nie umie szukac po nazwie obrebu', async () => {
     await expect(createEgibWfsParcelSource(fakeFetch({})).byName('Dąbrowa 12', 10)).rejects.toMatchObject({
       code: 'upstream_failed',
     });
+  });
+});
+
+describe('createEgibWfsRegistry', () => {
+  it('oddaje klasouzytki dzialki; bez klasouzytkow albo bez dzialki - null', async () => {
+    const feature = { ...FEATURE, properties: { ...FEATURE.properties, KLASOUZYTKI_EGIB: 'dr' } };
+    const registry = createEgibWfsRegistry(createEgibWfsParcelSource(fakeFetch({ features: [feature] })));
+    const bare = createEgibWfsRegistry(createEgibWfsParcelSource(fakeFetch({ features: [FEATURE] })));
+    const empty = createEgibWfsRegistry(createEgibWfsParcelSource(fakeFetch({ features: [] })));
+
+    expect(await registry.byId('141201_1.0001.6550/3')).toEqual({ landUse: ['dr'] });
+    expect(await bare.byId('141201_1.0001.6550/3')).toBeNull();
+    expect(await empty.byId('141201_1.0001.6550/3')).toBeNull();
   });
 });

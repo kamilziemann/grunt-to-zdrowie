@@ -9,6 +9,7 @@ import type { StageInput } from '../analysis-stages';
 import { yearOf } from '../iso-date';
 import { deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
+import { soilClassNumber, soilClassesOf } from '../land-use';
 import { terrainTooCoarse } from '../terrain';
 import { assessPeriod } from '../water-indicators';
 
@@ -179,8 +180,22 @@ function soilCause(input: StageInput, real: (id: SourceId) => boolean): Cause | 
       ...(soil.category === null
         ? []
         : [{ metric: 'soil_category', value: soil.category, unit: 'category', source: 'soil' as const }]),
+      ...registryClassEvidence(input),
     ],
   };
+}
+
+/** Najslabsza klasa bonitacyjna gruntu rolnego z ewidencji (1-6) - dowod z dokumentu, nie z modelu. */
+function registryClassEvidence(input: StageInput): Evidence[] {
+  const classes = soilClassesOf(input.field.landUse ?? []).flatMap((soilClass) => {
+    const value = soilClassNumber(soilClass);
+
+    return value === null ? [] : [value];
+  });
+
+  if (classes.length === 0) return [];
+
+  return [{ metric: 'registry_soil_class', value: Math.max(...classes), unit: 'class', source: 'parcel' }];
 }
 
 function landscapeCauses(input: StageInput, real: (id: SourceId) => boolean): Cause[] {

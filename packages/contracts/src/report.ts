@@ -345,6 +345,55 @@ export const zoneMapSchema = z.object({
 
 export type ZoneMap = z.infer<typeof zoneMapSchema>;
 
+/**
+ * Rodzaje uzytkow gruntowych z ewidencji (EGiB): grunty uprawne (orne, sady, laki, pastwiska), pozostale grunty
+ * rolne (zabudowane, stawy, rowy, zadrzewienia) i grunty nierolne (las, zabudowa, droga, kolej, woda, nieuzytek).
+ */
+export const LAND_USE_KINDS = [
+  'arable',
+  'orchard',
+  'meadow',
+  'pasture',
+  'farm_buildings',
+  'ponds',
+  'ditches',
+  'farm_woodland',
+  'forest',
+  'woodland',
+  'built',
+  'road',
+  'railway',
+  'water',
+  'wasteland',
+  'other',
+] as const;
+
+export const landUseKindSchema = z.enum(LAND_USE_KINDS);
+
+export type LandUseKind = z.infer<typeof landUseKindSchema>;
+
+/**
+ * Co o gruncie mowi ewidencja. `mismatch: 'non_agricultural'` = zaden uzytek nie jest uprawny (droga, zabudowa,
+ * las, woda) - ocena dotyczy warunkow w okolicy, nie uprawy na tej dzialce, a pewnosc jest nizsza;
+ * `'grassland_only'` = same laki/pastwiska przy uprawie polowej.
+ */
+export const landUseSchema = z.object({
+  /** klasouzytki z ewidencji, np. ["RIVb", "RV", "ŁV"] */
+  codes: z.array(z.string()),
+  kinds: z.array(landUseKindSchema),
+  /** choc jeden uzytek to grunt uprawny (R, S, Ł, Ps) */
+  agricultural: z.boolean(),
+  /** klasy bonitacyjne gruntow rolnych od najlepszej, np. ["IVb", "V", "VI"] */
+  soilClasses: z.array(z.string()),
+  /** podpowiedz uprawy z ewidencji: laki i pastwiska -> uzytki zielone (gdy wybrano inna uprawe) */
+  cropHint: z.enum(['grassland']).nullable(),
+  mismatch: z.enum(['non_agricultural', 'grassland_only']).nullable(),
+  /** powierzchnia ewidencyjna (ha) */
+  registryAreaHa: z.number().optional(),
+});
+
+export type LandUse = z.infer<typeof landUseSchema>;
+
 /** Ograniczenia, o ktorych raport mowi wprost (teksty w tlumaczeniach). */
 export const LIMITATION_IDS = [
   'sample_data',
@@ -389,6 +438,8 @@ export const waterReportSchema = z.object({
     sampleParts: z.array(reportPartSchema).optional(),
   }),
   field: fieldAreaSchema,
+  /** uzytek gruntowy z ewidencji; brak = obszar narysowany albo ewidencja nie odpowiedziala */
+  landUse: landUseSchema.optional(),
   crop: cropAtDateSchema,
   assessment: assessmentSchema,
   history: historySchema,

@@ -50,6 +50,9 @@ export function createParcelsService({ source, outlines, now }: ParcelsServiceDe
       areaHa: Math.round(areaSquareMeters(record.geometry)) / SQUARE_METERS_PER_HECTARE,
       source: record.origin,
       fetchedAt: now(),
+      // klasouzytki i powierzchnia ewidencyjna sa tylko w rekordzie z WFS ewidencji (ULDK ich nie podaje)
+      ...(record.registryAreaHa === undefined ? {} : { registryAreaHa: record.registryAreaHa }),
+      ...(record.landUse === undefined ? {} : { landUse: record.landUse }),
     };
   }
 

@@ -15,7 +15,16 @@ import { AppError } from '@app/http';
 
 import { fieldFromGeometry, fieldFromParcels, shortHash } from '../../domain/field-area';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
-import type { AnalysisStages, DataSources, ParcelLookup, Sourced, StageInput } from './ports';
+import { summarizeLandUse } from '../../domain/land-use';
+import type {
+  AnalysisStages,
+  DataSources,
+  ParcelLookup,
+  ParcelRegistry,
+  ParcelRegistryEntry,
+  Sourced,
+  StageInput,
+} from './ports';
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
@@ -35,6 +44,12 @@ export const SOURCE_TIMEOUTS_MS: Record<Exclude<SourceId, 'parcel'>, number> = {
   hydro: 5000,
   vegetation: 10_000,
 };
+
+/**
+ * Klasouzytki z WFS ewidencji (ULDK ich nie podaje) pobieramy rownolegle ze zrodlami danych; limit krotszy niz
+ * zrodla, zeby nie wydluzal analizy - spozniona ewidencja to raport bez opisu uzytku.
+ */
+export const REGISTRY_TIMEOUT_MS = 6000;
 
 /** Zapas dni przed 10-letnim oknem: bilans potrzebuje rozbiegu, a pierwszy okres zaczyna sie 60 dni wczesniej. */
 const WARMUP_DAYS = 120;
@@ -59,6 +74,9 @@ export interface AnalysisServiceDeps {
   parcels: ParcelLookup;
   sources: DataSources;
   stages: AnalysisStages;
+  /** ewidencja (klasouzytki, powierzchnia ewidencyjna) dla dzialek z ULDK; brak = raport bez opisu uzytku */
+  registry?: ParcelRegistry;
+  registryTimeoutMs?: number;
   /** chwila biezaca (ISO 8601) - testy podaja staly zegar */
   now: () => string;
   timeoutsMs?: Partial<typeof SOURCE_TIMEOUTS_MS>;
@@ -105,10 +123,53 @@ async function settle<T>(
   }
 }
 
+/** Ewidencja z limitem czasu; blad albo spoznienie = brak danych (raport bez opisu uzytku, analiza idzie dalej). */
+async function registryWithin(
+  lookup: () => Promise<(ParcelRegistryEntry | null)[]>,
+  timeoutMs: number,
+): Promise<(ParcelRegistryEntry | null)[]> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null[]>((resolve) => {
+    timer = setTimeout(() => resolve([]), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([lookup(), timeout]);
+  } catch {
+    return [];
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
+/** Pole uzupelnione o ewidencje dzialek, ktorych zrodlo (ULDK) jej nie podalo. */
+function withRegistry(field: FieldArea, parcels: readonly Parcel[], entries: (ParcelRegistryEntry | null)[]) {
+  const complete = parcels.map((parcel, index) => {
+    const entry = entries[index];
+
+    return parcel.landUse || !entry
+      ? parcel
+      : {
+          ...parcel,
+          landUse: entry.landUse,
+          ...(entry.registryAreaHa === undefined ? {} : { registryAreaHa: entry.registryAreaHa }),
+        };
+  });
+  const enriched = fieldFromParcels(complete);
+
+  return {
+    ...field,
+    ...(enriched.landUse ? { landUse: enriched.landUse } : {}),
+    ...(enriched.registryAreaHa === undefined ? {} : { registryAreaHa: enriched.registryAreaHa }),
+  };
+}
+
 export function createAnalysisService({
   parcels,
   sources,
   stages,
+  registry,
+  registryTimeoutMs = REGISTRY_TIMEOUT_MS,
   now,
   timeoutsMs = {},
 }: AnalysisServiceDeps) {
@@ -130,9 +191,10 @@ export function createAnalysisService({
 
   async function resolveField(
     input: AnalysisRequest['field'],
-  ): Promise<{ field: FieldArea; source: SourceRef }> {
+  ): Promise<{ field: FieldArea; source: SourceRef; parcels: Parcel[] }> {
     if ('geometry' in input) {
       return {
+        parcels: [],
         field: fieldFromGeometry(input),
         source: {
           id: 'parcel',
@@ -148,6 +210,7 @@ export function createAnalysisService({
     const [first] = found;
 
     return {
+      parcels: found,
       field: fieldFromParcels(found),
       source: {
         id: 'parcel',
@@ -167,23 +230,32 @@ export function createAnalysisService({
 
       assertDateInRange(date, today);
 
-      const { field, source: parcelSource } = await resolveField(request.field);
+      const ids = 'geometry' in request.field ? [] : [...new Set(request.field.parcelIds)];
+      // ewidencja rusza razem z ULDK; dzialka z zapasowego WFS ma ja w rekordzie, wtedy wynik ponizej jest pomijany
+      const registryLookup =
+        registry && ids.length > 0
+          ? registryWithin(() => Promise.all(ids.map((id) => registry.byId(id))), registryTimeoutMs)
+          : Promise.resolve([]);
+      const { field: resolved, source: parcelSource, parcels: found } = await resolveField(request.field);
       const from = addDays(addYears(date, -ANALYSIS_LIMITS.historyYears), -WARMUP_DAYS);
-      const [meteo, forecast, soil, terrain, hydro, vegetation] = await Promise.all([
-        settle('meteo', () => sources.meteo.series(field.centroid, from, date), limits.meteo),
+      const [entries, meteo, forecast, soil, terrain, hydro, vegetation] = await Promise.all([
+        found.every((parcel) => parcel.landUse) ? Promise.resolve([]) : registryLookup,
+        settle('meteo', () => sources.meteo.series(resolved.centroid, from, date), limits.meteo),
         // prognoza ma sens tylko dla analizy "na dzis"; dla dat historycznych nie udajemy, ze ja znamy
         date === today
           ? settle(
               'forecast',
-              () => sources.forecast.forecast(field.centroid, date, FORECAST_DAYS),
+              () => sources.forecast.forecast(resolved.centroid, date, FORECAST_DAYS),
               limits.forecast,
             )
           : null,
-        settle('soil', () => sources.soil.profile(field), limits.soil),
-        settle('terrain', () => sources.terrain.terrain(field), limits.terrain),
-        settle('hydro', () => sources.hydro.context(field), limits.hydro),
-        settle('vegetation', () => sources.vegetation.series(field, date), limits.vegetation),
+        settle('soil', () => sources.soil.profile(resolved), limits.soil),
+        settle('terrain', () => sources.terrain.terrain(resolved), limits.terrain),
+        settle('hydro', () => sources.hydro.context(resolved), limits.hydro),
+        settle('vegetation', () => sources.vegetation.series(resolved, date), limits.vegetation),
       ]);
+      const field = found.length > 0 ? withRegistry(resolved, found, entries) : resolved;
+      const landUse = summarizeLandUse(field.landUse, cropId, field.registryAreaHa);
 
       const crop = stages.crop(cropId, date);
       const fetched = [meteo, forecast, soil, terrain, hydro, vegetation].flatMap((item) =>
@@ -239,6 +311,7 @@ export function createAnalysisService({
           sampleParts: [...stages.sampleParts],
         },
         field,
+        ...(landUse ? { landUse } : {}),
         crop,
         assessment,
         history,

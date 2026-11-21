@@ -14,7 +14,13 @@ import type {
   ParcelOutlines,
   ParcelOutlineSource,
 } from '../../domain/parcel-outline-source';
-import type { ParcelRecord, ParcelSource } from '../../domain/parcel-source';
+import { parseLandUseCodes } from '../../domain/land-use';
+import type {
+  ParcelRecord,
+  ParcelRegistry,
+  ParcelRegistryEntry,
+  ParcelSource,
+} from '../../domain/parcel-source';
 
 export const EGIB_WFS_URL = 'https://mapy.geoportal.gov.pl/wss/service/PZGIK/EGIB/WFS/UslugaZbiorcza';
 
@@ -32,6 +38,10 @@ interface WfsFeature {
     NUMER_DZIALKI?: unknown;
     NAZWA_OBREBU?: unknown;
     NAZWA_GMINY?: unknown;
+    /** powierzchnia ewidencyjna w ha jako tekst ("0.2655"); literowka w nazwie pochodzi z uslugi */
+    POLE_EWIDENYJNE?: unknown;
+    /** klasouzytki po przecinku, np. "RIVb,RV,ŁV" */
+    KLASOUZYTKI_EGIB?: unknown;
   } | null;
   geometry?: { type?: unknown; coordinates?: unknown } | null;
 }
@@ -151,6 +161,17 @@ function titleCase(value: string): string {
     );
 }
 
+/** Klasouzytki i powierzchnia ewidencyjna z atrybutow obiektu; puste pola pomijamy. */
+function registryOf(properties: WfsFeature['properties']): Partial<ParcelRegistryEntry> {
+  const landUse = parseLandUseCodes(text(properties?.KLASOUZYTKI_EGIB));
+  const area = Number.parseFloat(text(properties?.POLE_EWIDENYJNE).replace(',', '.'));
+
+  return {
+    ...(landUse.length > 0 ? { landUse } : {}),
+    ...(Number.isFinite(area) && area > 0 ? { registryAreaHa: area } : {}),
+  };
+}
+
 /** Obiekty GetFeature -> pelne rekordy dzialek (opis w zakresie, jaki niesie WFS: bez powiatu). */
 export function parseParcels(body: unknown): ParcelRecord[] {
   const features: unknown = (body as { features?: unknown } | null)?.features;
@@ -173,6 +194,7 @@ export function parseParcels(body: unknown): ParcelRecord[] {
         voivodeship: VOIVODESHIPS[id.slice(0, 2)] ?? '',
         geometry,
         origin: 'egib-wfs',
+        ...registryOf(feature.properties),
       },
     ];
   });
@@ -233,5 +255,21 @@ export function createEgibWfsParcelSource(
     },
 
     byName: () => Promise.reject(AppError.upstream('EGiB WFS', new Error('name search is not supported'))),
+  };
+}
+
+/** Ewidencja (klasouzytki, powierzchnia) po identyfikatorze - uzupelnia dzialke z ULDK, ktore tych danych nie ma. */
+export function createEgibWfsRegistry(source: ParcelSource = createEgibWfsParcelSource()): ParcelRegistry {
+  return {
+    async byId(id) {
+      const record = await source.byId(id);
+
+      if (!record?.landUse) return null;
+
+      return {
+        landUse: record.landUse,
+        ...(record.registryAreaHa === undefined ? {} : { registryAreaHa: record.registryAreaHa }),
+      };
+    },
   };
 }

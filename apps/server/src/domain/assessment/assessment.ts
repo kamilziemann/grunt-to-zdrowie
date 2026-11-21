@@ -14,6 +14,7 @@ import type { Assessment, AssessmentLevel, ClimaticBalance, RootZone } from '@ap
 import type { SoilProfile } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { confidenceOf, type UncertaintyId } from '../confidence';
+import { hasFarmland } from '../land-use';
 import { addDays, isoDate, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
 import { seasonStress, type RootZoneDay } from '../root-zone-balance';
@@ -255,6 +256,9 @@ export function assess(input: StageInput): Assessment {
   if (balance?.coverage !== undefined && balance.coverage < 1) uncertainties.push('meteo_gaps');
 
   if (conflicting(signals)) uncertainties.push('conflicting_signals');
+
+  if (input.field.landUse && input.field.landUse.length > 0 && !hasFarmland(input.field.landUse))
+    uncertainties.push('not_farmland');
 
   const { assumed } = balanceSoil(input);
   const basis = verdictBasis(balance);

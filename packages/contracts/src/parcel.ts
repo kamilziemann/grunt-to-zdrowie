@@ -54,6 +54,10 @@ export const parcelSchema = parcelCandidateSchema.extend({
   /** skad pochodzi geometria: ULDK (podstawowe) albo zbiorcza usluga WFS ewidencji gruntow (zapasowe) */
   source: z.enum(['uldk', 'egib-wfs']),
   fetchedAt: z.string(),
+  /** powierzchnia ewidencyjna z EGiB (ha), gdy zrodlo ja podaje (WFS ewidencji; ULDK nie) */
+  registryAreaHa: z.number().optional(),
+  /** klasouzytki EGiB, np. ["RIVb", "ŁV"] albo ["dr"], gdy zrodlo je podaje (WFS ewidencji; ULDK nie) */
+  landUse: z.array(z.string()).optional(),
 });
 
 export type Parcel = z.infer<typeof parcelSchema>;

@@ -17,6 +17,20 @@ export interface ParcelRecord extends ParcelDescription {
   geometry: PolygonGeometry;
   /** ktore zrodlo oddalo rekord */
   origin: ParcelOrigin;
+  /** klasouzytki i powierzchnia ewidencyjna (ha) - podaje je tylko WFS ewidencji, ULDK nie */
+  landUse?: string[];
+  registryAreaHa?: number;
+}
+
+/** Dane ewidencyjne dzialki, ktorych nie ma w ULDK: klasouzytki i powierzchnia ewidencyjna. */
+export interface ParcelRegistryEntry {
+  landUse: string[];
+  registryAreaHa?: number;
+}
+
+/** Ewidencja gruntow po identyfikatorze dzialki (WFS EGiB); null = brak dzialki albo brak danych. */
+export interface ParcelRegistry {
+  byId(id: string): Promise<ParcelRegistryEntry | null>;
 }
 
 export interface ParcelMatches {

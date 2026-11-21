@@ -8,10 +8,14 @@ import type { EdgeCachePurger } from './domain/edge-cache';
 import type { HydroMapSource } from './domain/hydro-map-source';
 import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
-import { withFallback, type ParcelSource } from './domain/parcel-source';
+import { withFallback, type ParcelRegistry, type ParcelSource } from './domain/parcel-source';
 import type { PlaceSource } from './domain/place-source';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
-import { createEgibWfsOutlineSource, createEgibWfsParcelSource } from './infrastructure/egib-wfs';
+import {
+  createEgibWfsOutlineSource,
+  createEgibWfsParcelSource,
+  createEgibWfsRegistry,
+} from './infrastructure/egib-wfs';
 import {
   createNeonSqlRunner,
   createPostgisHydroMapSource,
@@ -50,6 +54,8 @@ export interface ContainerOverrides {
   hydroMapSource?: HydroMapSource | null;
   /** pamiec odpowiedzi zrodel analizy; null = bez pamieci (domyslnie Cache API Workera, gdy jest) */
   responseStore?: ResponseStore | null;
+  /** ewidencja (klasouzytki) dla analizy; null = bez ewidencji (testy: bez WFS GUGiK) */
+  parcelRegistry?: ParcelRegistry | null;
 }
 
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
@@ -102,6 +108,10 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       ...overrides.analysisSources,
     },
     stages: engineStages,
+    // klasouzytki i powierzchnia ewidencyjna z WFS ewidencji (ULDK ich nie podaje)
+    ...(overrides.parcelRegistry === null
+      ? {}
+      : { registry: overrides.parcelRegistry ?? createEgibWfsRegistry() }),
     now,
   });
 

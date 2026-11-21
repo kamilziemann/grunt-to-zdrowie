@@ -28,6 +28,7 @@ export function makeApp(
   const withSources = {
     hydroMapSource: null,
     responseStore: null,
+    parcelRegistry: null,
     ...overrides,
     analysisSources: { ...createSampleSources(), ...overrides.analysisSources },
   };

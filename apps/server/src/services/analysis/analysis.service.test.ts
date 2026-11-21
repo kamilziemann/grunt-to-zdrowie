@@ -200,3 +200,46 @@ describe('analysis service', () => {
     expect(report.field.kind).toBe('parcel');
   });
 });
+
+describe('analysis service: ewidencja (klasouzytki)', () => {
+  it('droga wg ewidencji: raport ostrzega (non_agricultural) i obniza pewnosc', async () => {
+    const registry = { byId: () => Promise.resolve({ landUse: ['dr'], registryAreaHa: 0.27 }) };
+    const plain = await service({}, { stages: engineStages }).analyze(request('2026-07-20'));
+    const road = await service({}, { stages: engineStages, registry }).analyze(request('2026-07-20'));
+    const order = ['high', 'medium', 'low'];
+
+    expect(waterReportSchema.safeParse(road).error).toBeUndefined();
+    expect(road.field).toMatchObject({ landUse: ['dr'], registryAreaHa: 0.27 });
+    expect(road.landUse).toMatchObject({
+      agricultural: false,
+      mismatch: 'non_agricultural',
+      kinds: ['road'],
+    });
+    expect(order.indexOf(road.assessment.confidence)).toBeGreaterThanOrEqual(
+      order.indexOf(plain.assessment.confidence),
+    );
+    expect(plain.landUse).toBeUndefined();
+  });
+
+  it('grunt orny z laka: podpowiedz uzytkow zielonych, pewnosc bez zmian', async () => {
+    const registry = { byId: () => Promise.resolve({ landUse: ['RIVb', 'ŁV'] }) };
+    const report = await service({}, { stages: engineStages, registry }).analyze(request('2026-07-20'));
+    const plain = await service({}, { stages: engineStages }).analyze(request('2026-07-20'));
+
+    expect(report.landUse).toMatchObject({ agricultural: true, cropHint: 'grassland', mismatch: null });
+    expect(report.landUse?.soilClasses).toEqual(['IVb', 'V']);
+    expect(report.assessment.confidence).toBe(plain.assessment.confidence);
+  });
+
+  it('ewidencja, ktora pada albo sie spoznia, nie zatrzymuje analizy', async () => {
+    const failing = { byId: () => Promise.reject(new Error('WFS down')) };
+    const slow = { byId: () => new Promise<null>(() => {}) };
+    const report = await service({}, { registry: failing }).analyze(request('2026-07-20'));
+    const started = Date.now();
+    const late = await service({}, { registry: slow, registryTimeoutMs: 50 }).analyze(request('2026-07-20'));
+
+    expect(report.landUse).toBeUndefined();
+    expect(late.landUse).toBeUndefined();
+    expect(Date.now() - started).toBeLessThan(2000);
+  });
+});
