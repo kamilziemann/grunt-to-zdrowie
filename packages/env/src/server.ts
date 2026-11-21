@@ -37,6 +37,12 @@ export const serverVarsSchema = z
         .regex(/^postgres(ql)?:\/\//, 'must be a postgres:// connection string')
         .optional(),
     ),
+    /**
+     * Klient OAuth Copernicus Data Space (API statystyk Sentinel-2: NDVI/NDMI pola). Opcjonalny - bez niego zrodlo
+     * satelitarne zglasza brak danych. Lokalnie: apps/web/.dev.vars, w chmurze: `wrangler secret put`.
+     */
+    COPERNICUS_CLIENT_ID: optionalSecret,
+    COPERNICUS_CLIENT_SECRET: optionalSecret,
   })
   .superRefine((vars, ctx) => {
     if (!vars.AUTH_ENABLED) return;

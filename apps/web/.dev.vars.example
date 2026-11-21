@@ -21,3 +21,8 @@
 # Postgres na Neon (PostGIS 3.6). Wartosc: DATABASE_URL z .env.local (`neon env pull` / `neon deploy` w katalogu glownym).
 # W chmurze: `wrangler secret put DATABASE_URL --env production`.
 # DATABASE_URL=postgresql://<user>:<haslo>@<host>-pooler.<region>.aws.neon.tech/neondb?sslmode=require
+
+# Copernicus Data Space (darmowe konto, klient OAuth z panelu Sentinel Hub): statystyki Sentinel-2 dla pola.
+# W chmurze: `wrangler secret put COPERNICUS_CLIENT_ID --env production` (i to samo dla SECRET).
+# COPERNICUS_CLIENT_ID=sh-<identyfikator>
+# COPERNICUS_CLIENT_SECRET=
