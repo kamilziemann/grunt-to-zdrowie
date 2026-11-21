@@ -537,7 +537,43 @@
     },
     "sources": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK.",
     "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
-    "highlight": "Orange – nearest ditch and watercourse."
+    "highlight": "Orange – nearest ditch and watercourse.",
+    "showAerial": "Show on aerial photo",
+    "showSketch": "Back to the sketch",
+    "sketch": {
+      "label": "Sketch: {field} and water within {radius} m of the field.",
+      "loading": "Loading ditches and streams…",
+      "unavailable": "Ditch and stream data is temporarily unavailable – the sketch shows only the field outline.",
+      "noWater": "No ditches, streams or water within {radius} m of the field.",
+      "field": {
+        "parcel": "Parcel {number}",
+        "parcels": "Parcels {number}",
+        "part": "Part of parcel {number}",
+        "drawn": "Your field"
+      },
+      "ditchThrough": "Ditch through the field, {meters} m",
+      "ditchAlongEdge": "Ditch along the field edge, {meters} m",
+      "nearestDitch": "Nearest ditch: {meters} m",
+      "nearestWatercourse": "Nearest watercourse: {meters} m",
+      "nearestNamed": "Nearest watercourse ({name}): {meters} m",
+      "north": "N",
+      "legend": {
+        "title": "Sketch legend",
+        "field": "Field boundary",
+        "ditch": "Drainage ditches",
+        "watercourse": "Rivers and streams",
+        "watercourseNamed": "Rivers and streams: {names}",
+        "canal": "Canals",
+        "water": "Standing water (ponds, lakes)",
+        "wetland": "Wetlands and bogs",
+        "highlightThrough": "Ditch running through the field",
+        "highlightNearest": "Nearest ditch or watercourse",
+        "scale": "Scale",
+        "highlightAlongEdge": "Ditch along the field edge (section within the parcel)"
+      },
+      "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
+      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
+    }
   },
   "print": {
     "header": "{app} · field water report",

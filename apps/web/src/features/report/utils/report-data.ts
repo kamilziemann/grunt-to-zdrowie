@@ -101,6 +101,13 @@ export function romanCategory(category: number): string {
   return ['I', 'II', 'III', 'IV'][category - 1] ?? String(category);
 }
 
+/** Dlugosc rowow w polu (m) z dowodow przyczyn albo zalecen - szkic pola podaje te sama liczbe; null = brak miary. */
+export function ditchInFieldM(report: WaterReport): number | null {
+  const evidence = [...report.causes, ...report.recommendations.retention].flatMap((item) => item.evidence);
+
+  return evidence.find((item) => item.metric === 'ditch_length_in_field_m')?.value ?? null;
+}
+
 /** Zalecenia od najwazniejszego (priorytet 1), przy rownym priorytecie kolejnosc z silnika. */
 export function byPriority(recommendations: readonly Recommendation[]): Recommendation[] {
   return recommendations.toSorted((a, b) => a.priority - b.priority);

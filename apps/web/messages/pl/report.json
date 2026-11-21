@@ -537,7 +537,43 @@
     },
     "sources": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK.",
     "sourcesDated": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}).",
-    "highlight": "Pomarańczowy kolor – najbliższy rów i ciek."
+    "highlight": "Pomarańczowy kolor – najbliższy rów i ciek.",
+    "showAerial": "Pokaż na zdjęciu lotniczym",
+    "showSketch": "Wróć do szkicu",
+    "sketch": {
+      "label": "Szkic: {field} i woda w promieniu {radius} m od pola.",
+      "loading": "Wczytuję rowy i cieki…",
+      "unavailable": "Danych o rowach i ciekach chwilowo brak – szkic pokazuje sam obrys pola.",
+      "noWater": "Brak rowów, cieków i wód w promieniu {radius} m od pola.",
+      "field": {
+        "parcel": "Działka {number}",
+        "parcels": "Działki {number}",
+        "part": "Część działki {number}",
+        "drawn": "Twoje pole"
+      },
+      "ditchThrough": "Rów przez pole, {meters} m",
+      "ditchAlongEdge": "Rów na skraju pola, {meters} m",
+      "nearestDitch": "Najbliższy rów: {meters} m",
+      "nearestWatercourse": "Najbliższy ciek: {meters} m",
+      "nearestNamed": "Najbliższy ciek ({name}): {meters} m",
+      "north": "N",
+      "legend": {
+        "title": "Legenda szkicu",
+        "field": "Granica pola",
+        "ditch": "Rowy melioracyjne",
+        "watercourse": "Rzeki i strumienie",
+        "watercourseNamed": "Rzeki i strumienie: {names}",
+        "canal": "Kanały",
+        "water": "Woda stojąca (stawy, jeziora)",
+        "wetland": "Mokradła i bagna",
+        "highlightThrough": "Rów płynący przez pole",
+        "highlightNearest": "Najbliższy rów albo ciek",
+        "scale": "Podziałka",
+        "highlightAlongEdge": "Rów na skraju pola (odcinek w granicach działki)"
+      },
+      "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
+      "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK."
+    }
   },
   "print": {
     "header": "{app} · raport wodny pola",

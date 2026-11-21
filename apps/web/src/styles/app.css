@@ -59,6 +59,14 @@
   --map-wetland: #0f766e;
   --map-water-label: #0b4a5e;
   --map-highlight: #d9480f;
+  /* Szkic "Pole i woda wokol" w raporcie (SVG na tle karty): kolory ida za motywem, wydruk zawsze jasny. */
+  --sketch-field: light-dark(#1d6b3b, #86d6a2);
+  --sketch-field-fill: light-dark(rgb(29 107 59 / 0.12), rgb(134 214 162 / 0.16));
+  --sketch-ditch: light-dark(#0e7490, #5fcde4);
+  --sketch-stream: light-dark(#0b4f7a, #8fd3f5);
+  --sketch-water: light-dark(#bfe3f5, #1d4a63);
+  --sketch-wetland: light-dark(#0f766e, #5eead4);
+  --sketch-highlight: light-dark(#c2410c, #fb923c);
 
   --radius: 0.5rem;
 }

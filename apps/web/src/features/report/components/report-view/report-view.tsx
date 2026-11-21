@@ -13,7 +13,7 @@ import { IrrigationSection } from '../irrigation-section';
 import { PrintFooter, PrintHeader } from '../print-frame';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
-import { sampleParts } from '../../utils/report-data';
+import { ditchInFieldM, sampleParts } from '../../utils/report-data';
 import { ReportSection } from '../report-section';
 import { SampleBanner } from '../sample-banner';
 import { SourcesSection } from '../sources-section';
@@ -92,7 +92,7 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
       <ReportSection id="retencja" number={4} title={t('sections.retention')} sample={sampleRecommendations}>
         <div className="flex flex-col gap-2">
           <h3 className="text-lg font-semibold">{t('fieldMap.title')}</h3>
-          <FieldMap field={report.field} />
+          <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} />
         </div>
         <RecommendationList
           category="retention"

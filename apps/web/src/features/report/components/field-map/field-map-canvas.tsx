@@ -1,6 +1,6 @@
-// Plotno mapy w raporcie (MapLibre) - modul ladowany leniwie przez `FieldMap`, wiec MapLibre i jego arkusz stylow
-// nie wchodza do JS strony raportu. Zdjecie lotnicze, rowy i cieki w promieniu 500 m, wyrozniony najblizszy row i
-// ciek, obrys pola. Po kazdym dorysowaniu mapa zapisuje obraz (PNG) - wydruk pokazuje obraz zamiast plotna WebGL.
+// Plotno mapy w raporcie (MapLibre) - modul ladowany leniwie przez `FieldMap` po kliknieciu "Pokaz na zdjeciu
+// lotniczym", wiec MapLibre i jego arkusz stylow nie wchodza do JS strony raportu. Zdjecie lotnicze, rowy i cieki
+// w promieniu 500 m, wyrozniony najblizszy row i ciek, obrys pola. Na wydruk idzie szkic (SVG), nie to plotno.
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import type { HydroFeature, ParcelGeometry } from '@app/contracts';
@@ -18,8 +18,6 @@ export interface FieldMapCanvasProps {
   features: readonly HydroFeature[];
   /** najblizszy row i ciek - wyroznione kolorem */
   nearest: readonly HydroFeature[];
-  /** obraz mapy do wydruku (data: URL) albo null, gdy plotna nie da sie zapisac */
-  onSnapshot: (dataUrl: string | null) => void;
   /** mapa nie wstala (brak WebGL) - zostaje sam podpis */
   onFailed: () => void;
 }
@@ -33,22 +31,15 @@ function collection(geometries: readonly HydroFeature['geometry'][]): FeatureCol
   };
 }
 
-export function FieldMapCanvas({
-  field,
-  bbox,
-  features,
-  nearest,
-  onSnapshot,
-  onFailed,
-}: FieldMapCanvasProps) {
+export function FieldMapCanvas({ field, bbox, features, nearest, onFailed }: FieldMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibre.Map | null>(null);
   const [ready, setReady] = useState(false);
-  const latest = useRef({ onSnapshot, onFailed });
+  const latest = useRef({ onFailed });
   const [west, south, east, north] = bbox;
 
   useEffect(() => {
-    latest.current = { onSnapshot, onFailed };
+    latest.current = { onFailed };
   });
 
   useEffect(() => {
@@ -76,8 +67,6 @@ export function FieldMapCanvas({
         fitBoundsOptions: { padding: 24 },
         interactive: false,
         attributionControl: false,
-        // obraz do wydruku: bez tego bufor plotna jest czyszczony po kazdej klatce
-        canvasContextAttributes: { preserveDrawingBuffer: true },
       });
 
       map = created;
@@ -120,14 +109,6 @@ export function FieldMapCanvas({
         });
         mapRef.current = created;
         setReady(true);
-      });
-      created.on('idle', () => {
-        try {
-          latest.current.onSnapshot(created.getCanvas().toDataURL('image/png'));
-        } catch {
-          // plotno "skazone" obcym kafelkiem - wydruk pokaze plotno
-          latest.current.onSnapshot(null);
-        }
       });
     }
 
