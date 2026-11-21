@@ -2,7 +2,7 @@ import type { FieldArea } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { fieldFromGeometry } from '../../domain/field-area';
-import { readGeoTiff } from './geotiff';
+import { readGeoTiff } from '../geotiff';
 import { coverageUrl, createSoilGridsSource, substitutePixels, type FetchLike } from './soilgrids';
 import recorded from './soilgrids-minsk.recorded.json?raw';
 
@@ -173,6 +173,7 @@ describe('createSoilGridsSource', () => {
       width: values.length,
       height: 1,
       values: Float64Array.from(values),
+      bands: [Float64Array.from(values)],
       originX: 21.56,
       originY: 52.171,
       pixelX: 0.01,

@@ -28,7 +28,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.4.0';
+export const ANALYSIS_ENGINE_VERSION = '0.5.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez

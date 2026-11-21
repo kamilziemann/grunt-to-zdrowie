@@ -320,6 +320,19 @@ export type IrrigationAdvice = z.infer<typeof irrigationAdviceSchema>;
 
 export const ZONE_KINDS = ['drying', 'collecting', 'typical', 'depression', 'flow_path', 'segment'] as const;
 
+export const ZONE_MOISTURE = ['drier', 'typical', 'wetter'] as const;
+
+export const ZONE_RELIEF = ['hilltop', 'slope', 'hollow', 'flat'] as const;
+
+export const ZONE_POSITIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'centre'] as const;
+
+/**
+ * Dlaczego stref nie ma albo jest jedna: pole za male, by wyrozniac miejsca (< 0,5 ha); pole jednorodne (zadne
+ * miejsce nie odstaje od reszty); brak danych przestrzennych (bez rastra roslinnosci i modelu terenu); czesci pola
+ * (dzialki gospodarstwa) leza tak daleko od siebie, ze nie sa jednym polem do podzialu.
+ */
+export const ZONE_MAP_REASONS = ['field_too_small', 'uniform', 'no_spatial_data', 'scattered_parts'] as const;
+
 export const zoneLineSchema = z.object({
   type: z.literal('LineString'),
   coordinates: z.array(z.tuple([z.number(), z.number()])),
@@ -335,6 +348,24 @@ export const zoneSchema = z.object({
   wetnessIndex: z.number().optional(),
   ndmiDelta: z.number().optional(),
   volumeM3: z.number().optional(),
+  /** udzial powierzchni pola, 0-1 */
+  share: z.number().min(0).max(1).optional(),
+  /** opis po polsku, np. "Suchsze miejsce na wzniesieniu, w północno-wschodniej części pola, ok. 0,8 ha" */
+  description: z.string().optional(),
+  /** wilgotnosc wzgledem reszty pola (z NDMI i wskaznika gromadzenia wody) */
+  moisture: z.enum(ZONE_MOISTURE).optional(),
+  /** polozenie w rzezbie: wzniesienie, stok, obnizenie, plasko (wzgledem reszty pola) */
+  relief: z.enum(ZONE_RELIEF).optional(),
+  /** czesc pola: strona swiata wzgledem srodka pola albo srodek */
+  position: z.enum(ZONE_POSITIONS).optional(),
+  /** srednia wysokosc (m n.p.m.) i roznica NDVI wzgledem mediany pola */
+  elevationM: z.number().optional(),
+  ndviDelta: z.number().optional(),
+  /** odleglosc od najblizszego rowu albo cieku (m), gdy jest w poblizu */
+  ditchDistanceM: z.number().min(0).optional(),
+  /** dla profilu podluznego: poczatek i koniec odcinka w metrach od `profileStart` */
+  fromM: z.number().min(0).optional(),
+  toM: z.number().min(0).optional(),
 });
 
 export type Zone = z.infer<typeof zoneSchema>;
@@ -348,6 +379,14 @@ export const zoneMapSchema = z.object({
   cellSizeM: z.number().positive(),
   cells: z.number().int().min(0),
   zones: z.array(zoneSchema),
+  reason: z.enum(ZONE_MAP_REASONS).optional(),
+  /** z jakich danych powstaly strefy (raster NDMI/NDVI, model terenu, rowy) */
+  basis: z.array(z.enum(['vegetation', 'terrain', 'hydro'])).optional(),
+  /** okno zdjec Sentinel-2, z ktorych zlozono raster roslinnosci */
+  imageFrom: isoDateSchema.optional(),
+  imageTo: isoDateSchema.optional(),
+  /** profil podluzny: koniec pola, od ktorego licza sie odcinki (strona swiata) */
+  profileStart: z.enum(ZONE_POSITIONS).optional(),
 });
 
 export type ZoneMap = z.infer<typeof zoneMapSchema>;

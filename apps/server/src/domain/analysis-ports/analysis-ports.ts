@@ -139,12 +139,33 @@ export interface VegetationObservation {
   pixels: number;
 }
 
+/**
+ * Raster NDVI/NDMI pola na siatce komorek (domain/field-grid: UTM, piksele Sentinel-2) - z najmniej zachmurzonej
+ * sceny w oknie zdjec, z maska chmur. Wartosci wierszami od polnocnego zachodu; NaN = chmura albo brak sceny.
+ */
+export interface VegetationRaster {
+  epsg: number;
+  /** naroznik polnocno-zachodni w metrach ukladu `epsg` */
+  west: number;
+  north: number;
+  cellSizeM: number;
+  cols: number;
+  rows: number;
+  ndvi: number[];
+  ndmi: number[];
+  /** okno zdjec, z ktorego wybrano scene */
+  from: string;
+  to: string;
+}
+
 export interface VegetationSeries {
   /** obserwacje w oknie wokol daty analizy, od najnowszej */
   observations: VegetationObservation[];
   /** ta sama pora roku w poprzednich latach - po jednej obserwacji na rok */
   baseline: (VegetationObservation & { year: number })[];
   cellSizeM: number;
+  /** raster pola do stref (gdy zrodlo go oddalo) */
+  raster?: VegetationRaster;
 }
 
 export interface MeteoSource {

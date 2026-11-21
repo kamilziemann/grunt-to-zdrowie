@@ -10,7 +10,7 @@ import type { FieldArea, SourceRef } from '@app/contracts';
 import type { SoilProfile, SoilSource, Sourced } from '../../domain/analysis-ports';
 import { containsPoint } from '../../domain/parcel-geometry';
 import { soilProfileFromLayers, type SoilLayer } from '../../domain/soil-profile';
-import { readGeoTiff, type Raster } from './geotiff';
+import { readGeoTiff, type Raster } from '../geotiff';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
 import { STATIC_TTL_S } from '../../domain/source-cache-policy';
 

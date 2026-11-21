@@ -3,12 +3,17 @@ import { describe, expect, it } from 'vitest';
 
 import { fieldFromGeometry } from '../../domain/field-area';
 import recorded from './cdse-statistics.recorded.json?raw';
+import { floatTiff } from '../../../test/fixtures/float-tiff';
 import {
+  CDSE_PROCESS_URL,
   CDSE_STATISTICS_URL,
   CDSE_TOKEN_URL,
   createSentinelStatisticsSource,
+  parseRaster,
   parseStatistics,
+  rasterBody,
   rasterSize,
+  rasterWindow,
   statisticsBody,
   windowsFor,
   type FetchLike,
@@ -53,6 +58,14 @@ function replay(
     calls.push({ url, body: bodyOf(init) });
 
     if (url === CDSE_TOKEN_URL) return Promise.resolve(token.clone());
+
+    if (url === CDSE_PROCESS_URL) {
+      // raster pola: NDVI 0,7 i NDMI 0,3 w kazdym pikselu siatki z zapytania
+      const { output } = JSON.parse(bodyOf(init)) as { output: { width: number; height: number } };
+      const pixels = Array.from({ length: output.width * output.height }, () => [0.7, 0.3]).flat();
+
+      return Promise.resolve(new Response(floatTiff(output.width, output.height, 2, pixels)));
+    }
 
     // to samo nagranie w kazdym oknie, przesuniete na rok, o ktory pyta zapytanie
     const year = /"from":"(\d{4})-/.exec(bodyOf(init))?.[1] ?? '2021';
@@ -109,6 +122,44 @@ describe('windowsFor i zapytanie', () => {
   });
 });
 
+describe('raster pola (Process API)', () => {
+  it('okno zdjec: 30 dni w sezonie, poza sezonem lato poprzedniego sezonu', () => {
+    expect(rasterWindow('2021-07-15')).toEqual({ from: '2021-06-16', to: '2021-07-15' });
+    expect(rasterWindow('2021-11-20')).toEqual({ from: '2021-06-01', to: '2021-08-31' });
+    expect(rasterWindow('2022-02-10')).toEqual({ from: '2021-06-01', to: '2021-08-31' });
+  });
+
+  it('zapytanie na siatke komorek w UTM (piksel w piksel) i odczyt dwoch warstw; chmury ponad polowe = brak', async () => {
+    const spec = { zone: 34, epsg: 32_634, west: 600_000, north: 5_780_020, cellSizeM: 10, cols: 2, rows: 2 };
+    const window = { from: '2021-06-16', to: '2021-07-15' };
+
+    expect(rasterBody(spec, window)).toMatchObject({
+      input: {
+        bounds: {
+          bbox: [600_000, 5_780_000, 600_020, 5_780_020],
+          properties: { crs: 'http://www.opengis.net/def/crs/EPSG/0/32634' },
+        },
+        data: [{ type: 'sentinel-2-l2a', dataFilter: { mosaickingOrder: 'leastCC' } }],
+      },
+      output: { width: 2, height: 2 },
+    });
+
+    const clear = await parseRaster(
+      floatTiff(2, 2, 2, [0.5, 0.2, 0.6, 0.25, 0.7, 0.3, Number.NaN, Number.NaN]),
+      spec,
+      window,
+    );
+    const cloudy = await parseRaster(
+      floatTiff(2, 2, 2, [0.5, 0.2, Number.NaN, Number.NaN, Number.NaN, Number.NaN, Number.NaN, Number.NaN]),
+      spec,
+      window,
+    );
+
+    expect(clear).toMatchObject({ ndvi: [0.5, 0.6, 0.7, Number.NaN], ndmi: [0.2, 0.25, 0.3, Number.NaN] });
+    expect(cloudy).toBeNull();
+  });
+});
+
 describe('createSentinelStatisticsSource', () => {
   it('token client_credentials, jedno zapytanie na okno, obserwacje od najnowszej, rok bazowy najblizej rocznicy', async () => {
     const calls: Call[] = [];
@@ -122,9 +173,15 @@ describe('createSentinelStatisticsSource', () => {
 
     expect(calls[0]).toMatchObject({ url: CDSE_TOKEN_URL });
     expect(calls[0]?.body).toContain('grant_type=client_credentials');
-    expect(calls.slice(1).map((call) => call.url)).toEqual(
-      Array.from({ length: 5 }, () => CDSE_STATISTICS_URL),
-    );
+    expect(calls.filter((call) => call.url === CDSE_STATISTICS_URL)).toHaveLength(5);
+    expect(calls.filter((call) => call.url === CDSE_PROCESS_URL)).toHaveLength(1);
+    expect(result.data?.raster).toMatchObject({
+      epsg: 32_634,
+      cellSizeM: 10,
+      from: '2021-06-16',
+      to: '2021-07-15',
+    });
+    expect(result.data?.raster?.ndmi.every((value) => value === 0.3)).toBe(true);
     expect(result.data?.observations[0]?.date).toBe('2021-07-11');
     // w kazdym roku najblizej 15 lipca jest scena z 11 lipca
     expect(result.data?.baseline.map((item) => [item.year, item.date])).toEqual([

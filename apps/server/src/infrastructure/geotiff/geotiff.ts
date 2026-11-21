@@ -1,13 +1,15 @@
-// Minimalny odczyt GeoTIFF z WCS SoilGrids: jedna warstwa liczb calkowitych 16 bit (albo float 32), kafle lub pasy,
-// kompresja brak/deflate, predyktor poziomy, georeferencja z ModelTiepoint + ModelPixelScale. Pelna biblioteka
-// (geotiff.js) bylaby wieksza od calego adaptera, a SoilGrids oddaje zawsze ten sam, prosty format.
-// Deflate rozpakowuje DecompressionStream (workerd i przegladarki), bez zaleznosci.
+// Minimalny odczyt GeoTIFF z WCS SoilGrids i Process API Copernicus: liczby calkowite 16 bit albo float 32, jedna
+// lub kilka probek na piksel (przeplot), kafle lub pasy, kompresja brak/deflate, predyktor poziomy dla 16 bit,
+// georeferencja z ModelTiepoint + ModelPixelScale. Pelna biblioteka (geotiff.js) bylaby wieksza od obu adapterow,
+// a oba zrodla oddaja zawsze ten sam, prosty format. Deflate rozpakowuje DecompressionStream, bez zaleznosci.
 
 export interface Raster {
   width: number;
   height: number;
-  /** wartosci wierszami od gornego lewego rogu */
+  /** wartosci pierwszej probki (warstwy) wierszami od gornego lewego rogu */
   values: Float64Array;
+  /** wszystkie probki: bands[0] === values */
+  bands: Float64Array[];
   /** wspolrzedne lewego gornego rogu i rozmiar piksela w jednostkach ukladu rastra (tu: stopnie WGS84) */
   originX: number;
   originY: number;
@@ -20,6 +22,8 @@ const TAG = {
   height: 257,
   bitsPerSample: 258,
   compression: 259,
+  samplesPerPixel: 277,
+  planarConfiguration: 284,
   stripOffsets: 273,
   rowsPerStrip: 278,
   stripByteCounts: 279,
@@ -91,7 +95,7 @@ const first = (tags: Tags, tag: number, fallback?: number): number => {
   return value;
 };
 
-/** Czyta pierwsza warstwe GeoTIFF. Rzuca przy formacie, ktorego SoilGrids nie uzywa (np. LZW, RGB). */
+/** Czyta GeoTIFF (wszystkie probki piksela). Rzuca przy formacie, ktorego zrodla nie uzywaja (np. LZW). */
 export async function readGeoTiff(buffer: ArrayBuffer): Promise<Raster> {
   const view = new DataView(buffer);
   const order = view.getUint16(0, false);
@@ -106,6 +110,7 @@ export async function readGeoTiff(buffer: ArrayBuffer): Promise<Raster> {
   const compression = first(tags, TAG.compression, 1);
   const predictor = first(tags, TAG.predictor, 1);
   const format = first(tags, TAG.sampleFormat, 1);
+  const samples = first(tags, TAG.samplesPerPixel, 1);
   const tiled = tags.has(TAG.tileOffsets);
   const blockWidth = tiled ? first(tags, TAG.tileWidth) : width;
   const blockHeight = tiled ? first(tags, TAG.tileLength) : first(tags, TAG.rowsPerStrip, height);
@@ -120,7 +125,14 @@ export async function readGeoTiff(buffer: ArrayBuffer): Promise<Raster> {
     throw new Error(`unsupported TIFF sample: ${bits} bit, format ${format}`);
   }
 
-  const values = new Float64Array(width * height);
+  if (samples > 1 && first(tags, TAG.planarConfiguration, 1) !== 1) {
+    throw new Error('unsupported TIFF planar configuration (separate planes)');
+  }
+
+  if (predictor === 3) throw new Error('unsupported TIFF floating point predictor');
+
+  const bands = Array.from({ length: samples }, () => new Float64Array(width * height));
+  const sampleBytes = bits / 8;
   const blocksAcross = Math.ceil(width / blockWidth);
 
   for (const [block, offset] of offsets.entries()) {
@@ -131,28 +143,32 @@ export async function readGeoTiff(buffer: ArrayBuffer): Promise<Raster> {
     const blockY = Math.floor(block / blocksAcross) * blockHeight;
 
     for (let row = 0; row < blockHeight && blockY + row < height; row += 1) {
-      let previous = 0;
+      const previous = Array.from({ length: samples }, () => 0);
 
       for (let col = 0; col < blockWidth; col += 1) {
-        const at = (row * blockWidth + col) * (bits / 8);
+        for (let band = 0; band < samples; band += 1) {
+          const at = ((row * blockWidth + col) * samples + band) * sampleBytes;
 
-        if (at + bits / 8 > data.byteLength) break;
+          if (at + sampleBytes > data.byteLength) break;
 
-        let value: number;
+          let value: number;
 
-        if (bits === 32) {
-          value = data.getFloat32(at, little);
-        } else {
-          const raw16 = data.getUint16(at, little);
+          if (bits === 32) {
+            value = data.getFloat32(at, little);
+          } else {
+            const raw16 = data.getUint16(at, little);
 
-          // predyktor 2: kazda probka to roznica wzgledem poprzedniej w wierszu (modulo 2^16)
-          const sample = predictor === 2 ? (previous + raw16) & 0xff_ff : raw16;
+            // predyktor 2: kazda probka to roznica wzgledem tej samej probki poprzedniego piksela (modulo 2^16)
+            const sample = predictor === 2 ? ((previous[band] ?? 0) + raw16) & 0xff_ff : raw16;
 
-          previous = sample;
-          value = format === 2 && sample >= 0x80_00 ? sample - 0x1_00_00 : sample;
+            previous[band] = sample;
+            value = format === 2 && sample >= 0x80_00 ? sample - 0x1_00_00 : sample;
+          }
+
+          const target = bands[band];
+
+          if (target && blockX + col < width) target[(blockY + row) * width + blockX + col] = value;
         }
-
-        if (blockX + col < width) values[(blockY + row) * width + blockX + col] = value;
       }
     }
   }
@@ -160,7 +176,8 @@ export async function readGeoTiff(buffer: ArrayBuffer): Promise<Raster> {
   return {
     width,
     height,
-    values,
+    values: bands[0] ?? new Float64Array(width * height),
+    bands,
     originX: (tiepoint[3] ?? 0) - (tiepoint[0] ?? 0) * scaleX,
     originY: (tiepoint[4] ?? 0) + (tiepoint[1] ?? 0) * scaleY,
     pixelX: scaleX,

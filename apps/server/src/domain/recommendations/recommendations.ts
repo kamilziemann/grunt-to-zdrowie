@@ -3,7 +3,15 @@
 // uzasadnia. Kazde dzialanie wynika z co najmniej jednej przyczyny i niesie jej dowody liczbowe; bez przyczyn nie ma
 // dzialan, a bez oceny nie ma tez wskazowki nawadniania. Liczby efektu tylko tam, gdzie sa podstawy (geometria rowu,
 // funkcja pedotransferowa, literatura) - zrodla przy regulach. Urzadzenia wodne zawsze z formalnoscia (`legal`).
-import type { Assessment, Cause, CauseId, Evidence, IrrigationAdvice, Recommendation } from '@app/contracts';
+import type {
+  Assessment,
+  Cause,
+  CauseId,
+  Evidence,
+  IrrigationAdvice,
+  Recommendation,
+  ZoneMap,
+} from '@app/contracts';
 
 import type { Recommendations, StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
@@ -11,6 +19,7 @@ import { cropProfile } from '../crops';
 import { addDays } from '../iso-date';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
+import { zoneForMeasure } from '../zones';
 
 type Measure = Omit<Recommendation, 'causes' | 'evidence' | 'zoneId'>;
 
@@ -263,7 +272,12 @@ const RULES: readonly Rule[] = [
   },
 ];
 
-function fromRule(rule: Rule, input: StageInput, found: readonly Cause[]): Recommendation | null {
+function fromRule(
+  rule: Rule,
+  input: StageInput,
+  found: readonly Cause[],
+  zones: ZoneMap | null,
+): Recommendation | null {
   const matched = found.filter((cause) => rule.answers.includes(cause.id));
 
   if (matched.length === 0 || (rule.when && !rule.when(input))) return null;
@@ -279,8 +293,8 @@ function fromRule(rule: Rule, input: StageInput, found: readonly Cause[]): Recom
     ...(rule.legal ? { legal: rule.legal(input) } : {}),
     causes: matched.map((cause) => cause.id),
     evidence: [first, ...rest],
-    // miejsca na polu wskaze dopiero podzial na strefy z modelu terenu (pakiet P12) - dzis cale pole
-    zoneId: null,
+    // miejsce na polu: oczko w zaglebieniu, zastawka przy rowie, pas trawiasty na stoku; bez stref - cale pole
+    zoneId: zoneForMeasure(rule.measure.measure, zones),
   };
 }
 
@@ -384,12 +398,17 @@ export function irrigationAdvice(input: StageInput, assessment: Assessment): Irr
   };
 }
 
-export function recommend(input: StageInput, assessment: Assessment, found: Cause[]): Recommendations {
+export function recommend(
+  input: StageInput,
+  assessment: Assessment,
+  found: Cause[],
+  zones: ZoneMap | null = null,
+): Recommendations {
   const weightOf = (recommendation: Recommendation) =>
     found
       .filter((cause) => recommendation.causes.includes(cause.id))
       .reduce((sum, cause) => sum + cause.weight, 0);
-  const all = RULES.map((rule) => fromRule(rule, input, found))
+  const all = RULES.map((rule) => fromRule(rule, input, found, zones))
     .filter((item): item is Recommendation => item !== null)
     // jedno dzialanie raz: pierwsza pasujaca regula (np. oczko w zaglebieniu przed oczkiem "gdziekolwiek")
     .filter((item, index, items) => items.findIndex((other) => other.measure === item.measure) === index)
