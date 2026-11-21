@@ -4,6 +4,7 @@ export { analysisKeys, analysisReportQuery } from './api/analysis.queries';
 export { AnalysisFailure, type AnalysisFailureProps } from './components/analysis-failure';
 export { AnalysisForm, type AnalysisFormProps } from './components/analysis-form';
 export { AnalysisProgress } from './components/analysis-progress';
+export { CropPicker, type CropPickerProps } from './components/crop-picker';
 export {
   analysisDateBounds,
   analysisRequestFromSearch,

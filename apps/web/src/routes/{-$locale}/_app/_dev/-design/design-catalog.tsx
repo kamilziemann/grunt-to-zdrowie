@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { routes, type Crumb } from '@/lib/routes';
 
+import { AnalysisDemos } from './analysis-demos';
 import { OverlayDemos } from './overlay-demos';
 
 // Tokeny linii i pol formularzy (border, input, ring) to nie tekst: probka bez podpisu `Aa`.
@@ -421,6 +422,10 @@ export function DesignCatalog() {
 
       <Section id="overlays" title={t('overlays.title')} description={t('overlays.description')}>
         <OverlayDemos />
+      </Section>
+
+      <Section id="analysis" title={t('analysis.title')} description={t('analysis.description')}>
+        <AnalysisDemos />
       </Section>
     </div>
   );

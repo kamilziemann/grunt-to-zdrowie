@@ -109,5 +109,15 @@
     "toastSuccessDescription": "Zmiany są już widoczne.",
     "toastErrorTitle": "Coś poszło nie tak",
     "toastErrorDescription": "Spróbuj ponownie."
+  },
+  "analysis": {
+    "title": "Analiza i raport",
+    "description": "Formularz analizy (wybór uprawy), postęp, błąd analizy i części raportu wodnego na przykładowym raporcie.",
+    "cropPicker": "CropPicker",
+    "progress": "AnalysisProgress",
+    "failure": "AnalysisFailure",
+    "sampleBanner": "SampleBanner",
+    "verdict": "VerdictSection",
+    "calendar": "RiskCalendar"
   }
 }

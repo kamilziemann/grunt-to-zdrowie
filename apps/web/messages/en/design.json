@@ -109,5 +109,15 @@
     "toastSuccessDescription": "The changes are already visible.",
     "toastErrorTitle": "Something went wrong",
     "toastErrorDescription": "Try again."
+  },
+  "analysis": {
+    "title": "Analysis and report",
+    "description": "Analysis form (crop choice), progress, analysis error and parts of the water report on a sample report.",
+    "cropPicker": "CropPicker",
+    "progress": "AnalysisProgress",
+    "failure": "AnalysisFailure",
+    "sampleBanner": "SampleBanner",
+    "verdict": "VerdictSection",
+    "calendar": "RiskCalendar"
   }
 }
