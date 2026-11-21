@@ -6,11 +6,14 @@ import { nowIso } from '@app/db';
 import type { EdgeCachePurger } from './domain/edge-cache';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
 import { withFallback, type ParcelSource } from './domain/parcel-source';
+import type { PlaceSource } from './domain/place-source';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
 import { createEgibWfsOutlineSource, createEgibWfsParcelSource } from './infrastructure/egib-wfs';
+import { createNominatimPlaceSource } from './infrastructure/nominatim';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import type { Container, ContainerDeps } from './services/container';
 import { createParcelsService } from './services/parcels';
+import { createPlacesService } from './services/places';
 
 export interface ContainerOverrides {
   /** stały zegar w testach */
@@ -21,6 +24,8 @@ export interface ContainerOverrides {
   parcelSource?: ParcelSource;
   /** obrysy dzialek dla obszaru (testy: dzialki w pamieci zamiast WFS GUGiK) */
   parcelOutlineSource?: ParcelOutlineSource;
+  /** geokoder (testy: miejsca w pamieci zamiast Nominatim) */
+  placeSource?: PlaceSource;
 }
 
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
@@ -33,8 +38,11 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     now,
   });
 
+  const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
+
   return {
     parcels,
+    places,
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),
   };
 }

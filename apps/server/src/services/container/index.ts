@@ -7,10 +7,13 @@ import type { Logger, TraceContext } from '@app/logger';
 
 import type { EdgeCachePurger } from '../../domain/edge-cache';
 import type { ParcelsService } from '../parcels';
+import type { PlacesService } from '../places';
 
 export interface Container {
   /** dzialki ewidencyjne: wyszukiwanie i geometria (zrodlo: ULDK GUGiK) */
   parcels: ParcelsService;
+  /** miejsca po adresie albo nazwie (geokoder) */
+  places: PlacesService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
   edgeCache: EdgeCachePurger;
 }

@@ -5,6 +5,7 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 import { healthModule } from '../../modules/health';
 import { meModule } from '../../modules/me';
 import { parcelsModule } from '../../modules/parcels';
+import { placesModule } from '../../modules/places';
 import { telemetryModule } from '../../modules/telemetry';
 import type { AppEnv } from '../../services/container';
 import { mountCacheRules } from './cache-rules';
@@ -25,5 +26,6 @@ export function mountRoutes(app: OpenAPIHono<AppEnv>) {
     .route('/health', healthModule)
     .route('/telemetry', telemetryModule)
     .route('/me', meModule)
-    .route('/parcels', parcelsModule);
+    .route('/parcels', parcelsModule)
+    .route('/places', placesModule);
 }

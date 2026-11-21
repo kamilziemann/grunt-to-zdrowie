@@ -8,7 +8,7 @@ import type { Context } from 'hono';
 
 import type { AppEnv } from '../../services/container';
 import { privateByDefault, publicCache, purgeOnWrite } from '../middlewares';
-import { PARCELS_PATH } from './paths';
+import { PARCELS_PATH, PLACES_PATH } from './paths';
 
 /** Publiczne odczyty z polityka i tagami. */
 const PUBLIC_READS: [
@@ -18,6 +18,8 @@ const PUBLIC_READS: [
 ][] = [
   // Dzialki zmieniaja sie rzadko, a ULDK ma limit zapytan na IP - odczyty ida z brzegu.
   [`${PARCELS_PATH}/*`, 'publicData', () => [cacheTags.parcels()]],
+  // Geokoder publiczny ma limit ok. 1 zapytania/s - te same pytania ida z brzegu.
+  [`${PLACES_PATH}/*`, 'publicData', () => [cacheTags.places()]],
 ];
 
 /**
