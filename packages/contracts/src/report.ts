@@ -104,6 +104,11 @@ export const rootZoneSchema = z.object({
   /** dni ze stresem i niedobor ewapotranspiracji uprawy (suma ETc - ETc adj) od poczatku sezonu do daty analizy */
   seasonStressDays: z.number().int().min(0).optional(),
   seasonEtDeficitMm: z.number().min(0).optional(),
+  /**
+   * udzial niedoboru ewapotranspiracji uprawy (1 - ETa/ETc) w 60 dniach do daty analizy, 0-1 - przy >= 0,2 plon
+   * spada o ok. 20% (Ky ~ 1, FAO-33), czyli tyle, ile kryterium suszy IUNG
+   */
+  etDeficitShare60d: z.number().min(0).max(1).optional(),
 });
 
 export type RootZone = z.infer<typeof rootZoneSchema>;

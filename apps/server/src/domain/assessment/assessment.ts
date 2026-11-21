@@ -36,6 +36,8 @@ const STRESS_WINDOW_DAYS = 30;
 const WATCH_SHARE_OF_THRESHOLD = 0.75;
 /** wyczerpanie powyzej 80% RAW = zapas latwo dostepnej wody na wyczerpaniu */
 const WATCH_SHARE_OF_RAW = 0.8;
+/** niedobor ewapotranspiracji uprawy w 60 dniach, od ktorego plon spada o ok. 20% (Ky ~ 1) - jak kryterium IUNG */
+const RISK_ET_DEFICIT_SHARE = 0.2;
 const COARSE_GRID_KM = 20;
 
 const round = (value: number, digits = 1): number => Number(value.toFixed(digits));
@@ -128,6 +130,7 @@ function rootZone(input: StageInput): { zone: RootZone; today: RootZoneDay } | n
   const recentFrom = addDays(input.date, -(STRESS_WINDOW_DAYS - 1));
   const recent = seasonStress(simulation.days, recentFrom, input.date);
   const season = seasonStress(simulation.days, isoDate(yearOf(input.date), 1, 1), input.date);
+  const deficitShare = etDeficitShare(simulation.days, addDays(input.date, -(WINDOW_DAYS - 1)), input.date);
 
   return {
     today,
@@ -143,8 +146,24 @@ function rootZone(input: StageInput): { zone: RootZone; today: RootZoneDay } | n
       stressDays30: recent.stressDays,
       seasonStressDays: season.stressDays,
       seasonEtDeficitMm: round(season.etDeficitMm),
+      ...(deficitShare === null ? {} : { etDeficitShare60d: round(deficitShare, 2) }),
     },
   };
+}
+
+/** Udzial niedoboru ewapotranspiracji uprawy (1 - ETa/ETc) w oknie; null, gdy uprawa w nim nie rosla. */
+function etDeficitShare(days: readonly RootZoneDay[], from: string, to: string): number | null {
+  let potential = 0;
+  let actual = 0;
+
+  for (const day of days) {
+    if (day.date < from || day.date > to || day.kc === null) continue;
+
+    potential += day.potentialEtcMm;
+    actual += day.actualEtcMm;
+  }
+
+  return potential > 0 ? Math.min(Math.max(1 - actual / potential, 0), 1) : null;
 }
 
 interface Signals {
@@ -180,9 +199,14 @@ export function levelOf(date: string, { balance, zone, growing }: Signals): Asse
 
   if (balance?.belowThreshold === true) return 'drought';
 
+  // ryzyko suszy z bilansu strefy korzeniowej dopiero przy niedoborze ewapotranspiracji na miare kryterium IUNG
+  // (spadek plonu ok. 20% w 60 dniach); krotki stres (Ks < 1 przez kilka dni) to tylko obserwacja - walidacja na
+  // wykazach gmin IUNG pokazala, ze sam stres dawal alarm w 9 z 13 przypadkow bez suszy (docs/validation.md)
   const stressed = growing && zone !== null && zone.stressCoefficient < 1;
+  const yieldAtRisk =
+    stressed && (zone.etDeficitShare60d ?? 1 - zone.stressCoefficient) >= RISK_ET_DEFICIT_SHARE;
 
-  if (stressed) return 'risk';
+  if (yieldAtRisk) return 'risk';
 
   const nearThreshold =
     balance?.balanceMm !== null &&
@@ -192,7 +216,7 @@ export function levelOf(date: string, { balance, zone, growing }: Signals): Asse
   const drying = growing && zone !== null && zone.depletionMm > zone.readilyAvailableMm * WATCH_SHARE_OF_RAW;
 
   // gleba nieznana, a na lzejszych glebach susza: nie wiemy, czy to pole jest bezpieczne - ostrzegamy
-  if (nearThreshold || drying || scenariosDisagree(balance)) return 'watch';
+  if (stressed || nearThreshold || drying || scenariosDisagree(balance)) return 'watch';
 
   const wet = (balance?.balanceMm ?? 0) > EXCESS_BALANCE_MM && (zone === null || zone.depletionShare < 0.05);
 

@@ -239,7 +239,8 @@ interface Outcome {
 function outcome(item: Case, report: WaterReport): Outcome {
   const balance = report.assessment.climaticBalance;
   const kbwDrought = balance?.belowThreshold ?? null;
-  const warns = ['drought', 'risk', 'watch'].includes(report.assessment.level);
+  // alarm = susza albo ryzyko; "obserwuj" (watch) to nie ogloszenie suszy - liczymy je osobno
+  const warns = ['drought', 'risk'].includes(report.assessment.level);
   const iung = item.iungCategories?.split('/');
   const ours = balance?.categoryScenarios ?? [];
 
@@ -315,6 +316,7 @@ const listed = results.filter(({ result }) => result.categoriesAgree !== null);
 console.log(`
 Zgodność poziomu: ${count(({ result }) => result.agreeLevel)} z ${results.length} (susza: ${count(({ item, result }) => item.iung === 'drought' && result.agreeLevel)}/${drought}, brak: ${count(({ item, result }) => item.iung === 'none' && result.agreeLevel)}/${results.length - drought})
 Zgodność KBW: ${count(({ result }) => result.agreeKbw === true)} z ${results.length} (susza: ${count(({ item, result }) => item.iung === 'drought' && result.agreeKbw === true)}/${drought}, brak: ${count(({ item, result }) => item.iung === 'none' && result.agreeKbw === true)}/${results.length - drought})
+„Obserwuj” (watch) bez suszy wg IUNG: ${count(({ item, report }) => item.iung === 'none' && report.assessment.level === 'watch')} z ${results.length - drought}
 Kategorie zgodne z wykazem gminy: ${listed.reduce((sum, { result }) => sum + (result.categoriesAgree ?? 0), 0)} z ${listed.length * 4}`);
 
 const jsonIndex = argv.indexOf('--json');

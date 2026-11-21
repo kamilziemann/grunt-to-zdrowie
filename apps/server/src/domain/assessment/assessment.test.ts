@@ -218,3 +218,26 @@ describe('assess - tabela przypadkow', () => {
     expect(result.climaticBalance?.rankInHistory).toEqual({ rank: expect.any(Number), years: 11 });
   });
 });
+
+describe('levelOf: bilans strefy korzeniowej', () => {
+  const zone = (stressCoefficient: number, etDeficitShare60d: number) => ({
+    totalAvailableMm: 100,
+    readilyAvailableMm: 55,
+    depletionMm: 80,
+    depletionShare: 0.8,
+    stressCoefficient,
+    stressDays30: 10,
+    etDeficitShare60d,
+  });
+
+  it('krotki stres to obserwacja, niedobor ET >= 20% w 60 dniach (spadek plonu jak w kryterium IUNG) to ryzyko', () => {
+    const level = (z: ReturnType<typeof zone>) =>
+      levelOf('2021-06-20', { balance: null, zone: z, growing: true });
+
+    expect(level(zone(0.6, 0.08))).toBe('watch');
+    expect(level(zone(0.3, 0.19))).toBe('watch');
+    expect(level(zone(0.3, 0.2))).toBe('risk');
+    // poza okresem wzrostu uprawy stres nie jest diagnoza
+    expect(levelOf('2021-06-20', { balance: null, zone: zone(0.3, 0.3), growing: false })).not.toBe('risk');
+  });
+});
