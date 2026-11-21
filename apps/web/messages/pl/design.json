@@ -1,0 +1,113 @@
+{
+  "metaTitle": "Design system",
+  "title": "Design system",
+  "description": "Tokeny i komponenty we wszystkich stanach. Strona deweloperska i cel testów wizualnych.",
+  "colors": {
+    "title": "Kolory",
+    "description": "Tokeny semantyczne z globals.css; jasny i ciemny motyw w jednym miejscu."
+  },
+  "typography": {
+    "title": "Typografia",
+    "description": "Skala rozmiarów z interlinią; rodziny: sans (UI) i mono (kod, pola tekstowe).",
+    "sample": "Zażółć gęślą jaźń"
+  },
+  "radii": {
+    "title": "Promienie"
+  },
+  "shadows": {
+    "title": "Cienie"
+  },
+  "spacing": {
+    "title": "Odstępy",
+    "description": "Skala wielokrotności --spacing (0,25 rem) oraz tokeny układu: gutter i section."
+  },
+  "motion": {
+    "title": "Ruch",
+    "description": "Czasy i krzywe; przy prefers-reduced-motion czasy spadają do zera."
+  },
+  "button": {
+    "title": "Button",
+    "description": "Warianty, rozmiary i stany.",
+    "variants": "Warianty",
+    "sizes": "Rozmiary",
+    "disabled": "Wyłączone",
+    "loading": "Ładowanie",
+    "iconLabel": "Ikona",
+    "saving": "Zapisywanie…",
+    "fetching": "Wczytywanie…"
+  },
+  "form": {
+    "title": "Input, Textarea, Label",
+    "description": "Domyślne, wyłączone i z błędem.",
+    "default": "Domyślne",
+    "placeholder": "Wpisz tekst",
+    "disabled": "Wyłączone",
+    "disabledValue": "Nie do edycji",
+    "error": "Z błędem",
+    "errorMessage": "To pole jest wymagane.",
+    "textareaPlaceholder": "Dłuższa treść"
+  },
+  "alert": {
+    "title": "Alert",
+    "description": "Warianty; ProblemAlert opisany niżej.",
+    "variantTitle": "Wariant: {variant}",
+    "body": "Krótki opis komunikatu."
+  },
+  "card": {
+    "title": "Card",
+    "cardTitle": "Tytuł karty",
+    "cardDescription": "Opis karty z cieniem i promieniem z tokenów.",
+    "content": "Treść karty.",
+    "action": "Akcja",
+    "contentOnly": "Karta tylko z treścią."
+  },
+  "loadingStates": {
+    "title": "Skeleton i Spinner",
+    "description": "Stany ładowania.",
+    "spinnerLabel": "Wczytywanie danych…"
+  },
+  "problemAlert": {
+    "title": "ProblemAlert i RetryButton",
+    "description": "Błąd z API: komunikat wg kodu, lista pól i szczegóły techniczne.",
+    "customTitle": "Nie udało się zapisać",
+    "wholeObjectIssue": "Cały obiekt jest zły"
+  },
+  "emptyState": {
+    "title": "EmptyState",
+    "withIcon": "Brak działek",
+    "withIconDescription": "Wskaż pierwszą działkę na mapie.",
+    "plain": "Bez ikony i opisu",
+    "action": "Akcja"
+  },
+  "navigation": {
+    "title": "PageHeader i Breadcrumbs",
+    "crumbList": "Działki",
+    "crumbCurrent": "Działka 12/3",
+    "headerTitle": "Działka 12/3",
+    "headerDescription": "Dąbrowa, gmina Krośnice",
+    "headerAction": "Analizuj"
+  },
+  "overlays": {
+    "title": "Dialog, ConfirmDialog i Toast",
+    "description": "Nakładki otwierane na żądanie.",
+    "dialog": "Dialog",
+    "dialogTitle": "Tytuł dialogu",
+    "dialogDescription": "Opis dialogu na tokenach: tło, cień i promień z motywu.",
+    "done": "Gotowe",
+    "confirm": "ConfirmDialog",
+    "confirmDestructive": "ConfirmDialog (destrukcyjny)",
+    "confirmTitle": "Potwierdzić akcję?",
+    "confirmDescription": "Zwykłe potwierdzenie.",
+    "destructiveTitle": "Usunąć element?",
+    "destructiveDescription": "Tej operacji nie można cofnąć.",
+    "toast": "Toast",
+    "toastSuccess": "Toast: sukces",
+    "toastError": "Toast: błąd",
+    "toastDefaultTitle": "Powiadomienie",
+    "toastDefaultDescription": "Zwykły komunikat.",
+    "toastSuccessTitle": "Zapisano",
+    "toastSuccessDescription": "Zmiany są już widoczne.",
+    "toastErrorTitle": "Coś poszło nie tak",
+    "toastErrorDescription": "Spróbuj ponownie."
+  }
+}

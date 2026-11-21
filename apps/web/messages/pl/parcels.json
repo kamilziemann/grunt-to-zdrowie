@@ -1,0 +1,109 @@
+{
+  "metaTitle": "Znajdź działkę",
+  "metaDescription": "Wskaż działkę rolną po numerze albo na mapie i przejdź do analizy wody.",
+  "title": "Znajdź działkę",
+  "steps": {
+    "label": "Etapy",
+    "find": "Znajdź",
+    "check": "Sprawdź",
+    "analyze": "Analizuj"
+  },
+  "search": {
+    "label": "Numer działki, obręb z numerem albo adres",
+    "placeholder": "np. 141201_1.0001.6509, Dąbrowa 12 albo adres",
+    "submit": "Szukaj",
+    "hint": "Wpisz numer działki, obręb z numerem albo adres. Możesz też kliknąć działkę na mapie.",
+    "tooShort": "Wpisz co najmniej 3 znaki, np. Dąbrowa 12.",
+    "tooLong": "To za długi tekst. Wpisz numer działki albo obręb i numer.",
+    "failed": "Nie udało się wyszukać działki",
+    "slow": "Szukam też działek o tym numerze w całej Polsce. To może potrwać kilkanaście sekund."
+  },
+  "candidates": {
+    "title": "Wybierz swoją działkę",
+    "count": "Znaleziono {total, plural, one {# działkę} few {# działki} many {# działek} other {# działki}} o tym numerze. Wybierz właściwą po gminie i powiecie.",
+    "truncated": "Pokazujemy pierwsze {shown} z {total}. Zawęź listę albo wpisz pełny numer działki.",
+    "filterLabel": "Zawęź po gminie lub powiecie",
+    "filterPlaceholder": "np. Krośnice",
+    "none": "Nie znaleźliśmy działki o takim numerze. Sprawdź pisownię albo wskaż działkę na mapie.",
+    "noneFiltered": "Żadna działka nie pasuje do tego filtra.",
+    "item": "Działka {number}, obręb {region}",
+    "place": "gm. {commune}, {county}, woj. {voivodeship}"
+  },
+  "preview": {
+    "title": "Sprawdź, czy to ta działka",
+    "loading": "Szukam działki…",
+    "parcel": "Działka {number}",
+    "id": "Identyfikator",
+    "region": "Obręb",
+    "commune": "Gmina",
+    "county": "Powiat",
+    "voivodeship": "Województwo",
+    "area": "Powierzchnia",
+    "areaValue": "{area} ha",
+    "areaNote": "Powierzchnia obliczona z granic na mapie. Może się różnić od powierzchni w ewidencji gruntów.",
+    "source": "Granice działki: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (ewidencja gruntów, WFS)}}, pobrano {date}.",
+    "add": "Dodaj do moich działek",
+    "dismiss": "To nie ta działka",
+    "alreadyAdded": "Ta działka jest już na Twojej liście.",
+    "listFull": "Lista mieści najwyżej {max} działek. Usuń którąś, żeby dodać nową.",
+    "notFoundAtPoint": "W tym miejscu nie ma działki ewidencyjnej. Kliknij w inne miejsce albo wpisz numer.",
+    "notFound": "Nie znaleźliśmy takiej działki. Sprawdź numer albo wskaż działkę na mapie.",
+    "failed": "Nie udało się pobrać działki"
+  },
+  "list": {
+    "title": "Moje działki",
+    "empty": "Nie masz jeszcze żadnej działki. Wyszukaj ją po numerze albo kliknij na mapie.",
+    "count": "{count, plural, =0 {Brak działek} one {# działka} few {# działki} many {# działek} other {# działki}}",
+    "totalArea": "Razem {area} ha",
+    "show": "Pokaż na mapie działkę {number}",
+    "remove": "Usuń działkę {number}",
+    "loading": "Wczytuję działkę {id}…",
+    "failed": "Nie udało się wczytać działki {id}",
+    "missing": "Działki {id} nie ma w ewidencji"
+  },
+  "analyze": {
+    "cta": "{count, plural, one {Analizuj działkę} other {Analizuj działki}}",
+    "disabledHint": "Dodaj działkę, żeby przejść do analizy."
+  },
+  "map": {
+    "label": "Mapa. Kliknij działkę, żeby ją wskazać.",
+    "staticLabel": "Mapa wybranych działek",
+    "loading": "Wczytuję mapę…",
+    "failed": "Nie udało się wczytać mapy. Wyszukiwanie po numerze działa dalej.",
+    "zoomHint": "Przybliż mapę, żeby wskazać działkę.",
+    "outsidePoland": "Kliknij miejsce w Polsce.",
+    "basemapLabel": "Podkład mapy",
+    "basemapMap": "Mapa",
+    "basemapOrtho": "Zdjęcie",
+    "zoomIn": "Przybliż",
+    "zoomOut": "Oddal",
+    "locate": "Pokaż moje położenie",
+    "locateUnavailable": "Położenie niedostępne",
+    "attribution": "Źródła danych mapy",
+    "boundaries": "Granice działek",
+    "boundariesHint": "Granice i numery działek z ewidencji gruntów. Widać je po przybliżeniu mapy.",
+    "loadingBoundaries": "Wczytuję granice działek…",
+    "loadingParcel": "Wczytuję dane działki…",
+    "pickHint": "Kliknij swoją działkę na mapie."
+  },
+  "sheet": {
+    "expand": "Rozwiń panel",
+    "collapse": "Zwiń panel"
+  },
+  "summary": {
+    "metaTitle": "Działki do analizy",
+    "title": "Działki do analizy",
+    "description": "Sprawdź listę działek, dla których przygotujemy ocenę sytuacji wodnej.",
+    "parcels": "Wybrane działki",
+    "nextTitle": "Następny krok: uprawa i data analizy",
+    "nextDescription": "Ten etap jest w budowie. Tutaj wybierzesz uprawę i datę, a aplikacja oceni sytuację wodną działki i przygotuje zalecenia. Na razie nie pokazujemy żadnych wyników.",
+    "change": "Zmień działki",
+    "emptyTitle": "Nie wybrano żadnej działki",
+    "emptyDescription": "Wróć do mapy i dodaj co najmniej jedną działkę.",
+    "back": "Wróć do mapy"
+  },
+  "places": {
+    "title": "Adresy i miejscowości",
+    "hint": "Wybierz miejsce. Mapa tam dojedzie, a Ty klikniesz swoją działkę."
+  }
+}

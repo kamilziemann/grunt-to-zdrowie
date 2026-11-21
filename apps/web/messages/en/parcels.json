@@ -1,0 +1,109 @@
+{
+  "metaTitle": "Find a parcel",
+  "metaDescription": "Pick a farm parcel by its number or on the map and continue to the water analysis.",
+  "title": "Find a parcel",
+  "steps": {
+    "label": "Steps",
+    "find": "Find",
+    "check": "Check",
+    "analyze": "Analyse"
+  },
+  "search": {
+    "label": "Parcel number, district with number or address",
+    "placeholder": "e.g. 141201_1.0001.6509, Dąbrowa 12 or an address",
+    "submit": "Search",
+    "hint": "Enter a parcel number, a district with a number or an address. You can also click a parcel on the map.",
+    "tooShort": "Enter at least 3 characters, e.g. Dąbrowa 12.",
+    "tooLong": "That text is too long. Enter a parcel number or a district and number.",
+    "failed": "Could not search for the parcel",
+    "slow": "Also searching for parcels with this number across Poland. This can take several seconds."
+  },
+  "candidates": {
+    "title": "Choose your parcel",
+    "count": "Found {total, plural, one {# parcel} other {# parcels}} with this number. Pick the right one by commune and county.",
+    "truncated": "Showing the first {shown} of {total}. Narrow the list or enter the full parcel number.",
+    "filterLabel": "Narrow by commune or county",
+    "filterPlaceholder": "e.g. Krośnice",
+    "none": "We could not find a parcel with that number. Check the spelling or pick the parcel on the map.",
+    "noneFiltered": "No parcel matches this filter.",
+    "item": "Parcel {number}, district {region}",
+    "place": "{commune} commune, {county}, {voivodeship} voivodeship"
+  },
+  "preview": {
+    "title": "Check that this is the right parcel",
+    "loading": "Looking for the parcel…",
+    "parcel": "Parcel {number}",
+    "id": "Identifier",
+    "region": "District",
+    "commune": "Commune",
+    "county": "County",
+    "voivodeship": "Voivodeship",
+    "area": "Area",
+    "areaValue": "{area} ha",
+    "areaNote": "Area calculated from the boundaries on the map. It may differ from the area in the land register.",
+    "source": "Parcel boundaries: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (land register, WFS)}}, fetched {date}.",
+    "add": "Add to my parcels",
+    "dismiss": "Not this parcel",
+    "alreadyAdded": "This parcel is already on your list.",
+    "listFull": "The list holds at most {max} parcels. Remove one to add another.",
+    "notFoundAtPoint": "There is no cadastral parcel at this spot. Click somewhere else or enter a number.",
+    "notFound": "We could not find that parcel. Check the number or pick the parcel on the map.",
+    "failed": "Could not load the parcel"
+  },
+  "list": {
+    "title": "My parcels",
+    "empty": "You have no parcels yet. Search by number or click one on the map.",
+    "count": "{count, plural, =0 {No parcels} one {# parcel} other {# parcels}}",
+    "totalArea": "{area} ha in total",
+    "show": "Show parcel {number} on the map",
+    "remove": "Remove parcel {number}",
+    "loading": "Loading parcel {id}…",
+    "failed": "Could not load parcel {id}",
+    "missing": "Parcel {id} is not in the land register"
+  },
+  "analyze": {
+    "cta": "{count, plural, one {Analyse parcel} other {Analyse parcels}}",
+    "disabledHint": "Add a parcel to continue to the analysis."
+  },
+  "map": {
+    "label": "Map. Click a parcel to pick it.",
+    "staticLabel": "Map of the selected parcels",
+    "loading": "Loading the map…",
+    "failed": "Could not load the map. Searching by number still works.",
+    "zoomHint": "Zoom in to pick a parcel.",
+    "outsidePoland": "Click a place in Poland.",
+    "basemapLabel": "Base map",
+    "basemapMap": "Map",
+    "basemapOrtho": "Photo",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "locate": "Show my location",
+    "locateUnavailable": "Location unavailable",
+    "attribution": "Map data sources",
+    "boundaries": "Parcel boundaries",
+    "boundariesHint": "Parcel boundaries and numbers from the land register. They appear when you zoom in.",
+    "loadingBoundaries": "Loading parcel boundaries…",
+    "loadingParcel": "Loading parcel details…",
+    "pickHint": "Click your parcel on the map."
+  },
+  "sheet": {
+    "expand": "Expand panel",
+    "collapse": "Collapse panel"
+  },
+  "summary": {
+    "metaTitle": "Parcels to analyse",
+    "title": "Parcels to analyse",
+    "description": "Check the list of parcels we will assess the water situation for.",
+    "parcels": "Selected parcels",
+    "nextTitle": "Next step: crop and analysis date",
+    "nextDescription": "This step is under construction. Here you will choose the crop and the date, and the app will assess the parcel's water situation and prepare recommendations. For now we show no results.",
+    "change": "Change parcels",
+    "emptyTitle": "No parcel selected",
+    "emptyDescription": "Go back to the map and add at least one parcel.",
+    "back": "Back to the map"
+  },
+  "places": {
+    "title": "Addresses and places",
+    "hint": "Choose a place. The map will go there and you can click your parcel."
+  }
+}

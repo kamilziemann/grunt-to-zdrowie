@@ -1,0 +1,12 @@
+{
+  "main": "Nawigacja główna",
+  "breadcrumbs": "Ścieżka",
+  "design": "Design system",
+  "themeToggle": "Motyw: {theme}. Kliknij, aby zmienić.",
+  "themes": {
+    "system": "systemowy",
+    "light": "jasny",
+    "dark": "ciemny"
+  },
+  "switchLanguage": "{code} - zmień język na {language}"
+}

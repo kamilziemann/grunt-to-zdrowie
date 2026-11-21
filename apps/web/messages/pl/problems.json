@@ -1,0 +1,15 @@
+{
+  "validation_failed": "Dane są nieprawidłowe. Sprawdź wypełnione pola.",
+  "not_found": "Nie znaleziono zasobu. Być może został usunięty.",
+  "conflict": "Konflikt: zasób został w międzyczasie zmieniony. Odśwież i spróbuj ponownie.",
+  "forbidden": "Brak uprawnień do tej operacji.",
+  "unauthorized": "Ta operacja wymaga zalogowania.",
+  "rate_limited": "Zbyt wiele żądań. Odczekaj chwilę i spróbuj ponownie.",
+  "payload_too_large": "Przesłane dane są zbyt duże.",
+  "unsupported_media_type": "Nieobsługiwany format danych.",
+  "upstream_failed": "Nie udało się połączyć z API lub usługą zewnętrzną. Spróbuj ponownie.",
+  "not_configured": "Ta funkcja nie jest skonfigurowana na serwerze (brak kluczy lub bindingów).",
+  "internal": "Wewnętrzny błąd serwera. Spróbuj ponownie za chwilę.",
+  "unknown": "Wystąpił nieoczekiwany błąd.",
+  "technicalDetails": "Szczegóły techniczne"
+}
