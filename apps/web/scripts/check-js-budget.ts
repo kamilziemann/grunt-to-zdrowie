@@ -9,7 +9,12 @@ import { gzipSync } from 'node:zlib';
 
 /** Limit gzip JS na strone (KB). Dzis 218-240 KB (Next w kontekst: 246-255); podniesienie = decyzja w PR. */
 const BUDGET_KB = 260;
-const PAGES = ['/'];
+// strona glowna, formularz analizy i raport (raport bez mapy - nie moze ciagnac MapLibre)
+const PAGES = [
+  '/',
+  '/analiza?dzialki=141201_1.0001.6509',
+  '/raport?dzialki=141201_1.0001.6509&uprawa=winter_wheat&data=2026-06-15',
+];
 const PORT = Number(process.env.JS_BUDGET_PORT ?? 3690);
 const BASE = `http://localhost:${PORT}`;
 const CLIENT_DIR = join(import.meta.dirname, '..', 'dist', 'client');
@@ -57,7 +62,7 @@ try {
 
     failed ||= over;
     console.log(
-      `${over ? 'PRZEKROCZONY' : 'ok'.padEnd(11)} ${page.padEnd(10)} ${total.toFixed(0)} KB gzip (${scripts.length} plikow)`,
+      `${over ? 'PRZEKROCZONY' : 'ok'.padEnd(11)} ${page.padEnd(12)} ${total.toFixed(0)} KB gzip (${scripts.length} plikow)`,
     );
   }
 } finally {

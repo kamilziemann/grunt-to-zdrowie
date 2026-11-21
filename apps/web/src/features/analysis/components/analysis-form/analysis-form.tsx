@@ -61,7 +61,9 @@ export function AnalysisForm({ parcelIds, initialCropId, initialDate, children }
   const [dateError, setDateError] = useState<AnalysisDateError | null>(null);
   const bounds = today ? analysisDateBounds(today) : null;
   const value = date ?? today ?? '';
-  const minLabel = bounds ? format.dateTime(new Date(`${bounds.min}T12:00:00Z`), { dateStyle: 'long' }) : '';
+  const minLabel = bounds
+    ? format.dateTime(new Date(`${bounds.min}T12:00:00Z`), { dateStyle: 'long', timeZone: 'UTC' })
+    : '';
 
   const chooseCrop = useCallback((next: CropId) => {
     setCropId(next);
