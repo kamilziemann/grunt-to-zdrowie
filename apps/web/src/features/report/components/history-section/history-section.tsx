@@ -1,13 +1,13 @@
-import type { History } from '@app/contracts';
+import type { WaterReport } from '@app/contracts';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { seasonScale } from '../../utils/report-data';
+import { currentPeriod, isoDay, seasonRows, stressSummary } from '../../utils/report-data';
 import { ReportDetails } from '../report-section';
 import { RiskCalendar } from '../risk-calendar';
 
-/** Klasy szerokosci paska jako literaly (Tailwind skanuje zrodla): udzial okresow suszy w sezonie co 1/14. */
+/** Klasy szerokosci paska jako literaly (Tailwind skanuje zrodla): co 1/14 skali. */
 const BAR_WIDTHS = [
   'w-0',
   'w-1/14',
@@ -26,100 +26,167 @@ const BAR_WIDTHS = [
   'w-full',
 ] as const;
 
-function barWidth(drought: number, scale: number): string {
-  const step = Math.round((drought / scale) * (BAR_WIDTHS.length - 1));
+function barWidth(value: number, scale: number): string {
+  const step = Math.round((value / scale) * (BAR_WIDTHS.length - 1));
 
   return BAR_WIDTHS[Math.min(Math.max(step, 0), BAR_WIDTHS.length - 1)] ?? 'w-0';
 }
 
 /**
- * Sekcja 2 - historia: zdanie "w X z Y sezonow brakowalo wody", miesiace najwiekszego ryzyka i pasek na kazdy
- * sezon (ile okresow suszy). Kalendarz okresow IUNG (rok x okres) w rozwijanych szczegolach.
+ * Sekcja 2 - historia: ile poprzednich sezonow mialo susze wg progow IUNG, jak wypada ten rok (pozycja okresu na tle
+ * lat, dni z niedoborem wody od poczatku sezonu na tle calych poprzednich sezonow), miesiace ryzyka, wykres dni
+ * stresu na sezon (biezacy wyrozniony) i kalendarz suszy. Sam licznik sezonow z susza IUNG bywa zerem przy
+ * werdykcie "susza" - dlatego obok zawsze stoi biezacy sezon.
  */
-export function HistorySection({ history }: { history: History }) {
+export function HistorySection({ report }: { report: WaterReport }) {
   const t = useTranslations('report.history');
   const tReport = useTranslations('report');
   const format = useFormatter();
-  const scale = seasonScale(history.seasons);
-  const seasons = history.seasons.toSorted((a, b) => a.year - b.year);
+  const { history } = report;
+  const rows = seasonRows(report);
+  const previous = rows.filter((row) => !row.current);
+  const current = rows.find((row) => row.current) ?? null;
+  const summary = stressSummary(rows);
+  const scale = Math.max(1, ...rows.map((row) => row.stressDays ?? 0));
+  const balance = report.assessment.climaticBalance;
+  const rank = balance?.rankInHistory;
+  const shortDay = (date: string) =>
+    format.dateTime(isoDay(date), { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const analysisDay = shortDay(report.meta.analysisDate);
   const months = history.riskMonths.map((month) =>
     format.dateTime(new Date(Date.UTC(2024, month - 1, 15)), { month: 'long', timeZone: 'UTC' }),
   );
+  const number = (value: number) => format.number(value, { maximumFractionDigits: 0 });
 
-  if (history.seasonsWithData === 0 && seasons.length === 0) {
+  if (history.seasonsWithData === 0 && rows.length === 0) {
     return <p className="text-base text-muted-foreground">{t('noData')}</p>;
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-lg font-semibold text-balance">
-        {t('headline', { drought: history.droughtSeasons, seasons: history.seasonsWithData })}
-      </p>
-      {months.length > 0 && (
-        <p className="text-base">
-          {t('riskMonths', { months: format.list(months, { type: 'conjunction' }) })}
+      <div className="flex flex-col gap-2" data-testid="history-summary">
+        <p className="text-lg font-semibold text-balance">
+          {t('previous', { drought: history.droughtSeasons, seasons: history.seasonsWithData })}
         </p>
-      )}
-      {seasons.length > 0 && (
+        {rank && balance && balance.periodNo !== null && (
+          <p className="text-base">
+            {t('current', {
+              year: Number(report.meta.analysisDate.slice(0, 4)),
+              date: shortDay(balance.periodTo),
+              rank: rank.rank,
+              years: rank.years,
+            })}
+          </p>
+        )}
+        {current?.stressDays !== null && current && summary && (
+          <p className="text-base">
+            {t('currentStress', {
+              days: current.stressDays ?? 0,
+              date: analysisDay,
+              average: summary.average,
+              max: summary.max,
+              maxYear: summary.maxYear,
+            })}
+          </p>
+        )}
+        {months.length > 0 && (
+          <p className="text-base">
+            {t('riskMonths', { months: format.list(months, { type: 'conjunction' }) })}
+          </p>
+        )}
+      </div>
+
+      {rows.length > 0 && (
         <figure className="flex flex-col gap-2 rounded-lg border bg-card p-4 print:break-inside-avoid">
-          <figcaption className="text-sm text-muted-foreground">{t('chartLabel')}</figcaption>
+          <figcaption className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">{t('chartLabel')}</span>
+            <span className="text-xs text-muted-foreground">{t('chartNote')}</span>
+          </figcaption>
           <ul className="flex flex-col gap-1.5">
-            {seasons.map((season) => {
-              const hasData = season.monitoredPeriods > 0;
-              const label = hasData
-                ? t('season', {
-                    year: season.year,
-                    drought: season.droughtPeriods,
-                    monitored: season.monitoredPeriods,
-                  })
-                : t('seasonNoData', { year: season.year });
+            {rows.map((row) => {
+              const label =
+                row.stressDays === null
+                  ? t('seasonNoData', { year: row.year })
+                  : t('seasonStress', {
+                      year: row.current
+                        ? t('seasonCurrent', { year: row.year, date: analysisDay })
+                        : row.year,
+                      days: row.stressDays,
+                    });
+              const extra = [
+                row.droughtPeriods > 0 ? t('droughtPeriods', { count: row.droughtPeriods }) : null,
+                row.etDeficitMm === null ? null : t('etDeficit', { mm: number(row.etDeficitMm) }),
+              ].filter((item): item is string => item !== null);
 
               return (
-                <li key={season.year} className="grid grid-cols-[3rem_1fr_2rem] items-center gap-2 text-sm">
-                  <span className="font-medium tabular-nums" aria-hidden="true">
-                    {season.year}
+                <li
+                  key={row.year}
+                  className={cn(
+                    'grid grid-cols-[4.5rem_1fr_2.5rem] items-center gap-2 rounded-sm text-sm',
+                    row.current && 'bg-water/10 py-1 font-semibold ring-1 ring-water',
+                  )}
+                  data-season={row.year}
+                  data-current={row.current || undefined}
+                >
+                  <span aria-hidden="true" className="flex flex-col pl-1 leading-tight tabular-nums">
+                    <span className="flex items-center gap-1">
+                      {row.year}
+                      {row.droughtPeriods > 0 && (
+                        <span className="flex size-4 items-center justify-center rounded-sm bg-destructive text-[0.65rem] font-bold text-destructive-foreground">
+                          !
+                        </span>
+                      )}
+                    </span>
+                    {row.current && <span className="text-xs font-normal">{analysisDay}</span>}
                   </span>
                   <span aria-hidden="true" className="h-4 overflow-hidden rounded-sm bg-muted">
                     <span
                       className={cn(
                         'block h-full rounded-sm print:border print:border-foreground',
-                        season.droughtPeriods > 0 ? 'bg-warning' : 'bg-success',
-                        season.droughtPeriods > 0 ? barWidth(season.droughtPeriods, scale) : 'w-1',
+                        row.current ? 'bg-water' : 'bg-warning',
+                        row.stressDays ? barWidth(row.stressDays, scale) : 'w-0',
                       )}
                     />
                   </span>
-                  <span className="text-right tabular-nums" aria-hidden="true">
-                    {hasData ? season.droughtPeriods : '–'}
+                  <span className="pr-1 text-right tabular-nums" aria-hidden="true">
+                    {row.stressDays ?? '–'}
                   </span>
-                  <span className="sr-only">
-                    {label}
-                    {season.stressDays !== null ? `, ${t('stressDays', { days: season.stressDays })}` : ''}
-                  </span>
+                  <span className="sr-only">{[label, ...extra].join(', ')}</span>
                 </li>
               );
             })}
           </ul>
         </figure>
       )}
+
       {history.calendar.length > 0 && (
+        <RiskCalendar calendar={history.calendar} current={currentPeriod(report)} />
+      )}
+
+      {previous.length > 0 && (
         <ReportDetails summary={tReport('details')}>
-          <RiskCalendar calendar={history.calendar} />
           <ul className="flex flex-col gap-0.5 text-muted-foreground">
-            {seasons.map((season) => (
-              <li key={season.year}>
-                {season.year}:{' '}
-                {[
-                  season.minBalanceMm === null
-                    ? null
-                    : t('minBalance', {
-                        balance: format.number(season.minBalanceMm, { maximumFractionDigits: 1 }),
-                      }),
-                  season.stressDays === null ? null : t('stressDays', { days: season.stressDays }),
-                ]
-                  .filter(Boolean)
-                  .join(', ') || '–'}
-              </li>
-            ))}
+            {history.seasons
+              .toSorted((a, b) => a.year - b.year)
+              .map((season) => (
+                <li key={season.year}>
+                  {season.year}:{' '}
+                  {[
+                    season.minBalanceMm === null
+                      ? null
+                      : t('minBalance', {
+                          balance: format.number(season.minBalanceMm, { maximumFractionDigits: 1 }),
+                        }),
+                    season.stressDays === null ? null : t('stressDays', { days: season.stressDays }),
+                    season.etDeficitMm === undefined || season.etDeficitMm === null
+                      ? null
+                      : t('etDeficit', { mm: number(season.etDeficitMm) }),
+                    season.droughtPeriods > 0 ? t('droughtPeriods', { count: season.droughtPeriods }) : null,
+                  ]
+                    .filter(Boolean)
+                    .join(', ') || '–'}
+                </li>
+              ))}
           </ul>
         </ReportDetails>
       )}

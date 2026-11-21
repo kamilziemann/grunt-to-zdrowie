@@ -23,7 +23,18 @@
   "sample": {
     "title": "Sample data – do not make decisions based on it",
     "description": "Part of the data in this report is placeholder data, not measurements for your field ({sources}). The report shows what the result will look like.",
-    "allSources": "all sources"
+    "allSources": "all sources",
+    "parts": "These parts are still computed with simplified sample rules: {parts}.",
+    "partNames": {
+      "assessment": "assessment",
+      "history": "history",
+      "causes": "causes",
+      "zones": "field zones",
+      "recommendations": "recommendations"
+    },
+    "sectionBadge": "Sample rules",
+    "sectionNote": "This part is still computed with simplified rules, not the target method. Treat it as a preview.",
+    "factBadge": "placeholder"
   },
   "status": {
     "partial": "Some data is missing, so the result is less certain. Details are at the end of the report.",
@@ -113,28 +124,68 @@
       "harvested": "after harvest"
     },
     "vegetation": "Sentinel-2",
-    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; deviation from {years} years: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; clear pixels {share}% ({pixels})"
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; deviation from {years} years: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; clear pixels {share}% ({pixels})",
+    "asOf": "As of {date}",
+    "rank": "Last 60 days compared with past years",
+    "rankValue": "{rank, plural, =1 {driest period} other {driest period no. #}} of {years} years",
+    "rankNote": "rain minus evaporation, {from} – {to}",
+    "stressSeason": "since the start of the season: {days} days, about {mm} l/m² of water missing",
+    "stressSeasonDays": "since the start of the season: {days} days",
+    "coverage": "weather data for {percent}% of the days in the period",
+    "scenarios": "Result on other soils",
+    "scenarioSummary": {
+      "all": "Drought on every soil – the result does not depend on the soil type.",
+      "none": "On no soil does the balance cross the drought threshold.",
+      "lighter": "On lighter soil (category {drought}) there would be drought, on heavier soil ({ok}) there would not.",
+      "mixed": "Drought on soil categories {drought}, no drought on {ok}."
+    },
+    "scenarioItem": "category {category} ({name}): threshold {threshold} mm – {result}",
+    "scenarioCurrent": "assumed for this field",
+    "soilNames": {
+      "1": "very light",
+      "2": "light",
+      "3": "medium",
+      "4": "heavy"
+    },
+    "scenarioResults": {
+      "drought": "drought",
+      "ok": "no drought",
+      "none": "no threshold"
+    }
   },
   "history": {
-    "headline": "In {drought} of the last {seasons} seasons with data this crop was short of water.",
     "noData": "There is no historical data for this field.",
     "riskMonths": "Water was most often short in: {months}.",
-    "chartLabel": "Number of drought periods in each season",
-    "season": "{year}: drought in {drought} of {monitored} assessed periods",
-    "seasonNoData": "{year}: no data",
     "stressDays": "{days} stress days",
     "minBalance": "lowest balance {balance} mm",
-    "calendar": "Drought period calendar",
-    "calendarDescription": "Each cell is a 60-day period assessed by IUNG; period 1 starts on 21 March, the next ones every 10 days.",
+    "calendar": "Drought calendar: this year against 10 years",
     "year": "Year",
-    "period": "Period {no}",
     "status": {
       "drought": "drought",
       "ok": "normal",
       "not_monitored": "not assessed",
-      "missing": "no data"
+      "missing": "no data",
+      "later": "not computed in this report"
     },
-    "legend": "Legend"
+    "legend": "Legend",
+    "previous": "{drought, plural, =0 {There was no agricultural drought (by IUNG thresholds) in any of the {seasons} previous seasons.} other {Agricultural drought (by IUNG thresholds) occurred in # of the {seasons} previous seasons.}}",
+    "current": "In {year}, the 60 days to {date} were the {rank, plural, =1 {driest such period} other {no. # driest such period}} of {years} years.",
+    "currentStress": "This season plants have already had {days} days short of water (to {date}). In previous seasons the average was {average} days per whole season, the most {max} in {maxYear}.",
+    "chartLabel": "Days when plants were short of water, season by season",
+    "chartNote": "From the root-zone water balance. Mark ! = season with agricultural drought by IUNG thresholds.",
+    "seasonStress": "{year}: {days} days short of water",
+    "seasonNoData": "{year}: no data",
+    "seasonCurrent": "{year} to {date}",
+    "droughtPeriods": "{count, plural, one {# drought period} other {# drought periods}}",
+    "etDeficit": "{mm} l/m² missing",
+    "calendarDescription": "Each cell is the 60 days ending on the given day – this is how IUNG assesses drought (21 March to 30 September).",
+    "periodEnd": "60 days to {date}",
+    "periodEndDay": "to",
+    "currentYear": "{year} (analysis)",
+    "currentPeriod": "In the 60 days to {date} there was drought in {drought} of {years} previous years.",
+    "regionLabel": "Drought calendar – scroll sideways to see the whole season",
+    "scrollHint": "Scroll the table sideways to see the whole season.",
+    "monthOfEnd": "Month the period ends"
   },
   "causes": {
     "intro": "From the largest impact.",
@@ -173,8 +224,8 @@
     }
   },
   "evidence": {
-    "value": "{metric}: {value} {unit}",
-    "reference": "reference: {reference} {unit}",
+    "value": "{metric}: {value}",
+    "reference": "reference: {reference}",
     "source": "source: {source}",
     "metrics": {
       "available_water_mm_per_m": "Water available to plants in 1 m of soil",
@@ -187,7 +238,27 @@
       "water_distance_m": "Distance to the nearest water",
       "tree_cover_share": "Share of trees nearby",
       "wetland_share": "Share of wetlands nearby",
-      "kc": "Crop coefficient Kc"
+      "kc": "Crop coefficient Kc",
+      "et0_period": "Evaporation over 60 days (evapotranspiration)",
+      "balance_period": "Water balance over 60 days",
+      "nearest_ditch_m": "Distance to the nearest ditch",
+      "nearest_water_m": "Distance to the nearest water",
+      "nearest_stream_m": "Distance to the nearest stream",
+      "stress_days_30": "Water stress days in the last 30 days",
+      "depletion_share": "Root-zone water depletion",
+      "ndvi_anomaly": "NDVI deviation from previous years",
+      "ndmi_anomaly": "NDMI deviation from previous years"
+    },
+    "unknownMetric": "Other indicator",
+    "units": {
+      "mm": "{value} mm",
+      "mmPerM": "{value} mm per 1 m of soil",
+      "m": "{value} m",
+      "m3": "{value} m³",
+      "ha": "{value} ha",
+      "percent": "{value}%",
+      "days": "{value} days",
+      "none": "{value}"
     }
   },
   "recommendations": {
@@ -285,11 +356,17 @@
       "consider": "Consider irrigating.",
       "yes": "The field is worth irrigating."
     },
-    "dose": "Dose: about {mm} l/m², i.e. about {volume} m³ for the whole field.",
     "within": "{days, plural, =0 {Ideally today.} one {Within # day.} other {Within # days.}}",
     "forecast": "Rain forecast for the coming days: {mm} l/m².",
     "noForecast": "There is no weather forecast for this day, so we do not suggest when to water.",
-    "none": "We do not assess irrigation in this report because data on the soil water reserve is missing."
+    "none": "We do not assess irrigation in this report because data on the soil water reserve is missing.",
+    "deficit": "The soil is about {mm} l/m² short of a full reserve (about {volume} m³ for the whole field).",
+    "deficitNote": "This is the total shortfall, not a single dose – it is made up over several waterings.",
+    "advisablePast": {
+      "no": "Irrigation was not needed then.",
+      "consider": "Irrigation was worth considering then.",
+      "yes": "The field was worth irrigating then."
+    }
   },
   "sources": {
     "confidence": "Confidence: {level}",

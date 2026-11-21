@@ -23,7 +23,18 @@
   "sample": {
     "title": "Dane przykładowe – nie podejmuj na ich podstawie decyzji",
     "description": "Część danych w tym raporcie to atrapy, a nie pomiary dla Twojego pola ({sources}). Raport pokazuje, jak będzie wyglądał wynik.",
-    "allSources": "wszystkie źródła"
+    "allSources": "wszystkie źródła",
+    "parts": "Uproszczonymi regułami przykładowymi liczymy jeszcze: {parts}.",
+    "partNames": {
+      "assessment": "ocenę",
+      "history": "historię",
+      "causes": "przyczyny",
+      "zones": "strefy na polu",
+      "recommendations": "zalecenia"
+    },
+    "sectionBadge": "Reguły przykładowe",
+    "sectionNote": "Tę część liczymy jeszcze uproszczonymi regułami, a nie docelową metodą. Traktuj ją jako podgląd.",
+    "factBadge": "atrapa"
   },
   "status": {
     "partial": "Części danych zabrakło, więc wynik jest mniej pewny. Szczegóły są na końcu raportu.",
@@ -113,28 +124,68 @@
       "harvested": "po zbiorze"
     },
     "vegetation": "Sentinel-2",
-    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; odchylenie od {years} lat: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; czyste piksele {share}% ({pixels})"
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; odchylenie od {years} lat: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; czyste piksele {share}% ({pixels})",
+    "asOf": "Stan na {date}",
+    "rank": "Ostatnie 60 dni na tle lat",
+    "rankValue": "{rank, plural, =1 {najsuchszy okres} other {#. najsuchszy okres}} z {years} lat",
+    "rankNote": "deszcz minus parowanie, {from} – {to}",
+    "stressSeason": "od początku sezonu: {days} dni, brakło ok. {mm} l/m² wody",
+    "stressSeasonDays": "od początku sezonu: {days} dni",
+    "coverage": "dane pogodowe z {percent}% dni okresu",
+    "scenarios": "Wynik na innych glebach",
+    "scenarioSummary": {
+      "all": "Susza na każdej glebie – wynik nie zależy od rodzaju gleby.",
+      "none": "Na żadnej glebie bilans nie przekracza progu suszy.",
+      "lighter": "Na glebie lżejszej (kategoria {drought}) byłaby susza, na cięższej ({ok}) nie.",
+      "mixed": "Susza na glebach kategorii {drought}, bez suszy na {ok}."
+    },
+    "scenarioItem": "kategoria {category} ({name}): próg {threshold} mm – {result}",
+    "scenarioCurrent": "przyjęta dla tego pola",
+    "soilNames": {
+      "1": "bardzo lekka",
+      "2": "lekka",
+      "3": "średnia",
+      "4": "ciężka"
+    },
+    "scenarioResults": {
+      "drought": "susza",
+      "ok": "bez suszy",
+      "none": "bez progu"
+    }
   },
   "history": {
-    "headline": "W {drought} z {seasons} ostatnich sezonów z danymi tej uprawie brakowało wody.",
     "noData": "Brak danych historycznych dla tego pola.",
     "riskMonths": "Najczęściej brakowało wody w miesiącach: {months}.",
-    "chartLabel": "Liczba okresów suszy w kolejnych sezonach",
-    "season": "{year}: susza w {drought} z {monitored} ocenianych okresów",
-    "seasonNoData": "{year}: brak danych",
     "stressDays": "{days} dni stresu",
     "minBalance": "najniższy bilans {balance} mm",
-    "calendar": "Kalendarz okresów suszy",
-    "calendarDescription": "Kratka to okres 60 dni oceniany przez IUNG; okres 1 zaczyna się 21 marca, kolejne co 10 dni.",
+    "calendar": "Kalendarz suszy: ten rok na tle 10 lat",
     "year": "Rok",
-    "period": "Okres {no}",
     "status": {
       "drought": "susza",
       "ok": "w normie",
       "not_monitored": "nie oceniano",
-      "missing": "brak danych"
+      "missing": "brak danych",
+      "later": "nie liczono w tym raporcie"
     },
-    "legend": "Legenda"
+    "legend": "Legenda",
+    "previous": "{drought, plural, =0 {W żadnym z {seasons} poprzednich sezonów nie było suszy rolniczej (wg progów IUNG).} other {Susza rolnicza (wg progów IUNG) była w # z {seasons} poprzednich sezonów.}}",
+    "current": "W {year} r. 60 dni do {date} to {rank, plural, =1 {najsuchszy taki okres} other {#. najsuchszy taki okres}} z {years} lat.",
+    "currentStress": "W tym sezonie rośliny miały już {days} dni z niedoborem wody (do {date}). W poprzednich sezonach średnio {average} dni w całym sezonie, najwięcej {max} w {maxYear} r.",
+    "chartLabel": "Dni, w których roślinom brakowało wody, w kolejnych sezonach",
+    "chartNote": "Według bilansu wody w strefie korzeni. Znak ! = sezon z suszą rolniczą wg progów IUNG.",
+    "seasonStress": "{year}: {days} dni z niedoborem wody",
+    "seasonNoData": "{year}: brak danych",
+    "seasonCurrent": "{year} do {date}",
+    "droughtPeriods": "{count, plural, one {# okres suszy} few {# okresy suszy} many {# okresów suszy} other {# okresu suszy}}",
+    "etDeficit": "brakło {mm} l/m²",
+    "calendarDescription": "Kratka to 60 dni kończące się w podanym dniu – tak ocenia suszę IUNG (od 21 marca do 30 września).",
+    "periodEnd": "60 dni do {date}",
+    "periodEndDay": "do",
+    "currentYear": "{year} (analiza)",
+    "currentPeriod": "W okresie 60 dni do {date} susza była w {drought} z {years} poprzednich lat.",
+    "regionLabel": "Kalendarz suszy – przesuń w bok, żeby zobaczyć cały sezon",
+    "scrollHint": "Przesuń tabelę w bok, żeby zobaczyć cały sezon.",
+    "monthOfEnd": "Miesiąc końca okresu"
   },
   "causes": {
     "intro": "Od największego wpływu.",
@@ -173,8 +224,8 @@
     }
   },
   "evidence": {
-    "value": "{metric}: {value} {unit}",
-    "reference": "odniesienie: {reference} {unit}",
+    "value": "{metric}: {value}",
+    "reference": "odniesienie: {reference}",
     "source": "źródło: {source}",
     "metrics": {
       "available_water_mm_per_m": "Woda dostępna dla roślin w 1 m gleby",
@@ -187,7 +238,27 @@
       "water_distance_m": "Odległość do najbliższej wody",
       "tree_cover_share": "Udział zadrzewień w okolicy",
       "wetland_share": "Udział mokradeł w okolicy",
-      "kc": "Współczynnik uprawy Kc"
+      "kc": "Współczynnik uprawy Kc",
+      "et0_period": "Parowanie z 60 dni (ewapotranspiracja)",
+      "balance_period": "Bilans wodny z 60 dni",
+      "nearest_ditch_m": "Odległość do najbliższego rowu",
+      "nearest_water_m": "Odległość do najbliższej wody",
+      "nearest_stream_m": "Odległość do najbliższego cieku",
+      "stress_days_30": "Dni stresu wodnego w ostatnich 30 dniach",
+      "depletion_share": "Ubytek wody w strefie korzeni",
+      "ndvi_anomaly": "Odchylenie NDVI od lat poprzednich",
+      "ndmi_anomaly": "Odchylenie NDMI od lat poprzednich"
+    },
+    "unknownMetric": "Inny wskaźnik",
+    "units": {
+      "mm": "{value} mm",
+      "mmPerM": "{value} mm na 1 m gleby",
+      "m": "{value} m",
+      "m3": "{value} m³",
+      "ha": "{value} ha",
+      "percent": "{value}%",
+      "days": "{value} dni",
+      "none": "{value}"
     }
   },
   "recommendations": {
@@ -285,11 +356,17 @@
       "consider": "Rozważ nawadnianie.",
       "yes": "Pole warto nawodnić."
     },
-    "dose": "Dawka: ok. {mm} l/m², czyli ok. {volume} m³ na całe pole.",
     "within": "{days, plural, =0 {Najlepiej dziś.} one {W ciągu # dnia.} other {W ciągu # dni.}}",
     "forecast": "Prognoza deszczu na najbliższe dni: {mm} l/m².",
     "noForecast": "Brak prognozy pogody dla tego dnia, więc nie podajemy terminu podlewania.",
-    "none": "Nie oceniamy nawadniania w tym raporcie, bo brakuje danych o zapasie wody w glebie."
+    "none": "Nie oceniamy nawadniania w tym raporcie, bo brakuje danych o zapasie wody w glebie.",
+    "deficit": "Do pełnego zapasu w glebie brakuje ok. {mm} l/m² (ok. {volume} m³ na całe pole).",
+    "deficitNote": "To łączny niedobór, a nie jedna dawka – uzupełnia się go w kilku podlaniach.",
+    "advisablePast": {
+      "no": "Nawadnianie nie było wtedy potrzebne.",
+      "consider": "Warto było wtedy rozważyć nawadnianie.",
+      "yes": "Pole warto było wtedy nawodnić."
+    }
   },
   "sources": {
     "confidence": "Pewność oceny: {level}",

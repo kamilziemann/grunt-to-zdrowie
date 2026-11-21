@@ -101,7 +101,7 @@ export function SourcesSection({ report }: { report: WaterReport }) {
                 >
                   <ExternalLink aria-hidden="true" className="size-4 print:hidden" />
                   {t('link', { provider: source.provider })}
-                  <span className="hidden print:inline">: {source.url}</span>
+                  <span className="hidden break-all print:inline">: {source.url}</span>
                 </Link>
               )}
             </li>

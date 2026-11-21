@@ -1,13 +1,23 @@
 import { describe, expect, it } from 'vitest';
 
+import { DROUGHT_REPORT } from '../fixtures/drought-report';
 import { SAMPLE_REPORT } from '../fixtures/sample-report';
 import {
   byPriority,
   byWeight,
   calendarRows,
+  currentPeriod,
   IUNG_PERIODS,
+  isPastAnalysis,
   isSampleReport,
+  needsSampleBanner,
+  periodDroughtCount,
+  periodMonths,
+  sampleParts,
   sampleSources,
+  scenarioSummary,
+  seasonRows,
+  stressSummary,
   soilWater,
   volumeM3,
   zoneOf,
@@ -71,5 +81,68 @@ describe('wyliczenia raportu', () => {
     expect(zoneOf(SAMPLE_REPORT, 'zone-2')?.kind).toBe('depression');
     expect(zoneOf(SAMPLE_REPORT, null)).toBeNull();
     expect(zoneOf({ ...SAMPLE_REPORT, zones: null }, 'zone-2')).toBeNull();
+  });
+
+  it('czesci przykladowe: z meta.sampleParts, bez pola przy sample = caly raport', () => {
+    expect([...sampleParts(DROUGHT_REPORT)]).toEqual(['causes', 'zones', 'recommendations']);
+    expect(sampleParts(SAMPLE_REPORT).size).toBe(5);
+
+    const realSources = {
+      ...DROUGHT_REPORT,
+      sources: DROUGHT_REPORT.sources.map((source) => ({ ...source, sample: false })),
+    };
+
+    // zrodla prawdziwe, przykladowe tylko reguly - bez ogolnego banera
+    expect(needsSampleBanner(realSources)).toBe(false);
+    expect(needsSampleBanner(DROUGHT_REPORT)).toBe(true);
+    expect(needsSampleBanner(SAMPLE_REPORT)).toBe(true);
+  });
+
+  it('biezacy sezon dopisany na koniec historii z dniami stresu do dnia analizy', () => {
+    const rows = seasonRows(DROUGHT_REPORT);
+
+    expect(rows).toHaveLength(11);
+    expect(rows.at(-1)).toMatchObject({ year: 2018, current: true, stressDays: 31, droughtPeriods: 1 });
+    expect(stressSummary(rows)).toEqual({ average: 34, max: 59, maxYear: 2008 });
+
+    const winter = { ...DROUGHT_REPORT, meta: { ...DROUGHT_REPORT.meta, analysisDate: '2018-02-10' } };
+
+    expect(seasonRows(winter).some((row) => row.current)).toBe(false);
+  });
+
+  it('scenariusze gleby: susza tylko na lzejszych', () => {
+    expect(scenarioSummary(DROUGHT_REPORT.assessment.climaticBalance)).toEqual({
+      kind: 'lighter',
+      drought: [1, 2],
+      ok: [3, 4],
+    });
+    expect(scenarioSummary(null)).toBeNull();
+  });
+
+  it('kalendarz z biezacym rokiem: jeden znany okres, kolumny po miesiacach konca okresu', () => {
+    const current = currentPeriod(DROUGHT_REPORT);
+
+    expect(current).toEqual({ year: 2018, periodNo: 3, status: 'drought', balanceMm: -188.4 });
+
+    const rows = calendarRows(DROUGHT_REPORT.history.calendar, current);
+
+    expect(rows.at(-1)?.current).toBe(true);
+    expect(rows.at(-1)?.cells.filter(Boolean)).toHaveLength(1);
+    expect(periodMonths().map((group) => group.periods.length)).toEqual([2, 3, 3, 3, 3]);
+    expect(periodDroughtCount(DROUGHT_REPORT.history.calendar, 3)).toEqual({ drought: 0, years: 10 });
+  });
+
+  it('dzien z przeszlosci: raport policzony pozniej', () => {
+    expect(isPastAnalysis(DROUGHT_REPORT)).toBe(true);
+    expect(
+      isPastAnalysis({
+        ...DROUGHT_REPORT,
+        meta: { ...DROUGHT_REPORT.meta, analysisDate: '2026-11-21', generatedAt: '2026-11-21T20:45:51.289Z' },
+      }),
+    ).toBe(false);
+  });
+
+  it('strefa obejmujaca cale pole to nie "czesc pola"', () => {
+    expect(zoneOf(DROUGHT_REPORT, 'zone-1')).toBeNull();
   });
 });

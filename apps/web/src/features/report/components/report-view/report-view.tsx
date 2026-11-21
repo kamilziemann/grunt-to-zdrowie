@@ -1,4 +1,4 @@
-import type { WaterReport } from '@app/contracts';
+import type { ReportPart, WaterReport } from '@app/contracts';
 import { CircleAlert } from 'lucide-react';
 import { useEffect, useRef, type RefObject } from 'react';
 import { useTranslations } from 'use-intl';
@@ -11,6 +11,7 @@ import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
+import { sampleParts } from '../../utils/report-data';
 import { ReportSection } from '../report-section';
 import { SampleBanner } from '../sample-banner';
 import { SourcesSection } from '../sources-section';
@@ -56,6 +57,10 @@ function useOpenDetailsForPrint(root: RefObject<HTMLElement | null>) {
 export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
   const t = useTranslations('report');
   const root = useRef<HTMLElement>(null);
+  // bez `sampleParts` caly raport jest przykladowy - mowi o tym baner, znaczniki przy kazdej sekcji bylyby szumem
+  const samples = report.meta.sampleParts ? sampleParts(report) : new Set<ReportPart>();
+  // strefy pokazujemy przy zaleceniach, wiec przykladowe strefy oznaczaja tez zalecenia
+  const sampleRecommendations = samples.has('recommendations') || samples.has('zones');
 
   useOpenDetailsForPrint(root);
 
@@ -71,31 +76,41 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
           </AlertDescription>
         </Alert>
       )}
-      <ReportSection id="ocena" number={1} title={t('sections.verdict')}>
+      <ReportSection id="ocena" number={1} title={t('sections.verdict')} sample={samples.has('assessment')}>
         <VerdictSection report={report} />
       </ReportSection>
-      <ReportSection id="historia" number={2} title={t('sections.history')}>
-        <HistorySection history={report.history} />
+      <ReportSection id="historia" number={2} title={t('sections.history')} sample={samples.has('history')}>
+        <HistorySection report={report} />
       </ReportSection>
-      <ReportSection id="przyczyny" number={3} title={t('sections.causes')}>
+      <ReportSection id="przyczyny" number={3} title={t('sections.causes')} sample={samples.has('causes')}>
         <CausesSection causes={report.causes} />
       </ReportSection>
-      <ReportSection id="retencja" number={4} title={t('sections.retention')}>
+      <ReportSection id="retencja" number={4} title={t('sections.retention')} sample={sampleRecommendations}>
         <RecommendationList
           category="retention"
           recommendations={report.recommendations.retention}
           report={report}
         />
       </ReportSection>
-      <ReportSection id="agrotechnika" number={5} title={t('sections.agrotech')}>
+      <ReportSection
+        id="agrotechnika"
+        number={5}
+        title={t('sections.agrotech')}
+        sample={sampleRecommendations}
+      >
         <RecommendationList
           category="agrotech"
           recommendations={report.recommendations.agrotech}
           report={report}
         />
       </ReportSection>
-      <ReportSection id="nawadnianie" number={6} title={t('sections.irrigation')}>
-        <IrrigationSection irrigation={report.recommendations.irrigation} areaHa={report.field.areaHa} />
+      <ReportSection
+        id="nawadnianie"
+        number={6}
+        title={t('sections.irrigation')}
+        sample={sampleRecommendations}
+      >
+        <IrrigationSection report={report} />
       </ReportSection>
       <ReportSection id="zrodla" number={7} title={t('sections.sources')}>
         <SourcesSection report={report} />

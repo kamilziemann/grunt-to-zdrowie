@@ -1,5 +1,6 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, FlaskConical } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
@@ -9,12 +10,26 @@ export interface ReportSectionProps {
   /** numer w kolejnosci raportu (ekran i wydruk maja te sama kolejnosc) */
   number: number;
   title: string;
+  /** czesc liczona jeszcze regulami przykladowymi (`meta.sampleParts`) - znacznik pod naglowkiem */
+  sample?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-/** Sekcja raportu: numerowany naglowek h2 i tresc. Na wydruku zaczyna sie od nowej linii bez urwanego naglowka. */
-export function ReportSection({ id, number, title, children, className }: ReportSectionProps) {
+/**
+ * Sekcja raportu: numerowany naglowek h2 i tresc. Na wydruku zaczyna sie od nowej linii bez urwanego naglowka.
+ * Czesc z regul przykladowych ma pod naglowkiem znacznik i zdanie, ze to podglad (zostaje na wydruku).
+ */
+export function ReportSection({
+  id,
+  number,
+  title,
+  sample = false,
+  children,
+  className,
+}: ReportSectionProps) {
+  const t = useTranslations('report.sample');
+
   return (
     <section
       id={id}
@@ -31,6 +46,18 @@ export function ReportSection({ id, number, title, children, className }: Report
         </span>
         {title}
       </h2>
+      {sample && (
+        <p
+          className="flex flex-wrap items-start gap-x-2 gap-y-1 rounded-lg border border-dashed border-warning bg-warning/10 px-3 py-2 text-sm print:break-inside-avoid"
+          data-testid="sample-part"
+        >
+          <span className="inline-flex items-center gap-1.5 font-semibold">
+            <FlaskConical aria-hidden="true" className="size-4" />
+            {t('sectionBadge')}
+          </span>
+          <span>{t('sectionNote')}</span>
+        </p>
+      )}
       {children}
     </section>
   );

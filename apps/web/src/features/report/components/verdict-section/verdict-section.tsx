@@ -14,7 +14,7 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { isoDay, percentOf, soilWater } from '../../utils/report-data';
+import { isoDay, percentOf, scenarioSummary, soilWater } from '../../utils/report-data';
 import { ReportDetails } from '../report-section';
 
 /** Kolor, ikona i slowo dla poziomu - nigdy sam kolor (WCAG 1.4.1). Klasy jako literaly (Tailwind skanuje zrodla). */
@@ -44,6 +44,18 @@ const LEVEL_STYLES: Record<AssessmentLevel, { icon: LucideIcon; card: string; ba
   unknown: { icon: CircleHelp, card: 'border-border bg-muted', badge: 'bg-foreground text-background' },
 };
 
+const ROMAN = ['I', 'II', 'III', 'IV'] as const;
+
+function roman(category: number): string {
+  return ROMAN[category - 1] ?? String(category);
+}
+
+function scenarioResult(belowThreshold: boolean | null): 'none' | 'drought' | 'ok' {
+  if (belowThreshold === null) return 'none';
+
+  return belowThreshold ? 'drought' : 'ok';
+}
+
 /**
  * Sekcja 1 - ocena: jedno zdanie jezykiem rolnika z kolorem, ikona i slowem, pod nim kilka liczb (zapas wody w
  * glebie, deszcz na tle lat, dni stresu, rosliny z satelity, pewnosc). Bilans KBW, progi IUNG i wskazniki
@@ -61,6 +73,10 @@ export function VerdictSection({ report }: { report: WaterReport }) {
   const water = assessment.rootZone ? soilWater(assessment.rootZone) : null;
   const balance = assessment.climaticBalance;
   const vegetation = assessment.vegetation;
+  const rootZone = assessment.rootZone;
+  const vegetationSample = report.sources.some((source) => source.id === 'vegetation' && source.sample);
+  const scenarios = scenarioSummary(balance);
+  const romans = (categories: number[]) => categories.map(roman).join(', ');
 
   return (
     <div className="flex flex-col gap-4">
@@ -83,6 +99,11 @@ export function VerdictSection({ report }: { report: WaterReport }) {
         </p>
         <p className="text-xl leading-snug font-semibold text-balance sm:text-2xl">
           {t(`sentences.${assessment.level}`)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {t('asOf', {
+            date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
+          })}
         </p>
       </div>
 
@@ -112,11 +133,32 @@ export function VerdictSection({ report }: { report: WaterReport }) {
               })}
             </Fact>
           )}
-          {assessment.rootZone && (
-            <Fact label={t('stress')} value={t('stressValue', { days: assessment.rootZone.stressDays30 })} />
+          {balance?.rankInHistory && (
+            <Fact
+              label={t('rank')}
+              value={t('rankValue', { rank: balance.rankInHistory.rank, years: balance.rankInHistory.years })}
+            >
+              {t('rankNote', { from: day(balance.periodFrom), to: day(balance.periodTo) })}
+            </Fact>
+          )}
+          {rootZone && (
+            <Fact label={t('stress')} value={t('stressValue', { days: rootZone.stressDays30 })}>
+              {rootZone.seasonStressDays === undefined
+                ? null
+                : rootZone.seasonEtDeficitMm === undefined
+                  ? t('stressSeasonDays', { days: rootZone.seasonStressDays })
+                  : t('stressSeason', {
+                      days: rootZone.seasonStressDays,
+                      mm: number(rootZone.seasonEtDeficitMm, 0),
+                    })}
+            </Fact>
           )}
           {vegetation && (
-            <Fact label={t('plants')} value={t(`interpretation.${vegetation.interpretation}`)} />
+            <Fact
+              label={t('plants')}
+              value={t(`interpretation.${vegetation.interpretation}`)}
+              badge={vegetationSample ? tReport('sample.factBadge') : undefined}
+            />
           )}
           <Fact label={t('confidence')} value={t(`confidenceLevels.${assessment.confidence}`)} />
         </dl>
@@ -151,6 +193,11 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                   </span>
                 )}
                 <span className="text-muted-foreground">{t(`methods.${balance.method}`)}</span>
+                {balance.coverage !== undefined && balance.coverage < 1 && (
+                  <span className="text-muted-foreground">
+                    {t('coverage', { percent: percentOf(balance.coverage) })}
+                  </span>
+                )}
               </dd>
               <dt className="font-medium">{t('threshold')}</dt>
               <dd className="flex flex-col">
@@ -158,7 +205,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                   {balance.thresholdMm !== null && balance.soilCategory !== null
                     ? t('thresholdValue', {
                         threshold: number(balance.thresholdMm),
-                        category: balance.soilCategory,
+                        category: roman(balance.soilCategory),
                       })
                     : t('thresholdNone')}
                 </span>
@@ -168,17 +215,45 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                   </span>
                 )}
               </dd>
+              {scenarios && (
+                <>
+                  <dt className="font-medium">{t('scenarios')}</dt>
+                  <dd className="flex flex-col gap-1" data-testid="soil-scenarios">
+                    <span>
+                      {t(`scenarioSummary.${scenarios.kind}`, {
+                        drought: romans(scenarios.drought),
+                        ok: romans(scenarios.ok),
+                      })}
+                    </span>
+                    <ul className="flex flex-col text-muted-foreground">
+                      {balance.categoryScenarios?.map((scenario) => (
+                        <li key={scenario.soilCategory}>
+                          {t('scenarioItem', {
+                            category: roman(scenario.soilCategory),
+                            name: t(`soilNames.${scenario.soilCategory}`),
+                            threshold: scenario.thresholdMm === null ? '—' : number(scenario.thresholdMm, 0),
+                            result: t(`scenarioResults.${scenarioResult(scenario.belowThreshold)}`),
+                          })}
+                          {scenario.soilCategory === balance.soilCategory
+                            ? ` (${t('scenarioCurrent')})`
+                            : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </>
+              )}
             </>
           )}
-          {assessment.rootZone && (
+          {rootZone && (
             <>
               <dt className="font-medium">{t('rootZone')}</dt>
               <dd>
                 {t('rootZoneValue', {
-                  taw: number(assessment.rootZone.totalAvailableMm),
-                  raw: number(assessment.rootZone.readilyAvailableMm),
-                  depletion: number(assessment.rootZone.depletionMm),
-                  ks: number(assessment.rootZone.stressCoefficient, 2),
+                  taw: number(rootZone.totalAvailableMm),
+                  raw: number(rootZone.readilyAvailableMm),
+                  depletion: number(rootZone.depletionMm),
+                  ks: number(rootZone.stressCoefficient, 2),
                 })}
               </dd>
             </>
@@ -220,10 +295,28 @@ function optional(value: number | null, format: (value: number, digits?: number)
   return value === null ? '—' : format(value, 2);
 }
 
-function Fact({ label, value, children }: { label: string; value: string; children?: ReactNode }) {
+function Fact({
+  label,
+  value,
+  badge,
+  children,
+}: {
+  label: string;
+  value: string;
+  /** znacznik zrodla przykladowego (atrapy) przy tej liczbie */
+  badge?: string;
+  children?: ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1 rounded-lg border bg-card p-4 print:break-inside-avoid">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dt className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        {label}
+        {badge && (
+          <span className="rounded-full border border-warning/60 bg-warning/10 px-2 py-0.5 text-xs font-semibold text-foreground">
+            {badge}
+          </span>
+        )}
+      </dt>
       <dd className="flex flex-col gap-1.5">
         <span className="text-lg font-semibold">{value}</span>
         {children && <span className="flex flex-col gap-1.5 text-sm text-muted-foreground">{children}</span>}
