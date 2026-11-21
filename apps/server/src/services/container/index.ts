@@ -6,8 +6,11 @@ import type { RawServerEnv, ServerVars } from '@app/env/server';
 import type { Logger, TraceContext } from '@app/logger';
 
 import type { EdgeCachePurger } from '../../domain/edge-cache';
+import type { ParcelsService } from '../parcels';
 
 export interface Container {
+  /** dzialki ewidencyjne: wyszukiwanie i geometria (zrodlo: ULDK GUGiK) */
+  parcels: ParcelsService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
   edgeCache: EdgeCachePurger;
 }

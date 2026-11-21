@@ -4,9 +4,12 @@ import type { OpenAPIHono } from '@hono/zod-openapi';
 
 import { healthModule } from '../../modules/health';
 import { meModule } from '../../modules/me';
+import { parcelsModule } from '../../modules/parcels';
 import { telemetryModule } from '../../modules/telemetry';
 import type { AppEnv } from '../../services/container';
 import { mountCacheRules } from './cache-rules';
+
+export * from './paths';
 
 export function mountRoutes(app: OpenAPIHono<AppEnv>) {
   // Cache brzegowy przed straznikami i modulami: polityki publicznych odczytow i purge po mutacjach.
@@ -18,5 +21,9 @@ export function mountRoutes(app: OpenAPIHono<AppEnv>) {
   //   app.use('/x/*', requirePolicy(hasAnyRole('admin')));  // wymaga polityki (401 / 403)
   // (import `requireAuth`/`requirePolicy` z '../middlewares', polityki z '../../domain/authorization').
 
-  return app.route('/health', healthModule).route('/telemetry', telemetryModule).route('/me', meModule);
+  return app
+    .route('/health', healthModule)
+    .route('/telemetry', telemetryModule)
+    .route('/me', meModule)
+    .route('/parcels', parcelsModule);
 }
