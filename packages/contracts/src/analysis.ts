@@ -43,15 +43,17 @@ export type FieldArea = z.infer<typeof fieldAreaSchema>;
  * obszar narysowany). `kind` odroznia fragment istniejacej dzialki od obszaru narysowanego od zera.
  */
 export const analysisFieldInputSchema = z.union([
-  z.object({
-    parcelIds: z.array(parcelIdSchema).min(1).max(PARCEL_LIMITS.selectionMax),
-  }),
+  // Wariant z geometria musi byc pierwszy: unia bierze pierwszy pasujacy ksztalt, a obszar wyciety z dzialki niesie
+  // tez `parcelIds` - przy odwrotnej kolejnosci serwer po cichu analizowalby cale dzialki zamiast wskazanej czesci.
   z.object({
     geometry: parcelGeometrySchema,
     kind: z.enum(['part', 'drawn']).default('drawn'),
     label: z.string().trim().min(1).max(ANALYSIS_LIMITS.labelMax).optional(),
     /** dzialki, z ktorych wycieto obszar (do opisu raportu) */
     parcelIds: z.array(parcelIdSchema).max(PARCEL_LIMITS.selectionMax).default([]),
+  }),
+  z.object({
+    parcelIds: z.array(parcelIdSchema).min(1).max(PARCEL_LIMITS.selectionMax),
   }),
 ]);
 
