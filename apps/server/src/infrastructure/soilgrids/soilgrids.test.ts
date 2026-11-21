@@ -88,7 +88,7 @@ describe('readGeoTiff', () => {
 });
 
 describe('createSoilGridsSource', () => {
-  it('pole koło Minska: profil z 6 warstw, kategoria z uziarnienia i zakres z wody w profilu', async () => {
+  it('pole koło Minska: profil z 6 warstw, zakres kategorii z uziarnienia i wody, do progu lzejszy koniec', async () => {
     const result = await createSoilGridsSource({ fetch: replay, now: () => '2026-11-21T12:00:00Z' }).profile(
       field,
     );
@@ -100,7 +100,7 @@ describe('createSoilGridsSource', () => {
       availableWaterMmPerM: 85.2,
       availableWaterProfileMm: 123.3,
       textureClass: 'gp',
-      category: 3,
+      category: 1,
       categoryRange: [1, 3],
       basis: 'texture',
       modelled: true,

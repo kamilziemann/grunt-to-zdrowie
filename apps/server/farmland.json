@@ -1,0 +1,41 @@
+{
+  "Ludwin": {
+    "point": [22.95, 51.354],
+    "parcels": 22,
+    "arableShare": 0.94,
+    "classes": {
+      "IIIb": 4.67,
+      "IVa": 6.62,
+      "IVb": 5.62,
+      "V": 2.86
+    }
+  },
+  "Pniewy": {
+    "point": [16.24, 52.498],
+    "parcels": 10,
+    "arableShare": 0.97,
+    "classes": {
+      "IIIb": 23.38,
+      "IVa": 22.45
+    }
+  },
+  "Nowy Tomyśl": {
+    "point": [16.13, 52.296],
+    "parcels": 11,
+    "arableShare": 0.84,
+    "classes": {
+      "V": 3.13,
+      "VI": 5.89
+    }
+  },
+  "Dobrzeń Wielki": {
+    "point": [17.86, 50.752],
+    "parcels": 27,
+    "arableShare": 0.82,
+    "classes": {
+      "IVa": 8.19,
+      "IVb": 6.8,
+      "V": 2.17
+    }
+  }
+}

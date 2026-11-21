@@ -158,6 +158,8 @@ export const assessmentSchema = z.object({
   /** dla `soilBasis: 'nearby'` - odleglosc obszaru, z ktorego wzieto glebe, od pola (m) */
   soilDistanceM: z.number().min(0).optional(),
   verdictBasis: z.enum(VERDICT_BASES).optional(),
+  /** zakres prawdopodobnych kategorii gleby (z uziarnienia i z wody w profilu), gdy gleba jest z modelu */
+  soilCategoryRange: z.tuple([soilCategorySchema, soilCategorySchema]).optional(),
 });
 
 export type Assessment = z.infer<typeof assessmentSchema>;

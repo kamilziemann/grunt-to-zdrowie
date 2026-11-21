@@ -13,7 +13,7 @@ const layer = (topCm: number, bottomCm: number, sandPct: number, clayPct: number
 });
 
 describe('soilProfileFromLayers', () => {
-  it('jednorodny piasek gliniasty: zapas mm/m z Saxtona-Rawlsa, kategoria II, woda do 1,5 m', () => {
+  it('jednorodny piasek gliniasty: zapas mm/m z Saxtona-Rawlsa, uziarnienie II, woda I -> kategoria I', () => {
     const profile = soilProfileFromLayers([layer(0, 30, 80, 8, 10), layer(30, 200, 80, 8, 10)]);
     const water = saxtonRawls({ sandPct: 80, clayPct: 8, organicMatterPct: 1.724 });
 
@@ -24,7 +24,7 @@ describe('soilProfileFromLayers', () => {
       organicMatterPct: 1.72,
       availableWaterMmPerM: Number((water.availableWater * 1000).toFixed(1)),
       availableWaterProfileMm: Number((water.availableWater * 1500).toFixed(1)),
-      category: 2,
+      category: 1,
       textureClass: 'pg',
       basis: 'texture',
       modelled: true,
@@ -48,8 +48,9 @@ describe('soilProfileFromLayers', () => {
       0,
     );
     expect(sand.availableWater).toBeLessThan(sandWet.availableWater);
-    // srednio 55/27/17 = glina lekka (gl) -> III, choc sama glina spod spodu bylaby IV
-    expect([profile?.textureClass, profile?.category]).toEqual(['gl', 3]);
+    // srednio 55/27/17 = glina lekka (gl) -> III, choc sama glina spod spodu bylaby IV; woda w profilu -> II,
+    // do progu lzejszy koniec zakresu
+    expect([profile?.textureClass, profile?.categoryRange, profile?.category]).toEqual(['gl', [2, 3], 2]);
   });
 
   it('bez warstw w 0-100 cm nie ma profilu', () => {

@@ -4,7 +4,9 @@
 // - uziarnienie i kategoria IUNG - srednia wazona z 0-150 cm, bo tak gleboki profil ocenia IUNG,
 // - materia organiczna - warstwa orna 0-30 cm (na nia dzialaja zalecenia agrotechniczne).
 // Kategoria ma zakres: z uziarnienia (grupa PTG) i z wody w profilu 0-150 cm (granice WOD IUNG). Gdy oba wskazania
-// sie roznia, raport mowi, ze kategoria jest niepewna.
+// sie roznia, raport mowi, ze kategoria jest niepewna, a do progu bierzemy lzejszy koniec zakresu: SoilGrids
+// zawyza udzial pylu i ilu w glebach lekkich Polski, a walidacja na wykazach gmin IUNG (docs/validation.md) daje
+// z lzejsza kategoria zgodnosc KBW 7/8 przy suszy zamiast 3/8, bez falszywych alarmow w 13 przypadkach bez suszy.
 import type { SoilProfile } from '../analysis-ports';
 import { iungCategoryFromTexture, iungCategoryFromWater } from '../soil-category';
 import { organicMatterFromCarbon, saxtonRawls } from '../soil-water';
@@ -86,9 +88,11 @@ export function soilProfileFromLayers(
     return null;
   }
 
-  const { category, textureClass } = iungCategoryFromTexture({ sandPct, siltPct, clayPct });
+  const { category: byTexture, textureClass } = iungCategoryFromTexture({ sandPct, siltPct, clayPct });
   const profileMm = (profileAwcPerM * IUNG_PROFILE_CM) / 100;
   const byWater = iungCategoryFromWater(profileMm);
+  const category = byTexture <= byWater ? byTexture : byWater;
+  const heavier = byTexture <= byWater ? byWater : byTexture;
 
   return {
     sandPct: round(sandPct),
@@ -100,7 +104,7 @@ export function soilProfileFromLayers(
     availableWaterMmPerM: round(awcPerM),
     availableWaterProfileMm: round(profileMm),
     category,
-    categoryRange: category <= byWater ? [category, byWater] : [byWater, category],
+    categoryRange: [category, heavier],
     basis: 'texture',
     ...(textureClass ? { textureClass } : {}),
     modelled,

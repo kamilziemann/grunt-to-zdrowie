@@ -274,5 +274,6 @@ export function assess(input: StageInput): Assessment {
     soilBasis: assumed ? 'assumed_medium' : substituteM === undefined ? 'field' : 'nearby',
     ...(substituteM === undefined ? {} : { soilDistanceM: substituteM }),
     ...(basis ? { verdictBasis: basis } : {}),
+    ...(input.soil?.categoryRange ? { soilCategoryRange: input.soil.categoryRange } : {}),
   };
 }
