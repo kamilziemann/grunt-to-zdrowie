@@ -243,3 +243,28 @@ describe('analysis service: ewidencja (klasouzytki)', () => {
     expect(Date.now() - started).toBeLessThan(2000);
   });
 });
+
+describe('analysis service: zapis raportow', () => {
+  it('zapis albo odczyt, ktory pada, nie psuje analizy; raport bez zapisu = 404', async () => {
+    const broken = {
+      get: () => Promise.reject(new Error('D1 down')),
+      save: () => Promise.reject(new Error('D1 down')),
+    };
+    const report = await service({}, { reports: broken }).analyze(request('2026-07-20'));
+
+    expect(report.meta.reused).toBeUndefined();
+    await expect(service().report(report.meta.reportId)).rejects.toMatchObject({ code: 'not_found' });
+  });
+
+  it('raport zapisany pod swoim identyfikatorem (skrot klucza)', async () => {
+    const saved: string[] = [];
+    const store = {
+      get: () => Promise.resolve(null),
+      save: (key: { id: string }) => (saved.push(key.id), Promise.resolve()),
+    };
+    const report = await service({}, { reports: store }).analyze(request('2026-07-20'));
+
+    expect(saved).toEqual([report.meta.reportId]);
+    expect(report.meta.reportId).toMatch(/^r-[0-9a-f]{8}$/);
+  });
+});

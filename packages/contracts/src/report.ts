@@ -482,6 +482,11 @@ export const waterReportSchema = z.object({
      * Zrodla danych przykladowych oznacza osobno `sources[].sample`.
      */
     sampleParts: z.array(reportPartSchema).optional(),
+    /**
+     * raport oddany z zapisu (to samo pole, uprawa, data i wersja silnika liczone wczesniej) - `generatedAt` mowi,
+     * kiedy go policzono; raport na dzisiejsza date liczymy od nowa po dobie
+     */
+    reused: z.boolean().optional(),
   }),
   field: fieldAreaSchema,
   /** uzytek gruntowy z ewidencji; brak = obszar narysowany albo ewidencja nie odpowiedziala */
@@ -501,3 +506,8 @@ export const waterReportSchema = z.object({
 });
 
 export type WaterReport = z.infer<typeof waterReportSchema>;
+
+/** Identyfikator zapisanego raportu (`meta.reportId`): skrot klucza pole + uprawa + data + wersja silnika. */
+export const REPORT_ID_PATTERN = /^r-[0-9a-f]{8}$/;
+
+export const reportIdParamSchema = z.object({ id: z.string().regex(REPORT_ID_PATTERN) });

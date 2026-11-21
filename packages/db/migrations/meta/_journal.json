@@ -8,6 +8,13 @@
       "when": 1795290519252,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795302637842,
+      "tag": "0001_chief_giant_girl",
+      "breakpoints": true
     }
   ]
 }

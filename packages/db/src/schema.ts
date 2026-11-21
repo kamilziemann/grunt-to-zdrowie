@@ -1,6 +1,7 @@
 // Schemat D1 (SQLite). Nowa tabela: dopisz ja tutaj, potem `bun db:generate` i `bun db:migrate`.
 // JSON trzymaj w kolumnach text z `mode: 'json'` i typuj kontraktami z @app/contracts - D1 nie ma typu JSON.
 import { sql } from 'drizzle-orm';
+import type { WaterReport } from '@app/contracts';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 // --- Auth (Better Auth) ---------------------------------------------------------------------------------------
@@ -93,4 +94,23 @@ export const rateLimit = sqliteTable('rate_limit', {
   lastRequest: integer('last_request').notNull(),
 });
 
+// --- Raporty analiz -------------------------------------------------------------------------------------------
+// Zapisany wynik analizy (wymog KOWR: wynik zapisany i odtwarzalny). Klucz = pole + uprawa + data + wersja silnika;
+// `id` to identyfikator raportu (`meta.reportId`, skrot klucza), kolumny klucza sprawdzaja zgodnosc przy odczycie.
+// Bez danych osobowych: pole to identyfikatory dzialek ewidencyjnych albo skrot geometrii.
+export const analysisReport = sqliteTable(
+  'analysis_report',
+  {
+    id: text('id').primaryKey(),
+    fieldId: text('field_id').notNull(),
+    cropId: text('crop_id').notNull(),
+    analysisDate: text('analysis_date').notNull(),
+    engineVersion: text('engine_version').notNull(),
+    report: text('report', { mode: 'json' }).$type<WaterReport>().notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [index('analysis_report_field_idx').on(t.fieldId, t.analysisDate)],
+);
+
 export type UserRow = typeof user.$inferSelect;
+export type AnalysisReportRow = typeof analysisReport.$inferSelect;

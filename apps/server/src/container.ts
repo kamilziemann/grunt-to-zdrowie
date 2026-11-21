@@ -1,7 +1,7 @@
 // Kompozycja zaleznosci na request (i na wiadomosc kolejki, cron, krok Workflow): repozytoria (Drizzle/D1)
 // + infrastruktura (adaptery bindingow i zewnetrznych uslug) -> serwisy. Zadnego I/O na poziomie modulu. `overrides` pozwalaja testom
 // podmienic infrastrukture na faki bez dotykania serwisow.
-import { nowIso } from '@app/db';
+import { createDb, nowIso } from '@app/db';
 
 import type { DataSources } from './domain/analysis-ports';
 import type { EdgeCachePurger } from './domain/edge-cache';
@@ -10,6 +10,7 @@ import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
 import { withFallback, type ParcelRegistry, type ParcelSource } from './domain/parcel-source';
 import type { PlaceSource } from './domain/place-source';
+import type { ReportStore } from './domain/report-store';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
 import {
   createEgibWfsOutlineSource,
@@ -30,6 +31,7 @@ import { createSoilGridsSource, soilGridsCacheTtl } from './infrastructure/soilg
 import { STATIC_TTL_S } from './domain/source-cache-policy';
 import { createTerrainTilesSource } from './infrastructure/terrain-tiles';
 import { createUldkParcelSource } from './infrastructure/uldk';
+import { createReportsRepository } from './repositories/reports';
 import { isoDateInPoland } from './domain/iso-date';
 import { createAnalysisService } from './services/analysis';
 import { createHydroService } from './services/hydro';
@@ -56,6 +58,8 @@ export interface ContainerOverrides {
   responseStore?: ResponseStore | null;
   /** ewidencja (klasouzytki) dla analizy; null = bez ewidencji (testy: bez WFS GUGiK) */
   parcelRegistry?: ParcelRegistry | null;
+  /** zapis raportow; null = bez zapisu (domyslnie D1) */
+  reportStore?: ReportStore | null;
 }
 
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
@@ -108,6 +112,10 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       ...overrides.analysisSources,
     },
     stages: engineStages,
+    // zapis raportow w D1: powtorka tego samego zadania wraca z zapisu, raport otwiera sie z linku
+    ...(overrides.reportStore === null
+      ? {}
+      : { reports: overrides.reportStore ?? createReportsRepository(createDb(deps.env.DB)) }),
     // klasouzytki i powierzchnia ewidencyjna z WFS ewidencji (ULDK ich nie podaje)
     ...(overrides.parcelRegistry === null
       ? {}

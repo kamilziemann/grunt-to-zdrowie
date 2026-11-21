@@ -29,6 +29,9 @@ export function makeApp(
     hydroMapSource: null,
     responseStore: null,
     parcelRegistry: null,
+    // bez zapisu raportow, zeby testy z roznymi zrodlami nie dostawaly raportu policzonego w innym tescie;
+    // test zapisu podaje repozytorium D1 jawnie (test/integration/reports.test.ts)
+    reportStore: null,
     ...overrides,
     analysisSources: { ...createSampleSources(), ...overrides.analysisSources },
   };

@@ -19,6 +19,14 @@ export function shortHash(text: string): string {
   return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
+/** Identyfikator pola z dzialek - niezalezny od kolejnosci; znany przed pobraniem geometrii (klucz raportu). */
+export const parcelsFieldId = (ids: readonly string[]): string =>
+  `parcels:${shortHash([...new Set(ids)].toSorted().join('|'))}`;
+
+/** Identyfikator pola z geometrii uzytkownika (skrot wspolrzednych). */
+export const geometryFieldId = (geometry: ParcelGeometry): string =>
+  `area:${shortHash(JSON.stringify(geometry.coordinates))}`;
+
 function measure(geometry: ParcelGeometry): Pick<FieldArea, 'areaHa' | 'bbox' | 'centroid'> {
   const [lng, lat] = centroid(geometry);
 
@@ -55,7 +63,7 @@ export function fieldFromParcels(parcels: readonly Parcel[]): FieldArea {
     : undefined;
 
   return {
-    id: `parcels:${shortHash(ids.toSorted().join('|'))}`,
+    id: parcelsFieldId(ids),
     kind: rest.length === 0 ? 'parcel' : 'parcels',
     parcelIds: ids,
     // numery i obreb; slowo "dzialka" doklada interfejs w jezyku uzytkownika
@@ -97,7 +105,7 @@ export function fieldFromGeometry(input: {
   const measured = measure(input.geometry);
 
   return {
-    id: `area:${shortHash(JSON.stringify(input.geometry.coordinates))}`,
+    id: geometryFieldId(input.geometry),
     kind: input.kind,
     parcelIds: [...input.parcelIds],
     label: input.label ?? defaultLabel(input.kind, input.parcelIds, measured.areaHa),

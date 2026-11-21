@@ -8,6 +8,7 @@ import { hydroModule } from '../../modules/hydro';
 import { meModule } from '../../modules/me';
 import { parcelsModule } from '../../modules/parcels';
 import { placesModule } from '../../modules/places';
+import { reportsModule } from '../../modules/reports';
 import { telemetryModule } from '../../modules/telemetry';
 import type { AppEnv } from '../../services/container';
 import { mountCacheRules } from './cache-rules';
@@ -31,5 +32,6 @@ export function mountRoutes(app: OpenAPIHono<AppEnv>) {
     .route('/parcels', parcelsModule)
     .route('/places', placesModule)
     .route('/hydro', hydroModule)
-    .route('/analysis', analysisModule);
+    .route('/analysis', analysisModule)
+    .route('/reports', reportsModule);
 }

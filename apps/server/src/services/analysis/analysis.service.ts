@@ -13,7 +13,13 @@ import {
 } from '@app/contracts';
 import { AppError } from '@app/http';
 
-import { fieldFromGeometry, fieldFromParcels, shortHash } from '../../domain/field-area';
+import {
+  fieldFromGeometry,
+  fieldFromParcels,
+  geometryFieldId,
+  parcelsFieldId,
+  shortHash,
+} from '../../domain/field-area';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import { summarizeLandUse } from '../../domain/land-use';
 import type {
@@ -22,6 +28,8 @@ import type {
   ParcelLookup,
   ParcelRegistry,
   ParcelRegistryEntry,
+  ReportKey,
+  ReportStore,
   Sourced,
   StageInput,
 } from './ports';
@@ -55,6 +63,8 @@ export const REGISTRY_TIMEOUT_MS = 6000;
 const WARMUP_DAYS = 120;
 const FORECAST_DAYS = 7;
 const BOUNDARIES_STALE_DAYS = 365;
+/** raport policzony w dniu analizy liczymy od nowa po dobie (nowa pogoda, prognoza, zdjecia) */
+const TODAY_REPORT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const MISSING_LIMITATION: Partial<Record<SourceId, LimitationId>> = {
   meteo: 'meteo_missing',
@@ -77,6 +87,8 @@ export interface AnalysisServiceDeps {
   /** ewidencja (klasouzytki, powierzchnia ewidencyjna) dla dzialek z ULDK; brak = raport bez opisu uzytku */
   registry?: ParcelRegistry;
   registryTimeoutMs?: number;
+  /** zapis raportow; brak = kazda analiza liczona od nowa, `GET /reports/:id` odpowiada 404 */
+  reports?: ReportStore;
   /** chwila biezaca (ISO 8601) - testy podaja staly zegar */
   now: () => string;
   timeoutsMs?: Partial<typeof SOURCE_TIMEOUTS_MS>;
@@ -170,6 +182,7 @@ export function createAnalysisService({
   stages,
   registry,
   registryTimeoutMs = REGISTRY_TIMEOUT_MS,
+  reports,
   now,
   timeoutsMs = {},
 }: AnalysisServiceDeps) {
@@ -222,13 +235,68 @@ export function createAnalysisService({
     };
   }
 
+  /** Klucz raportu z samego zadania - bez pobierania dzialek, zeby powtorka odpowiadala od razu. */
+  function keyOf(request: AnalysisRequest): ReportKey {
+    const fieldId =
+      'geometry' in request.field
+        ? geometryFieldId(request.field.geometry)
+        : parcelsFieldId(request.field.parcelIds);
+    const parts = [fieldId, request.cropId, request.date, ANALYSIS_ENGINE_VERSION];
+
+    return {
+      id: `r-${shortHash(parts.join('|'))}`,
+      fieldId,
+      cropId: request.cropId,
+      analysisDate: request.date,
+      engineVersion: ANALYSIS_ENGINE_VERSION,
+    };
+  }
+
+  const sameKey = (a: ReportKey, b: ReportKey): boolean =>
+    a.id === b.id &&
+    a.fieldId === b.fieldId &&
+    a.cropId === b.cropId &&
+    a.analysisDate === b.analysisDate &&
+    a.engineVersion === b.engineVersion;
+
+  /**
+   * Zapisany raport dla tego klucza, jesli wolno go uzyc. Raport policzony w dniu analizy (raport "na dzis": ostatnie
+   * dni pogody, prognoza, nowe zdjecia) jest wazny dobe; raport policzony pozniej niz data analizy sie nie zmienia.
+   * Blad odczytu = brak zapisu (liczymy od nowa).
+   */
+  async function stored(key: ReportKey): Promise<WaterReport | null> {
+    const found = await reports?.get(key.id).catch(() => null);
+
+    if (!found || !sameKey(found.key, key)) return null;
+
+    const computedOnTheDay = isoDateInPoland(found.createdAt) <= key.analysisDate;
+    const age = Date.parse(now()) - Date.parse(found.createdAt);
+
+    return computedOnTheDay && age > TODAY_REPORT_TTL_MS ? null : found.report;
+  }
+
   return {
+    /** Zapisany raport po identyfikatorze; brak = 404. */
+    async report(id: string): Promise<WaterReport> {
+      const found = await reports?.get(id);
+
+      if (!found) throw AppError.notFound('Report', id);
+
+      return { ...found.report, meta: { ...found.report.meta, reused: true } };
+    },
+
+    /** Raport dla pola, uprawy i daty: z zapisu, gdy ten sam byl juz liczony, inaczej liczony od nowa i zapisany. */
     async analyze(request: AnalysisRequest): Promise<WaterReport> {
       const started = Date.now();
       const today = isoDateInPoland(now());
       const { date, cropId } = request;
 
       assertDateInRange(date, today);
+
+      const key = keyOf(request);
+      const previous = await stored(key);
+
+      if (previous) return { ...previous, meta: { ...previous.meta, reused: true } };
 
       const ids = 'geometry' in request.field ? [] : [...new Set(request.field.parcelIds)];
       // ewidencja rusza razem z ULDK; dzialka z zapasowego WFS ma ja w rekordzie, wtedy wynik ponizej jest pomijany
@@ -293,9 +361,9 @@ export function createAnalysisService({
       // granice dzialek i hydrografia sa biezace - dla dawnej daty to wspolczesne przyblizenie
       if (date < addDays(today, -BOUNDARIES_STALE_DAYS)) limitations.add('current_boundaries');
 
-      return {
+      const report: WaterReport = {
         meta: {
-          reportId: `r-${shortHash([field.id, cropId, date, ANALYSIS_ENGINE_VERSION].join('|'))}`,
+          reportId: key.id,
           engineVersion: ANALYSIS_ENGINE_VERSION,
           analysisDate: date,
           generatedAt: now(),
@@ -321,6 +389,11 @@ export function createAnalysisService({
         sources: reportSources,
         limitations: [...limitations],
       };
+
+      // zapis nie moze zepsuc odpowiedzi: raport bez zapisu jest nadal poprawny, policzy sie przy powtorce
+      await reports?.save(key, report, now()).catch(() => undefined);
+
+      return report;
     },
   };
 }
