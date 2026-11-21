@@ -7,6 +7,7 @@ import type { RawServerEnv } from '@app/env/server';
 
 import { createContainer, type ContainerOverrides } from '../src/container';
 import { createApp, type App } from '../src/entry/app';
+import { createSampleSources } from '../src/infrastructure/sample-sources';
 
 export function testEnv(extra: Record<string, unknown> = {}): RawServerEnv {
   return { ...env, ...extra };
@@ -23,7 +24,12 @@ export function makeApp(
   extraEnv: Record<string, unknown> = {},
   extend?: (app: App) => void,
 ): TestApp {
-  const app = createApp({ createContainer: (deps) => createContainer(deps, overrides) });
+  // testy nigdy nie wolaja zewnetrznych zrodel analizy: domyslnie atrapy w pamieci, test podmienia pojedyncze zrodla
+  const withSources = {
+    ...overrides,
+    analysisSources: { ...createSampleSources(), ...overrides.analysisSources },
+  };
+  const app = createApp({ createContainer: (deps) => createContainer(deps, withSources) });
 
   extend?.(app);
 
