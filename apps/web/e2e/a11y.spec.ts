@@ -1,6 +1,8 @@
 // Dostepnosc: axe z regulami WCAG 2.x A i AA na kluczowych stronach, w jasnym i ciemnym motywie (emulacja
 // prefers-color-scheme; bez ciasteczka motyw wynika z systemu). Naruszenie = blad testu; regul nie wylaczamy.
-// Nowa strona = nowa pozycja w PAGES. Dzialka i raport sa podstawione (bez ULDK i zrodel danych).
+// Nowa strona = nowa pozycja w PAGES. Dzialka i raport sa podstawione (bez ULDK i zrodel danych), podklad mapy
+// i kafle hydrografii tez: z prawdziwym podkladem (OpenFreeMap) axe ruszal czasem w polowie ladowania mapy, gdy
+// MapLibre jeszcze przebudowywal DOM - wynik zalezal od sieci. Mape sprawdzamy w stanie koncowym (`ready`).
 import {
   DROUGHT_REPORT_URL,
   LOW_CONFIDENCE_REPORT_URL,
@@ -9,6 +11,7 @@ import {
   REPORT_URL,
 } from './support/analysis-api';
 import { expectHeadingOrder, expectNoViolations } from './support/axe';
+import { mockBasemap, mockHydroApi } from './support/hydro-api';
 
 import { expect, test } from './support/test';
 
@@ -47,8 +50,16 @@ for (const colorScheme of SCHEMES) {
     for (const [name, path, heading] of PAGES) {
       test(name, async ({ page }) => {
         await mockAnalysisApi(page);
+        await mockBasemap(page);
+        await mockHydroApi(page, { tiles: {} });
         await page.goto(path);
         await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+
+        // mapa dzialek: axe dopiero po zaladowaniu stylu i warstw (przedtem MapLibre dopisuje kontrolki i podpisy)
+        for (const map of await page.getByTestId('parcel-map').all()) {
+          await expect(map).toHaveAttribute('data-map-state', 'ready');
+        }
+
         // raport sprawdzamy w pelnej postaci (nie w stanie postepu)
         if (path.startsWith('/raport?')) await expect(page.getByTestId('verdict')).toBeVisible();
         await expectNoViolations(page);
