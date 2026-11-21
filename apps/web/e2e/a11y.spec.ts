@@ -23,6 +23,7 @@ const PAGES = [
     'Raport wodny pola',
   ],
   ['raport bez parametrów', '/raport', 'Brakuje danych do raportu'],
+  ['gospodarstwo bez parametrów', '/gospodarstwo', 'Brakuje danych do raportu'],
   ['katalog /design', '/design', 'Design system'],
   // Domyslna konfiguracja e2e ma auth wylaczony: strony auth pokazuja komunikat (formularze: auth-enabled.spec.ts).
   ['logowanie (auth wyłączone)', '/sign-in', 'Logowanie'],
