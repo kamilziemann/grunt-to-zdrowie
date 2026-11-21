@@ -65,6 +65,8 @@ export interface SoilProfile {
   availableWaterProfileMm?: number;
   /** zrodlo jest modelem (np. globalny SoilGrids 250 m), a nie pomiarem ani mapa glebowa */
   modelled?: boolean;
+  /** gleba zastepcza: w polu nie ma danych, wzieta z najblizszego obszaru w tej odleglosci od pola (m) */
+  substituteDistanceM?: number;
 }
 
 /** Siatka wysokosci w ukladzie metrycznym; komorki wierszami od polnocnego zachodu. */

@@ -7,7 +7,8 @@ import { assess } from '../assessment';
 import { cropAtDate } from '../crop-calendar';
 import { history } from '../history';
 import { addDays, addYears, daysBetween } from '../iso-date';
-import { causes, deficitSeasons, recurrentDeficit } from './causes';
+import { deficitSeasons } from '../history';
+import { causes, recurrentDeficit } from './causes';
 
 const FIELD: FieldArea = {
   id: 'area:test',

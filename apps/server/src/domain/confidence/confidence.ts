@@ -8,6 +8,7 @@ export type UncertaintyId =
   | 'coarse_meteo_grid'
   | 'soil_unknown'
   | 'soil_modelled'
+  | 'soil_substitute'
   | 'meteo_gaps'
   | 'conflicting_signals'
   | 'no_balance';
@@ -17,6 +18,8 @@ export const CONFIDENCE_RULES: Readonly<Record<UncertaintyId, number>> = {
   soil_unknown: 1,
   // gleba z modelu globalnego (SoilGrids 250 m), a sasiednia kategoria zmienia werdykt
   soil_modelled: 1,
+  // gleby w polu nie ma (zabudowa, woda) - wzieta z najblizszego obszaru z danymi
+  soil_substitute: 1,
   meteo_gaps: 1,
   conflicting_signals: 1,
   // bez zadnego bilansu nie ma oceny - pewnosc zawsze niska

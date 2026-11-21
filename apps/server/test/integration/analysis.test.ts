@@ -3,6 +3,8 @@
 import { waterReportSchema, type WaterReport } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
+import type { SoilSource } from '../../src/domain/analysis-ports';
+import { createSampleSources } from '../../src/infrastructure/sample-sources';
 import {
   NARROW_FIELD,
   REFERENCE_FIELDS,
@@ -89,5 +91,54 @@ describe('POST /analysis', () => {
 
     expect(statuses).toEqual([400, 400, 400, 400, 404]);
     expect(ok.headers.get('cache-control')).toContain('no-store');
+  });
+
+  it('gleba missing w suchym okresie: bilans na glebie sredniej, poziom ostrzega zamiast "w normie"', async () => {
+    const sample = createSampleSources();
+    // dzialka przy zabudowie: SoilGrids nie ma predykcji ani w polu, ani w 2 km
+    const soil: SoilSource = {
+      profile: () =>
+        Promise.resolve({
+          data: null,
+          source: {
+            id: 'soil',
+            provider: 'SoilGrids',
+            status: 'missing',
+            sample: false,
+            note: 'brak predykcji',
+          },
+        }),
+    };
+    // wiosna 2018 bez deszczu: KBW okresu konczacego sie 10 czerwca gleboko ujemny
+    const meteo: typeof sample.meteo = {
+      async series(point, from, to) {
+        const result = await sample.meteo.series(point, from, to);
+        const days = (result.data?.days ?? []).map((day) =>
+          day.date >= '2018-04-01' && day.date <= '2018-06-15'
+            ? Object.assign(day, { precipMm: 0, et0Mm: 4.5 })
+            : day,
+        );
+
+        return { ...result, data: result.data && { ...result.data, days } };
+      },
+    };
+    const dry = makeApp({
+      parcelSource: referenceParcelSource,
+      now: () => '2026-11-21T12:00:00.000Z',
+      analysisSources: { soil, meteo },
+    });
+    const res = await dry.request(
+      '/analysis',
+      json({ field: { parcelIds: [URBAN_FIELD.id] }, cropId: 'winter_wheat', date: '2018-06-15' }),
+    );
+    const report = await res.json<WaterReport>();
+    const scenarios = report.assessment.climaticBalance?.categoryScenarios ?? [];
+
+    expect(waterReportSchema.safeParse(report).error).toBeUndefined();
+    expect(scenarios.some((scenario) => scenario.belowThreshold)).toBe(true);
+    expect(['watch', 'risk', 'drought']).toContain(report.assessment.level);
+    expect(report.assessment).toMatchObject({ soilBasis: 'assumed_medium', confidence: 'low' });
+    expect(report.assessment.rootZone).not.toBeNull();
+    expect(report.limitations).toContain('soil_missing');
   });
 });

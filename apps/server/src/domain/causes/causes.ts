@@ -7,6 +7,7 @@ import type { Assessment, Cause, Evidence, History, SourceId } from '@app/contra
 
 import type { StageInput } from '../analysis-stages';
 import { yearOf } from '../iso-date';
+import { deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
 import { assessPeriod } from '../water-indicators';
 
@@ -22,7 +23,6 @@ const TYPICAL_AVAILABLE_WATER_MM_PER_M = 150;
 const DITCH_AT_FIELD_M = 50;
 /** niedobor wraca: niedobor w co najmniej 30% sezonow z danymi (min. 5 sezonow) */
 /** sezon z niedoborem wg bilansu strefy korzeniowej: uprawie zabraklo co najmniej tyle wody */
-const SEASON_DEFICIT_MM = 50;
 const RECURRENT_SHARE = 0.3;
 const MIN_SEASONS = 5;
 /** wrazliwosc uprawy: niedobor w co najmniej 40% sezonow */
@@ -263,23 +263,6 @@ function landscapeCauses(input: StageInput, real: (id: SourceId) => boolean): Ca
   }
 
   return found;
-}
-
-/**
- * Sezony z niedoborem: prog suszy IUNG przekroczony w ktoryms okresie albo uprawie zabraklo co najmniej 50 mm wody
- * wg bilansu strefy korzeniowej (na lekkiej glebie bilans pokazuje niedobor, zanim KBW przekroczy prog kategorii).
- */
-export function deficitSeasons(history: History | undefined): { deficit: number; withData: number } {
-  const seasons = (history?.seasons ?? []).filter(
-    (season) => season.minBalanceMm !== null || (season.etDeficitMm ?? null) !== null,
-  );
-
-  return {
-    deficit: seasons.filter(
-      (season) => season.droughtPeriods > 0 || (season.etDeficitMm ?? 0) >= SEASON_DEFICIT_MM,
-    ).length,
-    withData: seasons.length,
-  };
 }
 
 /** Czy niedobor wraca w historii pola (min. 30% sezonow z niedoborem, z co najmniej 5 sezonow). */

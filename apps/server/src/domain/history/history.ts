@@ -16,7 +16,30 @@ const RISK_MONTH_SHARE = 0.7;
 /** miesiac ze stresem w strefie korzeni: co najmniej tyle dni z Ks < 1 */
 const STRESS_DAYS_IN_MONTH = 10;
 
+/** sezon z niedoborem wg bilansu strefy korzeniowej: uprawie zabraklo co najmniej tyle wody (mm) */
+export const SEASON_DEFICIT_MM = 50;
+
 const round = (value: number): number => Number(value.toFixed(1));
+
+/**
+ * Sezony z niedoborem: prog suszy IUNG przekroczony w ktoryms okresie albo uprawie zabraklo co najmniej 50 mm wody
+ * wg bilansu strefy korzeniowej (na lekkiej glebie bilans pokazuje niedobor, zanim KBW przekroczy prog kategorii).
+ */
+export function deficitSeasons(record: Pick<History, 'seasons'> | undefined): {
+  deficit: number;
+  withData: number;
+} {
+  const seasons = (record?.seasons ?? []).filter(
+    (season) => season.minBalanceMm !== null || (season.etDeficitMm ?? null) !== null,
+  );
+
+  return {
+    deficit: seasons.filter(
+      (season) => season.droughtPeriods > 0 || (season.etDeficitMm ?? 0) >= SEASON_DEFICIT_MM,
+    ).length,
+    withData: seasons.length,
+  };
+}
 
 function riskMonths(counts: Map<number, number>): number[] {
   const most = Math.max(0, ...counts.values());
@@ -108,6 +131,7 @@ export function history(input: StageInput): History {
   return {
     seasonsWithData: withData.length,
     droughtSeasons: withData.filter((season) => season.droughtPeriods > 0).length,
+    deficitSeasons: deficitSeasons({ seasons }).deficit,
     seasons,
     calendar,
     riskMonths: riskMonths(

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { fieldFromGeometry } from '../../domain/field-area';
 import { readGeoTiff } from './geotiff';
-import { coverageUrl, createSoilGridsSource, type FetchLike } from './soilgrids';
+import { coverageUrl, createSoilGridsSource, substitutePixels, type FetchLike } from './soilgrids';
 import recorded from './soilgrids-minsk.recorded.json?raw';
 
 // Nagranie: WCS SoilGrids (srednie, 18 pokryc: piasek, il, wegiel x 6 warstw) dla prostokata 21,559-21,5646 E,
@@ -112,7 +112,7 @@ describe('createSoilGridsSource', () => {
       resolution: '250 m (model globalny)',
     });
     expect(result.source.provider).toContain('nie mapa glebowo-rolnicza');
-    expect(result.source.note).toContain('not a soil map');
+    expect(result.source.note).toContain('nie mapa glebowa');
   });
 
   it('brak predykcji (zabudowa, woda), blad HTTP i zly plik to `missing` z powodem', async () => {
@@ -131,8 +131,61 @@ describe('createSoilGridsSource', () => {
       [null, 'missing'],
       [null, 'missing'],
     ]);
-    expect(zeros.source.note).toContain('built-up');
+    expect(zeros.source.note).toContain('zabudowa');
+    expect(zeros.source.note).toContain('2 km');
     expect(failing.source.note).toContain('503');
+  });
+
+  it('pole bez predykcji: gleba zastepcza z najblizszych pikseli w drugim odczycie z marginesem 2 km', async () => {
+    // pole ok. 450 m na wschod od piksela z predykcja (75,5% piasku); w pierwszym odczycie same zera (zabudowa)
+    const builtUp = fieldFromGeometry({
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [21.567, 52.17],
+            [21.568, 52.17],
+            [21.568, 52.1708],
+            [21.567, 52.1708],
+            [21.567, 52.17],
+          ],
+        ],
+      },
+      kind: 'drawn',
+      parcelIds: [],
+    });
+    const wide = (url: string): boolean => {
+      const [, west = '0', east = '0'] = /SUBSET=long\(([\d.]+),([\d.]+)\)/.exec(url) ?? [];
+
+      return Number(east) - Number(west) > 0.01;
+    };
+    const fetch: FetchLike = (url, init) =>
+      wide(url) ? replay(url, init) : Promise.resolve(new Response(tinyTiff(0)));
+    const result = await createSoilGridsSource({ fetch }).profile(builtUp);
+
+    expect(result.data).toMatchObject({ textureClass: 'gp', substituteDistanceM: 450, modelled: true });
+    expect(result.source.status).toBe('partial');
+    expect(result.source.note).toContain('ok. 450 m od pola');
+  });
+
+  it('pierscienie gleby zastepczej: najmniejszy z pikselem z predykcja wygrywa', () => {
+    const raster = (values: number[]) => ({
+      width: values.length,
+      height: 1,
+      values: Float64Array.from(values),
+      originX: 21.56,
+      originY: 52.171,
+      pixelX: 0.01,
+      pixelY: 0.002,
+    });
+    // pole w pierwszym pikselu (bez predykcji); drugi piksel ok. 690 m, trzeci ok. 1370 m od pola
+    const near = substitutePixels({ sand: raster([0, 500, 600]), clay: raster([0, 100, 100]) }, field);
+    const far = substitutePixels({ sand: raster([0, 0, 0, 0, 600]), clay: raster([0, 0, 0, 0, 0]) }, field);
+
+    expect(near?.pixels).toEqual([1]);
+    expect(near?.distanceM).toBeGreaterThan(500);
+    expect(near?.distanceM).toBeLessThan(1000);
+    expect(far).toBeNull();
   });
 
   it('adres WCS: wlasciwosc, warstwa, prostokat pola z marginesem w WGS84', () => {

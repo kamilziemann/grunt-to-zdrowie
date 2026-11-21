@@ -5,7 +5,7 @@ import type { DailyWeather, MeteoSeries, SoilProfile } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
 import { addDays, addYears, daysBetween } from '../iso-date';
-import { assess, inGrowingSeason } from './assessment';
+import { assess, inGrowingSeason, levelOf, scenariosDisagree } from './assessment';
 
 const FIELD: FieldArea = {
   id: 'area:test',
@@ -151,7 +151,9 @@ describe('assess - tabela przypadkow', () => {
     const result = assess(input('2018-07-15', { ...DRY, precipMm: 0 }, { soil: null }));
 
     expect(result.level).toBe('drought');
-    expect(result.rootZone).toBeNull();
+    // bilans strefy korzeniowej na glebie sredniej - jawne zalozenie, raport mowi o nim w `soilBasis`
+    expect(result.rootZone).not.toBeNull();
+    expect(result).toMatchObject({ soilBasis: 'assumed_medium', verdictBasis: 'scenarios_agree' });
     expect(result.confidence).toBe('low');
     expect(result.climaticBalance?.categoryScenarios?.map((item) => item.belowThreshold)).toEqual([
       true,
@@ -159,6 +161,21 @@ describe('assess - tabela przypadkow', () => {
       true,
       true,
     ]);
+  });
+
+  it('nieznana gleba i rozbiezne scenariusze: poziom ostrzega, nigdy nie mowi "w normie"', () => {
+    const hot = { tMinC: 15, tMaxC: 30, tMeanC: 22.5, solarMjM2: 23, et0Mm: 5 };
+    // KBW ok. -228 mm: susza na kat. I-III, nie na IV
+    const result = assess(input('2018-07-15', { ...hot, precipMm: 1.2 }, { soil: null }));
+
+    expect(result.climaticBalance?.belowThreshold).toBeNull();
+    expect(result.verdictBasis).toBe('scenarios_disagree');
+    expect(['watch', 'risk']).toContain(result.level);
+    expect(scenariosDisagree(result.climaticBalance)).toBe(true);
+    // ten sam KBW bez bilansu strefy korzeniowej (uprawa nie rosnie) - nadal ostrzezenie z samych scenariuszy
+    expect(levelOf('2018-07-15', { balance: result.climaticBalance, zone: null, growing: false })).toBe(
+      'watch',
+    );
   });
 
   it('gleba z modelu 250 m: pewnosc spada tylko, gdy sasiednia kategoria zmienia werdykt', () => {

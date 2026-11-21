@@ -6,6 +6,9 @@
 // Poza 21 marca - 30 wrzesnia progi suszy nie obowiazuja: poziom `out_of_season`, a bilans strefy korzeniowej
 // pokazuje zapas wody przed sezonem. Miedzy 21 marca a 20 maja nie ma jeszcze pelnego okresu IUNG - KBW liczymy za
 // ostatnie 60 dni bez progu, a poziom wynika z bilansu strefy korzeniowej.
+// Gleba nieznana: bilans strefy korzeniowej liczymy dla gleby sredniej (jawne zalozenie), a werdykt KBW
+// z czterech kategorii. `ok` tylko wtedy, gdy wszystkie scenariusze i bilans mowia "bez niedoboru" - przy rozbieznosci
+// poziom ostrzega, nigdy nie uspokaja.
 import type { Assessment, AssessmentLevel, ClimaticBalance, RootZone } from '@app/contracts';
 
 import type { SoilProfile } from '../analysis-ports';
@@ -17,6 +20,7 @@ import { seasonStress, type RootZoneDay } from '../root-zone-balance';
 import { precipitationContext, vegetationSignal } from '../sample-stages';
 import {
   assessPeriod,
+  balanceSoil,
   rootZoneSimulation,
   SOIL_CATEGORIES,
   type PeriodAssessment,
@@ -150,6 +154,25 @@ interface Signals {
   growing: boolean;
 }
 
+/** Werdykt KBW nierozstrzygniety (gleba nieznana), a na czesci kategorii gleby prog jest przekroczony. */
+export function scenariosDisagree(balance: ClimaticBalance | null): boolean {
+  if (!balance || balance.belowThreshold !== null) return false;
+
+  const verdicts = (balance.categoryScenarios ?? []).map((scenario) => scenario.belowThreshold);
+
+  return verdicts.includes(true);
+}
+
+function verdictBasis(balance: ClimaticBalance | null): Assessment['verdictBasis'] {
+  const judged = (balance?.categoryScenarios ?? []).some((scenario) => scenario.belowThreshold !== null);
+
+  if (!balance || !judged) return undefined;
+
+  if (balance.soilCategory !== null && balance.thresholdMm !== null) return 'soil_category';
+
+  return scenariosDisagree(balance) ? 'scenarios_disagree' : 'scenarios_agree';
+}
+
 export function levelOf(date: string, { balance, zone, growing }: Signals): AssessmentLevel {
   if (!balance && !zone) return 'unknown';
 
@@ -168,7 +191,8 @@ export function levelOf(date: string, { balance, zone, growing }: Signals): Asse
     balance.balanceMm < balance.thresholdMm * WATCH_SHARE_OF_THRESHOLD;
   const drying = growing && zone !== null && zone.depletionMm > zone.readilyAvailableMm * WATCH_SHARE_OF_RAW;
 
-  if (nearThreshold || drying) return 'watch';
+  // gleba nieznana, a na lzejszych glebach susza: nie wiemy, czy to pole jest bezpieczne - ostrzegamy
+  if (nearThreshold || drying || scenariosDisagree(balance)) return 'watch';
 
   const wet = (balance?.balanceMm ?? 0) > EXCESS_BALANCE_MM && (zone === null || zone.depletionShare < 0.05);
 
@@ -224,12 +248,18 @@ export function assess(input: StageInput): Assessment {
   else if (input.soil.modelled && verdictDependsOnCategory(input.soil, balance))
     uncertainties.push('soil_modelled');
 
+  if (input.soil?.substituteDistanceM !== undefined) uncertainties.push('soil_substitute');
+
   // pogoda z atrapy to nie pomiar - taka ocena nie moze miec zadnej pewnosci
   if (sample.has('meteo')) uncertainties.push('no_balance');
 
   if (balance?.coverage !== undefined && balance.coverage < 1) uncertainties.push('meteo_gaps');
 
   if (conflicting(signals)) uncertainties.push('conflicting_signals');
+
+  const { assumed } = balanceSoil(input);
+  const basis = verdictBasis(balance);
+  const substituteM = input.soil?.substituteDistanceM;
 
   return {
     level,
@@ -238,5 +268,8 @@ export function assess(input: StageInput): Assessment {
     rootZone: zone,
     vegetation: vegetationSignal(input, deficit),
     precipitation: precipitationContext(input),
+    soilBasis: assumed ? 'assumed_medium' : substituteM === undefined ? 'field' : 'nearby',
+    ...(substituteM === undefined ? {} : { soilDistanceM: substituteM }),
+    ...(basis ? { verdictBasis: basis } : {}),
   };
 }

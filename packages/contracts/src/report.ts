@@ -135,6 +135,18 @@ export const precipitationContextSchema = z.object({
   years: z.number().int().positive(),
 });
 
+/**
+ * Skad gleba w bilansie strefy korzeniowej: z pola; z najblizszego obszaru z danymi (w polu brak predykcji - zabudowa,
+ * woda); przyjeta gleba srednia (kategoria III), gdy gleby nie ma nigdzie w poblizu - jawne zalozenie.
+ */
+export const SOIL_BASES = ['field', 'nearby', 'assumed_medium'] as const;
+
+/**
+ * Na czym oparto werdykt KBW: kategoria gleby pola; scenariusze czterech kategorii zgodne (gleba nieznana, ale wynik
+ * ten sam); scenariusze rozbiezne (na lzejszych glebach susza, na ciezszych nie) - poziom wtedy ostrzega.
+ */
+export const VERDICT_BASES = ['soil_category', 'scenarios_agree', 'scenarios_disagree'] as const;
+
 export const assessmentSchema = z.object({
   level: assessmentLevelSchema,
   confidence: confidenceSchema,
@@ -142,6 +154,10 @@ export const assessmentSchema = z.object({
   rootZone: rootZoneSchema.nullable(),
   vegetation: vegetationSignalSchema.nullable(),
   precipitation: precipitationContextSchema.nullable(),
+  soilBasis: z.enum(SOIL_BASES).optional(),
+  /** dla `soilBasis: 'nearby'` - odleglosc obszaru, z ktorego wzieto glebe, od pola (m) */
+  soilDistanceM: z.number().min(0).optional(),
+  verdictBasis: z.enum(VERDICT_BASES).optional(),
 });
 
 export type Assessment = z.infer<typeof assessmentSchema>;
@@ -151,7 +167,13 @@ export const periodStatusSchema = z.enum(['drought', 'ok', 'not_monitored', 'mis
 export const historySchema = z.object({
   /** ile sezonow mialo dane - "prog przekroczony w 4 z 9 sezonow z danymi" */
   seasonsWithData: z.number().int().min(0),
+  /** sezony z przekroczonym progiem suszy IUNG (dla kategorii gleby pola albo kategorii II, gdy gleba nieznana) */
   droughtSeasons: z.number().int().min(0),
+  /**
+   * sezony z niedoborem: prog IUNG przekroczony albo uprawie zabraklo >= 50 mm wody wg bilansu strefy korzeniowej -
+   * ta liczba idzie do zdania "niedobor w N z 10 sezonow" (na lekkiej glebie bilans widzi niedobor przed progiem)
+   */
+  deficitSeasons: z.number().int().min(0).optional(),
   seasons: z.array(
     z.object({
       year: z.number().int(),
