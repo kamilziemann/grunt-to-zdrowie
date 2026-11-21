@@ -58,6 +58,25 @@ describe('zapis raportow', () => {
     expect(stored.meta.reused).toBe(true);
   });
 
+  it('zapis usuwa raporty starsze niz 30 dni, mlodsze zostaja', async () => {
+    const store = createReportsRepository(createDb(env.DB));
+    const report = {} as WaterReport;
+    const key = (id: string) => ({
+      id,
+      fieldId: `parcels:${id}`,
+      cropId: 'maize_grain',
+      analysisDate: '2026-09-01',
+      engineVersion: 'test',
+    });
+
+    await store.save(key('r-0000old1'), report, '2026-10-01T12:00:00.000Z');
+    await store.save(key('r-0000new1'), report, '2026-10-25T12:00:00.000Z');
+    await store.save(key('r-0000now1'), report, '2026-11-21T12:00:00.000Z');
+
+    expect(await store.get('r-0000old1')).toBeNull();
+    expect((await store.get('r-0000new1'))?.createdAt).toBe('2026-10-25T12:00:00.000Z');
+  });
+
   it('nieznany raport = 404, zly identyfikator = 400', async () => {
     const app = appAt('2026-11-21T12:00:00.000Z', countingMeteo());
 
