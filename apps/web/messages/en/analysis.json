@@ -86,27 +86,27 @@
   },
   "progress": {
     "title": "Checking water on the field",
-    "hint": "This usually takes up to 30 seconds. Please keep the page open.",
+    "hint": "Fetching data from several sources at once. This usually takes a few seconds.",
     "elapsed": "{seconds, plural, one {# second} other {# seconds}}",
-    "slow": "Data sources are responding slower than usual. Still waiting.",
-    "listLabel": "Analysis steps",
-    "state": {
-      "done": "done",
-      "active": "in progress",
-      "pending": "waiting"
-    },
-    "steps": {
-      "parcel": "Fetching parcel boundaries",
-      "weather": "Fetching 10 years of weather",
-      "soil": "Checking soil and terrain",
-      "water": "Looking for ditches, streams and ponds nearby",
-      "satellite": "Looking at the field in satellite images",
-      "balance": "Calculating the water reserve and preparing advice"
+    "slow": "One of the sources is slower than usual ({seconds} s). Still waiting – up to a minute.",
+    "listLabel": "What is being fetched",
+    "sources": {
+      "parcel": "parcel boundaries and land use from the register (GUGiK)",
+      "weather": "10 years of weather and the forecast",
+      "soil": "soil and terrain",
+      "water": "ditches, watercourses and ponds nearby",
+      "satellite": "satellite images of the field (Sentinel-2)"
     }
   },
   "error": {
     "title": "We could not prepare the report",
     "retry": "Try again",
-    "change": "Change crop or date"
+    "change": "Change crop or date",
+    "timeout": "The analysis took longer than a minute, so we stopped waiting. One of the data sources is not responding – try again in a moment.",
+    "messages": {
+      "upstream_failed": "One of the data sources (e.g. GUGiK or the weather service) did not respond. This is usually temporary – try again in a moment.",
+      "not_found": "We could not find this parcel in the land register. Check the parcel number or pick it on the map.",
+      "validation_failed": "The link is missing data or the day is outside the analysis range (last 10 years). Choose the crop and day again."
+    }
   }
 }

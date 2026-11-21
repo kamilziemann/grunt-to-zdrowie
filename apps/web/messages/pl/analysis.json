@@ -86,27 +86,27 @@
   },
   "progress": {
     "title": "Sprawdzam wodę na polu",
-    "hint": "To trwa zwykle do 30 sekund. Nie zamykaj strony.",
+    "hint": "Pobieram naraz dane z kilku źródeł. Zwykle trwa to kilka sekund.",
     "elapsed": "{seconds, plural, one {# sekunda} few {# sekundy} many {# sekund} other {# sekundy}}",
-    "slow": "Źródła danych odpowiadają wolniej niż zwykle. Czekam dalej.",
-    "listLabel": "Kroki analizy",
-    "state": {
-      "done": "zrobione",
-      "active": "w toku",
-      "pending": "czeka"
-    },
-    "steps": {
-      "parcel": "Pobieram granice działek",
-      "weather": "Pobieram pogodę z 10 lat",
-      "soil": "Sprawdzam glebę i ukształtowanie terenu",
-      "water": "Szukam rowów, cieków i oczek wodnych w okolicy",
-      "satellite": "Oglądam pole na zdjęciach satelitarnych",
-      "balance": "Liczę zapas wody i przygotowuję zalecenia"
+    "slow": "Któreś źródło odpowiada wolniej niż zwykle ({seconds} s). Czekam dalej – najdłużej minutę.",
+    "listLabel": "Co teraz pobieram",
+    "sources": {
+      "parcel": "granice działki i użytki z ewidencji (GUGiK)",
+      "weather": "pogodę z 10 lat i prognozę",
+      "soil": "glebę i ukształtowanie terenu",
+      "water": "rowy, cieki i oczka wodne w okolicy",
+      "satellite": "zdjęcia satelitarne pola (Sentinel-2)"
     }
   },
   "error": {
     "title": "Nie udało się przygotować raportu",
     "retry": "Spróbuj ponownie",
-    "change": "Zmień uprawę lub datę"
+    "change": "Zmień uprawę lub datę",
+    "timeout": "Analiza trwała dłużej niż minutę, więc przestaliśmy czekać. Któreś źródło danych nie odpowiada – spróbuj ponownie za chwilę.",
+    "messages": {
+      "upstream_failed": "Jedno ze źródeł danych (np. GUGiK albo serwis pogody) nie odpowiedziało. To zwykle chwilowe – spróbuj ponownie za chwilę.",
+      "not_found": "Nie znaleźliśmy tej działki w ewidencji. Sprawdź numer działki albo wybierz ją na mapie.",
+      "validation_failed": "W linku brakuje danych albo dzień jest poza zakresem analizy (ostatnie 10 lat). Wybierz uprawę i dzień jeszcze raz."
+    }
   }
 }

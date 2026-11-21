@@ -1,39 +1,33 @@
-import { Check, LoaderCircle } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
 import { useElapsedSeconds } from '../../hooks/use-elapsed-seconds';
 
-export type AnalysisStep = 'parcel' | 'weather' | 'soil' | 'water' | 'satellite' | 'balance';
+export type AnalysisSource = 'parcel' | 'weather' | 'soil' | 'water' | 'satellite';
 
-/** Kroki i sekunda, od ktorej krok uchodzi za biezacy (szacunek z atrap i pomiarow zrodel, nie prawdziwy postep). */
-export const ANALYSIS_STEPS: readonly { step: AnalysisStep; startsAt: number }[] = [
-  { step: 'parcel', startsAt: 0 },
-  { step: 'weather', startsAt: 2 },
-  { step: 'soil', startsAt: 5 },
-  { step: 'water', startsAt: 8 },
-  { step: 'satellite', startsAt: 11 },
-  { step: 'balance', startsAt: 15 },
+/** Co serwer pobiera - rownoczesnie, wiec bez kolejnosci i bez "zrobione" odhaczanego po czasie. */
+export const ANALYSIS_SOURCES: readonly AnalysisSource[] = [
+  'parcel',
+  'weather',
+  'soil',
+  'water',
+  'satellite',
 ];
 
-/** Po tylu sekundach mowimy wprost, ze zrodla odpowiadaja wolniej (cel zadania: analiza do 30 s). */
-export const SLOW_AFTER_SECONDS = 30;
-
-/** Indeks biezacego kroku po `seconds` sekundach (ostatni krok trwa, az przyjdzie raport). */
-export function activeStepIndex(seconds: number): number {
-  return ANALYSIS_STEPS.reduce((active, { startsAt }, index) => (seconds >= startsAt ? index : active), 0);
-}
+/** Zwykle analiza trwa 2-10 s; po tylu sekundach mowimy wprost, ze ktores zrodlo odpowiada wolniej. */
+export const SLOW_AFTER_SECONDS = 15;
 
 /**
- * Postep analizy krok po kroku. API nie ma strumienia postepu, wiec kroki przelaczaja sie po czasie; biezacy krok
- * jest ogloszony czytnikom ekranu (`aria-live`), a lista mowi, co juz zrobione.
+ * Czekanie na analize: API nie ma strumienia postepu, a zrodla pobiera rownoczesnie - pokazujemy uczciwie, co jest
+ * pobierane (bez udawanych procentow i krokow odhaczanych zegarem), ile sekund minelo i kiedy zrodla sa wolniejsze.
+ * Przekroczony czas konczy zapytanie bledem (`ANALYSIS_TIMEOUT_MS`), wtedy ekran pokazuje "Sprobuj ponownie".
  */
 export function AnalysisProgress({ className }: { className?: string }) {
   const t = useTranslations('analysis.progress');
   const seconds = useElapsedSeconds();
-  const active = activeStepIndex(seconds);
-  const current = ANALYSIS_STEPS[active]?.step ?? 'parcel';
+  const slow = seconds >= SLOW_AFTER_SECONDS;
 
   return (
     <section
@@ -43,51 +37,29 @@ export function AnalysisProgress({ className }: { className?: string }) {
       data-testid="analysis-progress"
     >
       <div className="flex flex-col gap-1">
-        <h2 id="analysis-progress-title" className="text-2xl font-semibold">
+        <h2 id="analysis-progress-title" className="flex items-center gap-2 text-2xl font-semibold">
+          <LoaderCircle
+            aria-hidden="true"
+            className="size-6 shrink-0 text-primary motion-safe:animate-spin"
+          />
           {t('title')}
         </h2>
         <p className="text-base text-muted-foreground">{t('hint')}</p>
       </div>
-      <p aria-live="polite" className="sr-only">
-        {t(`steps.${current}`)}
-      </p>
-      <ol aria-label={t('listLabel')} className="flex flex-col gap-3">
-        {ANALYSIS_STEPS.map(({ step }, index) => {
-          const state = index < active ? 'done' : index === active ? 'active' : 'pending';
-
-          return (
-            <li
-              key={step}
-              data-state={state}
-              aria-current={state === 'active' ? 'step' : undefined}
-              className={cn(
-                'flex items-center gap-3 text-base transition-colors duration-200',
-                state === 'pending' ? 'text-muted-foreground' : 'text-foreground',
-                state === 'active' && 'font-semibold',
-              )}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'flex size-7 shrink-0 items-center justify-center rounded-full border',
-                  state === 'done' && 'border-primary bg-primary text-primary-foreground',
-                  state === 'active' && 'border-primary text-primary',
-                  state === 'pending' && 'border-border',
-                )}
-              >
-                {state === 'done' && <Check className="size-4" />}
-                {state === 'active' && <LoaderCircle className="size-4 animate-spin" />}
-              </span>
-              <span>
-                {t(`steps.${step}`)}
-                <span className="sr-only">, {t(`state.${state}`)}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="text-sm text-muted-foreground tabular-nums">
-        {seconds >= SLOW_AFTER_SECONDS ? t('slow') : t('elapsed', { seconds })}
+      <ul aria-label={t('listLabel')} className="flex flex-col gap-2.5">
+        {ANALYSIS_SOURCES.map((source) => (
+          <li key={source} className="flex items-start gap-3 text-base">
+            <span aria-hidden="true" className="mt-2 size-2 shrink-0 rounded-full bg-primary/60" />
+            {t(`sources.${source}`)}
+          </li>
+        ))}
+      </ul>
+      <p
+        aria-live="polite"
+        className="text-sm text-muted-foreground tabular-nums"
+        data-slow={slow || undefined}
+      >
+        {slow ? t('slow', { seconds }) : t('elapsed', { seconds })}
       </p>
     </section>
   );

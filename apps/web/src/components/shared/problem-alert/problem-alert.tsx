@@ -10,15 +10,17 @@ export interface ProblemAlertProps {
   problem: ProblemDetails;
   /** naglowek; domyslnie komunikat dla kodu */
   title?: string;
+  /** komunikat zamiast ogolnego dla kodu (ekran wie lepiej, co sie stalo, np. "nie ma takiej dzialki") */
+  message?: string;
   /** akcje, np. przycisk "Spróbuj ponownie" */
   children?: ReactNode;
   className?: string;
 }
 
 /** Blad z API dla uzytkownika: komunikat w jezyku interfejsu wg `code`, lista `issues`, detail techniczny zwiniety. */
-export function ProblemAlert({ problem, title, children, className }: ProblemAlertProps) {
+export function ProblemAlert({ problem, title, message: custom, children, className }: ProblemAlertProps) {
   const t = useTranslations('problems');
-  const message = problemMessage(t, problem.code);
+  const message = custom ?? problemMessage(t, problem.code);
 
   return (
     <Alert variant="destructive" className={className} data-problem-code={problem.code}>

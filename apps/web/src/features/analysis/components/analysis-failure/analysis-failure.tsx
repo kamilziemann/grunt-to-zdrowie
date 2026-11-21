@@ -12,17 +12,31 @@ export interface AnalysisFailureProps {
   onRetry: () => void;
   /** powrot do formularza z tymi samymi dzialkami */
   changeHref: AppHref;
+  /** przegladarka przestala czekac (limit czasu analizy) */
+  timedOut?: boolean;
+}
+
+const OWN_MESSAGES = new Set(['upstream_failed', 'not_found', 'validation_failed'] as const);
+
+function hasOwnMessage(code: string): code is 'upstream_failed' | 'not_found' | 'validation_failed' {
+  return (OWN_MESSAGES as ReadonlySet<string>).has(code);
 }
 
 /**
- * Analiza sie nie udala: komunikat wg kodu bledu (np. dzialki nie ma w ewidencji, GUGiK nie odpowiada, zla data),
- * ponowienie tego samego zapytania i powrot do formularza.
+ * Analiza sie nie udala: komunikat jezykiem rolnika wg kodu bledu (dzialki nie ma w ewidencji, zrodlo nie odpowiada,
+ * zly dzien) albo przekroczonego czasu, ponowienie tego samego zapytania i powrot do formularza. Szczegoly
+ * techniczne zostaja zwiniete.
  */
-export function AnalysisFailure({ problem, onRetry, changeHref }: AnalysisFailureProps) {
+export function AnalysisFailure({ problem, onRetry, changeHref, timedOut = false }: AnalysisFailureProps) {
   const t = useTranslations('analysis.error');
+  const message = timedOut
+    ? t('timeout')
+    : hasOwnMessage(problem.code)
+      ? t(`messages.${problem.code}`)
+      : undefined;
 
   return (
-    <ProblemAlert problem={problem} title={t('title')} className="text-base">
+    <ProblemAlert problem={problem} title={t('title')} message={message} className="text-base">
       <Button size="xl" onClick={onRetry}>
         <RefreshCw aria-hidden="true" />
         {t('retry')}

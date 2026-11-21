@@ -3,7 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useTranslations } from 'use-intl';
 
-import { AnalysisFailure, AnalysisProgress, analysisReportQuery } from '@/features/analysis';
+import {
+  AnalysisFailure,
+  AnalysisProgress,
+  analysisReportQuery,
+  AnalysisTimeoutError,
+} from '@/features/analysis';
 import { toProblem } from '@/lib/problems';
 import type { AppHref } from '@/lib/routes';
 
@@ -44,7 +49,12 @@ export function ReportScreen({ request, changeHref, mapHref, grasslandHref }: Re
     <div className="flex flex-col gap-section">
       <h1 className="text-3xl leading-tight font-bold text-primary">{t('title')}</h1>
       {query.isError && !query.isFetching ? (
-        <AnalysisFailure problem={toProblem(query.error)} onRetry={retry} changeHref={changeHref} />
+        <AnalysisFailure
+          problem={toProblem(query.error)}
+          onRetry={retry}
+          changeHref={changeHref}
+          timedOut={query.error instanceof AnalysisTimeoutError}
+        />
       ) : (
         <AnalysisProgress />
       )}

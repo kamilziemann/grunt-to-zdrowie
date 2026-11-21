@@ -321,4 +321,22 @@ describe('ReportView', () => {
       expect(screen.getByText(t('verdict.verdictBasis.soil_category'))).toBeInTheDocument();
     });
   });
+
+  it('brak zrodla (satelita missing) nie psuje raportu: wszystkie sekcje i nazwany brak', () => {
+    renderReport({
+      ...FIELD_REPORT,
+      assessment: { ...FIELD_REPORT.assessment, vegetation: null },
+      sources: FIELD_REPORT.sources.map((source) =>
+        source.id === 'vegetation' ? { ...source, status: 'missing' as const } : source,
+      ),
+      limitations: [...FIELD_REPORT.limitations, 'vegetation_missing'],
+    });
+
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(7);
+    expect(screen.getByTestId('report').querySelector('[data-source="vegetation"]')).toHaveAttribute(
+      'data-status',
+      'missing',
+    );
+    expect(screen.getByText(t('sources.limitationItems.vegetation_missing'))).toBeInTheDocument();
+  });
 });
