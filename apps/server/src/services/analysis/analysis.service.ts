@@ -184,7 +184,8 @@ export function createAnalysisService({
         sampleSources: fetched.filter((source) => source.sample).map((source) => source.id),
       };
       const assessment = stages.assess(input);
-      const causes = stages.causes(input, assessment);
+      const history = stages.history(input);
+      const causes = stages.causes(input, assessment, history);
       const zones = stages.zones(input);
       const reportSources = [parcelSource, ...fetched];
       const missing = fetched.filter((source) => source.status === 'missing');
@@ -221,7 +222,7 @@ export function createAnalysisService({
         field,
         crop,
         assessment,
-        history: stages.history(input),
+        history,
         causes,
         recommendations: stages.recommend(input, assessment, causes, zones),
         zones,

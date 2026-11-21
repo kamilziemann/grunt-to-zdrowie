@@ -59,7 +59,7 @@ describe('analysis service', () => {
     const report = await service({}, { stages: engineStages }).analyze(request('2026-07-20'));
 
     expect(waterReportSchema.safeParse(report).error).toBeUndefined();
-    expect(report.meta.sampleParts).toEqual(['causes', 'zones', 'recommendations']);
+    expect(report.meta.sampleParts).toEqual(['zones']);
     expect(report.assessment.climaticBalance).toMatchObject({ method: 'iung_dg95', periodNo: 7 });
     expect(report.assessment.climaticBalance?.categoryScenarios).toHaveLength(4);
     expect(report.assessment.rootZone?.seasonEtDeficitMm).toBeGreaterThanOrEqual(0);

@@ -1,17 +1,21 @@
-// Etapy silnika analizy w wersji uzywanej przez aplikacje: ocena i historia sa liczone z danych (KBW wg IUNG +
-// bilans strefy korzeniowej FAO-56), a przyczyny, strefy i zalecenia sa jeszcze przykladowe (pakiety P9 i P12) -
-// raport mowi o tym w `meta.sampleParts`. Kazdy etap podmienia sie tutaj osobno.
+// Etapy silnika analizy w wersji uzywanej przez aplikacje: ocena i historia (KBW wg IUNG + bilans strefy korzeniowej
+// FAO-56), przyczyny i zalecenia (reguly na danych z raportu) sa liczone; strefy na polu sa jeszcze przykladowe
+// (pakiet P12) - raport mowi o tym w `meta.sampleParts`. Kazdy etap podmienia sie tutaj osobno.
 import type { AnalysisStages } from '../analysis-stages';
 import { assess } from '../assessment';
+import { causes } from '../causes';
 import { cropAtDate } from '../crop-calendar';
 import { history } from '../history';
+import { recommend } from '../recommendations';
 import { sampleStages } from '../sample-stages';
 
 export const engineStages: AnalysisStages = {
-  // przyczyny, strefy, zalecenia i ograniczenia z wersji przykladowej
+  // strefy i ograniczenia z wersji przykladowej
   ...sampleStages,
-  sampleParts: ['causes', 'zones', 'recommendations'],
+  sampleParts: ['zones'],
   crop: cropAtDate,
   assess,
   history,
+  causes,
+  recommend,
 };

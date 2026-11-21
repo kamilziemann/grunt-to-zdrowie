@@ -51,8 +51,8 @@ export interface AnalysisStages {
   assess(input: StageInput): Assessment;
   /** Podatnosc na niedobory w 10 sezonach przed data analizy. */
   history(input: StageInput): History;
-  /** Przyczyny niedoboru - tylko gdy ocena je uzasadnia. */
-  causes(input: StageInput, assessment: Assessment): Cause[];
+  /** Przyczyny niedoboru - tylko gdy ocena (albo powtarzalny niedobor w historii) je uzasadnia. */
+  causes(input: StageInput, assessment: Assessment, history?: History): Cause[];
   /** Strefy wewnatrz pola; null, gdy brakuje danych przestrzennych. */
   zones(input: StageInput): ZoneMap | null;
   /** Zalecenia wynikaja z oceny i przyczyn: retencja, potem agrotechnika, na koncu nawadnianie. */
