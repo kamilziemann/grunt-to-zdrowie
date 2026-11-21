@@ -1,0 +1,62 @@
+[
+  [
+    {
+      "kind": 20,
+      "features": 2,
+      "nearest_m": 0
+    },
+    {
+      "kind": 21,
+      "features": 1,
+      "nearest_m": 0
+    },
+    {
+      "kind": 23,
+      "features": 1,
+      "nearest_m": 452.8003697333288
+    }
+  ],
+  [
+    {
+      "edge_m": 1065.698508869524,
+      "wooded_edge_m": 1046.3809954221606
+    }
+  ],
+  [
+    {
+      "kind": 40,
+      "features": 2,
+      "nearest_m": 1928.4675401782517,
+      "nearest_name": null
+    }
+  ],
+  [],
+  [
+    {
+      "kind": 50,
+      "name": "Dolina Biebrzy"
+    },
+    {
+      "kind": 50,
+      "name": "Ostoja Biebrzańska"
+    },
+    {
+      "kind": 52,
+      "name": "Biebrzański Park Narodowy"
+    }
+  ],
+  [
+    {
+      "table_name": "bdot_cover",
+      "imported_at": "2026-11-21T22:52:19.801Z"
+    },
+    {
+      "table_name": "bdot_protected",
+      "imported_at": "2026-11-21T22:52:46.580Z"
+    },
+    {
+      "table_name": "bdot_waterworks",
+      "imported_at": "2026-11-21T23:06:49.150Z"
+    }
+  ]
+]

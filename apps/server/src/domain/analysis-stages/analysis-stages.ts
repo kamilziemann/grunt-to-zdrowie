@@ -11,6 +11,7 @@ import type {
   LimitationId,
   ReportPart,
   SourceId,
+  Surroundings,
   WaterReport,
   ZoneMap,
 } from '@app/contracts';
@@ -36,6 +37,8 @@ export interface StageInput {
   terrain: TerrainData | null;
   hydro: HydroContext | null;
   vegetation: VegetationSeries | null;
+  /** otoczenie pola (drzewa, budowle wodne, obszary chronione); brak = reguly jak bez tych danych */
+  surroundings?: Surroundings | null;
   /** zrodla, ktore oddaly dane przykladowe (atrapy) - etap nie moze przypisac im wysokiej pewnosci */
   sampleSources?: readonly SourceId[];
 }

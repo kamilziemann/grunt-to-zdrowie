@@ -30,6 +30,7 @@ import { createSentinelStatisticsSource, sentinelCacheTtl } from './infrastructu
 import { createSoilGridsSource, soilGridsCacheTtl } from './infrastructure/soilgrids';
 import { STATIC_TTL_S } from './domain/source-cache-policy';
 import { createTerrainTilesSource } from './infrastructure/terrain-tiles';
+import { createPostgisSurroundingsSource } from './infrastructure/surroundings-postgis';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createReportsRepository } from './repositories/reports';
 import { isoDateInPoland } from './domain/iso-date';
@@ -105,6 +106,8 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       terrain: createTerrainTilesSource({ fetch: remember(() => STATIC_TTL_S) }),
       // hydrografia BDOT10k w Postgresie (Neon); bez DATABASE_URL zrodlo zglasza brak danych
       hydro: createPostgisHydroSource({ run: sqlRunner }),
+      // otoczenie pola z tabel BDOT10k obok hydrografii (drzewa, budowle i waly, obszary chronione)
+      surroundings: createPostgisSurroundingsSource({ run: sqlRunner }),
       // Sentinel-2 przez API statystyk Copernicus; bez kluczy OAuth zrodlo zglasza brak danych
       vegetation: createSentinelStatisticsSource({
         fetch: remember(sentinelCacheTtl(today)),

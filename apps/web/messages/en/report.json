@@ -494,7 +494,8 @@
       "current_boundaries": "The parcel boundaries are current. They may have been different on the analysis day.",
       "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
       "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth.",
-      "sample_data_partial": "Some of the data is still sample data (the box at the top of the report says which). Treat those parts as illustrative."
+      "sample_data_partial": "Some of the data is still sample data (the box at the top of the report says which). Treat those parts as illustrative.",
+      "drainage_structures_unknown": "Maps do not show weirs or culverts on ditches. Before planning a ditch weir, check on site what is already on the ditch."
     },
     "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s.",
     "statusNote": {

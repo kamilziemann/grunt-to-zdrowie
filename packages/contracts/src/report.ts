@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { fieldAreaSchema, isoDateSchema, sourceIdSchema, sourceRefSchema } from './analysis';
 import { cropIdSchema, cropStageSchema, iungCropGroupSchema } from './crop';
 import { parcelGeometrySchema } from './parcel';
+import { surroundingsSchema } from './surroundings';
 
 /**
  * Poziom sytuacji wodnej. `out_of_season` = data poza okresem 21 marca - 30 wrzesnia, w ktorym obowiazuja progi
@@ -279,6 +280,26 @@ export const measureIdSchema = z.enum(MEASURE_IDS);
 
 export type MeasureId = z.infer<typeof measureIdSchema>;
 
+/**
+ * Dopiski do zalecenia z otoczenia pola: sprawdz istniejace urzadzenie na rowie, jaz w poblizu, styk rowu z rura,
+ * obszar chroniony, zrodlo, teren odwadniany mechanicznie. `text` to gotowe zdanie po polsku z liczbami.
+ */
+export const RECOMMENDATION_NOTE_IDS = [
+  'check_existing_structure',
+  'structure_nearby',
+  'piped_junction',
+  'protected_area',
+  'spring_nearby',
+  'drained_lowland',
+] as const;
+
+export const recommendationNoteSchema = z.object({
+  id: z.enum(RECOMMENDATION_NOTE_IDS),
+  text: z.string(),
+});
+
+export type RecommendationNote = z.infer<typeof recommendationNoteSchema>;
+
 export const recommendationSchema = z.object({
   measure: measureIdSchema,
   category: z.enum(['retention', 'agrotech']),
@@ -296,6 +317,8 @@ export const recommendationSchema = z.object({
   effort: z.enum(['low', 'medium', 'high']),
   /** formalnosci wodnoprawne: brak, zgloszenie/powiadomienie, pozwolenie */
   legal: z.enum(['none', 'notification', 'permit']),
+  /** dopiski z otoczenia pola (gotowe zdania); brak = nic do dodania */
+  notes: z.array(recommendationNoteSchema).optional(),
 });
 
 export type Recommendation = z.infer<typeof recommendationSchema>;
@@ -460,6 +483,7 @@ export const LIMITATION_IDS = [
   'current_boundaries',
   'no_in_situ_measurement',
   'field_verification_needed',
+  'drainage_structures_unknown',
 ] as const;
 
 export const limitationIdSchema = z.enum(LIMITATION_IDS);
@@ -491,6 +515,8 @@ export const waterReportSchema = z.object({
   field: fieldAreaSchema,
   /** uzytek gruntowy z ewidencji; brak = obszar narysowany albo ewidencja nie odpowiedziala */
   landUse: landUseSchema.optional(),
+  /** otoczenie pola z BDOT10k (drzewa, budowle i waly, obszary chronione); brak = baza nie odpowiedziala */
+  surroundings: surroundingsSchema.optional(),
   crop: cropAtDateSchema,
   assessment: assessmentSchema,
   history: historySchema,

@@ -4,7 +4,7 @@
 //
 // Umowa dla kazdego zrodla: "nie ma danych" to odpowiedz, nie wyjatek - `data: null` i `source.status: 'missing'`
 // z powodem w `note`. Limit czasu i nieoczekiwane bledy lapie orkiestrator (services/analysis).
-import type { FieldArea, SoilCategory, SourceRef } from '@app/contracts';
+import type { FieldArea, SoilCategory, SourceRef, Surroundings } from '@app/contracts';
 
 export interface Sourced<T> {
   data: T | null;
@@ -190,6 +190,11 @@ export interface HydroSource {
   context(field: FieldArea): Promise<Sourced<HydroContext>>;
 }
 
+/** Otoczenie pola z BDOT10k: drzewa przy granicy, budowle i waly, zrodla, styk rowu z rura, obszary chronione. */
+export interface SurroundingsSource {
+  surroundings(field: FieldArea): Promise<Sourced<Surroundings>>;
+}
+
 export interface VegetationSource {
   series(field: FieldArea, date: string): Promise<Sourced<VegetationSeries>>;
 }
@@ -202,4 +207,6 @@ export interface DataSources {
   terrain: TerrainSource;
   hydro: HydroSource;
   vegetation: VegetationSource;
+  /** otoczenie pola; brak = raport bez `surroundings` (zalecenia jak bez tych danych) */
+  surroundings?: SurroundingsSource;
 }

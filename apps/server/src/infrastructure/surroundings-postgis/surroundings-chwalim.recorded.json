@@ -1,0 +1,50 @@
+[
+  [
+    {
+      "kind": 23,
+      "features": 2,
+      "nearest_m": 137.163261197482
+    },
+    {
+      "kind": 24,
+      "features": 2,
+      "nearest_m": 433.24028230698696
+    }
+  ],
+  [
+    {
+      "edge_m": 1899.922714900699,
+      "wooded_edge_m": 0
+    }
+  ],
+  [
+    {
+      "kind": 30,
+      "features": 6,
+      "nearest_m": 347.3504193319603,
+      "nearest_name": null
+    },
+    {
+      "kind": 40,
+      "features": 44,
+      "nearest_m": 1106.4867187209586,
+      "nearest_name": null
+    }
+  ],
+  [],
+  [],
+  [
+    {
+      "table_name": "bdot_cover",
+      "imported_at": "2026-11-21T22:52:19.801Z"
+    },
+    {
+      "table_name": "bdot_protected",
+      "imported_at": "2026-11-21T22:52:46.580Z"
+    },
+    {
+      "table_name": "bdot_waterworks",
+      "imported_at": "2026-11-21T23:06:49.150Z"
+    }
+  ]
+]

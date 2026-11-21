@@ -1,0 +1,60 @@
+[
+  [
+    {
+      "kind": 20,
+      "features": 26,
+      "nearest_m": 0
+    },
+    {
+      "kind": 23,
+      "features": 16,
+      "nearest_m": 0
+    },
+    {
+      "kind": 24,
+      "features": 5,
+      "nearest_m": 174.63810930540038
+    }
+  ],
+  [
+    {
+      "edge_m": 969.3988588244142,
+      "wooded_edge_m": 127.08928247281276
+    }
+  ],
+  [
+    {
+      "kind": 40,
+      "features": 1,
+      "nearest_m": 2999.439460131965,
+      "nearest_name": null
+    },
+    {
+      "kind": 41,
+      "features": 2,
+      "nearest_m": 105.62458772773414,
+      "nearest_name": null
+    }
+  ],
+  [
+    {
+      "distance_m": 105.62458772773414,
+      "point": "{\"type\":\"Point\",\"coordinates\":[22.851388,54.04103]}"
+    }
+  ],
+  [],
+  [
+    {
+      "table_name": "bdot_cover",
+      "imported_at": "2026-11-21T22:52:19.801Z"
+    },
+    {
+      "table_name": "bdot_protected",
+      "imported_at": "2026-11-21T22:52:46.580Z"
+    },
+    {
+      "table_name": "bdot_waterworks",
+      "imported_at": "2026-11-21T23:06:49.150Z"
+    }
+  ]
+]

@@ -10,16 +10,19 @@ import type {
   Evidence,
   IrrigationAdvice,
   Recommendation,
+  RecommendationNote,
   ZoneMap,
 } from '@app/contracts';
 
 import type { Recommendations, StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
+import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
+import { ditchWeirNotes, pondNotes, SPRING_NEAR_M } from './notes';
 
 type Measure = Omit<Recommendation, 'causes' | 'evidence' | 'zoneId'>;
 
@@ -35,6 +38,8 @@ interface Rule {
   effect?: (input: StageInput) => Recommendation['effect'];
   /** formalnosci zalezne od skali (nadpisuja stale) */
   legal?: (input: StageInput) => Recommendation['legal'];
+  /** dopiski z otoczenia pola (gotowe zdania) */
+  notes?: (input: StageInput) => RecommendationNote[];
 }
 
 /**
@@ -103,24 +108,93 @@ const POND: Measure = {
 const pondHolds = ({ soil }: StageInput): boolean =>
   soil?.category !== 1 && (soil?.availableWaterMmPerM ?? 0) >= LIGHT_SOIL_MM_PER_M;
 
+/** oczko ma sens poza polderem - tam obnizenie odwadnia przepompownia, a wode zatrzymuje sie w rowach */
+const pondFits = (input: StageInput): boolean => pondHolds(input) && !drainedLowland(input).detected;
+
+/** granica pola z drzewami w co najmniej polowie - pas zadrzewien niczego nie doda */
+const SHELTERED_SHARE = 0.5;
+
+/** Zrodlo blisko pola - argument za oczkiem (zasilanie latem). */
+function springEvidence({ surroundings }: StageInput): Evidence[] {
+  const spring = surroundings?.water.nearestSpring ?? null;
+
+  return spring && spring.distanceM <= SPRING_NEAR_M
+    ? [
+        {
+          metric: 'nearest_spring_m',
+          value: spring.distanceM,
+          unit: 'm',
+          reference: SPRING_NEAR_M,
+          source: 'hydro',
+        },
+      ]
+    : [];
+}
+
+/** Zastawka: jaz w poblizu, styk rowu z rura i dowody polderu. */
+function weirEvidence(input: StageInput): Evidence[] {
+  const water = input.surroundings?.water;
+  const structure = water?.nearestStructure ?? null;
+  const junction = water?.pipedJunction ?? null;
+
+  return [
+    ...(structure
+      ? [{ metric: 'nearest_structure_m', value: structure.distanceM, unit: 'm', source: 'hydro' as const }]
+      : []),
+    ...(junction
+      ? [
+          {
+            metric: 'piped_junction_m',
+            value: junction.distanceM,
+            unit: 'm',
+            reference: water?.junctionRadiusM ?? 0,
+            source: 'hydro' as const,
+          },
+        ]
+      : []),
+    ...drainedLowland(input).evidence,
+  ];
+}
+
+const DITCH_WEIR: Measure = {
+  measure: 'ditch_weir',
+  category: 'retention',
+  priority: 1,
+  effect: null,
+  effort: 'medium',
+  // zastawka to urzadzenie wodne: zgloszenie wodnoprawne i uzgodnienie ze spolka wodna / zarzadca rowu
+  legal: 'notification',
+};
+
+const weirEffect = ({ hydro }: StageInput): Recommendation['effect'] => {
+  const length = hydro?.ditchLengthInFieldM ?? 0;
+
+  return length > 0 ? { kind: 'volume_m3', value: Math.round(length * WEIR_STORAGE_M3_PER_M) } : null;
+};
+
 const RULES: readonly Rule[] = [
   // --- retencja: zatrzymac wode w krajobrazie i w rowach, zanim odplynie ---
   {
-    measure: {
-      measure: 'ditch_weir',
-      category: 'retention',
-      priority: 1,
-      effect: null,
-      effort: 'medium',
-      // zastawka to urzadzenie wodne: zgloszenie wodnoprawne i uzgodnienie ze spolka wodna / zarzadca rowu
-      legal: 'notification',
-    },
+    measure: DITCH_WEIR,
     answers: ['fast_drainage'],
-    effect: ({ hydro }) => {
-      const length = hydro?.ditchLengthInFieldM ?? 0;
-
-      return length > 0 ? { kind: 'volume_m3', value: Math.round(length * WEIR_STORAGE_M3_PER_M) } : null;
-    },
+    effect: weirEffect,
+    extraEvidence: weirEvidence,
+    notes: (input) => ditchWeirNotes(input, drainedLowland(input)),
+  },
+  // polder: zamiast oczka w obnizeniu - regulowany odplyw w rowach, takze gdy row nie jest przy samym polu
+  {
+    measure: DITCH_WEIR,
+    answers: [
+      'fast_drainage',
+      'no_landscape_retention',
+      'surface_runoff',
+      'precipitation_deficit',
+      'crop_sensitivity',
+    ],
+    when: (input) => drainedLowland(input).detected,
+    effect: weirEffect,
+    extraEvidence: weirEvidence,
+    notes: (input) => ditchWeirNotes(input, drainedLowland(input)),
   },
   {
     measure: {
@@ -150,7 +224,7 @@ const RULES: readonly Rule[] = [
   {
     measure: { ...POND, priority: 1 },
     answers: ['no_landscape_retention', 'surface_runoff', 'precipitation_deficit', 'crop_sensitivity'],
-    when: (input) => fieldDepression(input) !== null && pondHolds(input),
+    when: (input) => fieldDepression(input) !== null && pondFits(input),
     effect: (input) => {
       const depression = fieldDepression(input);
 
@@ -161,18 +235,34 @@ const RULES: readonly Rule[] = [
     extraEvidence: (input) => {
       const depression = fieldDepression(input);
 
-      return depression
-        ? [
-            { metric: 'depression_volume_m3', value: depression.volumeM3, unit: 'm3', source: 'terrain' },
-            { metric: 'depression_area_m2', value: depression.areaM2, unit: 'm2', source: 'terrain' },
-          ]
-        : [];
+      return [
+        ...(depression
+          ? [
+              {
+                metric: 'depression_volume_m3',
+                value: depression.volumeM3,
+                unit: 'm3',
+                source: 'terrain' as const,
+              },
+              {
+                metric: 'depression_area_m2',
+                value: depression.areaM2,
+                unit: 'm2',
+                source: 'terrain' as const,
+              },
+            ]
+          : []),
+        ...springEvidence(input),
+      ];
     },
+    notes: pondNotes,
   },
   {
     measure: POND,
     answers: ['no_landscape_retention'],
-    when: pondHolds,
+    when: pondFits,
+    extraEvidence: springEvidence,
+    notes: pondNotes,
   },
   {
     measure: {
@@ -195,6 +285,21 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['no_landscape_retention', 'high_evaporative_demand'],
+    // tylko gdy granica pola jest w wiekszosci bez drzew; pole oslonione (las, zadrzewienia) nie dostaje zalecenia
+    when: ({ surroundings }) => !surroundings || surroundings.trees.woodedEdgeShare < SHELTERED_SHARE,
+    // "z 1900 m granicy drzewa rosna przy 0 m"
+    extraEvidence: ({ surroundings }) =>
+      surroundings
+        ? [
+            {
+              metric: 'wooded_edge_m',
+              value: surroundings.trees.woodedEdgeM,
+              unit: 'm',
+              reference: surroundings.trees.edgeM,
+              source: 'hydro',
+            },
+          ]
+        : [],
   },
   // --- agrotechnika: wiecej wody w glebie i mniej parowania ---
   {
@@ -287,6 +392,8 @@ function fromRule(
 
   if (!first) return null;
 
+  const notes = rule.notes?.(input) ?? [];
+
   return {
     ...rule.measure,
     ...(rule.effect ? { effect: rule.effect(input) } : {}),
@@ -295,6 +402,7 @@ function fromRule(
     evidence: [first, ...rest],
     // miejsce na polu: oczko w zaglebieniu, zastawka przy rowie, pas trawiasty na stoku; bez stref - cale pole
     zoneId: zoneForMeasure(rule.measure.measure, zones),
+    ...(notes.length > 0 ? { notes } : {}),
   };
 }
 

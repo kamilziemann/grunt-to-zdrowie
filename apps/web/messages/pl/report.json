@@ -494,7 +494,8 @@
       "current_boundaries": "Granice działki są dzisiejsze. W dniu analizy mogły być inne.",
       "no_in_situ_measurement": "Nikt nie mierzył wilgotności gleby na miejscu. To obliczenia z danych zdalnych.",
       "field_verification_needed": "Przed decyzją sprawdź glebę na polu, np. łopatą na głębokości korzeni.",
-      "sample_data_partial": "Część danych jest jeszcze przykładowa (które – mówi ramka na początku raportu). Te części traktuj poglądowo."
+      "sample_data_partial": "Część danych jest jeszcze przykładowa (które – mówi ramka na początku raportu). Te części traktuj poglądowo.",
+      "drainage_structures_unknown": "Mapy nie pokazują zastawek ani przepustów na rowach. Zanim zaplanujesz zastawkę, sprawdź na miejscu, co już jest na rowie."
     },
     "meta": "Raport {id}, silnik {version}, przygotowany {date} w {seconds} s.",
     "statusNote": {

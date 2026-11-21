@@ -8,6 +8,7 @@ import type { RawServerEnv } from '@app/env/server';
 import { createContainer, type ContainerOverrides } from '../src/container';
 import { createApp, type App } from '../src/entry/app';
 import { createSampleSources } from '../src/infrastructure/sample-sources';
+import { createPostgisSurroundingsSource } from '../src/infrastructure/surroundings-postgis';
 
 export function testEnv(extra: Record<string, unknown> = {}): RawServerEnv {
   return { ...env, ...extra };
@@ -33,7 +34,12 @@ export function makeApp(
     // test zapisu podaje repozytorium D1 jawnie (test/integration/reports.test.ts)
     reportStore: null,
     ...overrides,
-    analysisSources: { ...createSampleSources(), ...overrides.analysisSources },
+    // otoczenie pola: "brak bazy" (nigdy prawdziwy Neon), test podaje zrodlo w pamieci, gdy go potrzebuje
+    analysisSources: {
+      ...createSampleSources(),
+      surroundings: createPostgisSurroundingsSource({ run: null }),
+      ...overrides.analysisSources,
+    },
   };
   const app = createApp({ createContainer: (deps) => createContainer(deps, withSources) });
 

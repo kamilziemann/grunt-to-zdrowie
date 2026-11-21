@@ -9,3 +9,4 @@ export * from './analysis';
 export * from './report';
 export * from './hydro';
 export * from './imagery';
+export * from './surroundings';

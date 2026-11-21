@@ -177,6 +177,48 @@ describe('causes', () => {
     );
   });
 
+  it('granica pola bez drzew (BDOT10k) to dowod przy parowaniu i braku retencji w krajobrazie', () => {
+    const trees = {
+      bandM: 15,
+      edgeM: 1900,
+      woodedEdgeM: 0,
+      woodedEdgeShare: 0,
+      nearestForestM: null,
+      nearestTreeRowM: 137,
+      searchRadiusM: 500,
+      openToWind: true,
+    };
+    const water = {
+      searchRadiusM: 3000,
+      nearestStructure: null,
+      structures: 0,
+      levees: 0,
+      nearestLeveeM: null,
+      nearestSpring: null,
+      nearestIntakeM: null,
+      pipedSegments: 0,
+      pipedJunction: null,
+      junctionRadiusM: 500,
+    };
+    const open = stageInput('2018-07-15', 70, { surroundings: { trees, water, protectedAreas: [] } });
+    const sheltered = stageInput('2018-07-15', 70, {
+      surroundings: {
+        trees: { ...trees, woodedEdgeM: 1500, woodedEdgeShare: 0.79, openToWind: false },
+        water,
+        protectedAreas: [],
+      },
+    });
+    const evidenceOf = (input: StageInput, id: string) =>
+      causes(input, assess(input))
+        .find((cause) => cause.id === id)
+        ?.evidence.filter((item) => item.metric === 'wooded_edge_m');
+    const edge = { metric: 'wooded_edge_m', value: 0, unit: 'm', reference: 1900, source: 'hydro' };
+
+    expect(evidenceOf(open, 'high_evaporative_demand')).toEqual([edge]);
+    expect(evidenceOf(open, 'no_landscape_retention')).toEqual([edge]);
+    expect(evidenceOf(sheltered, 'high_evaporative_demand')).toEqual([]);
+  });
+
   it('lekka gleba to przyczyna; ta sama gleba z atrapy nie jest dowodem', () => {
     const real = ids(stageInput('2018-07-15', 70, { soil: SAND }));
     const sample = ids(stageInput('2018-07-15', 70, { soil: SAND, sampleSources: ['soil', 'hydro'] }));

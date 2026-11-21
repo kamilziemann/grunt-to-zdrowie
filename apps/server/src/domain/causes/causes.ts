@@ -93,6 +93,21 @@ function vegetationEvidence(assessment: Assessment): Evidence[] {
   ];
 }
 
+/** Granica pola bez drzew (BDOT10k): "z 1900 m granicy drzewa rosna przy 0 m". */
+function openFieldEvidence({ surroundings }: StageInput): Evidence[] {
+  if (!surroundings?.trees.openToWind) return [];
+
+  return [
+    {
+      metric: 'wooded_edge_m',
+      value: surroundings.trees.woodedEdgeM,
+      unit: 'm',
+      reference: surroundings.trees.edgeM,
+      source: 'hydro',
+    },
+  ];
+}
+
 function weatherCauses(input: StageInput, assessment: Assessment): Cause[] {
   const balance = assessment.climaticBalance;
   const period = iungPeriodEndingBy(input.date);
@@ -145,6 +160,9 @@ function weatherCauses(input: StageInput, assessment: Assessment): Cause[] {
       ],
     });
   }
+
+  // pole otwarte na wiatr (granica bez drzew) paruje wiecej - dowod przy zapotrzebowaniu atmosfery
+  found.find((cause) => cause.id === 'high_evaporative_demand')?.evidence.push(...openFieldEvidence(input));
 
   // roslinnosc ponizej normy wzmacnia najsilniejsza przyczyne pogodowa (osobnej przyczyny w katalogu nie ma)
   const strongest = found.toSorted((a, b) => b.weight - a.weight)[0];
@@ -261,6 +279,7 @@ function landscapeCauses(input: StageInput, real: (id: SourceId) => boolean): Ca
             reference: hydro.searchRadiusM,
             source: 'hydro',
           },
+          ...openFieldEvidence(input),
         ],
       });
     }

@@ -1,4 +1,4 @@
-import type { Assessment, Cause, FieldArea, RootZone } from '@app/contracts';
+import type { Assessment, Cause, FieldArea, RootZone, Surroundings } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import type { HydroContext, SoilProfile } from '../analysis-ports';
@@ -216,6 +216,181 @@ describe('recommend', () => {
     const result = recommend(input(), assessment('ok'), []);
 
     expect([result.retention, result.agrotech]).toEqual([[], []]);
+  });
+});
+
+// Otoczenie jak 080904_5.0001.349/1 (Chwalim, dane z bazy 22.11.2026): granica 1900 m bez drzew, jaz 347 m, waly
+const OPEN_FIELD: Surroundings = {
+  trees: {
+    bandM: 15,
+    edgeM: 1900,
+    woodedEdgeM: 0,
+    woodedEdgeShare: 0,
+    nearestForestM: null,
+    nearestTreeRowM: 137,
+    searchRadiusM: 500,
+    openToWind: true,
+  },
+  water: {
+    searchRadiusM: 3000,
+    nearestStructure: { kind: 'weir', distanceM: 347, name: null },
+    structures: 6,
+    levees: 44,
+    nearestLeveeM: 1106,
+    nearestSpring: null,
+    nearestIntakeM: null,
+    pipedSegments: 0,
+    pipedJunction: null,
+    junctionRadiusM: 500,
+  },
+  protectedAreas: [],
+};
+
+describe('recommend z otoczeniem pola', () => {
+  const landscape = [cause('no_landscape_retention', 0.3), cause('high_evaporative_demand', 0.4)];
+  const measures = (extra: Partial<StageInput>, causes: Cause[] = landscape) =>
+    recommend(input(extra), assessment('drought'), causes).retention;
+
+  it('pas zadrzewien przy granicy bez drzew - z liczba; pole oslonione lasem go nie dostaje', () => {
+    const trees = measures({ surroundings: OPEN_FIELD }).find(
+      (item) => item.measure === 'field_margin_trees',
+    );
+    const sheltered: Surroundings = {
+      ...OPEN_FIELD,
+      trees: { ...OPEN_FIELD.trees, edgeM: 217, woodedEdgeM: 217, woodedEdgeShare: 1, openToWind: false },
+    };
+
+    expect(trees?.evidence).toContainEqual({
+      metric: 'wooded_edge_m',
+      value: 0,
+      unit: 'm',
+      reference: 1900,
+      source: 'hydro',
+    });
+    expect(measures({ surroundings: sheltered }).map((item) => item.measure)).not.toContain(
+      'field_margin_trees',
+    );
+    // bez danych o drzewach - jak dotad, zalecenie zostaje
+    expect(measures({}).map((item) => item.measure)).toContain('field_margin_trees');
+  });
+
+  it('zastawka: pytanie o istniejace urzadzenie, jaz 347 m z pytaniem do zarzadcy, styk rowu z rura', () => {
+    const withJunction: Surroundings = {
+      ...OPEN_FIELD,
+      water: { ...OPEN_FIELD.water, pipedJunction: { distanceM: 106, point: [22.851388, 54.04103] } },
+    };
+    const weir = measures({ surroundings: withJunction }, ALL).find((item) => item.measure === 'ditch_weir');
+
+    expect(weir?.notes?.map((note) => note.id)).toEqual([
+      'check_existing_structure',
+      'piped_junction',
+      'structure_nearby',
+    ]);
+    expect(weir?.notes?.[0]?.text).toContain('Sprawdź, czy na tym rowie jest już zastawka albo przepust');
+    expect(weir?.notes?.[1]?.text).toBe(
+      '106 m od pola otwarty rów wchodzi w rurę (zwykle przepust pod drogą) — to naturalne miejsce na piętrzenie wody w rowie.',
+    );
+    expect(weir?.notes?.[2]?.text).toBe(
+      '347 m od pola jest jaz — zapytaj zarządcę (spółka wodna, Wody Polskie), czy piętrzy wodę i w jakich miesiącach.',
+    );
+    expect(weir?.evidence.map((item) => item.metric)).toEqual(
+      expect.arrayContaining(['nearest_structure_m', 'piped_junction_m']),
+    );
+    // bez danych otoczenia tez pytamy o istniejaca zastawke - BDOT10k ich nie zna
+    expect(
+      measures({}, ALL)
+        .find((item) => item.measure === 'ditch_weir')
+        ?.notes?.map((note) => note.id),
+    ).toEqual(['check_existing_structure']);
+  });
+
+  it('obszar chroniony: zastrzezenie z nazwa przy oczku i zastawce, nie przy pasie zadrzewien', () => {
+    const loam = { ...SOIL, availableWaterMmPerM: 150, category: 3 as const };
+    const biebrza: Surroundings = {
+      ...OPEN_FIELD,
+      protectedAreas: [
+        { kind: 'national_park', name: 'Biebrzański Park Narodowy' },
+        { kind: 'natura2000', name: 'Dolina Biebrzy' },
+        { kind: 'natura2000', name: 'Ostoja Biebrzańska' },
+      ],
+    };
+    const retention = measures({ surroundings: biebrza, soil: loam }, [...ALL, ...landscape]);
+    const notesOf = (measure: string) =>
+      retention
+        .find((item) => item.measure === measure)
+        ?.notes?.filter((note) => note.id === 'protected_area');
+
+    expect(notesOf('small_pond')?.map((note) => note.text)).toEqual([
+      'Pole leży w parku narodowym (Biebrzański Park Narodowy). Ustawa o ochronie przyrody zakazuje tam zmian stosunków wodnych, które nie służą ochronie przyrody (art. 15 ust. 1 pkt 7) — zanim zaczniesz, uzgodnij to z dyrekcją parku.',
+      'Pole leży w obszarze Natura 2000 (Dolina Biebrzy, Ostoja Biebrzańska). Zakazane są działania, które mogą znacząco pogorszyć stan chronionych tam siedlisk i gatunków (art. 33 ust. 1 ustawy o ochronie przyrody) — zapytaj regionalnego dyrektora ochrony środowiska, czy ta zmiana stosunków wodnych może na nie wpłynąć.',
+    ]);
+    expect(notesOf('ditch_weir')).toHaveLength(2);
+    expect(retention.find((item) => item.measure === 'field_margin_trees')?.notes).toBeUndefined();
+  });
+
+  it('zrodlo przy polu jako argument za oczkiem; ujecie wody nie trafia do zalecen', () => {
+    const loam = { ...SOIL, availableWaterMmPerM: 150, category: 3 as const };
+    const spring: Surroundings = {
+      ...OPEN_FIELD,
+      water: {
+        ...OPEN_FIELD.water,
+        nearestSpring: { distanceM: 210, name: 'Źródło Marii' },
+        nearestIntakeM: 400,
+      },
+    };
+    const pond = measures({ surroundings: spring, soil: loam }).find((item) => item.measure === 'small_pond');
+
+    expect(pond?.notes).toEqual([
+      {
+        id: 'spring_nearby',
+        text: 'Źródło „Źródło Marii” 210 m od pola może zasilać oczko wodą także w suchym okresie — sprawdź, czy płynie latem.',
+      },
+    ]);
+    expect(pond?.evidence).toContainEqual({
+      metric: 'nearest_spring_m',
+      value: 210,
+      unit: 'm',
+      reference: 500,
+      source: 'hydro',
+    });
+    expect(JSON.stringify(pond)).not.toContain('ujęci');
+  });
+
+  it('polder (Zulawy, 221002_5.0011.185): zamiast oczka w obnizeniu - zatrzymanie wody w rowach', () => {
+    const loam = { ...SOIL, availableWaterMmPerM: 150, category: 4 as const };
+    const polder = {
+      soil: loam,
+      terrain: {
+        ...terrainWith({ areaM2: 24_900, volumeM3: 11_037, maxDepthM: 0.9 }),
+        summary: {
+          ...terrainWith({ areaM2: 24_900, volumeM3: 11_037, maxDepthM: 0.9 }).summary,
+          elevationMinM: -4.7,
+        },
+      },
+      hydro: { ...HYDRO, ditchesInRadius: 156, nearestWetlandM: null, wetlands: 0 },
+      surroundings: {
+        ...OPEN_FIELD,
+        water: { ...OPEN_FIELD.water, nearestStructure: null, nearestLeveeM: null },
+      },
+    };
+    // bez przyczyny "szybki odplyw" (row nie przy samym polu) - zastawka i tak, bo to polder
+    const causes = [cause('precipitation_deficit', 0.7), cause('no_landscape_retention', 0.3)];
+    const retention = measures(polder, causes);
+    const weir = retention.find((item) => item.measure === 'ditch_weir');
+
+    expect(retention.map((item) => item.measure)).not.toContain('small_pond');
+    expect(weir?.notes?.map((note) => note.id)).toEqual(['check_existing_structure', 'drained_lowland']);
+    expect(weir?.notes?.[1]?.text).toContain('najniższy punkt -4,7 m n.p.m., 156 odcinków rowów');
+    expect(weir?.evidence.map((item) => item.metric)).toEqual(
+      expect.arrayContaining(['elevation_min_m', 'ditches_in_radius']),
+    );
+    // to samo pole wyzej nad morzem - oczko w zaglebieniu wraca
+    expect(
+      measures(
+        { ...polder, terrain: terrainWith({ areaM2: 24_900, volumeM3: 11_037, maxDepthM: 0.9 }) },
+        causes,
+      ).map((item) => item.measure),
+    ).toContain('small_pond');
   });
 });
 

@@ -1,4 +1,4 @@
-import { waterReportSchema, type AnalysisRequest } from '@app/contracts';
+import { waterReportSchema, type AnalysisRequest, type Surroundings } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -245,6 +245,95 @@ describe('analysis service: ewidencja (klasouzytki)', () => {
 });
 
 describe('analysis service: zapis raportow', () => {
+  it('otoczenie pola: w raporcie i w zrodlach; brak bazy nie obniza statusu ani nie dodaje hydro_missing', async () => {
+    const surroundings: Surroundings = {
+      trees: {
+        bandM: 15,
+        edgeM: 900,
+        woodedEdgeM: 0,
+        woodedEdgeShare: 0,
+        nearestForestM: null,
+        nearestTreeRowM: null,
+        searchRadiusM: 500,
+        openToWind: true,
+      },
+      water: {
+        searchRadiusM: 3000,
+        nearestStructure: { kind: 'weir', distanceM: 347, name: null },
+        structures: 1,
+        levees: 0,
+        nearestLeveeM: null,
+        nearestSpring: null,
+        nearestIntakeM: null,
+        pipedSegments: 0,
+        pipedJunction: null,
+        junctionRadiusM: 500,
+      },
+      protectedAreas: [{ kind: 'landscape_park', name: 'Park Krajobrazowy Dolina Baryczy' }],
+    };
+    const provider = 'GUGiK BDOT10k (otoczenie pola)';
+    const known = await service(
+      {
+        surroundings: {
+          surroundings: () =>
+            Promise.resolve({
+              data: surroundings,
+              source: { id: 'hydro', provider, status: 'ok', sample: false },
+            }),
+        },
+      },
+      { stages: engineStages },
+    ).analyze(request('2026-07-20'));
+    const silent = await service({
+      surroundings: { surroundings: () => Promise.reject(new Error('connection refused')) },
+    }).analyze(request('2026-07-20'));
+
+    expect(waterReportSchema.safeParse(known).error).toBeUndefined();
+    expect(known.surroundings).toEqual({ ...surroundings, drainedLowland: false });
+    expect(
+      known.sources.filter((source) => source.id === 'hydro').map((source) => source.provider),
+    ).toContain(provider);
+    expect(silent.surroundings).toBeUndefined();
+    expect(silent.meta.status).toBe('complete');
+    expect(silent.limitations).not.toContain('hydro_missing');
+    expect(silent.sources.at(-1)).toMatchObject({
+      id: 'hydro',
+      provider: 'otoczenie pola',
+      status: 'missing',
+    });
+  });
+
+  it('zalecenie zastawki niesie ograniczenie: nie znamy zastawek ani przepustow na rowach', async () => {
+    const stages = {
+      ...sampleStages,
+      recommend: () => ({
+        retention: [
+          {
+            measure: 'ditch_weir' as const,
+            category: 'retention' as const,
+            priority: 1,
+            causes: ['fast_drainage' as const],
+            evidence: [{ metric: 'nearest_ditch_m', value: 0, unit: 'm', source: 'hydro' as const }],
+            zoneId: null,
+            effect: null,
+            effort: 'medium' as const,
+            legal: 'notification' as const,
+          },
+        ],
+        agrotech: [],
+        irrigation: null,
+      }),
+    };
+    const withWeir = await service({}, { stages }).analyze(request('2026-07-20'));
+    const without = await service(
+      {},
+      { stages: { ...sampleStages, recommend: () => ({ retention: [], agrotech: [], irrigation: null }) } },
+    ).analyze(request('2026-07-20'));
+
+    expect(withWeir.limitations).toContain('drainage_structures_unknown');
+    expect(without.limitations).not.toContain('drainage_structures_unknown');
+  });
+
   it('zapis albo odczyt, ktory pada, nie psuje analizy; raport bez zapisu = 404', async () => {
     const broken = {
       get: () => Promise.reject(new Error('D1 down')),

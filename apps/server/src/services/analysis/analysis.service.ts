@@ -20,6 +20,7 @@ import {
   parcelsFieldId,
   shortHash,
 } from '../../domain/field-area';
+import { drainedLowland } from '../../domain/drained-lowland';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import { summarizeLandUse } from '../../domain/land-use';
 import type {
@@ -36,7 +37,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.5.0';
+export const ANALYSIS_ENGINE_VERSION = '0.6.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -58,6 +59,12 @@ export const SOURCE_TIMEOUTS_MS: Record<Exclude<SourceId, 'parcel'>, number> = {
  * zrodla, zeby nie wydluzal analizy - spozniona ewidencja to raport bez opisu uzytku.
  */
 export const REGISTRY_TIMEOUT_MS = 6000;
+
+/**
+ * Otoczenie pola (drzewa, budowle wodne, obszary chronione) to argumenty do zalecen, nie podstawa oceny: brak tych
+ * danych nie obniza statusu raportu ani pewnosci, a zrodlo pokazuje sie z powodem w `sources`.
+ */
+export const SURROUNDINGS_TIMEOUT_MS = 5000;
 
 /** Zapas dni przed 10-letnim oknem: bilans potrzebuje rozbiegu, a pierwszy okres zaczyna sie 60 dni wczesniej. */
 const WARMUP_DAYS = 120;
@@ -110,11 +117,12 @@ async function settle<T>(
   id: SourceId,
   request: () => Promise<Sourced<T>>,
   timeoutMs: number,
+  name = SOURCE_NAMES[id],
 ): Promise<Sourced<T>> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const missing = (note: string): Sourced<T> => ({
     data: null,
-    source: { id, provider: SOURCE_NAMES[id], status: 'missing', sample: false, note },
+    source: { id, provider: name, status: 'missing', sample: false, note },
   });
   const timeout = new Promise<Sourced<T>>((resolve) => {
     timer = setTimeout(
@@ -129,7 +137,7 @@ async function settle<T>(
   try {
     return await Promise.race([request(), timeout]);
   } catch (error) {
-    return missing(failureNote(SOURCE_NAMES[id], error));
+    return missing(failureNote(name, error));
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
@@ -306,7 +314,8 @@ export function createAnalysisService({
           : Promise.resolve([]);
       const { field: resolved, source: parcelSource, parcels: found } = await resolveField(request.field);
       const from = addDays(addYears(date, -ANALYSIS_LIMITS.historyYears), -WARMUP_DAYS);
-      const [entries, meteo, forecast, soil, terrain, hydro, vegetation] = await Promise.all([
+      const surroundingsSource = sources.surroundings;
+      const [entries, meteo, forecast, soil, terrain, hydro, vegetation, surroundings] = await Promise.all([
         found.every((parcel) => parcel.landUse) ? Promise.resolve([]) : registryLookup,
         settle('meteo', () => sources.meteo.series(resolved.centroid, from, date), limits.meteo),
         // prognoza ma sens tylko dla analizy "na dzis"; dla dat historycznych nie udajemy, ze ja znamy
@@ -321,6 +330,14 @@ export function createAnalysisService({
         settle('terrain', () => sources.terrain.terrain(resolved), limits.terrain),
         settle('hydro', () => sources.hydro.context(resolved), limits.hydro),
         settle('vegetation', () => sources.vegetation.series(resolved, date), limits.vegetation),
+        surroundingsSource
+          ? settle(
+              'hydro',
+              () => surroundingsSource.surroundings(resolved),
+              SURROUNDINGS_TIMEOUT_MS,
+              'otoczenie pola',
+            )
+          : null,
       ]);
       const field = found.length > 0 ? withRegistry(resolved, found, entries) : resolved;
       const landUse = summarizeLandUse(field.landUse, cropId, field.registryAreaHa);
@@ -340,13 +357,14 @@ export function createAnalysisService({
         terrain: terrain.data,
         hydro: hydro.data,
         vegetation: vegetation.data,
+        surroundings: surroundings?.data ?? null,
         sampleSources: fetched.filter((source) => source.sample).map((source) => source.id),
       };
       const assessment = stages.assess(input);
       const history = stages.history(input);
       const causes = stages.causes(input, assessment, history);
       const zones = stages.zones(input);
-      const reportSources = [parcelSource, ...fetched];
+      const reportSources = [parcelSource, ...fetched, ...(surroundings ? [surroundings.source] : [])];
       const missing = fetched.filter((source) => source.status === 'missing');
       const limitations = new Set<LimitationId>(stages.limitations(input, assessment));
 
@@ -357,6 +375,12 @@ export function createAnalysisService({
       }
 
       if (reportSources.some((source) => source.sample)) limitations.add('sample_data');
+
+      const recommendations = stages.recommend(input, assessment, causes, zones);
+
+      // BDOT10k nie zna zastawek ani przepustow - przy zaleceniu zastawki raport mowi wprost, czego nie wiemy
+      if (recommendations.retention.some((item) => item.measure === 'ditch_weir'))
+        limitations.add('drainage_structures_unknown');
 
       // granice dzialek i hydrografia sa biezace - dla dawnej daty to wspolczesne przyblizenie
       if (date < addDays(today, -BOUNDARIES_STALE_DAYS)) limitations.add('current_boundaries');
@@ -380,11 +404,14 @@ export function createAnalysisService({
         },
         field,
         ...(landUse ? { landUse } : {}),
+        ...(input.surroundings
+          ? { surroundings: { ...input.surroundings, drainedLowland: drainedLowland(input).detected } }
+          : {}),
         crop,
         assessment,
         history,
         causes,
-        recommendations: stages.recommend(input, assessment, causes, zones),
+        recommendations,
         zones,
         sources: reportSources,
         limitations: [...limitations],
