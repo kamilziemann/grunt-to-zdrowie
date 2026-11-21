@@ -1,12 +1,12 @@
-// Zamiana wiersza pliku BDOT10k na rekord tabeli `bdot_hydro`: klasyfikacja, uproszczenie geometrii, zapis EWKB.
+// Zamiana wiersza pliku BDOT10k na rekord tabeli (`bdot_hydro` albo `bdot_context`): klasyfikacja, uproszczenie geometrii, zapis EWKB.
 // Wiersz przychodzi z czytnika Parquet z geometria juz rozkodowana do postaci GeoJSON (wspolrzedne w EPSG:2180).
 import { toEwkbHex, type HydroGeometry } from '../ewkb';
-import { BDOT_SRID, type HydroKind, type HydroLayer } from '../layers';
+import { BDOT_SRID, type BdotLayer } from '../layers';
 import { simplifyLine, simplifyRing, type Position } from '../simplify';
 
-export interface HydroRecord {
-  /** rodzaj obiektu (kody: HYDRO_KIND) */
-  k: HydroKind;
+export interface FeatureRecord {
+  /** rodzaj obiektu (kody: HYDRO_KIND albo CONTEXT_KIND, zaleznie od tabeli warstwy) */
+  k: number;
   /** nazwa wlasna, gdy obiekt ja ma (rzeki, kanaly, jeziora) */
   n: string | null;
   /** geometria EWKB szesnastkowo */
@@ -52,11 +52,11 @@ export function simplifyGeometry(value: unknown, toleranceM: number): HydroGeome
 }
 
 /** Rekord do zapisu albo null, gdy obiekt pomijamy (pod ziemia, morze, zla geometria). */
-export function toHydroRecord(
-  layer: HydroLayer,
+export function toFeatureRecord(
+  layer: BdotLayer,
   row: Readonly<Record<string, unknown>>,
   toleranceM: number,
-): HydroRecord | null {
+): FeatureRecord | null {
   const kind = layer.classify(row);
 
   if (kind === null) return null;
