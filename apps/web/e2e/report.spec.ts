@@ -1,5 +1,5 @@
 import { expect, test } from './support/test';
-import { mockAnalysisApi, PARCEL_ID, REPORT_URL } from './support/analysis-api';
+import { DROUGHT_REPORT_URL, mockAnalysisApi, PARCEL_ID, REPORT_URL } from './support/analysis-api';
 import { expectTouchTargets } from './support/touch-targets';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
@@ -111,5 +111,29 @@ test.describe('analiza i raport', () => {
       await expectTouchTargets(page.getByTestId('report-header').getByRole('link'));
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
     });
+  });
+
+  test('raport z prawdziwego silnika: ten rok na tle lat, kalendarz przewijany we własnym kontenerze', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockAnalysisApi(page);
+    await page.goto(DROUGHT_REPORT_URL);
+
+    await expect(page.getByTestId('verdict')).toContainText('Susza');
+    await expect(page.getByTestId('history-summary')).toContainText('najsuchszy taki okres z 11 lat');
+    await expect(page.getByTestId('sample-part')).toHaveCount(4);
+    await expect(page.getByTestId('irrigation-deficit')).toContainText('brakuje ok. 136 l/m²');
+
+    const calendar = page.getByTestId('risk-calendar');
+
+    await expect(calendar.locator('tr[data-current] [data-status="drought"]')).toHaveCount(1);
+
+    // kalendarz szerszy niz telefon przewija sie w swoim kontenerze, strona nie
+    const scroller = calendar.getByRole('region');
+    const widths = await scroller.evaluate((element) => [element.scrollWidth, element.clientWidth]);
+
+    expect(widths[0]).toBeGreaterThan(widths[1] ?? 0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });
