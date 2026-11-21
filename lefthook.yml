@@ -1,0 +1,33 @@
+# Lefthook - hooki gita. Instalacja: `bun install` (skrypt prepare) albo `bun x lefthook install`.
+# Pre-commit: najpierw sekwencyjnie autofix na staged plikach (oxfmt, potem puste linie z `arch/padding-lines` -
+# musi isc po oxfmt, bo oxfmt moze zlamac dluga jednolinijkowa instrukcje na kilka linii), a dopiero po nim
+# walidacja (lint i architektura rownolegle) - dzieki temu lint nie czyta plikow w trakcie zapisu.
+pre-commit:
+  jobs:
+    - name: fix
+      group:
+        piped: true
+        jobs:
+          - name: format
+            glob: '*.{ts,tsx,js,mjs,cjs,json,jsonc,md,css,yml,yaml}'
+            run: bun tools/scripts/oxfmt.mjs --write {staged_files}
+            stage_fixed: true
+          - name: padding
+            glob: '*.{ts,tsx,js,mjs,cjs}'
+            run: bun x oxlint -c .oxlintrc.padding.json --fix --no-error-on-unmatched-pattern {staged_files}
+            stage_fixed: true
+    - name: verify
+      group:
+        parallel: true
+        jobs:
+          - name: lint
+            glob: '*.{ts,tsx,js,mjs,cjs}'
+            run: bun x oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}
+          - name: architecture
+            glob: '{apps,packages,tools}/**/*.{ts,tsx}'
+            run: bun run architecture:check
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bun x commitlint --edit {1}
