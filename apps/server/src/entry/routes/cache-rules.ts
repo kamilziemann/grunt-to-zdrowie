@@ -8,7 +8,7 @@ import type { Context } from 'hono';
 
 import type { AppEnv } from '../../services/container';
 import { privateByDefault, publicCache, purgeOnWrite } from '../middlewares';
-import { PARCELS_PATH, PLACES_PATH } from './paths';
+import { HYDRO_PATH, PARCELS_PATH, PLACES_PATH } from './paths';
 
 /** Publiczne odczyty z polityka i tagami. */
 const PUBLIC_READS: [
@@ -20,6 +20,8 @@ const PUBLIC_READS: [
   [`${PARCELS_PATH}/*`, 'publicData', () => [cacheTags.parcels()]],
   // Geokoder publiczny ma limit ok. 1 zapytania/s - te same pytania ida z brzegu.
   [`${PLACES_PATH}/*`, 'publicData', () => [cacheTags.places()]],
+  // Hydrografia zmienia sie tylko po ponownym imporcie BDOT10k; kafle maja stale adresy, wiec ida z brzegu.
+  [`${HYDRO_PATH}/*`, 'publicData', () => [cacheTags.hydro()]],
 ];
 
 /**

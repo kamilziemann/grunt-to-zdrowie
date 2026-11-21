@@ -26,6 +26,7 @@ export function makeApp(
 ): TestApp {
   // testy nigdy nie wolaja zewnetrznych zrodel analizy: domyslnie atrapy w pamieci, test podmienia pojedyncze zrodla
   const withSources = {
+    hydroMapSource: null,
     ...overrides,
     analysisSources: { ...createSampleSources(), ...overrides.analysisSources },
   };

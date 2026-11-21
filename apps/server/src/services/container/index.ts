@@ -7,6 +7,7 @@ import type { Logger, TraceContext } from '@app/logger';
 
 import type { EdgeCachePurger } from '../../domain/edge-cache';
 import type { AnalysisService } from '../analysis';
+import type { HydroService } from '../hydro';
 import type { ParcelsService } from '../parcels';
 import type { PlacesService } from '../places';
 
@@ -17,6 +18,8 @@ export interface Container {
   analysis: AnalysisService;
   /** miejsca po adresie albo nazwie (geokoder) */
   places: PlacesService;
+  /** hydrografia BDOT10k do mapy (kafle rowow, ciekow, wod i mokradel) */
+  hydro: HydroService;
   /** czyszczenie cache'u brzegowego (Workers Cache) po zmianach widocznych publicznie */
   edgeCache: EdgeCachePurger;
 }

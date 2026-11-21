@@ -5,13 +5,18 @@ import { nowIso } from '@app/db';
 
 import type { DataSources } from './domain/analysis-ports';
 import type { EdgeCachePurger } from './domain/edge-cache';
+import type { HydroMapSource } from './domain/hydro-map-source';
 import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
 import { withFallback, type ParcelSource } from './domain/parcel-source';
 import type { PlaceSource } from './domain/place-source';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
 import { createEgibWfsOutlineSource, createEgibWfsParcelSource } from './infrastructure/egib-wfs';
-import { createNeonSqlRunner, createPostgisHydroSource } from './infrastructure/hydro-postgis';
+import {
+  createNeonSqlRunner,
+  createPostgisHydroMapSource,
+  createPostgisHydroSource,
+} from './infrastructure/hydro-postgis';
 import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway';
 import { createNasaPowerMeteoSource } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
@@ -20,6 +25,7 @@ import { createSentinelStatisticsSource } from './infrastructure/sentinel-statis
 import { createSoilGridsSource } from './infrastructure/soilgrids';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createAnalysisService } from './services/analysis';
+import { createHydroService } from './services/hydro';
 import type { Container, ContainerDeps } from './services/container';
 import { createParcelsService } from './services/parcels';
 import { createPlacesService } from './services/places';
@@ -37,6 +43,8 @@ export interface ContainerOverrides {
   analysisSources?: Partial<DataSources>;
   /** geokoder (testy: miejsca w pamieci zamiast Nominatim) */
   placeSource?: PlaceSource;
+  /** kafle hydrografii do mapy; null = brak bazy (testy: kafle w pamieci albo brak konfiguracji) */
+  hydroMapSource?: HydroMapSource | null;
 }
 
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
@@ -50,6 +58,14 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   });
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
+  const sqlRunner = deps.vars.DATABASE_URL ? createNeonSqlRunner(deps.vars.DATABASE_URL) : null;
+
+  const hydro = createHydroService({
+    source:
+      overrides.hydroMapSource !== undefined
+        ? overrides.hydroMapSource
+        : sqlRunner && createPostgisHydroMapSource({ run: sqlRunner }),
+  });
 
   // Pogoda (NASA POWER), prognoza (MET Norway), gleba (SoilGrids), woda w otoczeniu (BDOT10k) i satelita (Sentinel-2,
   // Copernicus) sa prawdziwe; teren to wciaz atrapa (`sample: true`, raport niesie `meta.sample`), a strefy -
@@ -64,7 +80,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       soil: createSoilGridsSource(),
       // hydrografia BDOT10k w Postgresie (Neon); bez DATABASE_URL zrodlo zglasza brak danych
       hydro: createPostgisHydroSource({
-        run: deps.vars.DATABASE_URL ? createNeonSqlRunner(deps.vars.DATABASE_URL) : null,
+        run: sqlRunner,
       }),
       // Sentinel-2 przez API statystyk Copernicus; bez kluczy OAuth zrodlo zglasza brak danych
       vegetation: createSentinelStatisticsSource({
@@ -81,6 +97,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     analysis,
     parcels,
     places,
+    hydro,
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),
   };
 }
