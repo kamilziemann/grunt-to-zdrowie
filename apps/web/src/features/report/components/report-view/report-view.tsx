@@ -61,8 +61,9 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
   const root = useRef<HTMLElement>(null);
   // bez `sampleParts` caly raport jest przykladowy - mowi o tym baner, znaczniki przy kazdej sekcji bylyby szumem
   const samples = report.meta.sampleParts ? sampleParts(report) : new Set<ReportPart>();
-  // strefy pokazujemy przy zaleceniach, wiec przykladowe strefy oznaczaja tez zalecenia
-  const sampleRecommendations = samples.has('recommendations') || samples.has('zones');
+  // zalecenia liczy juz silnik z danych; przykladowe strefy (meta.sampleParts: zones) nie czynia ich przykladowymi -
+  // inaczej raport podwazalby wlasne zalecenia. O przykladowych strefach mowi baner na gorze.
+  const sampleRecommendations = samples.has('recommendations');
 
   useOpenDetailsForPrint(root);
 
