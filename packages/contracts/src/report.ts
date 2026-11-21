@@ -65,6 +65,25 @@ export const climaticBalanceSchema = z.object({
   belowThreshold: z.boolean().nullable(),
   /** jak policzono ewapotranspiracje - nasz wynik jest oszacowaniem miary IUNG */
   method: z.enum(['fao56_penman_monteith', 'hargreaves', 'iung_dg95']),
+  /** udzial dni okresu z danymi pogodowymi, 0-1 */
+  coverage: z.number().min(0).max(1).optional(),
+  /**
+   * Wynik dla kazdej kategorii gleby I-IV - gdy kategoria jest niepewna, widac, czy jej wybor zmienia diagnoze.
+   * `thresholdMm: null` = uprawa nie jest oceniana w tym okresie albo nie rosnie na tej glebie.
+   */
+  categoryScenarios: z
+    .array(
+      z.object({
+        soilCategory: soilCategorySchema,
+        thresholdMm: z.number().nullable(),
+        belowThreshold: z.boolean().nullable(),
+      }),
+    )
+    .optional(),
+  /** miejsce KBW tego okresu wsrod tych samych okresow z lat poprzednich: 1 = najsuchszy */
+  rankInHistory: z
+    .object({ rank: z.number().int().positive(), years: z.number().int().positive() })
+    .optional(),
 });
 
 export type ClimaticBalance = z.infer<typeof climaticBalanceSchema>;
@@ -82,6 +101,9 @@ export const rootZoneSchema = z.object({
   stressCoefficient: z.number().min(0).max(1),
   /** dni ze stresem (Ks < 1) w ostatnich 30 dniach */
   stressDays30: z.number().int().min(0),
+  /** dni ze stresem i niedobor ewapotranspiracji uprawy (suma ETc - ETc adj) od poczatku sezonu do daty analizy */
+  seasonStressDays: z.number().int().min(0).optional(),
+  seasonEtDeficitMm: z.number().min(0).optional(),
 });
 
 export type RootZone = z.infer<typeof rootZoneSchema>;
@@ -139,6 +161,8 @@ export const historySchema = z.object({
       minBalanceMm: z.number().nullable(),
       /** dni ze stresem wodnym w sezonie wg bilansu strefy korzeniowej */
       stressDays: z.number().int().min(0).nullable(),
+      /** niedobor ewapotranspiracji uprawy w sezonie (mm) - ile wody zabraklo uprawie wg bilansu */
+      etDeficitMm: z.number().min(0).nullable().optional(),
     }),
   ),
   /** kalendarz ryzyka: rok x okres */
@@ -155,6 +179,13 @@ export const historySchema = z.object({
 });
 
 export type History = z.infer<typeof historySchema>;
+
+/** Czesci raportu, ktore moga byc liczone przykladowo (zanim powstanie wlasciwy etap silnika). */
+export const REPORT_PARTS = ['assessment', 'history', 'causes', 'zones', 'recommendations'] as const;
+
+export const reportPartSchema = z.enum(REPORT_PARTS);
+
+export type ReportPart = z.infer<typeof reportPartSchema>;
 
 /** Liczba, na ktorej opiera sie wniosek: co zmierzono, ile, z jakiego zrodla i wzgledem czego. */
 export const evidenceSchema = z.object({
@@ -316,6 +347,11 @@ export const waterReportSchema = z.object({
     status: z.enum(['complete', 'partial', 'insufficient']),
     /** raport z danych przykladowych (atrapy) - nie wolno go pokazac jako wyniku dla dzialki */
     sample: z.boolean(),
+    /**
+     * Czesci raportu liczone jeszcze przykladowymi regulami (nie metodyka docelowa). Brak pola = jak przy `sample`.
+     * Zrodla danych przykladowych oznacza osobno `sources[].sample`.
+     */
+    sampleParts: z.array(reportPartSchema).optional(),
   }),
   field: fieldAreaSchema,
   crop: cropAtDateSchema,
