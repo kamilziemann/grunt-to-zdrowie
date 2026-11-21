@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { AppHref } from '@/lib/routes';
 
 import { CausesSection } from '../causes-section';
+import { FieldMap } from '../field-map';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
 import { RecommendationList } from '../recommendation-list';
@@ -86,6 +87,10 @@ export function ReportView({ report, changeHref, mapHref }: ReportViewProps) {
         <CausesSection causes={report.causes} />
       </ReportSection>
       <ReportSection id="retencja" number={4} title={t('sections.retention')} sample={sampleRecommendations}>
+        <div className="flex flex-col gap-2">
+          <h3 className="text-lg font-semibold">{t('fieldMap.title')}</h3>
+          <FieldMap field={report.field} />
+        </div>
         <RecommendationList
           category="retention"
           recommendations={report.recommendations.retention}

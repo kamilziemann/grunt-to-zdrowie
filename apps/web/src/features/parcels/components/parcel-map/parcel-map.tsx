@@ -21,11 +21,10 @@ import {
   setHydroData,
   setHydroVisible,
 } from '@/lib/hydro-map';
+import { BASEMAP_STYLE_URL, loadMapLibre, ORTHO_LAYER, ORTHO_SOURCE } from '@/lib/map-base';
 import { cn } from '@/lib/utils/cn';
 
-import { loadMapLibre } from './load-maplibre';
 import {
-  BASEMAP_STYLE_URL,
   BOUNDARIES_ATTRIBUTION,
   BOUNDARIES_MIN_ZOOM,
   BOUNDARIES_SOURCE,
@@ -43,8 +42,6 @@ import {
   MAX_BOUNDARY_TILES,
   MAX_BOUNDS,
   MIN_PICK_ZOOM,
-  ORTHO_LAYER,
-  ORTHO_SOURCE,
   outlineCollections,
   type MapParcel,
   parcelCollection,

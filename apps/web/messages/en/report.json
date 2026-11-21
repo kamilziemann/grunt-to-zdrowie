@@ -508,5 +508,32 @@
     "description": "Download the numbers from the report: a table for a spreadsheet or the full report as JSON.",
     "csv": "Download table (CSV)",
     "json": "Download data (JSON)"
+  },
+  "fieldMap": {
+    "title": "Water around the field",
+    "label": "Map: {field} on an aerial photo, with ditches and streams within 500 m",
+    "loading": "Loading the field map…",
+    "failed": "The map could not be shown in this browser.",
+    "unavailable": "The ditches and streams layer is temporarily unavailable – the map shows only the field outline.",
+    "touches": "right at or through the field",
+    "distance": "{meters} m from the field",
+    "nearestDitch": "Nearest drainage ditch: {distance}.",
+    "noDitch": "No drainage ditches within {radius} m.",
+    "nearestNamed": "Nearest named watercourse: {kind} {name}, {distance}.",
+    "nearestWatercourse": "Nearest watercourse: unnamed {kind}, {distance}.",
+    "noWatercourse": "No rivers, streams or canals within {radius} m.",
+    "kinds": {
+      "ditch": "ditch",
+      "river": "river",
+      "stream": "stream",
+      "canal": "canal",
+      "standing_water": "water body",
+      "flowing_water": "channel",
+      "wetland": "wetland",
+      "bog": "bog"
+    },
+    "sources": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK.",
+    "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
+    "highlight": "Orange – nearest ditch and watercourse."
   }
 }

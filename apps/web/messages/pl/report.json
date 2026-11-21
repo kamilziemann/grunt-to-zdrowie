@@ -508,5 +508,32 @@
     "description": "Pobierz liczby z raportu: tabelę do arkusza kalkulacyjnego albo pełny raport w formacie JSON.",
     "csv": "Pobierz tabelę (CSV)",
     "json": "Pobierz dane (JSON)"
+  },
+  "fieldMap": {
+    "title": "Woda wokół pola",
+    "label": "Mapa: {field} na zdjęciu lotniczym, z rowami i ciekami w promieniu 500 m",
+    "loading": "Wczytuję mapę pola…",
+    "failed": "Nie udało się pokazać mapy w tej przeglądarce.",
+    "unavailable": "Warstwa rowów i cieków jest chwilowo niedostępna – na mapie jest sam obrys pola.",
+    "touches": "przy samym polu albo przez pole",
+    "distance": "{meters} m od pola",
+    "nearestDitch": "Najbliższy rów melioracyjny: {distance}.",
+    "noDitch": "Brak rowów melioracyjnych w promieniu {radius} m.",
+    "nearestNamed": "Najbliższy ciek z nazwą: {kind} {name}, {distance}.",
+    "nearestWatercourse": "Najbliższy ciek: {kind} bez nazwy, {distance}.",
+    "noWatercourse": "Brak rzek, strumieni i kanałów w promieniu {radius} m.",
+    "kinds": {
+      "ditch": "rów",
+      "river": "rzeka",
+      "stream": "strumień",
+      "canal": "kanał",
+      "standing_water": "zbiornik",
+      "flowing_water": "koryto",
+      "wetland": "mokradło",
+      "bog": "bagno"
+    },
+    "sources": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK.",
+    "sourcesDated": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}).",
+    "highlight": "Pomarańczowy kolor – najbliższy rów i ciek."
   }
 }

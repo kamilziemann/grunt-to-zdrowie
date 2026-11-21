@@ -1,5 +1,6 @@
 import type { AppHref } from '@/lib/routes';
 import type { WaterReport } from '@app/contracts';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -15,7 +16,14 @@ const CHANGE = '/analiza' as AppHref;
 const MAP = '/' as AppHref;
 
 function renderReport(report: WaterReport = SAMPLE_REPORT) {
-  return renderWithIntl(<ReportView report={report} changeHref={CHANGE} mapHref={MAP} />);
+  // mapa pola pobiera kafle hydrografii przez TanStack Query (w jsdom bez sieci - warstwa "niedostepna")
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+  return renderWithIntl(
+    <QueryClientProvider client={client}>
+      <ReportView report={report} changeHref={CHANGE} mapHref={MAP} />
+    </QueryClientProvider>,
+  );
 }
 
 const realReport: WaterReport = {
