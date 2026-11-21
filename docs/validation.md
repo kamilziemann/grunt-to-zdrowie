@@ -28,6 +28,10 @@ uprawach i porach roku co przypadki suszy; część z nich to okresy, gdy susza 
 
 ## Wyniki (po zmianach, silnik 0.4.0)
 
+Powtórka 22.11.2026 na silniku `0.6.0` (otoczenie pola z BDOT10k, nowe reguły zaleceń, poprawka udziału czystych
+pikseli Sentinel-2) dała ten sam wynik: poziom 21/21, KBW 20/21, „obserwuj” bez suszy 9/13, kategorie 60/64 —
+zmiany nie dotykają oceny.
+
 | Miejsce, data                                    | Uprawa        | IUNG  | IUNG kat. I/II/III/IV | KBW / próg (kat., okres)               | Pod progiem kat. I/II/III/IV | Poziom / pewność | Zgodność KBW | Zgodność poziomu |
 | ------------------------------------------------ | ------------- | ----- | --------------------- | -------------------------------------- | ---------------------------- | ---------------- | ------------ | ---------------- |
 | Sicienko (kujawsko-pomorskie), 2023-05-20        | spring_barley | brak  | -/-/-/-               | -46.7 / -125 (kat. 1 z 1–3, okres 1)   | nie/nie/nie/nie              | ok / medium      | ✓            | ✓                |
