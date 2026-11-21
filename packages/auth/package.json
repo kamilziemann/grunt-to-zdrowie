@@ -1,0 +1,30 @@
+{
+  "name": "@app/auth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Opcjonalne uwierzytelnianie: fabryka Better Auth (createAuth) na Drizzle/D1, typy sesji i tozsamosci.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/db": "workspace:*",
+    "better-auth": "^1.7.10",
+    "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "@cloudflare/workers-types": "^5.20261015.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
