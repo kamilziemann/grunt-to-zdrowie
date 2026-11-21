@@ -1,12 +1,12 @@
-// Obrazy pola z satelity: kondycja roslin (NDVI Sentinel-2) dla wybranych dzialek, gotowa do polozenia na mapie
-// (PNG na dzialke jako data URL + narozniki, wspolna skala kolorow dla calego pola). Pokaz trybu 3D (docs/progress/2026-11-21/tryb-3d-poc.md) - serwis nie zna HTTP ani
-// formatu uslugi satelitarnej.
-import { PROBLEM_CODES } from '@app/contracts';
+// Obrazy pola z satelity: kondycja roslin (NDVI) albo woda w roslinach (NDMI) z Sentinel-2 dla wybranych dzialek,
+// gotowe do polozenia na mapie (PNG na dzialke jako data URL + narozniki, wspolna skala kolorow dla calego pola).
+// Tryb "Woda na polu w 3D" (eksperymentalny) - serwis nie zna HTTP ani formatu uslugi satelitarnej.
+import { PROBLEM_CODES, type ImageryLayer, type VegetationImagery } from '@app/contracts';
 import { AppError } from '@app/http';
 
 import { addDays, isoDateInPoland } from '../../domain/iso-date';
 import { boundingBox, type BoundingBox, type PolygonGeometry } from '../../domain/parcel-geometry';
-import type { ParcelGeometryLookup, VegetationImagerySource } from './ports';
+import type { ParcelGeometryLookup, VegetationImagerySource, VegetationIndex } from './ports';
 
 /** Ile dni przed wybranym dniem szukamy zdjecia bez chmur (Sentinel-2 przelatuje co 2-5 dni). */
 export const SCENE_WINDOW_DAYS = 30;
@@ -21,17 +21,10 @@ export interface ImageryServiceDeps {
   now: () => string;
 }
 
-export interface VegetationImageryResult {
-  /** obraz na dzialke: PNG jako data URL (strona kladzie go na mapie bez drugiego zapytania) i jego narozniki */
-  images: { image: string; bbox: BoundingBox }[];
-  /** zasieg wszystkich obrazow: [zachod, poludnie, wschod, polnoc] w WGS84 */
-  bbox: BoundingBox;
-  requestedDate: string;
-  sceneDate: string;
-  sceneCloudCover: number;
-  clearShare: number;
-  ndvi: { low: number; high: number; mean: number };
-}
+export type VegetationImageryResult = VegetationImagery;
+
+/** Warstwa obrazu (slowo z API) -> wskaznik liczony z pasm Sentinel-2. */
+const LAYER_INDEX: Record<ImageryLayer, VegetationIndex> = { condition: 'ndvi', moisture: 'ndmi' };
 
 export function paddedBbox(geometry: PolygonGeometry): BoundingBox {
   const [west, south, east, north] = boundingBox(geometry);
@@ -57,7 +50,9 @@ export function createImageryService({ parcels, source, now }: ImageryServiceDep
     async vegetation(input: {
       parcelIds: readonly string[];
       date?: string;
+      layer?: ImageryLayer;
     }): Promise<VegetationImageryResult> {
+      const layer = input.layer ?? 'condition';
       const today = isoDateInPoland(now());
       const date = input.date ?? today;
 
@@ -73,7 +68,12 @@ export function createImageryService({ parcels, source, now }: ImageryServiceDep
 
       const found = await Promise.all(input.parcelIds.map((id) => parcels.get(id)));
       const parts = found.map((parcel) => ({ geometry: parcel.geometry, bbox: paddedBbox(parcel.geometry) }));
-      const image = await source.render({ parts, date, windowDays: SCENE_WINDOW_DAYS });
+      const image = await source.render({
+        parts,
+        index: LAYER_INDEX[layer],
+        date,
+        windowDays: SCENE_WINDOW_DAYS,
+      });
 
       if (!image) {
         throw new AppError(
@@ -86,6 +86,7 @@ export function createImageryService({ parcels, source, now }: ImageryServiceDep
       const boxes = image.tiles.map((tile) => tile.bbox);
 
       return {
+        layer,
         images: image.tiles.map((tile) => ({
           image: `data:image/png;base64,${toBase64(tile.png)}`,
           bbox: tile.bbox,
@@ -100,7 +101,7 @@ export function createImageryService({ parcels, source, now }: ImageryServiceDep
         sceneDate: image.sceneDate,
         sceneCloudCover: image.sceneCloudCover,
         clearShare: image.clearShare,
-        ndvi: { low: image.ndviLow, high: image.ndviHigh, mean: image.ndviMean },
+        scale: { low: image.low, high: image.high, mean: image.mean },
       };
     },
   };

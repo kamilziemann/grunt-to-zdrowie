@@ -1,4 +1,5 @@
-// Port obrazu kondycji roslin (NDVI z Sentinel-2) dla pola: dzialki + dzien -> pokolorowane obrazy przyciete do dzialek.
+// Port obrazu pola z Sentinel-2 (kondycja roslin NDVI albo woda w roslinach NDMI): dzialki + dzien + wskaznik ->
+// pokolorowane obrazy przyciete do dzialek.
 // Implementacja: infrastructure/copernicus-imagery (Copernicus Data Space). Serwis nie zna formatu zapytan uslugi.
 import type { BoundingBox, PolygonGeometry } from '../parcel-geometry';
 
@@ -9,8 +10,12 @@ export interface VegetationImagePart {
   bbox: BoundingBox;
 }
 
+/** Wskaznik obrazu: NDVI (kondycja roslin) albo NDMI (woda w roslinach). */
+export type VegetationIndex = 'ndvi' | 'ndmi';
+
 export interface VegetationImageRequest {
   parts: readonly VegetationImagePart[];
+  index: VegetationIndex;
   /** ostatni dzien okna wyszukiwania sceny (RRRR-MM-DD) */
   date: string;
   /** ile dni wstecz od `date` szukamy sceny */
@@ -18,7 +23,7 @@ export interface VegetationImageRequest {
 }
 
 export interface VegetationTile {
-  /** PNG: kolor = NDVI na wspolnej skali `ndviLow..ndviHigh`, piksele poza dzialka i pod chmura przezroczyste */
+  /** PNG: kolor = wskaznik na wspolnej skali `low..high`, piksele poza dzialka i pod chmura przezroczyste */
   png: Uint8Array;
   bbox: BoundingBox;
 }
@@ -32,10 +37,10 @@ export interface VegetationImage {
   sceneCloudCover: number;
   /** czesc pola widoczna bez chmur (0..1) */
   clearShare: number;
-  /** NDVI odpowiadajacy poczatkowi i koncowi skali kolorow (5. i 95. percentyl w polu, min. rozpietosc) */
-  ndviLow: number;
-  ndviHigh: number;
-  ndviMean: number;
+  /** wskaznik odpowiadajacy poczatkowi i koncowi skali kolorow (5. i 95. percentyl w polu, min. rozpietosc) */
+  low: number;
+  high: number;
+  mean: number;
 }
 
 export interface VegetationImagerySource {

@@ -6,10 +6,14 @@ import type { AppEnv } from '../../services/container';
 import type { getVegetation } from './imagery.routes';
 
 export const vegetation: RouteHandler<typeof getVegetation, AppEnv> = async (c) => {
-  const { dzialki, data } = c.req.valid('query');
+  const { dzialki, data, warstwa } = c.req.valid('query');
 
   return c.json(
-    await c.get('container').imagery.vegetation({ parcelIds: parseParcelSelection(dzialki), date: data }),
+    await c.get('container').imagery.vegetation({
+      parcelIds: parseParcelSelection(dzialki),
+      date: data,
+      layer: warstwa ?? 'condition',
+    }),
     200,
   );
 };

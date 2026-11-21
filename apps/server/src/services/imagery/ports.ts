@@ -6,6 +6,7 @@ export type {
   VegetationImage,
   VegetationImageRequest,
   VegetationImagerySource,
+  VegetationIndex,
 } from '../../domain/vegetation-imagery';
 
 export interface ParcelGeometryLookup {

@@ -60,9 +60,9 @@ function source(result: 'image' | 'none', requests: VegetationImageRequest[] = [
               sceneDate: '2025-06-15',
               sceneCloudCover: 0,
               clearShare: 0.98,
-              ndviLow: 0.6,
-              ndviHigh: 0.85,
-              ndviMean: 0.77,
+              low: 0.6,
+              high: 0.85,
+              mean: 0.77,
             },
       );
     },
@@ -84,8 +84,10 @@ describe('imagery service', () => {
       images: [{ image: `data:image/png;base64,${toBase64(new Uint8Array([1, 2, 3]))}` }, {}],
       requestedDate: '2025-07-01',
       sceneDate: '2025-06-15',
-      ndvi: { low: 0.6, high: 0.85, mean: 0.77 },
+      layer: 'condition',
+      scale: { low: 0.6, high: 0.85, mean: 0.77 },
     });
+    expect(requests[0]?.index).toBe('ndvi');
     expect(requests[0]?.parts.map((part) => part.geometry.type)).toEqual(['Polygon', 'Polygon']);
     expect(requests[0]?.windowDays).toBe(30);
 
@@ -93,6 +95,19 @@ describe('imagery service', () => {
 
     expect(west).toBeLessThan(21);
     expect(east).toBeGreaterThan(21.02);
+  });
+
+  it('warstwa wody w roslinach liczy NDMI', async () => {
+    const requests: VegetationImageRequest[] = [];
+    const service = createImageryService({
+      parcels: lookup,
+      source: source('image', requests),
+      now: () => NOW,
+    });
+    const result = await service.vegetation({ parcelIds: [...PARCELS.keys()], layer: 'moisture' });
+
+    expect(result.layer).toBe('moisture');
+    expect(requests[0]?.index).toBe('ndmi');
   });
 
   it('bez daty bierze dzisiejszy dzien w Polsce', async () => {

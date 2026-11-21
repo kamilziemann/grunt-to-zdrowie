@@ -20,7 +20,7 @@ export const STATS_CLEAR = {
     {
       interval: { from: '2025-06-15T00:00:00Z', to: '2025-06-16T00:00:00Z' },
       outputs: {
-        ndvi: {
+        index: {
           bands: {
             B0: {
               stats: {
@@ -49,7 +49,7 @@ export const STATS_CLOUDY = {
     {
       interval: { from: '2025-06-30T00:00:00Z', to: '2025-07-01T00:00:00Z' },
       outputs: {
-        ndvi: {
+        index: {
           bands: {
             B0: {
               stats: {

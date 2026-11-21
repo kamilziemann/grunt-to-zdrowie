@@ -1,7 +1,8 @@
 // Adapter VegetationImagerySource na Copernicus Data Space (Sentinel Hub API, Sentinel-2 L2A). Trzy kroki:
 // 1) katalog STAC: sceny z okna dat nad polem, od najmniej zachmurzonej,
-// 2) API statystyk: dla kolejnych kandydatow czesc pola bez chmur (warstwa SCL) i percentyle NDVI w polu,
-// 3) Process API: PNG z NDVI pokolorowanym na zakres z kroku 2, przyciety do geometrii (`dataMask`).
+// 2) API statystyk: dla kolejnych kandydatow czesc pola bez chmur (warstwa SCL) i percentyle wskaznika w polu,
+// 3) Process API: PNG ze wskaznikiem pokolorowanym na zakres z kroku 2, przyciety do geometrii (`dataMask`).
+// Wskaznik: NDVI (kondycja roslin, B04/B08, 10 m) albo NDMI (woda w roslinach, B8A/B11, 20 m) - ten sam przebieg.
 // Kroki 2 i 3 ida osobno dla kazdej dzialki: Sentinel Hub odrzuca MultiPolygon ze stykajacymi sie czesciami, a tak
 // wyglada pole z sasiednich dzialek (sumy wielokatow nie liczymy - to wymagaloby biblioteki geometrii).
 // Skala jest wzgledna (5.-95. percentyl pola, z minimalna rozpietoscia), bo rolnik ma zobaczyc, gdzie w polu jest
@@ -16,6 +17,7 @@ import type {
   VegetationImagePart,
   VegetationImageRequest,
   VegetationImagerySource,
+  VegetationIndex,
 } from '../../domain/vegetation-imagery';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 
@@ -33,7 +35,7 @@ const MAX_SCENE_CLOUD = 80;
 const MAX_CANDIDATES = 4;
 /** Pole uznajemy za widoczne, gdy bez chmur jest co najmniej taka jego czesc. */
 const MIN_CLEAR_SHARE = 0.6;
-/** Najmniejsza rozpietosc skali NDVI: jednolite pole nie moze wygladac jak pole pelne roznic. */
+/** Najmniejsza rozpietosc skali wskaznika: jednolite pole nie moze wygladac jak pole pelne roznic. */
 const MIN_NDVI_SPAN = 0.2;
 /** Dluzszy bok obrazu w pikselach (Sentinel-2 ma 10 m, wygladzamy interpolacja dwuszescienna). */
 const IMAGE_MAX_PX = 512;
@@ -51,12 +53,33 @@ const TOKEN_MARGIN_MS = 60_000;
 
 /** Klasy SCL, ktore zaslaniaja pole: cien chmury, chmury, cirrus, snieg. */
 const HIDDEN_SCL = [3, 8, 9, 10, 11];
-/** Kolory skali (czerwony -> zolty -> zielony, RdYlGn); te same wartosci maja tokeny legendy w apps/web. */
-const RAMP = [
-  [215, 48, 39],
-  [254, 224, 139],
-  [26, 152, 80],
-] as const;
+
+type Rgb = readonly [number, number, number];
+
+/**
+ * Wskazniki: (a - b) / (a + b) z dwoch pasm i kolory skali od niskiej do wysokiej wartosci - te same wartosci maja
+ * tokeny legendy w apps/web (`--vegetation-*`, `--moisture-*`).
+ */
+export const INDICES: Record<VegetationIndex, { bands: readonly [string, string]; ramp: readonly Rgb[] }> = {
+  // kondycja: czerwony -> zolty -> zielony (RdYlGn)
+  ndvi: {
+    bands: ['B08', 'B04'],
+    ramp: [
+      [215, 48, 39],
+      [254, 224, 139],
+      [26, 152, 80],
+    ],
+  },
+  // woda w roslinach: brazowy (sucho) -> jasny piasek -> niebieski (wilgotno)
+  ndmi: {
+    bands: ['B8A', 'B11'],
+    ramp: [
+      [140, 81, 10],
+      [246, 232, 195],
+      [33, 102, 172],
+    ],
+  },
+};
 
 export interface CopernicusCredentials {
   clientId?: string | undefined;
@@ -149,11 +172,11 @@ export function parseCatalog(body: unknown): SceneCandidate[] {
     .toSorted((a, b) => a.cloudCover - b.cloudCover || b.date.localeCompare(a.date));
 }
 
-/** Statystyki NDVI pola z odpowiedzi API statystyk; null = brak danych dla dnia. */
+/** Statystyki wskaznika pola z odpowiedzi API statystyk; null = brak danych dla dnia. */
 export function parseFieldStats(body: unknown): FieldStats | null {
   const root = record(body);
   const [interval] = Array.isArray(root.data) ? root.data : [];
-  const stats = record(record(record(record(record(record(interval).outputs).ndvi).bands).B0).stats);
+  const stats = record(record(record(record(record(record(interval).outputs).index).bands).B0).stats);
   const sampleCount = num(stats.sampleCount);
   const noDataCount = num(stats.noDataCount);
   const fieldPixels = num(root.geometryPixelCount);
@@ -210,7 +233,7 @@ export function unionBbox(boxes: readonly BoundingBox[]): BoundingBox {
 }
 
 /** Zakres skali: percentyle pola, rozszerzone symetrycznie do minimalnej rozpietosci. */
-export function ndviScale(stats: { low: number; high: number }): { low: number; high: number } {
+export function colorScale(stats: { low: number; high: number }): { low: number; high: number } {
   const span = stats.high - stats.low;
 
   if (span >= MIN_NDVI_SPAN) return { low: stats.low, high: stats.high };
@@ -236,29 +259,36 @@ export function imageSize(bbox: BoundingBox): { width: number; height: number } 
 
 const SCL_TEST = `[${HIDDEN_SCL.join(',')}].indexOf(s.SCL) < 0`;
 
-const STATS_EVALSCRIPT = `//VERSION=3
+/** Evalscript statystyk: wskaznik pola i maska pikseli bez chmur. */
+export function statsEvalscript(index: VegetationIndex): string {
+  const [a, b] = INDICES[index].bands;
+
+  return `//VERSION=3
 function setup() {
   return {
-    input: [{ bands: ['B04', 'B08', 'SCL', 'dataMask'] }],
-    output: [{ id: 'ndvi', bands: 1, sampleType: 'FLOAT32' }, { id: 'dataMask', bands: 1 }],
+    input: [{ bands: ['${a}', '${b}', 'SCL', 'dataMask'] }],
+    output: [{ id: 'index', bands: 1, sampleType: 'FLOAT32' }, { id: 'dataMask', bands: 1 }],
   };
 }
 function evaluatePixel(s) {
   var clear = s.dataMask === 1 && ${SCL_TEST};
-  return { ndvi: [(s.B08 - s.B04) / (s.B08 + s.B04)], dataMask: [clear ? 1 : 0] };
+  return { index: [(s.${a} - s.${b}) / (s.${a} + s.${b})], dataMask: [clear ? 1 : 0] };
 }`;
+}
 
-/** Evalscript obrazu: NDVI -> kolor na skali `low..high`, przezroczyste poza polem i pod chmura. */
-export function imageEvalscript(low: number, high: number): string {
+/** Evalscript obrazu: wskaznik -> kolor na skali `low..high`, przezroczyste poza polem i pod chmura. */
+export function imageEvalscript(low: number, high: number, index: VegetationIndex = 'ndvi'): string {
   const stops = [low, (low + high) / 2, high].map((value) => value.toFixed(4)).join(', ');
+  const { bands, ramp } = INDICES[index];
+  const [a, b] = bands;
 
   return `//VERSION=3
 function setup() {
-  return { input: [{ bands: ['B04', 'B08', 'SCL', 'dataMask'] }], output: { bands: 4, sampleType: 'UINT8' } };
+  return { input: [{ bands: ['${a}', '${b}', 'SCL', 'dataMask'] }], output: { bands: 4, sampleType: 'UINT8' } };
 }
 function evaluatePixel(s) {
-  var ndvi = (s.B08 - s.B04) / (s.B08 + s.B04);
-  var color = colorBlend(ndvi, [${stops}], ${JSON.stringify(RAMP)});
+  var value = (s.${a} - s.${b}) / (s.${a} + s.${b});
+  var color = colorBlend(value, [${stops}], ${JSON.stringify(ramp)});
   var visible = s.dataMask === 1 && ${SCL_TEST};
   return [color[0], color[1], color[2], visible ? 235 : 0];
 }`;
@@ -326,7 +356,7 @@ export function createCopernicusImagerySource(
     return accessToken;
   }
 
-  function statsBody(geometry: PolygonGeometry, date: string): string {
+  function statsBody(geometry: PolygonGeometry, date: string, index: VegetationIndex): string {
     return JSON.stringify({
       input: {
         bounds: { geometry, properties: { crs: CRS84 } },
@@ -337,7 +367,7 @@ export function createCopernicusImagerySource(
         aggregationInterval: { of: 'P1D' },
         resx: STATS_RES_DEG,
         resy: STATS_RES_DEG,
-        evalscript: STATS_EVALSCRIPT,
+        evalscript: statsEvalscript(index),
       },
       calculations: { default: { statistics: { default: { percentiles: { k: [5, 95] } } } } },
     });
@@ -392,7 +422,7 @@ export function createCopernicusImagerySource(
           const parts = await mapLimit(request.parts, MAX_PARALLEL, async (part) => {
             const response = await call(
               COPERNICUS_STATISTICS_URL,
-              statsBody(part.geometry, scene.date),
+              statsBody(part.geometry, scene.date, request.index),
               json,
             );
 
@@ -402,8 +432,8 @@ export function createCopernicusImagerySource(
 
           if (!stats || stats.clearShare < MIN_CLEAR_SHARE) continue;
 
-          const scale = ndviScale(stats);
-          const evalscript = imageEvalscript(scale.low, scale.high);
+          const scale = colorScale(stats);
+          const evalscript = imageEvalscript(scale.low, scale.high, request.index);
           const tiles = await mapLimit(request.parts, MAX_PARALLEL, async (part) => {
             const image = await call(COPERNICUS_PROCESS_URL, imageBody(part, scene.date, evalscript), {
               ...bearer,
@@ -419,9 +449,9 @@ export function createCopernicusImagerySource(
             sceneDate: scene.date,
             sceneCloudCover: scene.cloudCover,
             clearShare: stats.clearShare,
-            ndviLow: scale.low,
-            ndviHigh: scale.high,
-            ndviMean: stats.mean,
+            low: scale.low,
+            high: scale.high,
+            mean: stats.mean,
           };
         }
 

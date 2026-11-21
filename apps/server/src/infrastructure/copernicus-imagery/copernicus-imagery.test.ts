@@ -10,7 +10,10 @@ import {
   createCopernicusImagerySource,
   imageSize,
   mapLimit,
-  ndviScale,
+  colorScale,
+  imageEvalscript,
+  INDICES,
+  statsEvalscript,
   parseCatalog,
   parseFieldStats,
   type FetchLike,
@@ -39,7 +42,7 @@ const PART = {
   bbox: [21.5893, 52.1716, 21.5905, 52.1723],
 } satisfies VegetationImageRequest['parts'][number];
 
-const REQUEST: VegetationImageRequest = { parts: [PART], date: '2025-07-01', windowDays: 30 };
+const REQUEST: VegetationImageRequest = { parts: [PART], index: 'ndvi', date: '2025-07-01', windowDays: 30 };
 
 interface Call {
   url: string;
@@ -98,13 +101,27 @@ describe('parseFieldStats', () => {
   });
 });
 
-describe('ndviScale i imageSize', () => {
+describe('wskazniki', () => {
+  it('woda w roslinach: NDMI z pasm B8A i B11, skala od brazowego do niebieskiego', () => {
+    const image = imageEvalscript(-0.1, 0.3, 'ndmi');
+    const stats = statsEvalscript('ndmi');
+
+    expect(image).toContain("bands: ['B8A', 'B11', 'SCL', 'dataMask']");
+    expect(image).toContain('(s.B8A - s.B11) / (s.B8A + s.B11)');
+    expect(image).toContain('[-0.1000, 0.1000, 0.3000]');
+    expect(image).toContain(JSON.stringify(INDICES.ndmi.ramp));
+    expect(stats).toContain('(s.B8A - s.B11) / (s.B8A + s.B11)');
+    expect(statsEvalscript('ndvi')).toContain('(s.B08 - s.B04) / (s.B08 + s.B04)');
+  });
+});
+
+describe('colorScale i imageSize', () => {
   it('waski zakres pola rozszerza sie symetrycznie do minimalnej rozpietosci', () => {
-    const scale = ndviScale({ low: 0.73, high: 0.86 });
+    const scale = colorScale({ low: 0.73, high: 0.86 });
 
     expect(scale.high - scale.low).toBeCloseTo(0.2, 6);
     expect((scale.low + scale.high) / 2).toBeCloseTo(0.795, 6);
-    expect(ndviScale({ low: 0.2, high: 0.7 })).toEqual({ low: 0.2, high: 0.7 });
+    expect(colorScale({ low: 0.2, high: 0.7 })).toEqual({ low: 0.2, high: 0.7 });
   });
 
   it('obraz ma proporcje zasiegu w metrach', () => {

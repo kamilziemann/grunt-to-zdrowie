@@ -22,6 +22,9 @@ const PUBLIC_READS: [
   [`${PLACES_PATH}/*`, 'publicData', () => [cacheTags.places()]],
   // Hydrografia zmienia sie tylko po ponownym imporcie BDOT10k; kafle maja stale adresy, wiec ida z brzegu.
   [`${HYDRO_PATH}/*`, 'publicData', () => [cacheTags.hydro()]],
+  // Obraz pola z satelity (tryb 3D): dla przeszlego dnia sie nie zmienia, a kazde liczenie to kilka zapytan do
+  // Copernicus z limitem; zalezy od granic dzialek, wiec czysci go ten sam tag co dzialki.
+  ['/imagery/*', 'publicData', () => [cacheTags.parcels()]],
 ];
 
 /**
