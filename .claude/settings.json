@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun check:*)",
+      "Bash(bun run:*)",
+      "Bash(bun test:*)",
+      "Bash(bun x oxfmt:*)",
+      "Bash(bun tools/scripts/oxfmt.mjs:*)",
+      "Bash(bun x oxlint:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/scripts/format-edited-file.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/scripts/progress-reminder.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
