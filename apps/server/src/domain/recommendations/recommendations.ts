@@ -7,6 +7,7 @@ import type { Assessment, Cause, CauseId, Evidence, IrrigationAdvice, Recommenda
 
 import type { Recommendations, StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
+import { cropProfile } from '../crops';
 import { addDays } from '../iso-date';
 import { saxtonRawls } from '../soil-water';
 
@@ -32,12 +33,15 @@ const WEIR_STORAGE_M3_PER_M = 0.4;
 /** mulcz z resztek: FAO-56 rozdz. 11 - ok. 5% mniej parowania z gleby na 10% pokrycia; przy pokryciu 50% = 25% */
 const MULCH_EVAPORATION_CUT_PCT = 25;
 const TOPSOIL_M = 0.3;
+/** gleba ponizej tej retencji (mm/m) przepuszcza wode ze zbiornika bez uszczelnienia */
+const LIGHT_SOIL_MM_PER_M = 90;
 /** mokradlo blizej niz 300 m warto chronic jako czesc retencji otoczenia pola */
 const WETLAND_NEAR_M = 300;
 /** przy niedoborze (Ks) ponizej 0,6 nawodnienie jest pilne */
 const SEVERE_STRESS_KS = 0.6;
 /** wyczerpanie przekroczy wode latwo dostepna w ciagu tylu dni - czas przygotowac nawodnienie */
 const SOON_DAYS = 3;
+const RIPENING_KC_SHARE = 0.8;
 
 const round = (value: number, digits = 1): number => Number(value.toFixed(digits));
 
@@ -108,8 +112,8 @@ const RULES: readonly Rule[] = [
       legal: 'notification',
     },
     answers: ['no_landscape_retention'],
-    // na piaskach (kategoria I) woda z niewyscielonego zbiornika szybko wsiaka
-    when: ({ soil }) => soil?.category !== 1,
+    // na piaskach (kategoria I albo < 90 mm/m) woda z niewyscielonego zbiornika szybko wsiaka
+    when: ({ soil }) => soil?.category !== 1 && (soil?.availableWaterMmPerM ?? 0) >= LIGHT_SOIL_MM_PER_M,
   },
   {
     measure: {
@@ -246,7 +250,10 @@ function daysUntilStress(input: StageInput, depletionMm: number, readilyMm: numb
   return null;
 }
 
-/** Nawadnianie: tylko z bilansu strefy korzeniowej, w okresie wzrostu i przy ocenie wskazujacej niedobor. */
+/**
+ * Nawadnianie: tylko z bilansu strefy korzeniowej, w okresie wzrostu przed dojrzewaniem i przy ocenie wskazujacej
+ * niedobor.
+ */
 export function irrigationAdvice(input: StageInput, assessment: Assessment): IrrigationAdvice | null {
   const zone = assessment.rootZone;
 
@@ -256,6 +263,11 @@ export function irrigationAdvice(input: StageInput, assessment: Assessment): Irr
   const forecastPrecipMm =
     forecast.length === 0 ? null : round(forecast.reduce((sum, day) => sum + (day.precipMm ?? 0), 0));
   const growing = input.crop.kc !== null;
+  // dojrzewanie (faza koncowa, Kc ponizej 80% Kc pelni): woda juz nie zwieksza plonu - nie nawadniamy
+  const ripening =
+    input.crop.stage === 'late' &&
+    input.crop.kc !== null &&
+    input.crop.kc < cropProfile(input.cropId).kc.mid * RIPENING_KC_SHARE;
   const deficit = ['watch', 'risk', 'drought'].includes(assessment.level);
   const withinDays =
     forecast.length > 0 || zone.depletionMm > zone.readilyAvailableMm
@@ -266,7 +278,7 @@ export function irrigationAdvice(input: StageInput, assessment: Assessment): Irr
   const rainCovers = forecastPrecipMm !== null && forecastPrecipMm >= zone.depletionMm;
   let advisable: IrrigationAdvice['advisable'] = 'no';
 
-  if (growing && deficit && !rainCovers) {
+  if (growing && !ripening && deficit && !rainCovers) {
     if (stressed && zone.stressCoefficient < SEVERE_STRESS_KS) advisable = 'yes';
     else if (stressed || (withinDays !== null && withinDays <= SOON_DAYS)) advisable = 'consider';
   }

@@ -7,7 +7,7 @@ import { assess } from '../assessment';
 import { cropAtDate } from '../crop-calendar';
 import { history } from '../history';
 import { addDays, addYears, daysBetween } from '../iso-date';
-import { causes, recurrentDeficit } from './causes';
+import { causes, deficitSeasons, recurrentDeficit } from './causes';
 
 const FIELD: FieldArea = {
   id: 'area:test',
@@ -180,11 +180,20 @@ describe('causes', () => {
     const wet = stageInput('2021-11-15', 0, { soil: SAND });
     const assessment = assess(wet);
     const past = history(wet);
-    const recurrent: History = { ...past, seasonsWithData: 10, droughtSeasons: 5 };
+    // progi IUNG nie przekroczone ani razu, ale bilans strefy korzeniowej: >= 50 mm niedoboru w 5 z 10 sezonow
+    const recurrent: History = {
+      ...past,
+      droughtSeasons: 0,
+      seasons: past.seasons.map((season, index) =>
+        Object.assign(structuredClone(season), { droughtPeriods: 0, etDeficitMm: index % 2 === 0 ? 80 : 10 }),
+      ),
+    };
 
     expect(assessment.level).toBe('out_of_season');
     expect(ids(wet, assessment)).toEqual([]);
+    expect(deficitSeasons(recurrent)).toEqual({ deficit: 5, withData: 10 });
     expect(recurrentDeficit(recurrent)).toBe(true);
+    expect(recurrentDeficit({ ...recurrent, seasons: recurrent.seasons.slice(0, 4) })).toBe(false);
     expect(ids(wet, assessment, recurrent).toSorted()).toEqual([
       'crop_sensitivity',
       'low_soil_retention',

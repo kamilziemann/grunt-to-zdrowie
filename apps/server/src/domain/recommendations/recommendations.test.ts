@@ -45,7 +45,8 @@ const HYDRO: HydroContext = {
   treeCoverShare: null,
 };
 
-const DATE = '2021-07-15';
+// koniec czerwca: pszenica ozima jeszcze w pelni rozwoju (Kc 1,15)
+const DATE = '2021-06-28';
 
 const input = (extra: Partial<StageInput> = {}): StageInput => ({
   field: FIELD,
@@ -156,17 +157,16 @@ describe('recommend', () => {
     expect(organic?.effect).toEqual({ kind: 'water_mm', value: gain });
   });
 
-  it('oczko wodne tylko poza piaskami luznymi (na kat. I woda wsiaka)', () => {
+  it('oczko wodne tylko poza glebami lekkimi (kat. I albo < 90 mm/m - woda wsiaka)', () => {
     const noWater = [cause('no_landscape_retention', 0.3)];
-    const onLoam = recommend(input(), assessment('drought'), noWater).retention.map((item) => item.measure);
-    const onSand = recommend(
-      input({ soil: { ...SOIL, category: 1 } }),
-      assessment('drought'),
-      noWater,
-    ).retention.map((item) => item.measure);
+    const ponds = (soil: SoilProfile) =>
+      recommend(input({ soil }), assessment('drought'), noWater).retention.some(
+        (item) => item.measure === 'small_pond',
+      );
 
-    expect(onLoam).toContain('small_pond');
-    expect(onSand).not.toContain('small_pond');
+    expect(ponds({ ...SOIL, category: 3, availableWaterMmPerM: 150 })).toBe(true);
+    expect(ponds({ ...SOIL, category: 1, availableWaterMmPerM: 150 })).toBe(false);
+    expect(ponds({ ...SOIL, category: 2, availableWaterMmPerM: 80 })).toBe(false);
   });
 
   it('bez przyczyn nie ma dzialan', () => {
@@ -189,7 +189,7 @@ describe('irrigationAdvice', () => {
   it('deszcz z prognozy pokrywajacy niedobor zastepuje nawodnienie', () => {
     const forecast = {
       days: Array.from({ length: 7 }, (_unused, index) => ({
-        date: `2021-07-${16 + index}`,
+        date: `2021-07-0${1 + index}`,
         precipMm: 15,
         et0Mm: 3,
         tMinC: 12,
@@ -207,7 +207,7 @@ describe('irrigationAdvice', () => {
   it('zapas jeszcze latwo dostepny, ale prognoza sucha: rozwazyc, gdy przekroczenie w 3 dni', () => {
     const forecast = {
       days: Array.from({ length: 7 }, (_unused, index) => ({
-        date: `2021-07-${16 + index}`,
+        date: `2021-07-0${1 + index}`,
         precipMm: 0,
         et0Mm: 6,
         tMinC: 16,
@@ -218,14 +218,18 @@ describe('irrigationAdvice', () => {
 
     expect(irrigationAdvice(input({ forecast }), assessment('watch', near))).toMatchObject({
       advisable: 'consider',
-      // pszenica w polowie lipca dojrzewa (Kc ok. 0,6): 50 + 2 x 3,6 mm > 55 mm RAW drugiego dnia
-      withinDays: 2,
+      // pszenica w pelni rozwoju (Kc 1,15): 50 + 6,9 mm > 55 mm RAW juz pierwszego dnia prognozy
+      withinDays: 1,
       netDepthMm: 50,
     });
   });
 
-  it('bez niedoboru albo poza wzrostem: nie nawadniac; bez oceny i bez bilansu: brak wskazowki', () => {
+  it('bez niedoboru, poza wzrostem albo w dojrzewaniu: nie nawadniac; bez oceny i bez bilansu: brak wskazowki', () => {
     const winter = input({ date: '2021-12-01', crop: cropAtDate('winter_wheat', '2021-12-01') });
+    const ripening = input({ date: '2021-07-20', crop: cropAtDate('winter_wheat', '2021-07-20') });
+
+    expect(ripening.crop.stage).toBe('late');
+    expect(irrigationAdvice(ripening, assessment('drought'))?.advisable).toBe('no');
 
     expect(irrigationAdvice(input(), assessment('ok'))?.advisable).toBe('no');
     expect(irrigationAdvice(winter, assessment('drought'))?.advisable).toBe('no');

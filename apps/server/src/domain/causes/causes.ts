@@ -1,6 +1,6 @@
 // Przyczyny niedoboru wody (etap `causes`): kazda przyczyna to jawna regula na danych z raportu z dowodem liczbowym
 // i waga 0-1 (jak mocno tlumaczy niedobor). Przyczyny szukamy, gdy ocena mowi o niedoborze (obserwuj, ryzyko,
-// susza) albo gdy niedobor wraca w historii (min. 30% sezonow) - wtedy tylko przyczyny trwale (gleba, odplyw,
+// susza) albo gdy niedobor wraca w historii (min. 30% sezonow: prog IUNG albo >= 50 mm niedoboru wg bilansu) - wtedy tylko przyczyny trwale (gleba, odplyw,
 // krajobraz, wrazliwosc uprawy), bo pogoda z daty analizy niczego nie tlumaczy. Bez oceny przyczyn nie ma.
 // Dane ze zrodel przykladowych (atrap) nie sa dowodem - reguly je pomijaja.
 import type { Assessment, Cause, Evidence, History, SourceId } from '@app/contracts';
@@ -20,10 +20,12 @@ const LOW_AVAILABLE_WATER_MM_PER_M = 130;
 const TYPICAL_AVAILABLE_WATER_MM_PER_M = 150;
 /** row blizej niz 50 m od granicy (albo przez pole) odprowadza wode z pola */
 const DITCH_AT_FIELD_M = 50;
-/** niedobor wraca: susza w co najmniej 30% sezonow z danymi (min. 5 sezonow) */
+/** niedobor wraca: niedobor w co najmniej 30% sezonow z danymi (min. 5 sezonow) */
+/** sezon z niedoborem wg bilansu strefy korzeniowej: uprawie zabraklo co najmniej tyle wody */
+const SEASON_DEFICIT_MM = 50;
 const RECURRENT_SHARE = 0.3;
 const MIN_SEASONS = 5;
-/** wrazliwosc uprawy: susza w co najmniej 40% sezonow */
+/** wrazliwosc uprawy: niedobor w co najmniej 40% sezonow */
 const SENSITIVE_SHARE = 0.4;
 const SLOPE_RUNOFF_PCT = 3;
 
@@ -263,29 +265,57 @@ function landscapeCauses(input: StageInput, real: (id: SourceId) => boolean): Ca
   return found;
 }
 
-function cropCause(input: StageInput, history: History | undefined): Cause | null {
-  if (!history || history.seasonsWithData < MIN_SEASONS) return null;
-
-  const share = history.droughtSeasons / history.seasonsWithData;
-
-  if (share < SENSITIVE_SHARE) return null;
-
-  const deficits = history.seasons.flatMap((season) =>
-    season.etDeficitMm === null || season.etDeficitMm === undefined ? [] : [season.etDeficitMm],
+/**
+ * Sezony z niedoborem: prog suszy IUNG przekroczony w ktoryms okresie albo uprawie zabraklo co najmniej 50 mm wody
+ * wg bilansu strefy korzeniowej (na lekkiej glebie bilans pokazuje niedobor, zanim KBW przekroczy prog kategorii).
+ */
+export function deficitSeasons(history: History | undefined): { deficit: number; withData: number } {
+  const seasons = (history?.seasons ?? []).filter(
+    (season) => season.minBalanceMm !== null || (season.etDeficitMm ?? null) !== null,
   );
-  const typicalDeficit = median(deficits);
+
+  return {
+    deficit: seasons.filter(
+      (season) => season.droughtPeriods > 0 || (season.etDeficitMm ?? 0) >= SEASON_DEFICIT_MM,
+    ).length,
+    withData: seasons.length,
+  };
+}
+
+/** Czy niedobor wraca w historii pola (min. 30% sezonow z niedoborem, z co najmniej 5 sezonow). */
+export function recurrentDeficit(history: History | undefined): boolean {
+  const { deficit, withData } = deficitSeasons(history);
+
+  return withData >= MIN_SEASONS && deficit / withData >= RECURRENT_SHARE;
+}
+
+function cropCause(history: History | undefined): Cause | null {
+  const { deficit, withData } = deficitSeasons(history);
+
+  if (withData < MIN_SEASONS || deficit / withData < SENSITIVE_SHARE) return null;
+
+  const typicalDeficit = median(
+    (history?.seasons ?? []).flatMap((season) =>
+      season.etDeficitMm === null || season.etDeficitMm === undefined ? [] : [season.etDeficitMm],
+    ),
+  );
 
   return {
     id: 'crop_sensitivity',
-    weight: round(clamp(share), 2),
+    weight: round(clamp(deficit / withData), 2),
     evidence: [
-      {
-        metric: 'drought_seasons',
-        value: history.droughtSeasons,
-        unit: 'seasons',
-        reference: history.seasonsWithData,
-        source: 'meteo',
-      },
+      { metric: 'deficit_seasons', value: deficit, unit: 'seasons', reference: withData, source: 'meteo' },
+      ...(history
+        ? [
+            {
+              metric: 'drought_seasons',
+              value: history.droughtSeasons,
+              unit: 'seasons',
+              reference: history.seasonsWithData,
+              source: 'meteo' as const,
+            },
+          ]
+        : []),
       ...(typicalDeficit === null
         ? []
         : [
@@ -298,15 +328,6 @@ function cropCause(input: StageInput, history: History | undefined): Cause | nul
           ]),
     ],
   };
-}
-
-/** Czy niedobor wraca w historii pola (min. 30% sezonow z susza). */
-export function recurrentDeficit(history: History | undefined): boolean {
-  return (
-    history !== undefined &&
-    history.seasonsWithData >= MIN_SEASONS &&
-    history.droughtSeasons / history.seasonsWithData >= RECURRENT_SHARE
-  );
 }
 
 export function causes(input: StageInput, assessment: Assessment, history?: History): Cause[] {
@@ -322,7 +343,7 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
     ...(deficitNow ? weatherCauses(input, assessment) : []),
     soilCause(input, real),
     ...landscapeCauses(input, real),
-    cropCause(input, history),
+    cropCause(history),
   ].filter((cause): cause is Cause => cause !== null);
 
   return found.toSorted((a, b) => b.weight - a.weight);
