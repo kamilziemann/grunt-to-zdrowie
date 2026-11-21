@@ -14,6 +14,7 @@ import type {
 } from '../../domain/analysis-ports';
 import { addDays, daysBetween, withYear, yearOf } from '../../domain/iso-date';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
+import { sourceCacheTtl } from '../../domain/source-cache-policy';
 
 export const CDSE_TOKEN_URL =
   'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
@@ -113,6 +114,26 @@ export function rasterSize(bbox: FieldArea['bbox']): { width: number; height: nu
   const side = (meters: number) => Math.min(MAX_SIDE_PX, Math.max(1, Math.round(meters / CELL_M)));
 
   return { width: side((east - west) * metersPerDegLng), height: side((north - south) * metersPerDegLat) };
+}
+
+/** token OAuth zyje ok. 10 min - pamietamy go krocej, zeby nigdy nie oddac wygaslego */
+const TOKEN_TTL_S = 300;
+
+/**
+ * Czas zycia odpowiedzi w pamieci: token - 5 min; statystyki - z konca okna (`aggregation.timeRange.to`), bo
+ * archiwum sprzed kilkunastu dni sie nie zmienia, a ostatnie dni dostaja jeszcze nowe sceny.
+ */
+export function sentinelCacheTtl(today: () => string) {
+  return (url: string, init: RequestInit | undefined): number => {
+    if (url === CDSE_TOKEN_URL) return TOKEN_TTL_S;
+
+    if (url !== CDSE_STATISTICS_URL || typeof init?.body !== 'string') return 0;
+
+    const body = JSON.parse(init.body) as { aggregation?: { timeRange?: { to?: string } } };
+    const to = body.aggregation?.timeRange?.to?.slice(0, 10) ?? null;
+
+    return sourceCacheTtl(to, today());
+  };
 }
 
 export function statisticsBody(field: FieldArea, window: Window): unknown {

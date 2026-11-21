@@ -12,6 +12,7 @@ import {
   statisticsBody,
   windowsFor,
   type FetchLike,
+  sentinelCacheTtl,
 } from './sentinel-statistics';
 
 // Nagranie: API statystyk CDSE (Sentinel-2 L2A, NDVI/NDMI z maska SCL 4-5) dla prostokata ok. 205 x 167 m od
@@ -218,5 +219,19 @@ describe('createSentinelStatisticsSource', () => {
     expect(result.data).toEqual({ observations: [], baseline: [], cellSizeM: 10 });
     expect(result.source.status).toBe('partial');
     expect(result.source.note).toContain('brak bezchmurnego zdjęcia');
+  });
+});
+
+describe('sentinelCacheTtl', () => {
+  it('token 5 min, archiwum 30 dni, okno konczace sie w ostatnich dniach 3 h', () => {
+    const ttl = sentinelCacheTtl(() => '2026-11-21');
+    const window = (to: string) => ({
+      method: 'POST',
+      body: JSON.stringify({ aggregation: { timeRange: { to: `${to}T23:59:59Z` } } }),
+    });
+
+    expect(ttl(CDSE_TOKEN_URL, { method: 'POST', body: 'grant_type=client_credentials' })).toBe(300);
+    expect(ttl(CDSE_STATISTICS_URL, window('2021-07-15'))).toBe(30 * 24 * 3600);
+    expect(ttl(CDSE_STATISTICS_URL, window('2026-11-21'))).toBe(3 * 3600);
   });
 });

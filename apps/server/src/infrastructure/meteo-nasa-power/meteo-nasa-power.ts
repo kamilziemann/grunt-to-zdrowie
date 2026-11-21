@@ -9,6 +9,7 @@ import type { DailyWeather, MeteoSeries, MeteoSource, Sourced } from '../../doma
 import { addDays, daysBetween } from '../../domain/iso-date';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
+import { sourceCacheTtl } from '../../domain/source-cache-policy';
 
 export const NASA_POWER_URL = 'https://power.larc.nasa.gov/api/temporal/daily/point';
 
@@ -66,6 +67,17 @@ export function powerUrl([lng, lat]: [number, number], from: string, to: string)
   });
 
   return `${NASA_POWER_URL}?${params.toString()}`;
+}
+
+/** Czas zycia odpowiedzi w pamieci (infrastructure/response-cache): z daty `end` zapytania. */
+export function nasaPowerCacheTtl(today: () => string) {
+  return (url: string): number => {
+    const end = new URL(url).searchParams.get('end');
+    const dataTo =
+      end && /^\d{8}$/.test(end) ? `${end.slice(0, 4)}-${end.slice(4, 6)}-${end.slice(6)}` : null;
+
+    return sourceCacheTtl(dataTo, today());
+  };
 }
 
 /** Dni, ktore maja opad i obie temperatury - bez nich nie ma bilansu. */

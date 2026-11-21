@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { createNasaPowerMeteoSource, parsePower, powerUrl, type FetchLike } from './meteo-nasa-power';
+import {
+  createNasaPowerMeteoSource,
+  parsePower,
+  powerUrl,
+  type FetchLike,
+  nasaPowerCacheTtl,
+} from './meteo-nasa-power';
 import recorded from './nasa-power.recorded.json?raw';
 
 // Nagranie: punkt 52,17 N 21,56 E (Minsk Mazowiecki), 10-21 listopada 2026, pobrane 21.11.2026 - ostatnie trzy dni
@@ -91,5 +97,14 @@ describe('createNasaPowerMeteoSource', () => {
       data: null,
       source: { status: 'missing', note: 'NASA POWER: błąd połączenia (connection reset)' },
     });
+  });
+});
+
+describe('nasaPowerCacheTtl', () => {
+  it('seria konczaca sie w historii - 30 dni, konczaca sie dzis - 3 h', () => {
+    const ttl = nasaPowerCacheTtl(() => '2026-11-21');
+
+    expect(ttl(powerUrl([21.56, 52.17], '2008-01-01', '2018-06-15'))).toBe(30 * 24 * 3600);
+    expect(ttl(powerUrl([21.56, 52.17], '2016-01-01', '2026-11-21'))).toBe(3 * 3600);
   });
 });

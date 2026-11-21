@@ -12,6 +12,7 @@ import { containsPoint } from '../../domain/parcel-geometry';
 import { soilProfileFromLayers, type SoilLayer } from '../../domain/soil-profile';
 import { readGeoTiff, type Raster } from './geotiff';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
+import { STATIC_TTL_S } from '../../domain/source-cache-policy';
 
 export const SOILGRIDS_WCS_URL = 'https://maps.isric.org/mapserv';
 
@@ -47,6 +48,9 @@ export interface SoilGridsOptions {
   fetch?: FetchLike;
   now?: () => string;
 }
+
+/** Czas zycia odpowiedzi w pamieci: model gleby sie nie zmienia (nowa wersja SoilGrids to nowy adres mapy). */
+export const soilGridsCacheTtl = (): number => STATIC_TTL_S;
 
 /** Margines wokol pola w stopniach [dlugosc, szerokosc] dla odleglosci w metrach. */
 function padFor(meters: number, latitude: number): [number, number] {

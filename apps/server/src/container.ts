@@ -18,12 +18,14 @@ import {
   createPostgisHydroSource,
 } from './infrastructure/hydro-postgis';
 import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway';
-import { createNasaPowerMeteoSource } from './infrastructure/meteo-nasa-power';
+import { createNasaPowerMeteoSource, nasaPowerCacheTtl } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
+import { cachedFetch, workersResponseStore, type ResponseStore } from './infrastructure/response-cache';
 import { createSampleSources } from './infrastructure/sample-sources';
-import { createSentinelStatisticsSource } from './infrastructure/sentinel-statistics';
-import { createSoilGridsSource } from './infrastructure/soilgrids';
+import { createSentinelStatisticsSource, sentinelCacheTtl } from './infrastructure/sentinel-statistics';
+import { createSoilGridsSource, soilGridsCacheTtl } from './infrastructure/soilgrids';
 import { createUldkParcelSource } from './infrastructure/uldk';
+import { isoDateInPoland } from './domain/iso-date';
 import { createAnalysisService } from './services/analysis';
 import { createHydroService } from './services/hydro';
 import type { Container, ContainerDeps } from './services/container';
@@ -45,6 +47,8 @@ export interface ContainerOverrides {
   placeSource?: PlaceSource;
   /** kafle hydrografii do mapy; null = brak bazy (testy: kafle w pamieci albo brak konfiguracji) */
   hydroMapSource?: HydroMapSource | null;
+  /** pamiec odpowiedzi zrodel analizy; null = bez pamieci (domyslnie Cache API Workera, gdy jest) */
+  responseStore?: ResponseStore | null;
 }
 
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
@@ -71,19 +75,27 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   // Copernicus) sa prawdziwe; teren to wciaz atrapa (`sample: true`, raport niesie `meta.sample`), a strefy -
   // reguly przykladowe (`meta.sampleParts`). Pakiety planu docs/plans/silnik-analizy-i-raport.md podmieniaja je
   // tutaj pojedynczo. Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
+  // pamiec odpowiedzi: kolejne analizy tego samego pola i sasiednich dzialek nie pytaja dostawcow drugi raz
+  // (limity Copernicus i NASA POWER przy trybie "gospodarstwo"); historia - 30 dni, ostatnie dni - 3 h
+  const store = overrides.responseStore !== undefined ? overrides.responseStore : workersResponseStore();
+  const today = () => isoDateInPoland(now());
+  const remember = (ttl: (url: string, init: RequestInit | undefined) => number) =>
+    cachedFetch((url, init) => fetch(url, init), store, ttl);
+
   const analysis = createAnalysisService({
     parcels,
     sources: {
       ...createSampleSources(),
-      meteo: createNasaPowerMeteoSource(),
+      meteo: createNasaPowerMeteoSource({ fetch: remember(nasaPowerCacheTtl(today)) }),
       forecast: createMetNorwayForecastSource(),
-      soil: createSoilGridsSource(),
+      soil: createSoilGridsSource({ fetch: remember(soilGridsCacheTtl) }),
       // hydrografia BDOT10k w Postgresie (Neon); bez DATABASE_URL zrodlo zglasza brak danych
       hydro: createPostgisHydroSource({
         run: sqlRunner,
       }),
       // Sentinel-2 przez API statystyk Copernicus; bez kluczy OAuth zrodlo zglasza brak danych
       vegetation: createSentinelStatisticsSource({
+        fetch: remember(sentinelCacheTtl(today)),
         clientId: deps.vars.COPERNICUS_CLIENT_ID,
         clientSecret: deps.vars.COPERNICUS_CLIENT_SECRET,
       }),
