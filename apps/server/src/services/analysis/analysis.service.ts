@@ -27,9 +27,10 @@ export const ANALYSIS_ENGINE_VERSION = '0.2.0';
 export const SOURCE_TIMEOUTS_MS: Record<Exclude<SourceId, 'parcel'>, number> = {
   meteo: 12_000,
   forecast: 6000,
-  soil: 3000,
+  // SoilGrids: 18 malych pokryc WCS w puli po 4 - zwykle ok. 1-1,5 s
+  soil: 8000,
   terrain: 4000,
-  hydro: 4000,
+  hydro: 5000,
   vegetation: 10_000,
 };
 

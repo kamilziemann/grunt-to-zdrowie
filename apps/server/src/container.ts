@@ -15,6 +15,7 @@ import { createMetNorwayForecastSource } from './infrastructure/meteo-met-norway
 import { createNasaPowerMeteoSource } from './infrastructure/meteo-nasa-power';
 import { createNominatimPlaceSource } from './infrastructure/nominatim';
 import { createSampleSources } from './infrastructure/sample-sources';
+import { createSoilGridsSource } from './infrastructure/soilgrids';
 import { createUldkParcelSource } from './infrastructure/uldk';
 import { createAnalysisService } from './services/analysis';
 import type { Container, ContainerDeps } from './services/container';
@@ -48,8 +49,8 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
 
-  // Pogoda (NASA POWER) i prognoza (MET Norway) sa prawdziwe, ocena i historia liczone z danych; gleba, teren, woda
-  // i satelita to wciaz atrapy (`sample: true`, raport niesie `meta.sample`), a przyczyny, strefy i zalecenia -
+  // Pogoda (NASA POWER), prognoza (MET Norway) i gleba (SoilGrids) sa prawdziwe, ocena i historia liczone z danych;
+  // teren, woda i satelita to wciaz atrapy (`sample: true`, raport niesie `meta.sample`), a przyczyny, strefy i zalecenia -
   // reguly przykladowe (`meta.sampleParts`). Pakiety planu docs/plans/silnik-analizy-i-raport.md podmieniaja je
   // tutaj pojedynczo. Testy dostaja zrodla w pamieci przez `analysisSources` (test/helpers.ts).
   const analysis = createAnalysisService({
@@ -58,6 +59,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
       ...createSampleSources(),
       meteo: createNasaPowerMeteoSource(),
       forecast: createMetNorwayForecastSource(),
+      soil: createSoilGridsSource(),
       ...overrides.analysisSources,
     },
     stages: engineStages,

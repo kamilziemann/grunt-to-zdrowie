@@ -161,6 +161,19 @@ describe('assess - tabela przypadkow', () => {
     ]);
   });
 
+  it('gleba z modelu 250 m: pewnosc spada tylko, gdy sasiednia kategoria zmienia werdykt', () => {
+    const modelled: SoilProfile = { ...SOIL, modelled: true, categoryRange: [2, 2] };
+    const hot = { tMinC: 15, tMaxC: 30, tMeanC: 22.5, solarMjM2: 23, et0Mm: 5 };
+    // KBW ok. -228 mm: susza na kat. I-III, nie na IV (sasiedzi kategorii II zgodni) -> tylko gruba siatka pogody
+    const robust = assess(input('2018-07-15', { ...hot, precipMm: 1.2 }, { soil: modelled }));
+    // KBW ok. -216 mm: susza na kat. II, ale nie na III -> wybor kategorii z modelu decyduje o werdykcie
+    const sensitive = assess(input('2018-07-15', { ...hot, precipMm: 1.4 }, { soil: modelled }));
+
+    expect([robust.level, robust.confidence]).toEqual(['drought', 'medium']);
+    expect([sensitive.level, sensitive.confidence]).toEqual(['drought', 'low']);
+    expect(assess(input('2018-07-15', { ...hot, precipMm: 1.4 })).confidence).toBe('medium');
+  });
+
   it('sprzeczne sygnaly (KBW susza, korzenie bez niedoboru) obnizaja pewnosc', () => {
     const agreeing = assess(input('2018-07-15', DRY));
     const conflicting = assess(input('2018-07-15', { ...DRY, et0Mm: 0.3, precipMm: 0.6 }));

@@ -8,6 +8,7 @@
 // ostatnie 60 dni bez progu, a poziom wynika z bilansu strefy korzeniowej.
 import type { Assessment, AssessmentLevel, ClimaticBalance, RootZone } from '@app/contracts';
 
+import type { SoilProfile } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { confidenceOf, type UncertaintyId } from '../confidence';
 import { addDays, isoDate, yearOf } from '../iso-date';
@@ -19,6 +20,7 @@ import {
   rootZoneSimulation,
   SOIL_CATEGORIES,
   type PeriodAssessment,
+  FALLBACK_SOIL_CATEGORY,
 } from '../water-indicators';
 
 const HISTORY_YEARS = 10;
@@ -173,6 +175,28 @@ export function levelOf(date: string, { balance, zone, growing }: Signals): Asse
   return wet ? 'excess' : 'ok';
 }
 
+/**
+ * Czy werdykt KBW zmienilby sie przy innej prawdopodobnej kategorii gleby: z zakresu profilu (uziarnienie vs woda
+ * w profilu) poszerzonego o kategorie sasiednie - model 250 m myli sie zwykle o jedna kategorie.
+ */
+function verdictDependsOnCategory(soil: SoilProfile, balance: ClimaticBalance | null): boolean {
+  const scenarios = balance?.categoryScenarios ?? [];
+  const category = soil.category ?? FALLBACK_SOIL_CATEGORY;
+  const [low, high] = soil.categoryRange ?? [category, category];
+  const verdicts = new Set(
+    scenarios
+      .filter(
+        (scenario) =>
+          scenario.soilCategory >= Math.min(low, category - 1) &&
+          scenario.soilCategory <= Math.max(high, category + 1) &&
+          scenario.belowThreshold !== null,
+      )
+      .map((scenario) => scenario.belowThreshold),
+  );
+
+  return verdicts.size > 1;
+}
+
 /** Sprzeczne sygnaly: KBW mowi "susza", a w strefie korzeni wody nie brakuje - albo odwrotnie. */
 function conflicting({ balance, zone, growing }: Signals): boolean {
   if (!balance || !zone || !growing || balance.belowThreshold === null) return false;
@@ -197,6 +221,8 @@ export function assess(input: StageInput): Assessment {
   if (input.meteo && input.meteo.gridKm > COARSE_GRID_KM) uncertainties.push('coarse_meteo_grid');
 
   if (!input.soil || input.soil.category === null || sample.has('soil')) uncertainties.push('soil_unknown');
+  else if (input.soil.modelled && verdictDependsOnCategory(input.soil, balance))
+    uncertainties.push('soil_modelled');
 
   // pogoda z atrapy to nie pomiar - taka ocena nie moze miec zadnej pewnosci
   if (sample.has('meteo')) uncertainties.push('no_balance');

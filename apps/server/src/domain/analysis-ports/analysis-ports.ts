@@ -59,6 +59,12 @@ export interface SoilProfile {
   /** zakres prawdopodobnych kategorii, gdy pewnosc jest niska (np. sama klasa bonitacyjna) */
   categoryRange?: [SoilCategory, SoilCategory];
   basis: 'texture' | 'land_use' | 'both';
+  /** grupa granulometryczna (np. "pg" = piasek gliniasty), z ktorej wynika kategoria */
+  textureClass?: string;
+  /** woda dostepna w calym profilu do 1,5 m (mm) - tej glebokosci dotycza kategorie IUNG */
+  availableWaterProfileMm?: number;
+  /** zrodlo jest modelem (np. globalny SoilGrids 250 m), a nie pomiarem ani mapa glebowa */
+  modelled?: boolean;
 }
 
 /** Siatka wysokosci w ukladzie metrycznym; komorki wierszami od polnocnego zachodu. */
@@ -102,6 +108,14 @@ export interface HydroContext {
   features: { kind: HydroFeatureKind; coordinates: LngLat[] }[];
   /** udzial drzew i zadrzewien w otoczeniu pola, 0-1; null = brak danych o pokryciu terenu */
   treeCoverShare: number | null;
+  /** odleglosc do najblizszej wody stojacej i mokradla; null = brak w promieniu */
+  nearestWaterBodyM?: number | null;
+  nearestWetlandM?: number | null;
+  /** liczba odcinkow rowow w promieniu i laczna dlugosc rowow wewnatrz pola (m) */
+  ditchesInRadius?: number;
+  ditchLengthInFieldM?: number;
+  /** nazwa najblizszego cieku, gdy BDOT10k ja podaje */
+  nearestWatercourseName?: string | null;
 }
 
 export interface VegetationObservation {
