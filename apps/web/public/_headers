@@ -1,0 +1,8 @@
+# Naglowki plikow statycznych (Workers Static Assets: JS, CSS, fonty, ikony) - strony HTML dostaja swoje w Workerze
+# (src/entry/page-request). Pliki z hashem w nazwie (/assets/*) sa niezmienne, wiec moga lezec w przegladarce rok.
+/*
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,22 @@
+{
+  "extends": "@app/tsconfig/react-app.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "e2e/**/*.ts", "scripts/**/*.ts", "*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".wrangler",
+    ".turbo",
+    "coverage",
+    "test-results",
+    "playwright-report",
+    "src/worker.ts",
+    "src/entry/**",
+    "src/types/cloudflare-env.d.ts"
+  ]
+}

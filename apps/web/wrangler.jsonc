@@ -1,0 +1,101 @@
+{
+  // JEDYNY Worker aplikacji: strony (TanStack Start, SSR) + API (Hono z apps/server pod /api) + cron - wejscie
+  // src/worker.ts. Pliki klienta (JS/CSS) dolacza @cloudflare/vite-plugin w czasie builda.
+  // Workers Cache (`cache.enabled`) stoi PRZED Workerem: odpowiedzi z `Cloudflare-CDN-Cache-Control` i `Cache-Tag`
+  // (packages/cache) ida z brzegu, mutacje czyszcza tagi (apps/server: entry/routes/cache-rules.ts).
+  // Pierwszy deploy (`bun run deploy` z roota) zaklada baze D1 i wpisuje jej id w miejsce zaslepki REPLACE_WITH_* w
+  // env.production albo env.preview - zacommituj te zmiane. Lokalne sekrety: .dev.vars (wzor: .dev.vars.example).
+  // Bindingi (d1, r2, queues, workflows, ai, vars, cache) nie dziedzicza sie miedzy srodowiskami - kazde env ma
+  // pelna kopie. Blok top-level to TYLKO lokalny development (vite dev, testy) z nazwami *-dev, zeby deploy bez --env
+  // nie przejal zasobow produkcji. Nowy binding: tutaj (kazde env) + packages/env/src/server.ts + adapter w
+  // apps/server/src/infrastructure.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "grunt-to-zdrowie-dev",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "cache": { "enabled": true },
+  // Lokalna baza wrangler dev: database_id to tylko klucz danych w .wrangler/state (zmiana = pusta lokalna baza).
+  // Nie wpisuj tu id bazy z Cloudflare - prawdziwe id stoja w env.preview/env.production.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "grunt-to-zdrowie",
+      "database_id": "REPLACE_WITH_D1_ID",
+      "migrations_dir": "../../packages/db/migrations",
+    },
+  ],
+  "triggers": { "crons": ["*/10 * * * *"] },
+  // Cloudflare Observability: logi i slady 100% requestow, trwale w panelu, Issues w czasie rzeczywistym. Jeden slad
+  // na zapytanie: przegladarka -> SSR -> Hono maja ten sam traceId (`traceparent`), bledy przegladarki ida do
+  // /api/telemetry/errors z traceId strony. Uwaga: slady zapisuja pelny URL (`url.full`).
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "issues": { "enabled": true },
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      // invocation logs zapisuja pelny URL; kazde zapytanie loguje nasz logger (sciezka bez tokenow, traceId)
+      "invocation_logs": false,
+      "persist": true,
+    },
+    "traces": { "enabled": true, "head_sampling_rate": 1, "persist": true },
+  },
+  "upload_source_maps": true,
+  "vars": {
+    "ENVIRONMENT": "development",
+    "LOG_LEVEL": "debug",
+    "AUTH_ENABLED": "false",
+    "PUBLIC_URL": "http://localhost:3000/api",
+    "ALLOWED_ORIGINS": "http://localhost:3000",
+    // Sentry domyslnie wylaczony (SENTRY_DSN jako sekret: wrangler secret put SENTRY_DSN)
+    "SENTRY_ENABLED": "false",
+  },
+  "env": {
+    "preview": {
+      "name": "grunt-to-zdrowie-preview",
+      "cache": { "enabled": true },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "grunt-to-zdrowie-preview",
+          "database_id": "REPLACE_WITH_PREVIEW_D1_ID",
+          "migrations_dir": "../../packages/db/migrations",
+        },
+      ],
+      "triggers": { "crons": ["*/10 * * * *"] },
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "LOG_LEVEL": "info",
+        "AUTH_ENABLED": "false",
+        "PUBLIC_URL": "https://grunt-to-zdrowie-preview.YOUR-SUBDOMAIN.workers.dev/api",
+        "ALLOWED_ORIGINS": "https://grunt-to-zdrowie-preview.YOUR-SUBDOMAIN.workers.dev",
+        "SENTRY_ENABLED": "false",
+      },
+    },
+    "production": {
+      "name": "grunt-to-zdrowie",
+      "cache": { "enabled": true },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "grunt-to-zdrowie",
+          "database_id": "REPLACE_WITH_PRODUCTION_D1_ID",
+          "migrations_dir": "../../packages/db/migrations",
+        },
+      ],
+      "triggers": { "crons": ["*/10 * * * *"] },
+      // Wlasna domena: odkomentuj i wpisz (strefa musi byc na tym koncie Cloudflare), potem PUBLIC_URL i ALLOWED_ORIGINS.
+      // "routes": [{ "pattern": "app.example.com", "custom_domain": true }],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "LOG_LEVEL": "info",
+        "AUTH_ENABLED": "false",
+        "PUBLIC_URL": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev/api",
+        "ALLOWED_ORIGINS": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev",
+        "SENTRY_ENABLED": "false",
+      },
+    },
+  },
+}

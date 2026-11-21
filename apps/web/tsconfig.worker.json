@@ -1,0 +1,10 @@
+{
+  "extends": "@app/tsconfig/worker.json",
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/worker.ts", "src/entry/**/*.ts", "src/types/cloudflare-env.d.ts"]
+}

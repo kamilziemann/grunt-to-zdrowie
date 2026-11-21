@@ -1,0 +1,23 @@
+# Sekrety JEDYNEGO Workera (strony + API) do lokalnego `bun run dev` (skopiuj do apps/web/.dev.vars - plik w .gitignore).
+# W produkcji: `wrangler secret put NAZWA`. Zmienne nie-sekretne (PUBLIC_URL, CORS, LOG_LEVEL) sa w wrangler.jsonc -> vars.
+# Walidacja: packages/env/src/server.ts (serverVarsSchema) - brak/zly format = HTTP 503 not_configured.
+# Nowy sekret: pole w serverVarsSchema (`optionalSecret` dla opcjonalnych) + linia tutaj + `wrangler secret put`.
+
+# Opcjonalne nadpisania (domyslne w wrangler.jsonc):
+# LOG_LEVEL=debug
+
+# Sentry (opcjonalny, domyslnie wylaczony - logi i slady sa w Cloudflare Observability):
+# SENTRY_ENABLED=true
+# SENTRY_DSN=https://<klucz>@<org>.ingest.sentry.io/<projekt>
+# SENTRY_TRACES_SAMPLE_RATE=0.1
+
+# Auth (opcjonalne, domyslnie wylaczone - AUTH_ENABLED w wrangler.jsonc). Wlaczenie: AUTH_ENABLED="true" + sekret.
+# AUTH_SECRET: losowe min. 32 znaki (`openssl rand -base64 32`); bez niego przy AUTH_ENABLED=true API zwraca 503.
+# W chmurze: `wrangler secret put AUTH_SECRET --env production`. AUTH_URL domyslnie = PUBLIC_URL.
+# AUTH_ENABLED=true
+# AUTH_SECRET=
+# AUTH_URL=
+
+# Postgres na Neon (PostGIS 3.6). Wartosc: DATABASE_URL z .env.local (`neon env pull` / `neon deploy` w katalogu glownym).
+# W chmurze: `wrangler secret put DATABASE_URL --env production`.
+# DATABASE_URL=postgresql://<user>:<haslo>@<host>-pooler.<region>.aws.neon.tech/neondb?sslmode=require
