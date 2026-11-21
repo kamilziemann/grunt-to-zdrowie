@@ -16,7 +16,7 @@ uprawach i porach roku co przypadki suszy; część z nich to okresy, gdy susza 
 
 - Pole: prostokąt ok. 270 × 220 m (ok. 6 ha) od punktu w gminie. W rundzie 4 punkty w Ludwinie, Pniewach, Nowym
   Tomyślu i Dobrzeniu Wielkim przesunęliśmy z centrum miejscowości na najbliższy grunt orny (≥ 80% powierzchni
-  działek w prostokącie to R wg ewidencji), żeby gleba i klasoużytki dotyczyły pola. W pozostałych pięciu gminach
+  działek w prostokącie to R wg ewidencji), żeby gleba i klasoużytki dotyczyły pola. W pozostałych pięciu gminach (Sicienko, Obrowo, Zielona Góra, Krokowa, Łask)
   ewidencja w usłudze zbiorczej nie podaje klasoużytków (niżej), więc punkty zostały.
 - **Zgodność KBW**: nasz werdykt KBW dla kategorii gleby pola vs ogłoszenie IUNG dla gminy.
 - **Zgodność poziomu**: IUNG „susza” ↔ nasz alarm (`drought` albo `risk`); IUNG „brak” ↔ brak alarmu (`ok`,
@@ -83,7 +83,7 @@ Rozważone reguły (zlecenie rundy 4) na 21 przypadkach:
   i luźne („gleby zbyt lekkie, za suche”), ale **do tych samych klas zalicza gleby zbyt mokre, glejowe, płytkie
   i kamieniste**, a klasy IIIb–IVb łączą piaski gliniaste mocne z ciężkimi glinami. Klasa mówi o przydatności
   rolniczej, nie o uziarnieniu. Do tego usługa zbiorcza WFS nie podaje klasoużytków w części powiatów (bydgoski,
-  toruński, zielonogórski, pucki, łaski, opolski — puste `KLASOUZYTKI_EGIB`), a sygnał „same klasy V–VI” wystąpił
+  toruński, zielonogórski, pucki, łaski — puste `KLASOUZYTKI_EGIB`), a sygnał „same klasy V–VI” wystąpił
   w zestawie raz (Nowy Tomyśl: V, VI — tam (a) już daje kat. I). Reguły (c) nie dało się więc zweryfikować;
   klasy pokazujemy jako dowód w raporcie (`registry_soil_class`), nie zmieniają kategorii.
 
