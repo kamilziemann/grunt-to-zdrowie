@@ -91,9 +91,11 @@ const POLDER_DEPRESSION = 'Obniżenie na terenie odwadnianym rowami (polder)';
 
 /** "Suchsze miejsce na wzniesieniu, w północno-wschodniej części pola, przy rowie, ok. 0,8 ha". */
 export function describeZone(zone: Zone, { polder = false }: { polder?: boolean } = {}): string {
-  const name = polder && zone.kind === 'depression' ? POLDER_DEPRESSION : KIND[zone.kind];
+  const inPolder = polder && zone.kind === 'depression';
   const parts = [
-    [name ?? 'Część pola', zone.relief ? RELIEF[zone.relief] : ''].filter(Boolean).join(' '),
+    inPolder
+      ? POLDER_DEPRESSION
+      : [KIND[zone.kind] ?? 'Część pola', zone.relief ? RELIEF[zone.relief] : ''].filter(Boolean).join(' '),
     zone.position && zone.kind !== 'typical' ? PART[zone.position] : '',
     zone.ditchDistanceM !== undefined && zone.ditchDistanceM <= 50 ? 'przy rowie' : '',
     approxHectares(zone.areaHa),

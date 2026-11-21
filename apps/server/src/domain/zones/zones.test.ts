@@ -290,7 +290,7 @@ describe('describeZone', () => {
 
     expect(describeZone(hollow)).toMatch(/^Zagłębienie bez odpływu w obniżeniu/);
     expect(describeZone(hollow, { polder: true })).toBe(
-      'Obniżenie na terenie odwadnianym rowami (polder) w obniżeniu, w północno-zachodniej części pola, ok. 4,0 ha, pojemność ok. 11037 m³',
+      'Obniżenie na terenie odwadnianym rowami (polder), w północno-zachodniej części pola, ok. 4,0 ha, pojemność ok. 11037 m³',
     );
   });
 });
