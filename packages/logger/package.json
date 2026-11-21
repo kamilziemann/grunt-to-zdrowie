@@ -1,0 +1,23 @@
+{
+  "name": "@app/logger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimalny logger strukturalny (JSON lines) dzialajacy w Workers, Node i przegladarce.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check:types": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@app/tsconfig": "workspace:*",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}
