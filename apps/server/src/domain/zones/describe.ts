@@ -68,6 +68,24 @@ export function compass(dx: number, dy: number, scale: number): Position {
   return sectors[Math.round(((angle + 360) % 360) / 45) % 8] ?? 'centre';
 }
 
+/**
+ * roznica NDMI wzgledem pola od tej wartosci to wiecej niz roznica wilgotnosci jednej uprawy - czesto inny uzytek
+ * albo inny stan pola (laka obok scierniska, zboze obok swiezo zaoranego pasa)
+ */
+export const OTHER_USE_NDMI_DELTA = 0.15;
+
+const OTHER_USE_NOTE =
+  'Tak duża różnica wilgotności roślin może też oznaczać inny użytek albo inny stan pola (np. łąka obok ścierniska) — sprawdź na miejscu.';
+
+/** Zdanie ostroznosci przy duzej roznicy NDMI (strefa ze zdjecia satelitarnego, nie z terenu). */
+function otherUseNote(zone: Zone): string {
+  return zone.kind !== 'typical' &&
+    zone.ndmiDelta !== undefined &&
+    Math.abs(zone.ndmiDelta) >= OTHER_USE_NDMI_DELTA
+    ? `. ${OTHER_USE_NOTE}`
+    : '';
+}
+
 /** "Suchsze miejsce na wzniesieniu, w północno-wschodniej części pola, przy rowie, ok. 0,8 ha". */
 export function describeZone(zone: Zone): string {
   const parts = [
@@ -78,7 +96,7 @@ export function describeZone(zone: Zone): string {
     zone.volumeM3 === undefined ? '' : `pojemność ok. ${Math.round(zone.volumeM3)} m³`,
   ];
 
-  return parts.filter(Boolean).join(', ');
+  return `${parts.filter(Boolean).join(', ')}${otherUseNote(zone)}`;
 }
 
 /** "Odcinek 0–100 m od północnego końca: suchszy, spadek 2,1%, przy rowie". */
@@ -91,5 +109,5 @@ export function describeSegment(zone: Zone, start: Position): string {
     zone.ditchDistanceM !== undefined && zone.ditchDistanceM <= 50 ? 'przy rowie' : '',
   ].filter(Boolean);
 
-  return parts.length > 0 ? `${head}: ${parts.join(', ')}` : head;
+  return `${parts.length > 0 ? `${head}: ${parts.join(', ')}` : head}${otherUseNote(zone)}`;
 }

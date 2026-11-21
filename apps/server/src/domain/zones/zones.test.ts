@@ -1,4 +1,4 @@
-import type { ParcelGeometry } from '@app/contracts';
+import type { ParcelGeometry, Zone } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import type { TerrainGrid, VegetationRaster } from '../analysis-ports';
@@ -6,6 +6,7 @@ import type { StageInput } from '../analysis-stages';
 import { cellsInField, fieldGrid, type GridCell, type GridSpec } from '../field-grid';
 import { fromUtm } from '../utm';
 import type { CellFeatures } from './cell-features';
+import { describeZone } from './describe';
 import { fieldZones, principalAxis, profileFromCells, zoneForMeasure, zonesFromCells } from './zones';
 
 const E0 = 600_000;
@@ -259,5 +260,28 @@ describe('zoneForMeasure', () => {
     expect(zoneForMeasure('ditch_weir', map)).toBe('pond');
     expect(zoneForMeasure('reduced_tillage', map)).toBeNull();
     expect(zoneForMeasure('small_pond', { ...map, zones: [zone('rest', {})] })).toBeNull();
+  });
+});
+
+describe('describeZone', () => {
+  const zone: Zone = {
+    id: 'zone-1',
+    kind: 'drying',
+    areaHa: 4,
+    geometry: { type: 'Polygon', coordinates: [] },
+    position: 'w',
+    relief: 'flat',
+  };
+
+  // 080904_5.0001.349/1 (2023-06-20): suchsza strefa 4 ha na zachodzie, NDMI -0,58 wzgledem pola - to raczej inny
+  // uzytek (lace i rowy w ewidencji) niz susza jednej uprawy
+  it('duza roznica NDMI dostaje zdanie ostroznosci, mala - nie; reszta pola nigdy', () => {
+    expect(describeZone({ ...zone, ndmiDelta: -0.58 })).toBe(
+      'Suchsze miejsce, w zachodniej części pola, ok. 4,0 ha. Tak duża różnica wilgotności roślin może też oznaczać inny użytek albo inny stan pola (np. łąka obok ścierniska) — sprawdź na miejscu.',
+    );
+    expect(describeZone({ ...zone, ndmiDelta: -0.05 })).toBe(
+      'Suchsze miejsce, w zachodniej części pola, ok. 4,0 ha',
+    );
+    expect(describeZone({ ...zone, kind: 'typical', ndmiDelta: 0.3 })).not.toContain('inny użytek');
   });
 });
