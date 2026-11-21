@@ -20,10 +20,13 @@ import type { AnalysisStages, DataSources, ParcelLookup, Sourced, StageInput } f
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
 export const ANALYSIS_ENGINE_VERSION = '0.1.0-sample';
 
-/** Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. */
+/**
+ * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
+ * niego nie ma oceny: NASA POWER oddaje 10 lat zwykle w ok. 2 s, ale pod obciazeniem bywa wolniejszy.
+ */
 export const SOURCE_TIMEOUTS_MS: Record<Exclude<SourceId, 'parcel'>, number> = {
-  meteo: 3000,
-  forecast: 3000,
+  meteo: 12_000,
+  forecast: 6000,
   soil: 3000,
   terrain: 4000,
   hydro: 4000,
