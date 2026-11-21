@@ -1,5 +1,11 @@
 import { expect, test } from './support/test';
-import { DROUGHT_REPORT_URL, mockAnalysisApi, PARCEL_ID, REPORT_URL } from './support/analysis-api';
+import {
+  DROUGHT_REPORT_URL,
+  LOW_CONFIDENCE_REPORT_URL,
+  mockAnalysisApi,
+  PARCEL_ID,
+  REPORT_URL,
+} from './support/analysis-api';
 import { expectTouchTargets } from './support/touch-targets';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
@@ -48,6 +54,23 @@ test.describe('analiza i raport', () => {
 
     await expect(page.locator('[data-source="forecast"]')).toContainText('Brak danych');
     await expect(page.locator('[data-limitation="sample_data"]')).toBeVisible();
+  });
+
+  test('niska pewność: zastrzeżenie przy werdykcie, jedna atrapa, nota źródła tylko dla doradcy', async ({
+    page,
+  }) => {
+    await mockAnalysisApi(page);
+    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+
+    await expect(page.getByTestId('verdict-caveat')).toContainText('Ostrożnie: ta ocena jest niepewna');
+    await expect(page.getByTestId('sample-banner')).toHaveAttribute('data-scope', 'some');
+
+    const soil = page.locator('[data-source="soil"]');
+
+    await expect(soil).toContainText('To źródło nie podało danych dla tego miejsca.');
+    await expect(soil.getByText('no SoilGrids prediction')).toBeHidden();
+    await soil.getByText('Szczegóły dla doradcy').click();
+    await expect(soil.getByText(/no SoilGrids prediction/)).toBeVisible();
   });
 
   test('błąd analizy pokazuje komunikat i ponawia zapytanie', async ({ page }) => {

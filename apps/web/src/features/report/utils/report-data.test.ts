@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DROUGHT_REPORT } from '../fixtures/drought-report';
+import { LOW_CONFIDENCE_REPORT } from '../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../fixtures/sample-report';
 import {
   byPriority,
@@ -14,11 +15,13 @@ import {
   periodDroughtCount,
   periodMonths,
   sampleParts,
+  sampleScope,
   sampleSources,
   scenarioSummary,
   seasonRows,
   stressSummary,
   soilWater,
+  verdictCaveat,
   volumeM3,
   zoneOf,
 } from './report-data';
@@ -144,5 +147,46 @@ describe('wyliczenia raportu', () => {
 
   it('strefa obejmujaca cale pole to nie "czesc pola"', () => {
     expect(zoneOf(DROUGHT_REPORT, 'zone-1')).toBeNull();
+  });
+
+  it('zasieg danych przykladowych: jedna atrapa (teren) to nie caly raport', () => {
+    expect(sampleScope(LOW_CONFIDENCE_REPORT)).toBe('some');
+    expect(sampleScope(SAMPLE_REPORT)).toBe('all');
+
+    const fakeMeteo = {
+      ...LOW_CONFIDENCE_REPORT,
+      sources: LOW_CONFIDENCE_REPORT.sources.map((source) =>
+        source.id === 'meteo' ? { ...source, sample: true } : source,
+      ),
+    };
+
+    expect(sampleScope(fakeMeteo)).toBe('all');
+    expect(
+      sampleScope({
+        ...LOW_CONFIDENCE_REPORT,
+        meta: { ...LOW_CONFIDENCE_REPORT.meta, sample: false },
+        sources: LOW_CONFIDENCE_REPORT.sources.map((source) => ({ ...source, sample: false })),
+      }),
+    ).toBeNull();
+  });
+
+  it('zastrzezenie przy werdykcie: niska pewnosc + braki, nie przy sredniej i poza sezonem', () => {
+    expect(verdictCaveat(LOW_CONFIDENCE_REPORT)?.reasons).toEqual([
+      'soil_missing',
+      'meteo_coarse_grid',
+      'balance_estimated',
+    ]);
+    expect(
+      verdictCaveat({
+        ...LOW_CONFIDENCE_REPORT,
+        assessment: { ...LOW_CONFIDENCE_REPORT.assessment, confidence: 'medium' },
+      }),
+    ).toBeNull();
+    expect(
+      verdictCaveat({
+        ...LOW_CONFIDENCE_REPORT,
+        assessment: { ...LOW_CONFIDENCE_REPORT.assessment, level: 'out_of_season' },
+      }),
+    ).toBeNull();
   });
 });

@@ -1,7 +1,13 @@
 // Dostepnosc: axe z regulami WCAG 2.x A i AA na kluczowych stronach, w jasnym i ciemnym motywie (emulacja
 // prefers-color-scheme; bez ciasteczka motyw wynika z systemu). Naruszenie = blad testu; regul nie wylaczamy.
 // Nowa strona = nowa pozycja w PAGES. Dzialka i raport sa podstawione (bez ULDK i zrodel danych).
-import { DROUGHT_REPORT_URL, mockAnalysisApi, PARCEL_ID, REPORT_URL } from './support/analysis-api';
+import {
+  DROUGHT_REPORT_URL,
+  LOW_CONFIDENCE_REPORT_URL,
+  mockAnalysisApi,
+  PARCEL_ID,
+  REPORT_URL,
+} from './support/analysis-api';
 import { expectHeadingOrder, expectNoViolations } from './support/axe';
 
 import { expect, test } from './support/test';
@@ -22,6 +28,7 @@ const PAGES = [
     DROUGHT_REPORT_URL,
     'Raport wodny pola',
   ],
+  ['raport z zastrzeżeniem (niska pewność, jedna atrapa)', LOW_CONFIDENCE_REPORT_URL, 'Raport wodny pola'],
   ['raport bez parametrów', '/raport', 'Brakuje danych do raportu'],
   ['gospodarstwo bez parametrów', '/gospodarstwo', 'Brakuje danych do raportu'],
   ['katalog /design', '/design', 'Design system'],

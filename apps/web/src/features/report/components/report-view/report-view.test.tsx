@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { renderWithIntl, translator } from '@/test/render-intl';
 
 import { DROUGHT_REPORT } from '../../fixtures/drought-report';
+import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
 import { ReportView } from './report-view';
 
@@ -142,5 +143,39 @@ describe('ReportView', () => {
     expect(text).not.toMatch(/[a-z0-9]+_[a-z0-9_]+/);
     expect(text).not.toMatch(/\bshare\b/);
     expect(text).toContain(t('evidence.unknownMetric'));
+  });
+
+  it('przeglad: "woda w normie" przy niskiej pewnosci ma zastrzezenie, jedna atrapa nie robi calego raportu przykladowym', () => {
+    renderReport(LOW_CONFIDENCE_REPORT);
+
+    const verdict = screen.getByTestId('verdict');
+
+    expect(verdict).toHaveTextContent(t('verdict.levels.ok'));
+    expect(within(verdict).getByTestId('verdict-caveat')).toHaveTextContent(t('verdict.caveat.title'));
+    expect(within(verdict).getByTestId('verdict-caveat')).toHaveTextContent(
+      t('verdict.caveat.reasons.soil_missing'),
+    );
+
+    const banner = screen.getByTestId('sample-banner');
+
+    expect(banner).toHaveAttribute('data-scope', 'some');
+    expect(banner).toHaveTextContent('Jedno źródło danych jest jeszcze przykładowe: ukształtowanie terenu');
+    expect(banner).not.toHaveTextContent(t('sample.title'));
+  });
+
+  it('noty zrodel (po angielsku) tylko w szczegolach dla doradcy; w glownym widoku zdanie po polsku', () => {
+    renderReport(LOW_CONFIDENCE_REPORT);
+
+    const soil = screen
+      .getAllByRole('listitem')
+      .find((item) => item.getAttribute('data-source') === 'soil') as HTMLElement;
+
+    expect(soil).toHaveTextContent(t('sources.statusNote.missing'));
+
+    const note = within(soil).getByTestId('source-note');
+
+    expect(note.tagName).toBe('DETAILS');
+    expect(note).not.toHaveAttribute('open');
+    expect(note).toHaveTextContent(/no SoilGrids prediction/);
   });
 });

@@ -3,6 +3,7 @@
 import type { Page } from '@playwright/test';
 
 import { DROUGHT_REPORT } from '../../src/features/report/fixtures/drought-report';
+import { LOW_CONFIDENCE_REPORT } from '../../src/features/report/fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../../src/features/report/fixtures/sample-report';
 
 export const PARCEL_ID = '141201_1.0001.6509';
@@ -37,9 +38,19 @@ export const REPORT_URL = `/raport?dzialki=${PARCEL_ID}&uprawa=winter_wheat&data
 /** Raport z prawdziwego silnika (susza 15.06.2018, czesci przykladowe w `meta.sampleParts`). */
 export const DROUGHT_REPORT_URL = `/raport?dzialki=${PARCEL_ID}&uprawa=winter_wheat&data=${DROUGHT_REPORT.meta.analysisDate}`;
 
+/**
+ * Raport z przegladu: "woda w normie" przy niskiej pewnosci (brak gleby), jedna atrapa. Ten sam dzien co susza w
+ * starszym raporcie, wiec podstawiamy go pod umowny dzien w adresie.
+ */
+export const LOW_CONFIDENCE_DATE = '2018-06-16';
+
+export const LOW_CONFIDENCE_REPORT_URL = `/raport?dzialki=${PARCEL_ID}&uprawa=winter_wheat&data=${LOW_CONFIDENCE_DATE}`;
+
 /** Odpowiedz analizy dla daty z zadania: dzien raportu z prawdziwego silnika albo raport przykladowy. */
 function reportFor(body: string | null) {
   const date = (JSON.parse(body ?? '{}') as { date?: string }).date;
+
+  if (date === LOW_CONFIDENCE_DATE) return LOW_CONFIDENCE_REPORT;
 
   return date === DROUGHT_REPORT.meta.analysisDate ? DROUGHT_REPORT : SAMPLE_REPORT;
 }
