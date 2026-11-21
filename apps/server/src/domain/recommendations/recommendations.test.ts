@@ -5,7 +5,7 @@ import type { HydroContext, SoilProfile } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
 import { saxtonRawls } from '../soil-water';
-import { irrigationAdvice, organicMatterGainMm, recommend } from './recommendations';
+import { irrigationAdvice, irrigationSchedule, organicMatterGainMm, recommend } from './recommendations';
 
 const FIELD: FieldArea = {
   id: 'area:test',
@@ -178,12 +178,23 @@ describe('recommend', () => {
 
 describe('irrigationAdvice', () => {
   it('silny stres w okresie wzrostu przy suszy: nawodnic dawka do polowej pojemnosci', () => {
-    expect(irrigationAdvice(input(), assessment('drought'))).toEqual({
+    expect(irrigationAdvice(input(), assessment('drought'))).toMatchObject({
       advisable: 'yes',
       netDepthMm: 80,
       withinDays: 0,
       forecastPrecipMm: null,
+      doses: expect.any(Number),
+      doseMm: expect.any(Number),
     });
+  });
+
+  it('niedobor rozbity na dawki deszczowni 20-30 mm, liczbe dawek i odstep z dziennego zuzycia wody', () => {
+    // 80 mm niedoboru, 62 mm wody latwo dostepnej, uprawa zuzywa 4,5 mm/d -> 3 x 30 mm co 6 dni
+    expect(irrigationSchedule(80, 62, 4.5)).toEqual({ doseMm: 30, doses: 3, intervalDays: 6 });
+    // plytkie korzenie (12 mm latwo dostepnej wody): dawka nie schodzi ponizej 20 mm; bez zuzycia - bez odstepu
+    expect(irrigationSchedule(45, 12, null)).toEqual({ doseMm: 20, doses: 3 });
+    // 22 mm wody latwo dostepnej -> dawka 20 mm; upal 8 mm/d -> odstep min. 2 dni
+    expect(irrigationSchedule(22, 22, 8)).toEqual({ doseMm: 20, doses: 2, intervalDays: 2 });
   });
 
   it('deszcz z prognozy pokrywajacy niedobor zastepuje nawodnienie', () => {

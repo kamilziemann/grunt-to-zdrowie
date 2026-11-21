@@ -164,6 +164,15 @@ export type Assessment = z.infer<typeof assessmentSchema>;
 
 export const periodStatusSchema = z.enum(['drought', 'ok', 'not_monitored', 'missing']);
 
+export const calendarCellSchema = z.object({
+  year: z.number().int(),
+  periodNo: z.number().int().min(1).max(14),
+  status: periodStatusSchema,
+  balanceMm: z.number().nullable(),
+  /** nadmiar wody: KBW okresu powyzej +50 mm (opad wyraznie wiekszy od parowania) - niezaleznie od progu suszy */
+  excess: z.boolean().optional(),
+});
+
 export const historySchema = z.object({
   /** ile sezonow mialo dane - "prog przekroczony w 4 z 9 sezonow z danymi" */
   seasonsWithData: z.number().int().min(0),
@@ -188,14 +197,12 @@ export const historySchema = z.object({
     }),
   ),
   /** kalendarz ryzyka: rok x okres */
-  calendar: z.array(
-    z.object({
-      year: z.number().int(),
-      periodNo: z.number().int().min(1).max(14),
-      status: periodStatusSchema,
-      balanceMm: z.number().nullable(),
-    }),
-  ),
+  calendar: z.array(calendarCellSchema),
+  /**
+   * okresy biezacego roku (roku analizy), ktore skonczyly sie najpozniej w dniu analizy - osobno od `calendar`, zeby
+   * liczniki "w N z 10 lat" liczyly tylko pelne sezony
+   */
+  currentCalendar: z.array(calendarCellSchema).optional(),
   /** miesiace (1-12), w ktorych niedobor powtarzal sie najczesciej */
   riskMonths: z.array(z.number().int().min(1).max(12)),
 });
@@ -294,6 +301,12 @@ export const irrigationAdviceSchema = z.object({
   /** w ciagu ilu dni; null gdy brak prognozy (np. data historyczna) */
   withinDays: z.number().int().min(0).nullable(),
   forecastPrecipMm: z.number().nullable(),
+  /** dawka jednorazowa realna dla deszczowni (20-30 mm, nie wiecej niz woda latwo dostepna) */
+  doseMm: z.number().positive().optional(),
+  /** ile takich dawek uzupelni niedobor `netDepthMm` */
+  doses: z.number().int().positive().optional(),
+  /** co ile dni powtarzac dawke przy obecnym zuzyciu wody przez uprawe */
+  intervalDays: z.number().int().positive().optional(),
 });
 
 export type IrrigationAdvice = z.infer<typeof irrigationAdviceSchema>;

@@ -10,6 +10,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { addDays } from '../iso-date';
 import { saxtonRawls } from '../soil-water';
+import { rootZoneSimulation } from '../water-indicators';
 
 type Measure = Omit<Recommendation, 'causes' | 'evidence' | 'zoneId'>;
 
@@ -42,6 +43,11 @@ const SEVERE_STRESS_KS = 0.6;
 /** wyczerpanie przekroczy wode latwo dostepna w ciagu tylu dni - czas przygotowac nawodnienie */
 const SOON_DAYS = 3;
 const RIPENING_KC_SHARE = 0.8;
+/** dawka jednorazowa deszczowni: mniej niz 20 mm wyparuje z lisci i wierzchniej warstwy, wiecej niz 30 mm splynie */
+const DOSE_MIN_MM = 20;
+const DOSE_MAX_MM = 30;
+/** zuzycie wody przez uprawe liczone ze sredniej ostatnich dni (albo prognozy) */
+const ETC_DAYS = 7;
 
 const round = (value: number, digits = 1): number => Number(value.toFixed(digits));
 
@@ -251,6 +257,42 @@ function daysUntilStress(input: StageInput, depletionMm: number, readilyMm: numb
 }
 
 /**
+ * Rozbicie niedoboru na dawki deszczowni: dawka 20-30 mm (nie wiecej niz woda latwo dostepna, zeby nie przelac
+ * strefy korzeni), liczba dawek do uzupelnienia niedoboru i odstep = ile dni uprawa zuzywa jedna dawke.
+ */
+export function irrigationSchedule(
+  netDepthMm: number,
+  readilyAvailableMm: number,
+  etcMmPerDay: number | null,
+): { doseMm: number; doses: number; intervalDays?: number } {
+  const dose = Math.min(DOSE_MAX_MM, Math.max(DOSE_MIN_MM, Math.round(readilyAvailableMm / 5) * 5));
+  const doses = Math.max(1, Math.ceil(netDepthMm / dose));
+  const interval =
+    etcMmPerDay !== null && etcMmPerDay > 0
+      ? Math.min(14, Math.max(2, Math.floor(dose / etcMmPerDay)))
+      : null;
+
+  return { doseMm: dose, doses, ...(interval === null ? {} : { intervalDays: interval }) };
+}
+
+/** Srednie dobowe zuzycie wody przez uprawe (ETc): z prognozy, a bez niej - z ostatnich dni bilansu. */
+function etcPerDay(input: StageInput): number | null {
+  const forecast = (input.forecast?.days ?? []).slice(0, ETC_DAYS).flatMap((day, index) => {
+    const kc = cropAtDate(input.cropId, addDays(input.date, index + 1)).kc;
+
+    return kc === null || day.et0Mm === null ? [] : [kc * day.et0Mm];
+  });
+  const recent =
+    forecast.length > 0
+      ? forecast
+      : (rootZoneSimulation(input)
+          ?.days.slice(-ETC_DAYS)
+          .map((day) => day.potentialEtcMm) ?? []);
+
+  return recent.length > 0 ? recent.reduce((sum, value) => sum + value, 0) / recent.length : null;
+}
+
+/**
  * Nawadnianie: tylko z bilansu strefy korzeniowej, w okresie wzrostu przed dojrzewaniem i przy ocenie wskazujacej
  * niedobor.
  */
@@ -283,12 +325,17 @@ export function irrigationAdvice(input: StageInput, assessment: Assessment): Irr
     else if (stressed || (withinDays !== null && withinDays <= SOON_DAYS)) advisable = 'consider';
   }
 
+  const netDepthMm = Math.round(zone.depletionMm);
+
   return {
     advisable,
     // dawka netto: uzupelnienie do polowej pojemnosci wodnej
-    netDepthMm: advisable === 'no' ? null : Math.round(zone.depletionMm),
+    netDepthMm: advisable === 'no' ? null : netDepthMm,
     withinDays: advisable === 'no' ? null : withinDays,
     forecastPrecipMm,
+    ...(advisable === 'no' || netDepthMm <= 0
+      ? {}
+      : irrigationSchedule(netDepthMm, zone.readilyAvailableMm, etcPerDay(input))),
   };
 }
 

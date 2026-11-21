@@ -21,6 +21,7 @@ import { precipitationContext, vegetationSignal } from '../sample-stages';
 import {
   assessPeriod,
   balanceSoil,
+  EXCESS_BALANCE_MM,
   rootZoneSimulation,
   SOIL_CATEGORIES,
   type PeriodAssessment,
@@ -34,8 +35,6 @@ const STRESS_WINDOW_DAYS = 30;
 const WATCH_SHARE_OF_THRESHOLD = 0.75;
 /** wyczerpanie powyzej 80% RAW = zapas latwo dostepnej wody na wyczerpaniu */
 const WATCH_SHARE_OF_RAW = 0.8;
-/** nadmiar: KBW za 60 dni powyzej +50 mm przy pelnym profilu */
-const EXCESS_BALANCE_MM = 50;
 const COARSE_GRID_KM = 20;
 
 const round = (value: number, digits = 1): number => Number(value.toFixed(digits));

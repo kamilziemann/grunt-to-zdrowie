@@ -8,7 +8,13 @@ import type { StageInput } from '../analysis-stages';
 import { isoDate, monthOf, yearOf } from '../iso-date';
 import { iungPeriods } from '../iung-periods';
 import { seasonStress, type RootZoneDay } from '../root-zone-balance';
-import { assessPeriod, FALLBACK_SOIL_CATEGORY, rootZoneSimulation } from '../water-indicators';
+import {
+  assessPeriod,
+  EXCESS_BALANCE_MM,
+  FALLBACK_SOIL_CATEGORY,
+  rootZoneSimulation,
+  type PeriodAssessment,
+} from '../water-indicators';
 
 const HISTORY_YEARS = 10;
 /** miesiac ryzyka: niedobor wracal w nim prawie tak czesto jak w najgorszym miesiacu */
@@ -71,6 +77,38 @@ function stressMonths(days: readonly RootZoneDay[], years: readonly number[]): M
   return counts;
 }
 
+type CalendarCell = History['calendar'][number];
+
+function calendarCell(year: number, periodNo: number, item: PeriodAssessment): CalendarCell {
+  const balance = item.balance.balanceMm;
+
+  return {
+    year,
+    periodNo,
+    status: item.verdict === 'not_grown' ? 'not_monitored' : item.verdict,
+    balanceMm: balance,
+    ...(balance !== null && balance > EXCESS_BALANCE_MM ? { excess: true } : {}),
+  };
+}
+
+/** Okresy roku analizy zakonczone najpozniej w dniu analizy (kalendarz biezacego sezonu). */
+function currentCalendar(
+  input: StageInput,
+  category: NonNullable<StageInput['soil']>['category'],
+): CalendarCell[] {
+  const year = yearOf(input.date);
+
+  return iungPeriods(year)
+    .filter((period) => period.to <= input.date)
+    .map((period) =>
+      calendarCell(
+        year,
+        period.no,
+        assessPeriod(input, period, input.crop.iungGroup, category ?? FALLBACK_SOIL_CATEGORY),
+      ),
+    );
+}
+
 export function history(input: StageInput): History {
   const group = input.crop.iungGroup;
   const category = input.soil?.category ?? FALLBACK_SOIL_CATEGORY;
@@ -100,12 +138,7 @@ export function history(input: StageInput): History {
     const months = new Set<number>();
 
     for (const item of periods) {
-      calendar.push({
-        year,
-        periodNo: item.period.no,
-        status: item.verdict === 'not_grown' ? 'not_monitored' : item.verdict,
-        balanceMm: item.balance.balanceMm,
-      });
+      calendar.push(calendarCell(year, item.period.no, item));
 
       if (item.verdict === 'drought') months.add(monthOf(item.period.to));
     }
@@ -134,6 +167,7 @@ export function history(input: StageInput): History {
     deficitSeasons: deficitSeasons({ seasons }).deficit,
     seasons,
     calendar,
+    currentCalendar: currentCalendar(input, category),
     riskMonths: riskMonths(
       monitoredCrop || !simulation ? droughtByMonth : stressMonths(simulation.days, years),
     ),

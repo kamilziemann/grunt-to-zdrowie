@@ -18,8 +18,8 @@ const FIELD: FieldArea = {
   areaHa: 5,
 };
 
-/** Co drugi rok suchy (lata parzyste), pozostale wilgotne. */
-function alternatingYears(date: string): MeteoSeries {
+/** Co drugi rok suchy (lata parzyste), pozostale wilgotne (`wetPrecipMm` opadu na dobe). */
+function alternatingYears(date: string, wetPrecipMm = 4): MeteoSeries {
   const from = addDays(addYears(date, -10), -120);
 
   return {
@@ -30,7 +30,7 @@ function alternatingYears(date: string): MeteoSeries {
 
       return {
         date: day,
-        precipMm: dry ? 0.4 : 4,
+        precipMm: dry ? 0.4 : wetPrecipMm,
         tMinC: dry ? 15 : 12,
         tMaxC: dry ? 30 : 25,
         tMeanC: dry ? 22.5 : 18.5,
@@ -83,6 +83,22 @@ describe('history', () => {
     expect(result.seasons.find((season) => season.year === 2018)?.droughtPeriods).toBeGreaterThan(0);
     expect(result.seasons.find((season) => season.year === 2021)?.droughtPeriods).toBe(0);
     expect(result.riskMonths.length).toBeGreaterThan(0);
+  });
+
+  it('nadmiar wody w okresach wilgotnych lat i kalendarz biezacego roku do dnia analizy', () => {
+    // wilgotne lata: 7 mm opadu na dobe, KBW okresu wyraznie powyzej +50 mm
+    const result = history(input('winter_wheat', alternatingYears('2026-07-15', 7)));
+    const wet = result.calendar.filter((item) => item.year === 2021 && item.excess);
+    const dry = result.calendar.filter((item) => item.year === 2020 && item.excess);
+
+    expect(wet.length).toBeGreaterThan(0);
+    expect(dry).toHaveLength(0);
+    // okresy 2026 zakonczone najpozniej 15 lipca (okres 6 konczy sie 10 lipca), osobno od 10 pelnych sezonow
+    expect(result.currentCalendar?.map((item) => [item.year, item.periodNo])).toEqual(
+      [1, 2, 3, 4, 5, 6].map((no) => [2026, no]),
+    );
+    expect(result.calendar.some((item) => item.year === 2026)).toBe(false);
+    expect(result.deficitSeasons).toBeGreaterThanOrEqual(result.droughtSeasons);
   });
 
   it('suche lata maja dni stresu i niedobor wody w strefie korzeni, wilgotne - nie', () => {
