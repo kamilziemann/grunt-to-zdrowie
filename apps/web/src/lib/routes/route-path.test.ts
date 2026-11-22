@@ -37,6 +37,6 @@ describe('routePath', () => {
     expect(withQuery(withQuery(analysis, { q: 'vat', page: '3' }), { page: undefined })).toBe(
       '/analiza?q=vat',
     );
-    expect(withHash(routePath('/account'), 'sesje')).toBe('/account#sesje');
+    expect(withHash(routePath('/jak-liczymy'), 'zrodla')).toBe('/jak-liczymy#zrodla');
   });
 });

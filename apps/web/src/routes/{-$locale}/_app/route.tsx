@@ -1,4 +1,4 @@
-// Powloka aplikacji (naglowek z nawigacja i menu konta, tresc, stopka) dla wszystkich stron. Trasa bez segmentu
+// Powloka aplikacji (naglowek z nawigacja, tresc, stopka) dla wszystkich stron. Trasa bez segmentu
 // w adresie (`_app`). 404 (`notFound()` z loadera albo nieznany adres) obsluguje ta trasa: SSR szuka granicy tylko
 // w `notFoundComponent` tras, a granica zastepuje komponent trasy - stad powloka tez tu.
 import { createFileRoute, notFound, Outlet, useMatches } from '@tanstack/react-router';
@@ -8,7 +8,6 @@ import { useTranslations } from 'use-intl';
 import { AppNav } from '@/components/shared/app-nav';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
-import { UserMenu } from '@/features/auth';
 import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { BRAND, headTranslator, pageHead } from '@/lib/seo';
@@ -72,9 +71,7 @@ function AppShell({ children }: { children: ReactNode }) {
             fullBleed ? 'py-2' : 'mx-auto max-w-page py-3',
           )}
         >
-          <AppNav appName={BRAND}>
-            <UserMenu />
-          </AppNav>
+          <AppNav appName={BRAND} />
         </div>
       </header>
       {fullBleed ? (

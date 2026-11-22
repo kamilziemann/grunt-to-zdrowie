@@ -33,11 +33,11 @@ export default defineConfig({
     tanstackStart({
       router: {
         codeSplittingOptions: {
-          // Strony prywatne i deweloperskie (`_protected`, `_dev`): loader razem z komponentem w leniwym chunku trasy,
+          // Strony deweloperskie (`_dev`): loader razem z komponentem w leniwym chunku trasy,
           // wiec ich kod nie trafia do glownego chunka stron publicznych. Strony publiczne zostaja przy domyslnym
           // podziale - loader w glownym chunku, bez drugiego kroku sieci przed jego startem (zalecenie TanStack).
           splitBehavior: ({ routeId }) =>
-            routeId.includes('/_protected') || routeId.includes('/_dev')
+            routeId.includes('/_dev')
               ? [['loader', 'component'], ['errorComponent'], ['pendingComponent'], ['notFoundComponent']]
               : undefined,
         },

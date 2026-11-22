@@ -1,5 +1,5 @@
 // Wejscie JEDYNEGO Workera aplikacji (wrangler.jsonc `main`):
-// - /api/*      -> API Hono z apps/server bez zmian (OpenAPI, auth, limity, cache i purge) - prefiks odcinany,
+// - /api/*      -> API Hono z apps/server bez zmian (OpenAPI, limity, cache i purge) - prefiks odcinany,
 // - reszta      -> TanStack Start (SSR stron), z requestId/sladem i domyslnym `no-store`,
 // - scheduled (i queue, klasy Workflow, gdy je dodasz) -> wejscia serwera w tym samym Workerze.
 // Przed Workerem stoi Workers Cache: publiczne strony i odczyty API ida z brzegu, Worker liczy tylko MISS-y.

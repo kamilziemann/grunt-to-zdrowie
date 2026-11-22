@@ -1,7 +1,6 @@
 // Typy use-intl: pliki `messages/pl/<przestrzen>.json` sa zrodlem prawdy, wiec brakujacy klucz w kodzie (albo
 // literowka) nie przejdzie `bun check:types`. Zgodnosc `messages/en` z `messages/pl` pilnuje src/i18n/messages.test.ts.
 import type analysis from '../../messages/pl/analysis.json';
-import type auth from '../../messages/pl/auth.json';
 import type common from '../../messages/pl/common.json';
 import type design from '../../messages/pl/design.json';
 import type errors from '../../messages/pl/errors.json';
@@ -17,7 +16,6 @@ declare module 'use-intl' {
     Locale: AppLocale;
     Messages: {
       analysis: typeof analysis;
-      auth: typeof auth;
       common: typeof common;
       design: typeof design;
       errors: typeof errors;

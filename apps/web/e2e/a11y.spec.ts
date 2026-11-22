@@ -39,10 +39,6 @@ const PAGES = [
   ['gospodarstwo bez parametrów', '/gospodarstwo', 'Brakuje danych do raportu'],
   ['jak liczymy (metodyka i źródła)', '/jak-liczymy', 'Jak liczymy'],
   ['katalog /design', '/design', 'Design system'],
-  // Domyslna konfiguracja e2e ma auth wylaczony: strony auth pokazuja komunikat (formularze: auth-enabled.spec.ts).
-  ['logowanie (auth wyłączone)', '/sign-in', 'Logowanie'],
-  ['rejestracja (auth wyłączone)', '/sign-up', 'Rejestracja'],
-  ['konto (auth wyłączone)', '/account', 'Konto'],
   ['404 (nieznany adres)', '/nie-ma-takiej-strony', 'Nie ma takiej strony'],
 ] as const;
 

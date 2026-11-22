@@ -16,15 +16,11 @@ import { Route as Char123LocaleChar125AppIndexRouteImport } from './routes/{-$lo
 import { Route as Char123LocaleChar125AppSplatRouteImport } from './routes/{-$locale}/_app/$'
 import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-$locale}/_app/_dev/route'
 import { Route as Char123LocaleChar125AppMethodRouteRouteImport } from './routes/{-$locale}/_app/_method/route'
-import { Route as Char123LocaleChar125AppProtectedRouteRouteImport } from './routes/{-$locale}/_app/_protected/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
 import { Route as Char123LocaleChar125AppGospodarstwoRouteImport } from './routes/{-$locale}/_app/gospodarstwo'
 import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$locale}/_app/raport'
-import { Route as Char123LocaleChar125AppSignInRouteImport } from './routes/{-$locale}/_app/sign-in'
-import { Route as Char123LocaleChar125AppSignUpRouteImport } from './routes/{-$locale}/_app/sign-up'
 import { Route as Char123LocaleChar125AppDevDesignRouteImport } from './routes/{-$locale}/_app/_dev/design'
 import { Route as Char123LocaleChar125AppMethodJakLiczymyRouteImport } from './routes/{-$locale}/_app/_method/jak-liczymy'
-import { Route as Char123LocaleChar125AppProtectedAccountRouteImport } from './routes/{-$locale}/_app/_protected/account'
 
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
@@ -64,11 +60,6 @@ const Char123LocaleChar125AppMethodRouteRoute =
     id: '/_method',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
-const Char123LocaleChar125AppProtectedRouteRoute =
-  Char123LocaleChar125AppProtectedRouteRouteImport.update({
-    id: '/_protected',
-    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
-  } as any)
 const Char123LocaleChar125AppAnalizaRoute =
   Char123LocaleChar125AppAnalizaRouteImport.update({
     id: '/analiza',
@@ -87,18 +78,6 @@ const Char123LocaleChar125AppRaportRoute =
     path: '/raport',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
-const Char123LocaleChar125AppSignInRoute =
-  Char123LocaleChar125AppSignInRouteImport.update({
-    id: '/sign-in',
-    path: '/sign-in',
-    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
-  } as any)
-const Char123LocaleChar125AppSignUpRoute =
-  Char123LocaleChar125AppSignUpRouteImport.update({
-    id: '/sign-up',
-    path: '/sign-up',
-    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
-  } as any)
 const Char123LocaleChar125AppDevDesignRoute =
   Char123LocaleChar125AppDevDesignRouteImport.update({
     id: '/design',
@@ -111,12 +90,6 @@ const Char123LocaleChar125AppMethodJakLiczymyRoute =
     path: '/jak-liczymy',
     getParentRoute: () => Char123LocaleChar125AppMethodRouteRoute,
   } as any)
-const Char123LocaleChar125AppProtectedAccountRoute =
-  Char123LocaleChar125AppProtectedAccountRouteImport.update({
-    id: '/account',
-    path: '/account',
-    getParentRoute: () => Char123LocaleChar125AppProtectedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
@@ -125,12 +98,9 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
-  '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
-  '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
-  '/{-$locale}/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRoutesByTo {
   '/{-$locale}': typeof Char123LocaleChar125AppIndexRoute
@@ -139,11 +109,8 @@ export interface FileRoutesByTo {
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
-  '/{-$locale}/sign-in': typeof Char123LocaleChar125AppSignInRoute
-  '/{-$locale}/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
-  '/{-$locale}/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,17 +119,13 @@ export interface FileRoutesById {
   '/{-$locale}/_app': typeof Char123LocaleChar125AppRouteRouteWithChildren
   '/{-$locale}/_app/_dev': typeof Char123LocaleChar125AppDevRouteRouteWithChildren
   '/{-$locale}/_app/_method': typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
-  '/{-$locale}/_app/_protected': typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/_app/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/_app/raport': typeof Char123LocaleChar125AppRaportRoute
-  '/{-$locale}/_app/sign-in': typeof Char123LocaleChar125AppSignInRoute
-  '/{-$locale}/_app/sign-up': typeof Char123LocaleChar125AppSignUpRoute
   '/{-$locale}/_app/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/_app/_dev/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/_app/_method/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
-  '/{-$locale}/_app/_protected/account': typeof Char123LocaleChar125AppProtectedAccountRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,12 +136,9 @@ export interface FileRouteTypes {
     | '/{-$locale}/analiza'
     | '/{-$locale}/gospodarstwo'
     | '/{-$locale}/raport'
-    | '/{-$locale}/sign-in'
-    | '/{-$locale}/sign-up'
     | '/{-$locale}/'
     | '/{-$locale}/design'
     | '/{-$locale}/jak-liczymy'
-    | '/{-$locale}/account'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/{-$locale}'
@@ -187,11 +147,8 @@ export interface FileRouteTypes {
     | '/{-$locale}/analiza'
     | '/{-$locale}/gospodarstwo'
     | '/{-$locale}/raport'
-    | '/{-$locale}/sign-in'
-    | '/{-$locale}/sign-up'
     | '/{-$locale}/design'
     | '/{-$locale}/jak-liczymy'
-    | '/{-$locale}/account'
   id:
     | '__root__'
     | '/{-$locale}'
@@ -199,17 +156,13 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app'
     | '/{-$locale}/_app/_dev'
     | '/{-$locale}/_app/_method'
-    | '/{-$locale}/_app/_protected'
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
     | '/{-$locale}/_app/gospodarstwo'
     | '/{-$locale}/_app/raport'
-    | '/{-$locale}/_app/sign-in'
-    | '/{-$locale}/_app/sign-up'
     | '/{-$locale}/_app/'
     | '/{-$locale}/_app/_dev/design'
     | '/{-$locale}/_app/_method/jak-liczymy'
-    | '/{-$locale}/_app/_protected/account'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -268,13 +221,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppMethodRouteRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
-    '/{-$locale}/_app/_protected': {
-      id: '/{-$locale}/_app/_protected'
-      path: ''
-      fullPath: '/{-$locale}'
-      preLoaderRoute: typeof Char123LocaleChar125AppProtectedRouteRouteImport
-      parentRoute: typeof Char123LocaleChar125AppRouteRoute
-    }
     '/{-$locale}/_app/analiza': {
       id: '/{-$locale}/_app/analiza'
       path: '/analiza'
@@ -296,20 +242,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppRaportRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
-    '/{-$locale}/_app/sign-in': {
-      id: '/{-$locale}/_app/sign-in'
-      path: '/sign-in'
-      fullPath: '/{-$locale}/sign-in'
-      preLoaderRoute: typeof Char123LocaleChar125AppSignInRouteImport
-      parentRoute: typeof Char123LocaleChar125AppRouteRoute
-    }
-    '/{-$locale}/_app/sign-up': {
-      id: '/{-$locale}/_app/sign-up'
-      path: '/sign-up'
-      fullPath: '/{-$locale}/sign-up'
-      preLoaderRoute: typeof Char123LocaleChar125AppSignUpRouteImport
-      parentRoute: typeof Char123LocaleChar125AppRouteRoute
-    }
     '/{-$locale}/_app/_dev/design': {
       id: '/{-$locale}/_app/_dev/design'
       path: '/design'
@@ -323,13 +255,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/{-$locale}/jak-liczymy'
       preLoaderRoute: typeof Char123LocaleChar125AppMethodJakLiczymyRouteImport
       parentRoute: typeof Char123LocaleChar125AppMethodRouteRoute
-    }
-    '/{-$locale}/_app/_protected/account': {
-      id: '/{-$locale}/_app/_protected/account'
-      path: '/account'
-      fullPath: '/{-$locale}/account'
-      preLoaderRoute: typeof Char123LocaleChar125AppProtectedAccountRouteImport
-      parentRoute: typeof Char123LocaleChar125AppProtectedRouteRoute
     }
   }
 }
@@ -364,31 +289,13 @@ const Char123LocaleChar125AppMethodRouteRouteWithChildren =
     Char123LocaleChar125AppMethodRouteRouteChildren,
   )
 
-interface Char123LocaleChar125AppProtectedRouteRouteChildren {
-  Char123LocaleChar125AppProtectedAccountRoute: typeof Char123LocaleChar125AppProtectedAccountRoute
-}
-
-const Char123LocaleChar125AppProtectedRouteRouteChildren: Char123LocaleChar125AppProtectedRouteRouteChildren =
-  {
-    Char123LocaleChar125AppProtectedAccountRoute:
-      Char123LocaleChar125AppProtectedAccountRoute,
-  }
-
-const Char123LocaleChar125AppProtectedRouteRouteWithChildren =
-  Char123LocaleChar125AppProtectedRouteRoute._addFileChildren(
-    Char123LocaleChar125AppProtectedRouteRouteChildren,
-  )
-
 interface Char123LocaleChar125AppRouteRouteChildren {
   Char123LocaleChar125AppDevRouteRoute: typeof Char123LocaleChar125AppDevRouteRouteWithChildren
   Char123LocaleChar125AppMethodRouteRoute: typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
-  Char123LocaleChar125AppProtectedRouteRoute: typeof Char123LocaleChar125AppProtectedRouteRouteWithChildren
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
   Char123LocaleChar125AppGospodarstwoRoute: typeof Char123LocaleChar125AppGospodarstwoRoute
   Char123LocaleChar125AppRaportRoute: typeof Char123LocaleChar125AppRaportRoute
-  Char123LocaleChar125AppSignInRoute: typeof Char123LocaleChar125AppSignInRoute
-  Char123LocaleChar125AppSignUpRoute: typeof Char123LocaleChar125AppSignUpRoute
   Char123LocaleChar125AppIndexRoute: typeof Char123LocaleChar125AppIndexRoute
 }
 
@@ -398,15 +305,11 @@ const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRou
       Char123LocaleChar125AppDevRouteRouteWithChildren,
     Char123LocaleChar125AppMethodRouteRoute:
       Char123LocaleChar125AppMethodRouteRouteWithChildren,
-    Char123LocaleChar125AppProtectedRouteRoute:
-      Char123LocaleChar125AppProtectedRouteRouteWithChildren,
     Char123LocaleChar125AppSplatRoute: Char123LocaleChar125AppSplatRoute,
     Char123LocaleChar125AppAnalizaRoute: Char123LocaleChar125AppAnalizaRoute,
     Char123LocaleChar125AppGospodarstwoRoute:
       Char123LocaleChar125AppGospodarstwoRoute,
     Char123LocaleChar125AppRaportRoute: Char123LocaleChar125AppRaportRoute,
-    Char123LocaleChar125AppSignInRoute: Char123LocaleChar125AppSignInRoute,
-    Char123LocaleChar125AppSignUpRoute: Char123LocaleChar125AppSignUpRoute,
     Char123LocaleChar125AppIndexRoute: Char123LocaleChar125AppIndexRoute,
   }
 

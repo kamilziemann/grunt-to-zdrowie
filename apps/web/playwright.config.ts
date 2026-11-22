@@ -3,21 +3,10 @@ import { fileURLToPath } from 'node:url';
 
 import { defineConfig, devices } from '@playwright/test';
 
-import {
-  AUTH_BASE_URL,
-  AUTH_WEB_PORT,
-  BASE_URL,
-  E2E_API_STATE,
-  E2E_AUTH_STATE,
-  WEB_PORT,
-} from './e2e/support/api-state';
+import { BASE_URL, E2E_API_STATE, WEB_PORT } from './e2e/support/api-state';
 
-// Wartosc testowa (>= 32 znaki), tylko dla lokalnego serwera e2e z auth.
-const AUTH_E2E_SECRET = 'e2e-only-secret-e2e-only-secret-0123456789';
-
-/** Zmienne Workera e2e: API pod /api tego samego originu (PUBLIC_URL, CORS) + nadpisania projektu. */
-const workerVars = (baseUrl: string, extra: Record<string, string> = {}) =>
-  JSON.stringify({ PUBLIC_URL: `${baseUrl}/api`, ALLOWED_ORIGINS: baseUrl, ...extra });
+/** Zmienne Workera e2e: API pod /api tego samego originu (PUBLIC_URL, CORS). */
+const WORKER_VARS = JSON.stringify({ PUBLIC_URL: `${BASE_URL}/api`, ALLOWED_ORIGINS: BASE_URL });
 
 // Zrzuty wizualne (spec z tagiem @visual) zaleza od systemu (czcionki, antyaliasing), wiec baseline'y leza
 // w e2e/__screenshots__/<platforma>/. Bez baseline'ow biezacej platformy albo w CI @visual jest pomijany.
@@ -54,11 +43,7 @@ export default defineConfig({
     locale: 'pl-PL',
     timezoneId: 'Europe/Warsaw',
   },
-  projects: [
-    { name: 'chromium', testIgnore: /auth-enabled\.spec\.ts/, use: desktop },
-    // Przeplyw z kontami (auth-enabled.spec.ts) na osobnym serwerze z AUTH_ENABLED=true.
-    { name: 'auth', testMatch: /auth-enabled\.spec\.ts/, use: { ...desktop, baseURL: AUTH_BASE_URL } },
-  ],
+  projects: [{ name: 'chromium', use: desktop }],
   webServer: [
     {
       // Swieza lokalna D1 przy kazdym uruchomieniu (migracje), potem jeden serwer (strony + API) na tym stanie.
@@ -70,21 +55,7 @@ export default defineConfig({
       // Wlasny serwer z wlasnym stanem: istniejacy `bun run dev` wskazuje na inna baze i port.
       reuseExistingServer: false,
       timeout: 240_000,
-      env: { APP_STATE_DIR: E2E_API_STATE, APP_VARS: workerVars(BASE_URL) },
-    },
-    {
-      // Serwer z kontami: AUTH_ENABLED + AUTH_SECRET jako zmienne (tylko lokalnie), wlasna D1.
-      command:
-        `rm -rf ${E2E_AUTH_STATE} && ` +
-        `bun x wrangler d1 migrations apply DB --local --persist-to ${E2E_AUTH_STATE} && ` +
-        `bun x vite dev --port ${AUTH_WEB_PORT} --strictPort`,
-      url: `${AUTH_BASE_URL}/api/health`,
-      reuseExistingServer: false,
-      timeout: 240_000,
-      env: {
-        APP_STATE_DIR: E2E_AUTH_STATE,
-        APP_VARS: workerVars(AUTH_BASE_URL, { AUTH_ENABLED: 'true', AUTH_SECRET: AUTH_E2E_SECRET }),
-      },
+      env: { APP_STATE_DIR: E2E_API_STATE, APP_VARS: WORKER_VARS },
     },
   ],
 });

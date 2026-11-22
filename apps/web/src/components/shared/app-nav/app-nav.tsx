@@ -1,7 +1,6 @@
 import { Droplets } from 'lucide-react';
 import { Link } from '@/lib/navigation';
 import { usePathname } from '@/lib/navigation';
-import type { ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { LocaleSwitcher } from '@/components/shared/locale-switcher';
@@ -9,8 +8,8 @@ import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { isNavItemActive, NAV_ITEMS, routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-/** `children`: pozycja zalezna od sesji (UserMenu z features/auth), wstrzykiwana przez layout - nav nie zna featurow. */
-export function AppNav({ appName, children }: { appName: string; children?: ReactNode }) {
+/** Naglowek aplikacji: logo, pozycje menu, jezyk i motyw. */
+export function AppNav({ appName }: { appName: string }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
 
@@ -41,7 +40,6 @@ export function AppNav({ appName, children }: { appName: string; children?: Reac
         })}
       </ul>
       <div className="ml-auto flex items-center gap-1">
-        {children}
         <LocaleSwitcher />
         <ThemeToggle />
       </div>

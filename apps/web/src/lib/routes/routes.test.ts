@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { NAV_ITEMS, isNavItemActive, routes, safeNextPath } from './routes';
+import { NAV_ITEMS, isNavItemActive, routes } from './routes';
 
 describe('routes', () => {
   it('lista działek trafia do parametru `dzialki` (zakodowana), bez niej adres jest czysty', () => {
@@ -17,21 +17,5 @@ describe('routes', () => {
     expect(design && isNavItemActive(design, '/design/kolory')).toBe(true);
     expect(design && isNavItemActive(design, '/designer')).toBe(false);
     expect(NAV_ITEMS.some((item) => isNavItemActive(item, '/'))).toBe(false);
-  });
-
-  it('signIn niesie sciezke powrotu, bez niej czysty adres', () => {
-    expect(routes.signIn()).toBe('/sign-in');
-    expect(routes.signIn('/account?tab=sesje')).toBe('/sign-in?next=%2Faccount%3Ftab%3Dsesje');
-  });
-
-  it('safeNextPath przepuszcza tylko sciezki tej aplikacji', () => {
-    expect(safeNextPath('/analiza?dzialki=a#x')).toBe('/analiza?dzialki=a#x');
-    expect(safeNextPath('https://zly.example/')).toBeNull();
-    expect(safeNextPath('//zly.example/admin')).toBeNull();
-    expect(safeNextPath(String.raw`/\zly.example`)).toBeNull();
-    expect(safeNextPath('admin')).toBeNull();
-    expect(safeNextPath('')).toBeNull();
-    expect(safeNextPath(null)).toBeNull();
-    expect(routes.signIn('https://zly.example/')).toBe('/sign-in');
   });
 });

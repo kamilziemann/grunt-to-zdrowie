@@ -51,7 +51,7 @@ export function withQuery(href: AppHref, query?: Record<string, string | undefin
   return (queryString ? `${path}?${queryString}` : path) as AppHref;
 }
 
-/** Adres z kotwica (`/account#sesje`). */
+/** Adres z kotwica (`/jak-liczymy#zrodla`). */
 export function withHash(href: AppHref, hash: string): AppHref {
   return `${href.split('#')[0]}#${hash}` as AppHref;
 }

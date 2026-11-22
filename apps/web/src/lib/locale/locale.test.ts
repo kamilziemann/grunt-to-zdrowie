@@ -43,8 +43,8 @@ describe('locale', () => {
   it('localizePath dokleja prefiks, zachowuje query i # oraz pomija /api i adresy zewnetrzne', () => {
     expect(localizePath('/analiza?dzialki=12', 'en')).toBe('/en/analiza?dzialki=12');
     expect(localizePath('/', 'en')).toBe('/en');
-    expect(localizePath('/en/account', 'pl')).toBe('/account');
-    expect(localizePath('/account#sekcja', 'en')).toBe('/en/account#sekcja');
+    expect(localizePath('/en/analiza', 'pl')).toBe('/analiza');
+    expect(localizePath('/jak-liczymy#sekcja', 'en')).toBe('/en/jak-liczymy#sekcja');
     expect(localizePath('/api/parcels/search', 'en')).toBe('/api/parcels/search');
     expect(localizePath('https://example.com', 'en')).toBe('https://example.com');
   });

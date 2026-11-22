@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -15,11 +14,11 @@ vi.mock('@/lib/navigation', async () => ({
   useRouter: () => ({ refresh: vi.fn<() => void>() }),
 }));
 
-function renderNav(accountSlot?: ReactNode) {
+function renderNav() {
   return render(
     <IntlTestProvider>
       <ThemeProvider>
-        <AppNav appName="Grunt to Zdrowie">{accountSlot}</AppNav>
+        <AppNav appName="Grunt to Zdrowie" />
       </ThemeProvider>
     </IntlTestProvider>,
   );
@@ -59,15 +58,5 @@ describe('AppNav', () => {
     renderNav();
 
     expect(screen.getAllByRole('link').filter((link) => link.hasAttribute('aria-current'))).toEqual([]);
-  });
-
-  it('wstrzyknięty slot konta pojawia się w nawigacji, a bez niego nic nie jest dodawane', () => {
-    nav.pathname.mockReturnValue('/');
-    const { unmount } = renderNav(<span>slot-konta</span>);
-
-    expect(screen.getByText('slot-konta')).toBeInTheDocument();
-    unmount();
-    renderNav();
-    expect(screen.queryByText('slot-konta')).not.toBeInTheDocument();
   });
 });

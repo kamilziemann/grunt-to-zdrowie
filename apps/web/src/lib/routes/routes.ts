@@ -44,34 +44,11 @@ export const routes = {
     }),
   /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
   parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
-  /** Logowanie; `next` = strona, na ktora wrocic po zalogowaniu (tylko sciezka tej aplikacji, zob. `safeNextPath`). */
   /** "Jak liczymy": zrodla danych, metody, ograniczenia (dla jury, doradcy i rolnika). */
   method: () => routePath('/jak-liczymy'),
-  signIn: (next?: string) => withQuery(routePath('/sign-in'), { next: safeNextPath(next) ?? undefined }),
-  signUp: () => routePath('/sign-up'),
-  account: () => routePath('/account'),
   /** Katalog systemu designu (tylko development). */
   design: () => routePath('/design'),
 } as const;
-
-const LOCAL_ORIGIN = 'https://app.invalid';
-
-/**
- * Adres powrotu po logowaniu (`?next=`): tylko sciezka tej aplikacji (`/account?tab=a`). Pelny URL, `//host`
- * albo `/\host` (przegladarka czyta je jako inny host) = null, zeby link logowania nie przekierowal na obca strone.
- */
-export function safeNextPath(value: string | null | undefined): AppHref | null {
-  if (!value?.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return null;
-
-  try {
-    const url = new URL(value, LOCAL_ORIGIN);
-
-    // sprawdzona sciezka tej samej aplikacji (z ?next=), wiec bezpieczna jako adres linku i nawigacji
-    return url.origin === LOCAL_ORIGIN ? (`${url.pathname}${url.search}${url.hash}` as AppHref) : null;
-  } catch {
-    return null;
-  }
-}
 
 /** Klucze etykiet nawigacji: przestrzen `nav` w messages/*.json (AppNav tlumaczy je typowanym `t`). */
 export type NavLabelKey = 'design';

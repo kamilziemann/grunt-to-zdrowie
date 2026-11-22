@@ -3,7 +3,6 @@
 // Lista musi zgadzac sie z plikami w messages/pl (pilnuje messages.test.ts).
 export const NAMESPACES = [
   'analysis',
-  'auth',
   'common',
   'design',
   'errors',
