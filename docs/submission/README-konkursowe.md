@@ -2,7 +2,7 @@
 
 > Rozszerzenie głównego [`README.md`](../../README.md) (tam skrót wszystkich wymaganych punktów, w tym użycie AI)
 > o szczegóły: ścieżkę jury, źródła, metody, weryfikację, koszty, skalę i bezpieczeństwo. Stan na 22.11.2026, silnik
-> analizy **0.8.4**; wszystkie źródła raportu są prawdziwe (`meta.sample: false`, bez części przykładowych). Fakty
+> analizy **0.8.5**; wszystkie źródła raportu są prawdziwe (`meta.sample: false`, bez części przykładowych). Fakty
 > z repozytorium, a ceny, limity i licencje sprawdzone u źródła 22.11.2026 (adresy obok); miejsca oznaczone **„do
 > potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów: [`docs/project-status.md`](../project-status.md),
 > [`docs/validation.md`](../validation.md), strona „Jak liczymy” (`apps/web/messages/pl/method.json`),
@@ -30,7 +30,7 @@ publicznych dla wskazanego pola i dnia (dowolna data z ostatnich 10 lat).
 3. **Raport.** `/raport`: ocena z pewnością (wysoka/średnia/niska) → historia 10 sezonów i kalendarz ryzyka →
    przyczyny z dowodami liczbowymi → zalecenia retencyjne, agrotechniczne i nawadnianie → miejsca na polu (strefy) →
    źródła i ograniczenia. Wydruk A4, eksport CSV/JSON dla doradcy, raport otwiera się z linku. Od silnika 0.8.0
-   (obecnie 0.8.4) raport niesie też dane „Pogodynki wody”: zbiornik wody w glebie (ile procent zostało, ile zwykle, za ile dni bez
+   (obecnie 0.8.5) raport niesie też dane „Pogodynki wody”: zbiornik wody w glebie (ile procent zostało, ile zwykle, za ile dni bez
    deszczu zacznie się stres), prognozę na 7 dni, rachunek wody od 21 marca, ostatnie 60 dni dzień po dniu i zdjęcia
    satelitarne z ostatnich 30 dni (także pominięte przez chmury).
 
@@ -122,8 +122,8 @@ przytoczyć ze źródłem.
 1. **Porównanie z ogłoszeniami IUNG.** [`docs/validation.md`](../validation.md): 21 przypadków z komunikatów i
    wykazów gmin Systemu Monitoringu Suszy Rolniczej IUNG-PIB, 8 z suszą i 13 bez (te same gminy, uprawy i pory roku).
    Skrypt `bun run validate:iung -- --api <adres API>` liczy raporty przez prawdziwe API ze wszystkimi źródłami.
-   Wynik (silnik 0.4.0–0.8.0, bez zmian; 0.8.1–0.8.4 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy oraz przyczyny i zalecenia poza
-   sezonem, nie rachunek oceny — powtórka na 0.8.4 **do zrobienia**): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
+   Wynik (silnik 0.4.0–0.8.0, bez zmian; 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy oraz przyczyny i zalecenia poza
+   sezonem, nie rachunek oceny — powtórka na 0.8.5 **do zrobienia**): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
    13/13), **zgodność KBW 20/21**, „obserwuj” bez suszy 9/13, werdykty dla każdej z czterech kategorii gleby zgodne
    z wykazem gminy **60/64**. Rozbieżności i ich przyczyny (siatka NASA POWER, punkt zamiast gminy, gleba z modelu)
    są opisane w tym samym pliku; 21 przypadków to nadal mało (brak gór i Żuław w zestawie).
@@ -253,9 +253,9 @@ Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i AP
 
 - Nazwa zespołu i link do repozytorium w głównym `README.md`.
 - Prezentacja PDF (do 10 slajdów) i film do 3 minut — linki w głównym `README.md`. Raporty wzorcowe są w
-  [`docs/samples/`](../samples/README.md) (silnik 0.8.0 — do odświeżenia na 0.8.4 po zmianach karty raportu).
+  [`docs/samples/`](../samples/README.md) (silnik 0.8.0 — do odświeżenia na 0.8.5 po zmianach karty raportu).
 - Plan konta Cloudflare wdrożenia (Free czy Paid) i zmierzony czas CPU analizy — **do potwierdzenia** (koszty wyżej).
 - Licencja kodu własnego (dziś `"private": true`, bez pliku licencji) i wersje modeli Codex / Antigravity.
-- Powtórka walidacji IUNG na silniku 0.8.4.
+- Powtórka walidacji IUNG na silniku 0.8.5.
 - Licencje i podstawy oznaczone „do potwierdzenia” (brzmienie art. 40a Pgik, PostGIS w Supabase, zużycie PU
   Copernicus, uzgodnienie limitu z GUGiK przy dużym ruchu, licencja stylu OpenFreeMap „liberty”).

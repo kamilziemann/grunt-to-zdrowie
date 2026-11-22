@@ -35,7 +35,7 @@ wynik ma podaną pewność i źródło; raport do wydruku (A4/PDF) i do przesła
   adres), kliknięcie działki na mapie, kilka działek naraz, własne pole narysowane na mapie albo działka podzielona
   linią. Warstwy: granice działek, zdjęcie lotnicze, rowy i cieki, otoczenie pola, zdjęcia satelitarne.
 - **Uprawa i dzień** (`/analiza`): katalog 15 upraw z kalendarzem rozwoju, dzień z ostatnich 10 lat (domyślnie dziś).
-- **Raport** (`/raport`), silnik analizy w wersji **0.8.4**: ocena z pewnością (wysoka / średnia / niska); zbiornik
+- **Raport** (`/raport`), silnik analizy w wersji **0.8.5**: ocena z pewnością (wysoka / średnia / niska); zbiornik
   wody w glebie (ile procent zostało, ile zwykle, za ile dni bez deszczu zacznie się stres); prognoza na 7 dni;
   rachunek wody od 21 marca; 10 poprzednich sezonów i kalendarz ryzyka; przyczyny z dowodami liczbowymi i udziałem;
   zalecenia w stałej kolejności (retencja → agrotechnika → nawadnianie z dawką) z uwagą o formalnościach
@@ -105,8 +105,8 @@ ostatnie dni 3 godziny), raport „na dziś” liczy się od nowa po dobie. Meto
 - **Porównanie z ogłoszeniami IUNG** ([`docs/validation.md`](docs/validation.md)): 21 przypadków z Systemu
   Monitoringu Suszy Rolniczej IUNG-PIB (8 z suszą, 13 bez), liczone przez prawdziwe API skryptem
   `apps/server/scripts/validate-iung.ts`. Zgodność poziomu 21/21, zgodność KBW 20/21, werdykty dla czterech kategorii
-  gleby 60/64. Ostatnia powtórka na silniku 0.8.0; wersje 0.8.1–0.8.4 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
-  zalecenia poza sezonem, nie rachunek oceny — powtórka na 0.8.4 **do zrobienia**.
+  gleby 60/64. Ostatnia powtórka na silniku 0.8.0; wersje 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
+  zalecenia poza sezonem, nie rachunek oceny — powtórka na 0.8.5 **do zrobienia**.
 - **Progi i wzory ze źródłem**: 784 wartości progów KBW porównane ze stroną IUNG; bilans FAO-56 odtwarza przykłady
   37 i 38 z publikacji FAO-56 (test jednostkowy).
 - **Testy przeliczone ręcznie** dla każdej reguły silnika (susza zakończona ulewą, uprawa poza sezonem, luki w
