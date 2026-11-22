@@ -388,15 +388,16 @@ describe('ReportView', () => {
 
       // 4 miejsca; "pozostala czesc pola" (17,9 ha) to tlo bez numeru
       expect(items).toHaveLength(4);
-      expect(items[0]).toHaveTextContent(
-        'Miejsce 1: Suchsze miejsce, w zachodniej części pola, przy rowie, ok. 0,5 ha',
-      );
-      // co z tym zrobic: zalecenia przypiete do miejsca, a bez nich - obejrzec na polu
-      expect(within(items[0] as HTMLElement).getByTestId('zone-action')).toHaveTextContent(/^Co zrobić: /);
+      // karta miejsca: krotki tytul z pol strefy, gdzie i ile
+      expect(items[0]).toHaveTextContent('Miejsce 1: Suchsze miejsce przy rowie');
+      expect(items[0]).toHaveTextContent('Zachód pola · 0,5 ha · 3% pola');
+      // co z tym zrobic: zalecenia przypiete do miejsca jako etykiety, a bez nich - obejrzec na polu
+      expect(within(items[0] as HTMLElement).getByTestId('zone-action')).toHaveTextContent(/^Co zrobić:/);
       expect(within(items[3] as HTMLElement).getByTestId('zone-action')).toHaveTextContent(
-        'Osobnego zalecenia',
+        'Bez osobnego zalecenia',
       );
-      expect(within(list).getByTestId('zone-list-basis')).toHaveTextContent(
+      // skad sa miejsca - w zwinietym "Skad te dane" pod karta
+      expect(screen.getByTestId('zone-list-basis')).toHaveTextContent(
         'jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu 17 maja 2018 – 15 czerwca 2018)',
       );
       expect(screen.getAllByTestId('field-sketch-zone-number').map((badge) => badge.textContent)).toEqual([

@@ -19,7 +19,7 @@ import { StressCountdown } from '../stress-countdown';
 import { WaterLedgerChart } from '../water-ledger-chart';
 import { WaterTankChart } from '../water-tank-chart';
 import { imageryRequest } from '../satellite-section';
-import { ZoneList } from '../zone-list';
+import { ZoneBasis, ZoneList } from '../zone-list';
 
 /** Dwie kolumny 3:2 (wykres albo pierwszy krok obok krotszego klocka). */
 const TWO_COLUMNS =
@@ -41,6 +41,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
   const t = useTranslations('report.simple');
   const zones = useMemo(() => fieldZones(report), [report]);
   const imagery = imageryRequest(report);
+  const basis = useMemo(() => <ZoneBasis report={report} />, [report]);
   const extras = reportExtras(report);
   // ile kart wody sie pokaze (pozostale znikaja same) - przy trzech jeden rzad na komputerze, bez sieroty
   const waterCards = [
@@ -63,6 +64,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
         zones={zones}
         imageryParcels={imagery?.dzialki ?? null}
         imageryDate={report.meta.analysisDate}
+        notes={basis}
       >
         <ZoneList report={report} />
       </FieldMap>

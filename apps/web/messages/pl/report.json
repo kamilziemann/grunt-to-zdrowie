@@ -696,7 +696,20 @@
       }
     },
     "signsTitle": "Co jest na szkicu",
-    "backToSketch": "Wróć do szkicu"
+    "backToSketch": "Wróć do szkicu",
+    "facts": {
+      "ditchThrough": "Rowy przez pole",
+      "ditchAlongEdge": "Rowy wzdłuż granicy pola",
+      "ditchCount": "{count} · {meters} m",
+      "meters": "{meters} m",
+      "nearestDitch": "Najbliższy rów melioracyjny",
+      "watercourse": "Najbliższy ciek ({kind} bez nazwy)",
+      "watercourses": "Rzeki, strumienie i kanały",
+      "none": "Brak w promieniu {radius} m",
+      "touches": "Przy samym polu"
+    },
+    "sourcesTitle": "Skąd te dane i jak dokładne są",
+    "caption": "{field} · zdjęcie z {date}"
   },
   "print": {
     "header": "{app} · raport wodny pola",
@@ -782,9 +795,27 @@
       "note": "NDMI i NDVI z jednej sceny – duża różnica może też oznaczać inny użytek albo inny termin siewu, nie tylko wilgotność."
     },
     "hint": "Kliknij miejsce, żeby pokazać je na obrazie. Drugie kliknięcie zdejmuje wyróżnienie.",
-    "action": "Co zrobić: {action}.",
-    "noAction": "Osobnego zalecenia tu nie ma – obejrzyj to miejsce, gdy będziesz na polu.",
-    "measuresTitle": "Miejsca na polu – liczby dla doradcy"
+    "measuresTitle": "Miejsca na polu – liczby dla doradcy",
+    "card": {
+      "title": "{kind, select, drying {Suchsze miejsce} collecting {Tu zbiera się woda} depression {Zagłębienie bez odpływu} flow_path {Droga spływu wody} typical {Pozostała część pola} other {Część pola}}{relief, select, hilltop { na wzniesieniu} slope { na stoku} hollow { w obniżeniu} other {}}{ditch, select, yes { przy rowie} other {}}",
+      "polder": "Obniżenie na terenie odwadnianym rowami",
+      "positions": {
+        "n": "Północ pola",
+        "ne": "Północny wschód pola",
+        "e": "Wschód pola",
+        "se": "Południowy wschód pola",
+        "s": "Południe pola",
+        "sw": "Południowy zachód pola",
+        "w": "Zachód pola",
+        "nw": "Północny zachód pola",
+        "centre": "Środek pola"
+      },
+      "area": "{area} ha",
+      "actions": "Co zrobić:",
+      "noAction": "Bez osobnego zalecenia – obejrzyj na miejscu",
+      "caveat": "Może to być inny użytek – sprawdź na miejscu",
+      "caveatLong": "Znak ostrzeżenia przy miejscu: różnica wilgotności roślin jest tam tak duża, że może oznaczać inny użytek albo inny stan pola (np. łąka obok ścierniska), a nie tylko wodę – sprawdź na miejscu."
+    }
   },
   "stored": {
     "computed": "Policzono {date}, {time}",
@@ -1069,6 +1100,7 @@
       "plantsNotSoil": "„Woda w roślinach” to wilgotność roślin, nie gleby.",
       "relative": "Kolory porównują miejsca w obrębie pola, a nie pola między sobą.",
       "colour": "Kolory wymagają druku kolorowego – w czerni i bieli oba końce skali wyglądają podobnie."
-    }
+    },
+    "howToRead": "Jak czytać to zdjęcie"
   }
 }

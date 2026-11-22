@@ -696,7 +696,20 @@
       }
     },
     "signsTitle": "What is on the sketch",
-    "backToSketch": "Back to the sketch"
+    "backToSketch": "Back to the sketch",
+    "facts": {
+      "ditchThrough": "Ditches across the field",
+      "ditchAlongEdge": "Ditches along the field edge",
+      "ditchCount": "{count} · {meters} m",
+      "meters": "{meters} m",
+      "nearestDitch": "Nearest drainage ditch",
+      "watercourse": "Nearest watercourse ({kind}, unnamed)",
+      "watercourses": "Rivers, streams and canals",
+      "none": "None within {radius} m",
+      "touches": "Right by the field"
+    },
+    "sourcesTitle": "Where this data comes from and how accurate it is",
+    "caption": "{field} · image from {date}"
   },
   "print": {
     "header": "{app} · field water report",
@@ -782,9 +795,27 @@
       "note": "NDMI and NDVI come from one scene – a big difference may also mean another land use or sowing date, not only moisture."
     },
     "hint": "Click a spot to show it on the image. Click again to clear it.",
-    "action": "What to do: {action}.",
-    "noAction": "There is no separate recommendation here – take a look at this spot next time you are in the field.",
-    "measuresTitle": "Spots in the field – numbers for the adviser"
+    "measuresTitle": "Spots in the field – numbers for the adviser",
+    "card": {
+      "title": "{kind, select, drying {Drier spot} collecting {Water collects here} depression {Hollow with no outflow} flow_path {Water flow path} typical {Rest of the field} other {Part of the field}}{relief, select, hilltop { on a rise} slope { on a slope} hollow { in a hollow} other {}}{ditch, select, yes { by a ditch} other {}}",
+      "polder": "Low ground drained by ditches",
+      "positions": {
+        "n": "North of the field",
+        "ne": "North-east of the field",
+        "e": "East of the field",
+        "se": "South-east of the field",
+        "s": "South of the field",
+        "sw": "South-west of the field",
+        "w": "West of the field",
+        "nw": "North-west of the field",
+        "centre": "Middle of the field"
+      },
+      "area": "{area} ha",
+      "actions": "What to do:",
+      "noAction": "No separate advice – look at it on site",
+      "caveat": "This may be a different land use – check on site",
+      "caveatLong": "Warning sign by a spot: the difference in plant moisture there is so large that it may mean a different land use or field state (e.g. a meadow next to stubble), not just water – check on site."
+    }
   },
   "stored": {
     "computed": "Computed on {date}, {time}",
@@ -1069,6 +1100,7 @@
       "plantsNotSoil": "“Water in plants” is the moisture of plants, not of the soil.",
       "relative": "Colours compare places within the field, not fields with each other.",
       "colour": "Colours need colour printing – in black and white both ends of the scale look alike."
-    }
+    },
+    "howToRead": "How to read this image"
   }
 }

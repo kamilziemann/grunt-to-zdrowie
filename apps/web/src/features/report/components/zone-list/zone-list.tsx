@@ -1,4 +1,5 @@
 import type { WaterReport, Zone } from '@app/contracts';
+import { TriangleAlert } from 'lucide-react';
 import { useCallback, type ReactNode } from 'react';
 import { useFormatter, useLocale, useTranslations } from 'use-intl';
 
@@ -86,91 +87,142 @@ export function ZoneButton({
   );
 }
 
-/** Co zrobic w miejscu: nazwy zalecen, ktore go dotycza (w kolejnosci raportu), albo null. */
-function useZoneActions(report: WaterReport): (zoneId: string) => string | null {
+/** Co zrobic w miejscu: nazwy zalecen, ktore go dotycza (w kolejnosci raportu, najwyzej trzy). */
+function useZoneActions(report: WaterReport): (zoneId: string) => string[] {
   const tMeasures = useTranslations('report.recommendations.measures');
-  const format = useFormatter();
   const recommendations = orderedRecommendations(report);
 
-  return (zoneId) => {
-    const names = [
+  return (zoneId) =>
+    [
       ...new Set(
         recommendations
           .filter((recommendation) => recommendation.zoneId === zoneId)
           .map((recommendation) => tMeasures(`${recommendation.measure}.name`)),
       ),
-    ];
+    ].slice(0, 3);
+}
 
-    return names.length > 0 ? format.list(names.slice(0, 2), { type: 'conjunction' }) : null;
+/** Row w poblizu miejsca - ten sam prog co w zdaniu serwera ("przy rowie"). */
+const NEAR_DITCH_M = 50;
+/** Rodzaje miejsc z wlasnym krotkim tytulem; pozostale (odcinek pola) biora tytul z opisu serwera. */
+const TITLED_KINDS = new Set<Zone['kind']>(['drying', 'collecting', 'depression', 'flow_path', 'typical']);
+
+/** Pierwsze zdanie opisu serwera (bez zdania ostroznosci dopisywanego po kropce). */
+function firstSentence(text: string): string {
+  return text.split(/(?<=\.)\s+(?=\p{Lu})/u)[0] ?? text;
+}
+
+/**
+ * Krotki tytul karty miejsca ("Suchsze miejsce na wzniesieniu przy rowie") z pol strefy; dla odcinkow pola i w
+ * jezyku innym niz polski - opis jak dotad. Zdanie ostroznosci serwera ("moze to byc inny uzytek") karta pokazuje
+ * osobno, krotko.
+ */
+function useZoneCard(): (zone: Zone) => { title: string; caveat: boolean } {
+  const t = useTranslations('report.zones.card');
+  const describe = useZoneDescription();
+
+  return (zone) => {
+    const description = zone.description ?? '';
+    const caveat = description.includes('inny użytek');
+
+    if (!TITLED_KINDS.has(zone.kind)) return { title: firstSentence(describe(zone)), caveat };
+
+    return {
+      title: description.startsWith('Obniżenie na terenie odwadnianym')
+        ? t('polder')
+        : t('title', {
+            kind: zone.kind,
+            relief: zone.relief ?? 'flat',
+            ditch: zone.ditchDistanceM !== undefined && zone.ditchDistanceM <= NEAR_DITCH_M ? 'yes' : 'no',
+          }),
+      caveat,
+    };
   };
 }
 
 /**
- * Miejsca na polu w kolumnie objasnien karty "Twoje pole": numer jak na obrazie, co tu jest, co z tym zrobic
- * (zalecenia, ktore dotycza miejsca) i udzial w polu; klikniecie wybiera miejsce na obrazie, drugie odznacza, fokus
- * albo najechanie podglada. Pod lista - skad sa miejsca i ze trzeba je obejrzec na polu. Bez miejsc - jedno zdanie
- * z powodem, bez pustej ramki.
+ * Miejsca na polu jako karty w prawej kolumnie "Twoje pole": numer jak na obrazie, krotki tytul, gdzie i ile (strona
+ * pola, hektary, udzial), zalecenia dla miejsca jako etykiety i - przy bardzo duzej roznicy wilgotnosci roslin -
+ * ostrzezenie, ze to moze byc inny uzytek. Klikniecie wybiera miejsce na obrazie, drugie odznacza, fokus albo
+ * najechanie podglada. Bez miejsc - jedno zdanie z powodem, bez pustej ramki.
  */
 export function ZoneList({ report }: { report: WaterReport }) {
   const t = useTranslations('report.zones');
   const format = useFormatter();
-  const describe = useZoneDescription();
+  const card = useZoneCard();
   const actions = useZoneActions(report);
   const { active } = useZoneFocus();
   const zones = fieldZones(report);
-  const map = report.zones;
 
   if (zones.length === 0) {
     return (
       <div className="flex flex-col gap-2">
         <h3 className="text-lg font-semibold">{t('title')}</h3>
         <p className="text-base text-muted-foreground" data-testid="zone-list-empty">
-          {t(`reason.${map?.reason ?? 'no_spatial_data'}`)}
+          {t(`reason.${report.zones?.reason ?? 'no_spatial_data'}`)}
         </p>
       </div>
     );
   }
 
-  const day = (date: string) =>
-    format.dateTime(new Date(`${date}T12:00:00Z`), { dateStyle: 'long', timeZone: APP_TIME_ZONE });
-  const imageText =
-    map?.imageFrom && map.imageTo
-      ? t('image', { from: day(map.imageFrom), to: day(map.imageTo) })
-      : t('imageUnknown');
-  const vegetation = map?.basis?.includes('vegetation') ?? false;
-
   return (
-    <div className="flex flex-col gap-2" data-testid="zone-list">
+    <div className="flex flex-col gap-3 print:gap-1" data-testid="zone-list">
       <h3 className="text-lg font-semibold">{t('title')}</h3>
-      <p className="text-base text-muted-foreground print:hidden">{t('hint')}</p>
-      <ol className="flex flex-col gap-1" aria-label={t('title')}>
+      <p className="sr-only">{t('hint')}</p>
+      <ol className="flex flex-col gap-3 print:gap-1" aria-label={t('title')}>
         {zones.map(({ zone, number }: NumberedZone) => {
-          const action = actions(zone.id);
+          const names = actions(zone.id);
+          const { title, caveat } = card(zone);
+          const meta = [
+            zone.position ? t(`card.positions.${zone.position}`) : null,
+            t('card.area', {
+              area: format.number(zone.areaHa, { maximumFractionDigits: zone.areaHa < 0.1 ? 2 : 1 }),
+            }),
+            zone.share === undefined
+              ? null
+              : t('share', {
+                  percent: format.number(zone.share, {
+                    style: 'percent',
+                    maximumFractionDigits: zone.share < 0.1 ? 1 : 0,
+                  }),
+                }),
+          ].filter((part): part is string => part !== null);
 
           return (
             <li key={zone.id}>
               <ZoneButton
                 zoneId={zone.id}
                 className={cn(
-                  'flex min-h-12 w-full items-start gap-3 rounded-xl px-2 py-2 text-left text-base transition-colors duration-150 hover:bg-muted focus-visible:bg-muted aria-pressed:bg-muted aria-pressed:ring-2 aria-pressed:ring-(--sketch-highlight) print:min-h-0 print:px-0 print:py-0.5',
+                  'flex w-full items-start gap-3 rounded-2xl border-2 border-border bg-card p-4 text-left text-base transition-colors duration-150 hover:bg-muted focus-visible:bg-muted aria-pressed:border-(--sketch-highlight) print:rounded-none print:border-0 print:p-0 print:py-0.5',
                   active === zone.id && 'bg-muted',
                 )}
               >
                 <ZoneNumber number={number} active={active === zone.id} large />
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="font-medium">
+                <span className="flex min-w-0 flex-col gap-1.5">
+                  <span className="text-lg leading-snug font-semibold print:text-base">
                     <span className="sr-only">{t('number', { number })} </span>
-                    {describe(zone)}
+                    {title}
                   </span>
-                  <span data-testid="zone-action">{action ? t('action', { action }) : t('noAction')}</span>
-                  {zone.share !== undefined && (
-                    <span className="text-sm text-muted-foreground">
-                      {t('share', {
-                        percent: format.number(zone.share, {
-                          style: 'percent',
-                          maximumFractionDigits: zone.share < 0.1 ? 1 : 0,
-                        }),
-                      })}
+                  <span className="text-muted-foreground">{meta.join(' · ')}</span>
+                  <span className="flex flex-wrap gap-1.5" data-testid="zone-action">
+                    <span className="sr-only">{t('card.actions')}</span>
+                    {names.length > 0 ? (
+                      names.map((name) => (
+                        <span
+                          key={name}
+                          className="rounded-full border border-secondary-border bg-secondary px-2.5 py-0.5 text-sm font-medium text-secondary-foreground print:border-0 print:bg-transparent print:px-0"
+                        >
+                          {name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground">{t('card.noAction')}</span>
+                    )}
+                  </span>
+                  {caveat && (
+                    <span className="flex items-start gap-1.5 text-sm font-medium text-warning">
+                      <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                      {t('card.caveat')}
                     </span>
                   )}
                 </span>
@@ -179,9 +231,37 @@ export function ZoneList({ report }: { report: WaterReport }) {
           );
         })}
       </ol>
-      <p className="text-sm text-muted-foreground" data-testid="zone-list-basis">
+    </div>
+  );
+}
+
+/**
+ * Skad sa miejsca na polu i na ile im ufac - do zwinietego "Skad te dane" pod karta "Twoje pole": z jakiego zdjecia
+ * i modelu terenu, ze to podpowiedz do obejrzenia na polu, i pelne zdanie o ostrzezeniu "inny uzytek".
+ */
+export function ZoneBasis({ report }: { report: WaterReport }) {
+  const t = useTranslations('report.zones');
+  const format = useFormatter();
+  const zones = fieldZones(report);
+  const map = report.zones;
+
+  if (zones.length === 0) return null;
+
+  const day = (date: string) =>
+    format.dateTime(new Date(`${date}T12:00:00Z`), { dateStyle: 'long', timeZone: APP_TIME_ZONE });
+  const imageText =
+    map?.imageFrom && map.imageTo
+      ? t('image', { from: day(map.imageFrom), to: day(map.imageTo) })
+      : t('imageUnknown');
+  const vegetation = map?.basis?.includes('vegetation') ?? false;
+  const caveat = zones.some(({ zone }) => zone.description?.includes('inny użytek'));
+
+  return (
+    <div className="flex flex-col gap-2" data-testid="zone-list-basis">
+      <p>
         {vegetation ? imageText : t('terrainOnly')} {t('verify')}
       </p>
+      {caveat && <p>{t('card.caveatLong')}</p>}
     </div>
   );
 }

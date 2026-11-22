@@ -36,11 +36,12 @@ describe('FieldMap', () => {
     );
 
     expect(screen.getByTestId('field-map')).toHaveAttribute('data-hydro', 'ready');
+    // fakty o otoczeniu jako kafle: podpis i wartosc
     expect(screen.getByTestId('field-map-nearest')).toHaveTextContent(
-      'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',
+      'Najbliższy rów melioracyjnyPrzy samym polu',
     );
     expect(screen.getByTestId('field-map-nearest')).toHaveTextContent(
-      'Brak rzek, strumieni i kanałów w promieniu 500 m.',
+      'Rzeki, strumienie i kanałyBrak w promieniu 500 m',
     );
     expect(screen.getByTestId('field-map')).toHaveTextContent('BDOT10k, GUGiK (dane z 21 lis 2026)');
   });

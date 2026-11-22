@@ -3,7 +3,7 @@
 // dopiero wybor trybu (to samo zapytanie i klucz cache co blok "Pole z satelity" na wydruku i mapa dzialek).
 import type { FieldArea, ImageryLayer } from '@app/contracts';
 import { useQuery } from '@tanstack/react-query';
-import { LoaderCircle, PenLine } from 'lucide-react';
+import { ChevronDown, LoaderCircle, PenLine } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
@@ -127,7 +127,10 @@ function BackToSketch() {
   );
 }
 
-/** Kolumna objasnien w trybie satelitarnym: co pokazuje obraz, skala slowami, data zdjecia i zastrzezenia. */
+/**
+ * Legenda trybu satelitarnego pod obrazem: skala slowami i jedno zdanie, co pokazuje obraz; data zdjecia,
+ * zastrzezenia i liczby dla doradcy po rozwinieciu "Jak czytac to zdjecie".
+ */
 export function SatelliteNotes({ layer, state }: { layer: ImageryLayer; state: SatelliteState }) {
   const t = useTranslations('report.satellite');
   const format = useFormatter();
@@ -142,22 +145,31 @@ export function SatelliteNotes({ layer, state }: { layer: ImageryLayer; state: S
       data-state={state.kind}
     >
       <h3 className="text-lg font-semibold">{t(`layers.${layer}.title`)}</h3>
+      {data && <SatelliteScale layer={layer} />}
       <p className="text-base">{t(`layers.${layer}.what`)}</p>
+      {data && data.clearShare < CLEAR_ENOUGH && <p className="text-base">{t('clouds')}</p>}
       {data && (
-        <>
-          <SatelliteScale layer={layer} />
-          <p className="text-base font-medium">{t('scene', { date: day(format, data.sceneDate) })}</p>
-          {data.clearShare < CLEAR_ENOUGH && <p className="text-base">{t('clouds')}</p>}
-          <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
-            <li>{t('limits.pixel')}</li>
-            <li>{t('limits.oneDay')}</li>
-            {layer === 'moisture' && <li>{t('limits.plantsNotSoil')}</li>}
-            <li>{t('limits.relative')}</li>
-          </ul>
-          <p className="text-sm text-muted-foreground">
-            {t(`layers.${layer}.advisor`, { low: value(data.scale.low), high: value(data.scale.high) })}
-          </p>
-        </>
+        <details className="group">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-base font-medium text-water select-none [&::-webkit-details-marker]:hidden">
+            {t('howToRead')}
+            <ChevronDown
+              aria-hidden="true"
+              className="size-5 shrink-0 transition-transform duration-200 group-open:rotate-180"
+            />
+          </summary>
+          <div className="flex flex-col gap-2 pt-1">
+            <p className="text-base font-medium">{t('scene', { date: day(format, data.sceneDate) })}</p>
+            <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
+              <li>{t('limits.pixel')}</li>
+              <li>{t('limits.oneDay')}</li>
+              {layer === 'moisture' && <li>{t('limits.plantsNotSoil')}</li>}
+              <li>{t('limits.relative')}</li>
+            </ul>
+            <p className="text-sm text-muted-foreground">
+              {t(`layers.${layer}.advisor`, { low: value(data.scale.low), high: value(data.scale.high) })}
+            </p>
+          </div>
+        </details>
       )}
     </div>
   );

@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils/cn';
 
 import type { NumberedZone } from '../../utils/report-data';
 import { FieldSketch, SketchLegend, ZoneKindLegend } from '../field-sketch';
+import { ReportDetails } from '../report-section';
 import { useZoneFocus } from '../zone-focus';
 import type { FieldMapLayers } from './field-map-canvas';
 import { chooseFieldMode, FIELD_MODES, useFieldMode, type FieldMode } from './field-mode';
@@ -97,8 +98,10 @@ export interface FieldMapProps {
   imageryParcels?: string | null;
   /** dzien analizy - obraz z satelity z najczystszego zdjecia z 30 dni przed nim */
   imageryDate?: string;
-  /** lista miejsc na polu w kolumnie objasnien (pod objasnieniami obrazu satelitarnego) */
+  /** lista miejsc na polu - prawa kolumna karty */
   children?: ReactNode;
+  /** skad sa miejsca na polu i jak dokladne - trafia do zwinietego "Skad te dane" pod karta */
+  notes?: ReactNode;
 }
 
 const NO_ZONES: readonly NumberedZone[] = [];
@@ -112,14 +115,14 @@ const MAX_ZOOM_STEP = 3;
 const ZONES_RADIUS_M = 100;
 
 /**
- * Karta "Twoje pole" na cala szerokosc: po lewej duzy obraz pola, po prawej kolumna objasnien. Tryb obrazu wybieraja
- * cztery pigulki (wybor zapamietany w przegladarce): "Szkic" (domyslny - "Woda na polu i wokol niego" w skali, SVG:
- * pole, rowy, cieki, wody i otoczenie, miejsca na polu wzorem), "Zdjecie lotnicze" (MapLibre, osobny chunk ladowany
- * dopiero po wyborze; warstwy, przyblizenie), "Kondycja roslin" i "Woda w roslinach" (obraz z satelity z dnia
- * analizy, pobierany dopiero po wyborze). Kolumna objasnien: przy satelicie skala slowami, data i zastrzezenia; potem
- * miejsca na polu (`children`), znaki szkicu, zdania o najblizszym rowie i cieku oraz zrodla. Klikniecie miejsca na
- * obrazie albo liscie wyroznia je wszedzie (`zone-focus`), drugie klikniecie, Escape albo tlo zdejmuje wyroznienie.
- * Na wydruk idzie zawsze szkic z objasnieniami szkicu (obrazy z satelity drukuje blok "Pole z satelity").
+ * Karta "Twoje pole" na cala szerokosc. U gory cztery pigulki trybu obrazu (wybor zapamietany w przegladarce): "Szkic"
+ * (domyslny - "Woda na polu i wokol niego" w skali, SVG), "Zdjecie lotnicze" (MapLibre, osobny chunk ladowany dopiero
+ * po wyborze), "Kondycja roslin" i "Woda w roslinach" (obraz z satelity z dnia analizy, pobierany dopiero po wyborze).
+ * Po lewej obraz, a pod nim legenda aktywnego trybu (znaki szkicu / warstwy zdjecia / skala satelity) - trzymaja sie
+ * ekranu przy przewijaniu; po prawej miejsca na polu jako karty (`children`). Pod spodem kafle z faktami o otoczeniu
+ * (rowy przez pole, najblizszy row, najblizszy ciek) i zwiniete "Skad te dane" (`notes` + zrodla). Klikniecie miejsca
+ * na obrazie albo karcie wyroznia je wszedzie (`zone-focus`), drugie klikniecie, Escape albo tlo zdejmuje wyroznienie.
+ * Na wydruk idzie zawsze szkic z legenda szkicu (obrazy z satelity drukuje blok "Pole z satelity").
  */
 export function FieldMap({
   field,
@@ -128,6 +131,7 @@ export function FieldMap({
   imageryParcels = null,
   imageryDate = '',
   children,
+  notes = null,
 }: FieldMapProps) {
   const t = useTranslations('report.fieldMap');
   const tSimple = useTranslations('report.simple');
@@ -237,6 +241,59 @@ export function FieldMap({
     ? format.dateTime(new Date(importedAt), { dateStyle: 'medium', timeZone: APP_TIME_ZONE })
     : null;
 
+  // fakty o otoczeniu pola jako kafle pod karta: rowy przez pole, najblizszy row, najblizszy ciek
+  const factDistance = (item: NearestHydro) => (item.distanceM < 1 ? t('facts.touches') : distance(item));
+  const facts: FieldFact[] = [];
+
+  if (state === 'ready') {
+    if (fact?.kind === 'ditch_through') {
+      facts.push({
+        key: 'through',
+        label: t(fact.alongEdge ? 'facts.ditchAlongEdge' : 'facts.ditchThrough'),
+        value:
+          fact.ditches > 1
+            ? t('facts.ditchCount', { count: fact.ditches, meters: meters(fact.lengthM) })
+            : t('facts.meters', { meters: meters(fact.lengthM) }),
+        marked: false,
+      });
+    }
+
+    facts.push({
+      key: 'ditch',
+      label: t('facts.nearestDitch'),
+      value: hydro.nearest.ditch ? factDistance(hydro.nearest.ditch) : t('facts.none', { radius: RADIUS_M }),
+      marked: aerial && hydro.nearest.ditch !== null,
+    });
+
+    const named = hydro.nearest.named;
+    const course = hydro.nearest.watercourse;
+
+    facts.push(
+      named
+        ? {
+            key: 'watercourse',
+            label: namedWaterLabel(t(`kinds.${named.feature.kind}`), named.feature.name ?? ''),
+            value: factDistance(named),
+            marked: aerial,
+          }
+        : course
+          ? {
+              key: 'watercourse',
+              label: t('facts.watercourse', { kind: t(`kinds.${course.feature.kind}`) }),
+              value: factDistance(course),
+              marked: aerial,
+            }
+          : {
+              key: 'watercourse',
+              label: t('facts.watercourses'),
+              value: t('facts.none', { radius: RADIUS_M }),
+              marked: false,
+            },
+    );
+  }
+
+  const scene = satellite.state.kind === 'ready' ? satellite.state.data.sceneDate : null;
+
   return (
     <section
       id={SATELLITE_ANCHOR}
@@ -257,7 +314,7 @@ export function FieldMap({
           </p>
         </div>
         <fieldset
-          className="grid grid-cols-2 gap-1 rounded-3xl bg-muted p-1 lg:grid-cols-4 lg:rounded-full print:hidden"
+          className="grid grid-cols-2 gap-1 rounded-3xl bg-muted p-1 lg:flex lg:w-fit lg:rounded-full print:hidden"
           data-testid="field-map-mode"
         >
           <legend className="sr-only">{t('modeLabel')}</legend>
@@ -266,55 +323,33 @@ export function FieldMap({
           ))}
         </fieldset>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:items-start print:grid-cols-2 print:gap-4">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] lg:items-start print:grid-cols-2 print:gap-4">
+        {/* obraz z legenda aktywnego trybu trzyma sie ekranu, gdy lista miejsc obok jest dluzsza */}
         <div
           ref={sketchRef}
-          className="flex min-w-0 scroll-mt-4 flex-col gap-3 lg:sticky lg:top-24 print:static"
+          className="flex min-w-0 scroll-mt-4 flex-col gap-4 lg:sticky lg:top-24 print:static print:gap-2"
         >
-          <div
-            className={cn(
-              'w-full overflow-hidden rounded-2xl border print:break-inside-avoid print:rounded-lg',
-              !sketchMode && 'hidden print:block',
-            )}
-          >
-            <FieldSketch
-              model={sketch}
-              fieldName={fieldName}
-              factText={state === 'ready' ? factText : null}
-              label={[t('sketch.label', { field: fieldName, radius }), factText].filter(Boolean).join(' ')}
-              zones={zoneMarks}
-              activeZone={active}
-              selectedZone={selected}
-              onZoneSelect={toggle}
-              onBackgroundSelect={clear}
-            />
-          </div>
-          {aerial && (
-            <div className="flex flex-col gap-3 print:hidden">
-              <fieldset className="flex flex-wrap gap-2" data-testid="field-map-layers">
-                <legend className="sr-only">{tLayers('label')}</legend>
-                <LayerSwitch
-                  name="photo"
-                  checked={layers.photo}
-                  onChange={switchLayer}
-                  label={tLayers('photo')}
-                />
-                <LayerSwitch
-                  name="water"
-                  checked={layers.water}
-                  onChange={switchLayer}
-                  label={tLayers('water')}
-                />
-                {hasZones && (
-                  <LayerSwitch
-                    name="zones"
-                    checked={layers.zones}
-                    onChange={switchLayer}
-                    label={tLayers('zones')}
-                  />
-                )}
-              </fieldset>
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border bg-muted lg:aspect-[5/4]">
+          <figure className="flex flex-col gap-2">
+            <div
+              className={cn(
+                'w-full overflow-hidden rounded-2xl border print:break-inside-avoid print:rounded-lg',
+                !sketchMode && 'hidden print:block',
+              )}
+            >
+              <FieldSketch
+                model={sketch}
+                fieldName={fieldName}
+                factText={state === 'ready' ? factText : null}
+                label={[t('sketch.label', { field: fieldName, radius }), factText].filter(Boolean).join(' ')}
+                zones={zoneMarks}
+                activeZone={active}
+                selectedZone={selected}
+                onZoneSelect={toggle}
+                onBackgroundSelect={clear}
+              />
+            </div>
+            {aerial && (
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border bg-muted lg:aspect-[5/4] print:hidden">
                 {failed ? (
                   <MapPlaceholder text={t('failed')} />
                 ) : (
@@ -336,100 +371,151 @@ export function FieldMap({
                   </Suspense>
                 )}
               </div>
-              {!failed && (
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={zoomIn}
-                    disabled={zoomStep >= MAX_ZOOM_STEP}
-                  >
-                    <ZoomIn aria-hidden="true" />
-                    {t('zoomIn')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    onClick={zoomOut}
-                    disabled={zoomStep === 0}
-                  >
-                    <ZoomOut aria-hidden="true" />
-                    {t('zoomOut')}
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-          {layer && (
-            <div className="print:hidden">
-              <SatelliteImage
-                layer={layer}
-                state={satellite.state}
-                field={field}
-                zones={zones}
-                date={imageryDate}
-                onRetry={satellite.retry}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex min-w-0 flex-col gap-6 print:gap-3" data-testid="field-map-aside">
-          {layer && <SatelliteNotes layer={layer} state={satellite.state} />}
-          {children}
-          <div className={cn('flex flex-col gap-2', !sketchMode && 'hidden print:flex')}>
-            <h3 className="text-lg font-semibold">{t('signsTitle')}</h3>
-            <SketchLegend model={sketch} zoneKinds={zoneKinds} />
-          </div>
-          {aerial && layers.zones && <ZoneKindLegend kinds={zoneKinds} />}
-          <div className="flex flex-col gap-1 text-base">
-            {state === 'loading' && <p className="text-muted-foreground">{t('sketch.loading')}</p>}
-            {state === 'ready' && (
-              <div className="flex flex-col gap-1" data-testid="field-map-nearest">
-                <p>
-                  {aerial && hydro.nearest.ditch && <Swatch />}
-                  {hydro.nearest.ditch
-                    ? t('nearestDitch', { distance: distance(hydro.nearest.ditch) })
-                    : t('noDitch', { radius: RADIUS_M })}
-                </p>
-                <p>
-                  {aerial && (hydro.nearest.named ?? hydro.nearest.watercourse) && <Swatch />}
-                  {hydro.nearest.named
-                    ? t('nearestNamed', {
-                        label: namedWaterLabel(
-                          t(`kinds.${hydro.nearest.named.feature.kind}`),
-                          hydro.nearest.named.feature.name ?? '',
-                        ),
-                        distance: distance(hydro.nearest.named),
-                      })
-                    : hydro.nearest.watercourse
-                      ? t('nearestWatercourse', {
-                          kind: t(`kinds.${hydro.nearest.watercourse.feature.kind}`),
-                          distance: distance(hydro.nearest.watercourse),
-                        })
-                      : t('noWatercourse', { radius: RADIUS_M })}
-                </p>
-                {sketch.groups.length === 0 && <p>{t('sketch.noWater', { radius })}</p>}
+            )}
+            {layer && (
+              <div className="print:hidden">
+                <SatelliteImage
+                  layer={layer}
+                  state={satellite.state}
+                  field={field}
+                  zones={zones}
+                  date={imageryDate}
+                  onRetry={satellite.retry}
+                />
               </div>
             )}
-            {state === 'unavailable' && <p>{t('sketch.unavailable')}</p>}
-            <p className="text-sm text-muted-foreground">
-              {aerial ? (
-                <span className="print:hidden">
-                  {date ? t('sourcesDated', { date }) : t('sources')}
-                  {hydro.highlighted.length > 0 ? ` ${t('highlight')}` : ''}
-                </span>
-              ) : null}
-              <span className={cn(!sketchMode && 'hidden print:inline')}>
-                {date ? t('sketch.sourcesDated', { date, radius }) : t('sketch.sources', { radius })}
-              </span>
-            </p>
+            {scene && (
+              <figcaption className="px-1 text-sm text-muted-foreground print:hidden">
+                {t('caption', {
+                  field: fieldName,
+                  date: format.dateTime(new Date(`${scene}T12:00:00Z`), {
+                    dateStyle: 'long',
+                    timeZone: APP_TIME_ZONE,
+                  }),
+                })}
+              </figcaption>
+            )}
+          </figure>
+          {/* legenda aktywnego trybu pod obrazem; prawa kolumna zostaje dla miejsc na polu */}
+          <div
+            className="flex flex-col gap-4 rounded-2xl border p-4 print:gap-2 print:border-0 print:p-0"
+            data-testid="field-map-notes"
+          >
+            {layer && <SatelliteNotes layer={layer} state={satellite.state} />}
+            <div className={cn('flex flex-col gap-2', !sketchMode && 'hidden print:flex')}>
+              <h3 className="text-lg font-semibold">{t('signsTitle')}</h3>
+              <SketchLegend model={sketch} zoneKinds={zoneKinds} />
+            </div>
+            {aerial && (
+              <div className="flex flex-col gap-3 print:hidden">
+                <h3 className="text-lg font-semibold">{tLayers('label')}</h3>
+                <fieldset className="flex flex-wrap gap-2" data-testid="field-map-layers">
+                  <legend className="sr-only">{tLayers('label')}</legend>
+                  <LayerSwitch
+                    name="photo"
+                    checked={layers.photo}
+                    onChange={switchLayer}
+                    label={tLayers('photo')}
+                  />
+                  <LayerSwitch
+                    name="water"
+                    checked={layers.water}
+                    onChange={switchLayer}
+                    label={tLayers('water')}
+                  />
+                  {hasZones && (
+                    <LayerSwitch
+                      name="zones"
+                      checked={layers.zones}
+                      onChange={switchLayer}
+                      label={tLayers('zones')}
+                    />
+                  )}
+                </fieldset>
+                {!failed && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      onClick={zoomIn}
+                      disabled={zoomStep >= MAX_ZOOM_STEP}
+                    >
+                      <ZoomIn aria-hidden="true" />
+                      {t('zoomIn')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      onClick={zoomOut}
+                      disabled={zoomStep === 0}
+                    >
+                      <ZoomOut aria-hidden="true" />
+                      {t('zoomOut')}
+                    </Button>
+                  </div>
+                )}
+                {layers.zones && <ZoneKindLegend kinds={zoneKinds} />}
+              </div>
+            )}
           </div>
         </div>
+        <div className="flex min-w-0 flex-col gap-6 print:gap-3" data-testid="field-map-aside">
+          {children}
+        </div>
       </div>
+      {state === 'loading' && <p className="text-base text-muted-foreground">{t('sketch.loading')}</p>}
+      {state === 'unavailable' && <p className="text-base">{t('sketch.unavailable')}</p>}
+      {facts.length > 0 && (
+        <dl
+          className={cn(
+            'grid gap-3 print:grid-cols-3 print:gap-2',
+            facts.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
+          )}
+          data-testid="field-map-nearest"
+        >
+          {facts.map((item) => (
+            <div
+              key={item.key}
+              className="flex flex-col gap-0.5 rounded-2xl border px-4 py-3 print:rounded-lg print:px-2 print:py-1"
+            >
+              <dt className="text-base text-muted-foreground">
+                {item.marked && <Swatch />}
+                {item.label}
+              </dt>
+              <dd className="text-xl font-semibold first-letter:uppercase print:text-base">{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      {state === 'ready' && sketch.groups.length === 0 && (
+        <p className="text-base">{t('sketch.noWater', { radius })}</p>
+      )}
+      <ReportDetails summary={t('sourcesTitle')}>
+        {notes}
+        <p className="text-muted-foreground">
+          {aerial ? (
+            <span className="print:hidden">
+              {date ? t('sourcesDated', { date }) : t('sources')}
+              {hydro.highlighted.length > 0 ? ` ${t('highlight')}` : ''}
+            </span>
+          ) : null}
+          <span className={cn(!sketchMode && 'hidden print:inline')}>
+            {date ? t('sketch.sourcesDated', { date, radius }) : t('sketch.sources', { radius })}
+          </span>
+        </p>
+      </ReportDetails>
     </section>
   );
+}
+
+/** Jeden fakt o otoczeniu pola (kafel pod karta): podpis i wartosc; `marked` = kolor wyroznienia na zdjeciu. */
+interface FieldFact {
+  key: string;
+  label: string;
+  value: string;
+  marked: boolean;
 }
 
 function summarize(field: FieldArea, tiles: readonly { features: readonly HydroFeature[] }[]) {

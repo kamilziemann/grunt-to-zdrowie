@@ -279,9 +279,9 @@ test.describe('mapa pola w raporcie', () => {
     await expect(page.getByTestId('field-sketch-scale')).toContainText(/\d+\sm/);
     await expect(page.getByTestId('field-sketch-legend')).toContainText('Rowy płynące przez pole');
     await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
-    await expect(page.getByTestId('field-map-nearest')).toContainText(
-      'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',
-    );
+    // fakty o otoczeniu jako kafle pod karta
+    await expect(page.getByTestId('field-map-nearest')).toContainText('Najbliższy rów melioracyjny');
+    await expect(page.getByTestId('field-map-nearest')).toContainText('Przy samym polu');
     // zdjecie lotnicze dopiero na zadanie: dwie pigulki, wybor zapamietany
     await expect(page.getByTestId('field-map-canvas')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Szkic', exact: true })).toHaveAttribute(
