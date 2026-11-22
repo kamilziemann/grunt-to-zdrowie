@@ -25,7 +25,7 @@ export function PageHeader({ title, description, breadcrumbs, meta, children, cl
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl leading-tight font-bold text-primary">{title}</h1>
+            <h1 className="text-3xl leading-tight font-medium tracking-tight md:text-4xl">{title}</h1>
             {meta}
           </div>
           {description && <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>}

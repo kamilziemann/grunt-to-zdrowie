@@ -31,7 +31,7 @@ export function StepsHeader({ current, className }: { current: ParcelStep; class
               aria-hidden="true"
               className={cn(
                 'flex size-6 items-center justify-center rounded-full text-xs font-semibold',
-                active && 'bg-primary text-primary-foreground',
+                active && 'bg-accent text-accent-foreground',
                 done && 'bg-primary/15 text-primary',
                 !active && !done && 'bg-muted text-muted-foreground',
               )}

@@ -41,7 +41,7 @@ export function ParcelPreview({ parcel, alreadyAdded, listFull, listMax, onDismi
     <section
       aria-labelledby="parcel-preview-title"
       data-testid="parcel-preview"
-      className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
+      className="flex flex-col gap-3 rounded-xl border border-secondary-border bg-secondary p-4 text-secondary-foreground"
     >
       <div className="flex flex-col gap-0.5">
         <p className="text-sm text-muted-foreground">{t('title')}</p>

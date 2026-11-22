@@ -541,7 +541,7 @@ export function ParcelsScreen({
             <div className="flex flex-col gap-4 p-4 max-md:pt-0">
               <div className="flex flex-col gap-3 max-md:flex-col-reverse">
                 <div className="flex flex-col gap-2">
-                  <h1 className="text-2xl font-bold text-primary max-md:text-xl">{t('title')}</h1>
+                  <h1 className="text-2xl font-medium tracking-tight max-md:text-xl">{t('title')}</h1>
                   {/* przy pierwszym wejsciu kroki opisuje karta nizej - pasek etapow bylby powtorzeniem */}
                   {!firstVisit && <StepsHeader current={step} />}
                 </div>
