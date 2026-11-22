@@ -1,4 +1,4 @@
-import { mockAnalysisApi } from './support/analysis-api';
+import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
 import { basemapButton, mockMapServices, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
@@ -139,6 +139,26 @@ test.describe('działki', () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
       await expectTouchTargets(panel.getByRole('button'));
       await expectTouchTargets(page.getByTestId('layers-button'));
+    });
+
+    test('krok działki po powrocie z mapy zaczyna się od góry, choć wcześniej był przewinięty', async ({
+      page,
+    }) => {
+      await mockAnalysisApi(page);
+      await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
+      await expect(page.getByText('Działka 6509')).toBeVisible();
+
+      // rolnik przewija panel do "Moje pole to kilka dzialek" (na telefonie pod zgieciem) i idzie na mape
+      const many = page.getByRole('link', { name: 'Moje pole to kilka działek' });
+
+      await many.scrollIntoViewIfNeeded();
+      await many.click();
+      await expect(page).toHaveURL(/\/mapa\?/);
+      await page.getByRole('link', { name: 'Analizuj działkę' }).click();
+      await expect(page).toHaveURL(/\/analiza\?/);
+
+      await expect(page.getByRole('heading', { level: 1, name: 'Czy to Twoja działka?' })).toBeInViewport();
+      expect(await page.getByTestId('check-panel').evaluate((panel) => panel.scrollTop)).toBe(0);
     });
   });
 });

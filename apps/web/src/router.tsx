@@ -3,7 +3,11 @@
 // - setupRouterSsrQueryIntegration: dane zapytan z SSR jada do przegladarki (dehydracja/hydracja, streaming),
 // - defaultPreloadStaleTime: 0 - swiezosc danych kontroluje Query, nie wewnetrzny cache routera,
 // - preload `intent`: loader i zapytania startuja przy najechaniu na link (przejscie bez czekania),
-// - zwykle query stringi (`?q=2027`, nie JSON) - jeden adres = jeden klucz cache brzegu.
+// - zwykle query stringi (`?q=2027`, nie JSON) - jeden adres = jeden klucz cache brzegu,
+// - `data-scroll-reset`: przewijane panele stron, ktore po przejsciu na nowy adres zaczynaja od gory. Router
+//   przenosi przewiniecie elementow miedzy adresami po sciezce `nth-child`, wiec panel kroku dzialki dostawal
+//   przewiniecie z poprzedniej wizyty (przez mape, gdzie pod ta sciezka stoi inny element). Powrot wstecz dalej
+//   przywraca zapamietane miejsce.
 import { createQueryClient, parsePlainSearch, stringifyPlainSearch } from '@app/start-kit';
 import { createRouter } from '@tanstack/react-router';
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
@@ -22,6 +26,7 @@ export function getRouter() {
     defaultErrorComponent: RouteError,
     defaultNotFoundComponent: DocumentNotFound,
     scrollRestoration: true,
+    scrollToTopSelectors: ['[data-scroll-reset]'],
     parseSearch: parsePlainSearch,
     stringifySearch: stringifyPlainSearch,
   });

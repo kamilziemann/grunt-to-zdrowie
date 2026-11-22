@@ -317,7 +317,12 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
         </p>
       </div>
 
-      <div className="surface-panel relative min-h-0 flex-1 overflow-y-auto overscroll-contain md:order-1">
+      <div
+        className="surface-panel relative min-h-0 flex-1 overflow-y-auto overscroll-contain md:order-1"
+        data-testid="check-panel"
+        // nowy adres = panel od gory (router.tsx), a nie przewiniecie z poprzedniej wizyty
+        data-scroll-reset
+      >
         <div className="px-5 pt-5 md:px-7 md:pt-7">{ready && renderForm ? renderForm(summary) : summary}</div>
       </div>
     </div>
