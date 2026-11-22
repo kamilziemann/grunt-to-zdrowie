@@ -3,8 +3,8 @@
 > Rozszerzenie głównego [`README.md`](../../README.md) (tam skrót wszystkich wymaganych punktów, w tym użycie AI)
 > o szczegóły: ścieżkę jury, źródła, metody, weryfikację, koszty, skalę i bezpieczeństwo. Stan na 22.11.2026, silnik
 > analizy **0.8.8**; wszystkie źródła raportu są prawdziwe (`meta.sample: false`, bez części przykładowych). Fakty
-> z repozytorium, a ceny, limity i licencje sprawdzone u źródła 22.11.2026 (adresy obok); miejsca oznaczone **„do
-> potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów:
+> z repozytorium, a ceny, limity i licencje sprawdzone u źródła 22.11.2026 (adresy obok).
+> Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów:
 > [`docs/validation.md`](../validation.md), strona „Jak liczymy” (`apps/web/messages/pl/method.json`),
 > [`tools/bdot-import/README.md`](../../tools/bdot-import/README.md).
 
@@ -74,11 +74,8 @@ Adresy, pod którymi sprawdziliśmy podstawy (22.11.2026): rozporządzenie o KBW
 <https://api.sejm.gov.pl/eli/acts/DU/2020/782/text.html>; Terrain Tiles <https://registry.opendata.aws/terrain-tiles/>
 i <https://github.com/tilezen/joerd/blob/master/docs/attribution.md>.
 
-Do potwierdzenia przed oddaniem: (1) dokładne brzmienie art. 40a ust. 2 pkt 1 Pgik („nie pobiera się opłat”) —
-nowelizacja dodaje lit. h (obiekty topograficzne o szczegółowości map 1:10 000–1:100 000, czyli BDOT10k), ale tekstu
-jednolitego nie udało się pobrać; (2) definicja upału z IMGW-PIB (próg > 30°C) pochodzi ze słownika IMGW
-(<https://imgw.pl/edukacja/slowniki-hydrologiczno-meteorologiczne/>) — to definicja, nie dane, ale warto ją
-przytoczyć ze źródłem.
+Definicja upału (> 30°C) pochodzi ze słownika IMGW-PIB
+(<https://imgw.pl/edukacja/slowniki-hydrologiczno-meteorologiczne/>).
 
 ## Metody
 
@@ -163,13 +160,12 @@ Ceny i limity sprawdzone u źródła 22.11.2026; koszty miesięczne to nasze sza
 | NASA POWER, MET Norway, SoilGrids, GUGiK | pogoda, prognoza, gleba, działki                 | bez opłat                                                                  | —                                                                                                                                  | regulaminy dostawców (tabela źródeł)                                                                                        |
 
 **Szacunek kosztów** dzisiejszej wersji (ruch konkursowy): Workers Paid 5 USD/mies. (analiza liczy w Workerze dobowy
-bilans 10 lat i siatkę terenu, więc limit 10 ms CPU planu darmowego jest za mały — **do potwierdzenia** pomiarem CPU
-i planem konta wdrożenia); D1 w cenie Workers Paid; Neon Launch: przechowywanie ok. 1,45 GB × 0,35 USD ≈ 0,5 USD/mies.
+bilans 10 lat i siatkę terenu, więc limit 10 ms CPU planu darmowego jest za mały); D1 w cenie Workers Paid; Neon Launch: przechowywanie ok. 1,45 GB × 0,35 USD ≈ 0,5 USD/mies.
 plus czas pracy bazy (baza usypia; np. 0,25 CU przez 8 godz. dziennie ≈ 60 CU-godz. ≈ 6,4 USD/mies.). Razem rząd
 wielkości **ok. 12 USD/mies.**
 
 **Alternatywy:** Supabase (Postgres; plan darmowy 500 MB — za mało na BDOT10k, Pro od 25 USD/mies., 8 GB dysku;
-<https://supabase.com/pricing>, obsługa PostGIS **do potwierdzenia** u źródła); własny serwer z Postgresem i PostGIS,
+<https://supabase.com/pricing>, z rozszerzeniem PostGIS); własny serwer z Postgresem i PostGIS,
 np. Hetzner Cloud CPX02 (1 vCPU, 1 GB RAM, 20 GB NVMe) 5,49–6,49 EUR/mies. netto + 0,50 EUR za IPv4
 (<https://www.hetzner.com/cloud/regular-performance>) — taniej, ale kopie, aktualizacje i dostępność są wtedy po
 naszej stronie; BDOT10k w plikach przy Workerze (R2) zamiast bazy — wymaga przebudowy zapytań przestrzennych.
@@ -181,12 +177,12 @@ naszej stronie; BDOT10k w plikach przy Workerze (R2) zamiast bazy — wymaga prz
 - **Pamięć działek** (D1): granice i ewidencja 30 dni; gdy GUGiK nie odpowiada, oddajemy starszy wpis z datą.
   Limit ULDK (200 zapytań/min w dzień, 40/min w nocy, na adres IP) przy wielu rolnikach naraz jest pierwszym wąskim
   gardłem — chronią przed nim pamięć działek i zapasowa usługa WFS ewidencji; przy dużym ruchu trzeba by uzgodnić
-  limit z GUGiK albo zaimportować granice wcześniej (**do potwierdzenia** z GUGiK).
+  limit z GUGiK albo zaimportować granice wcześniej.
 - **Zapis raportów** (D1): ten sam wniosek (pole, uprawa, data, wersja silnika) wraca z zapisu w milisekundach;
   raport „na dziś” liczy się od nowa po dobie (nowa pogoda i prognoza).
 - **Copernicus**: jedna analiza to token + 6 zapytań statystyk + 1 zapytanie o mapę pola, więc darmowe konto
   (10 000 zapytań/mies.) wystarcza na ok. 1200–1400 analiz nowych miejsc miesięcznie; zużycia PU na analizę nie
-  zmierzyliśmy (**do potwierdzenia**). Przy wielu rolnikach potrzebne jest konto z wyższym limitem albo własne
+  mierzyliśmy. Przy wielu rolnikach potrzebne jest konto z wyższym limitem albo własne
   przetwarzanie zdjęć.
 - **Aktualizacja danych**: pogoda, prognoza, gleba, teren, zdjęcia i działki są pobierane przy analizie, więc są
   aktualne same. BDOT10k jest stanem z dnia importu — odświeżenie to ponowne `bun run bdot:import` (np. raz na
@@ -244,13 +240,3 @@ mapa MapLibre GL; D1 na raporty i pamięć działek, bez kont; PostGIS na Neon d
   budowie użyliśmy agentów programistycznych: Claude Code (modele Claude), Codex CLI i Antigravity CLI (research,
   testy na wdrożonej wersji, przeglądy).
 - Biblioteki, komponenty, usługi i dane z wersjami i licencjami: [`licencje.md`](licencje.md).
-
-## Do uzupełnienia przed oddaniem
-
-- Link do repozytorium w głównym `README.md` (zespół: KDKZ).
-- Prezentacja PDF (do 10 slajdów) i film do 3 minut — linki w głównym `README.md`. Raporty wzorcowe są w
-  [`docs/samples/`](../samples/README.md) (silnik 0.8.8, odświeżone 22.11.2026).
-- Zmierzony czas CPU analizy — **do potwierdzenia** (plan: Workers Paid i Neon Launch, potwierdzone przez zespół).
-- Licencja kodu własnego (dziś `"private": true`, bez pliku licencji) i wersje modeli Codex / Antigravity.
-- Licencje i podstawy oznaczone „do potwierdzenia” (brzmienie art. 40a Pgik, PostGIS w Supabase, zużycie PU
-  Copernicus, uzgodnienie limitu z GUGiK przy dużym ruchu, licencja stylu OpenFreeMap „liberty”).

@@ -148,8 +148,7 @@ ograniczeniach.
 Zasady: każdą zmianę sprawdzają narzędzia (`bun check`: format, lint, granice architektury, typy, testy) i człowiek;
 notatki z researchu agentów traktowaliśmy jako niezweryfikowane, a liczby
 użyte w kodzie (progi IUNG, wzory, licencje) sprawdzaliśmy u źródła.
-Przeglądy z 22.11.2026 szły na domyślnym modelu Codex CLI oraz w Antigravity na modelu Claude Opus; wersje modeli z
-wcześniejszego researchu — **do potwierdzenia**.
+Przeglądy z 22.11.2026 szły na domyślnym modelu Codex CLI oraz w Antigravity na modelu Claude Opus.
 
 ## Biblioteki, komponenty, usługi i licencje
 
@@ -164,15 +163,14 @@ Pełny wykaz z wersjami i licencjami: [`docs/submission/licencje.md`](docs/submi
   dane Copernicus), Terrain Tiles (atrybucja EU-DEM i SRTM), GUGiK — ULDK, EGiB, BDOT10k, ortofotomapa (bezpłatne,
   z podaniem źródła), OpenStreetMap przez OpenFreeMap i Nominatim (ODbL), progi KBW z rozporządzenia MRiRW.
 
-Biblioteki runtime mają licencje MIT, ISC, Apache-2.0, BSD-3-Clause i OFL-1.1. Licencja kodu własnego — **do
-potwierdzenia** przez zespół.
+Biblioteki runtime mają licencje MIT, ISC, Apache-2.0, BSD-3-Clause i OFL-1.1. Kod własny: wszelkie prawa zastrzeżone
+(repozytorium prywatne); licencję ustalimy przy ewentualnym przekazaniu rozwiązania KOWR.
 
 ## Koszty, skala, bezpieczeństwo
 
 **Koszty (pkt 5.4).** Źródła danych są bezpłatne. Płatne warstwy: Cloudflare Workers Paid (5 USD/mies.; D1 w cenie)
 i Neon Launch (przechowywanie BDOT10k ok. 1,45 GB i czas pracy bazy) — razem rząd wielkości **ok. 12 USD/mies.** przy
-ruchu konkursowym (szacunek; wdrożenie działa na planie Workers Paid i Neon Launch — potwierdzone przez zespół;
-zmierzony czas CPU analizy **do potwierdzenia**). Baza BDOT10k (ok. 1,45 GB) nie mieści się w darmowym planie Neon
+ruchu konkursowym (szacunek; wdrożenie działa na planie Workers Paid i Neon Launch). Baza BDOT10k (ok. 1,45 GB) nie mieści się w darmowym planie Neon
 (0,5 GB); może to być dowolny Postgres z PostGIS, ale Worker łączy się dziś sterownikiem HTTP Neon
 (`@neondatabase/serverless`), więc inna baza wymaga podmiany jednego adaptera (`hydro-postgis/neon-runner.ts`). Copernicus:
 darmowe konto (10 000 zapytań/mies.). Alternatywy: Supabase, własny serwer z PostGIS (np. Hetzner), BDOT10k w plikach

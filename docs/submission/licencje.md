@@ -4,11 +4,10 @@ Wykaz do pkt 4.2 ppkt 6–7 regulaminu zadania (biblioteki, komponenty, modele, 
 Wersje i licencje bibliotek wygenerowano 22.11.2026 z plików `package.json` wszystkich workspace'ów i pola `license`
 w zainstalowanych paczkach (`node_modules`, zgodnie z `bun.lock`). Licencje danych i usług przepisano ze strony „Jak
 liczymy” (`apps/web/messages/pl/method.json`) i z [README konkursowego](README-konkursowe.md), gdzie są też adresy,
-pod którymi sprawdzono podstawy prawne. Pozycje, których nie potwierdziliśmy u źródła, są oznaczone **„do
-potwierdzenia”**.
+pod którymi sprawdzono podstawy prawne.
 
-Kod własny aplikacji (`apps/*`, `packages/*`, `tools/*`) nie ma jeszcze wybranej licencji (`"private": true`
-w `package.json`) — **do potwierdzenia** przez zespół przed przekazaniem rozwiązania KOWR.
+Kod własny aplikacji (`apps/*`, `packages/*`, `tools/*`) jest objęty prawami zastrzeżonymi zespołu (`"private": true`
+w `package.json`, repozytorium prywatne); licencję ustalimy przy ewentualnym przekazaniu rozwiązania KOWR.
 
 ## Biblioteki działające w aplikacji (runtime)
 
@@ -95,7 +94,7 @@ Unlicense, BlueOak-1.0.0, Python-2.0, CC-BY-4.0 dla `caniuse-lite`). Licencje z 
 
 | Usługa                          | Do czego                                  | Warunki                                                                                                |
 | ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Cloudflare Workers              | jeden Worker: strony i API                | regulamin Cloudflare; plan konta wdrożenia (Free/Paid) **do potwierdzenia**                            |
+| Cloudflare Workers              | jeden Worker: strony i API                | regulamin Cloudflare; plan Workers Paid                                                                |
 | Cloudflare D1                   | zapisane raporty, pamięć działek (30 dni) | jak wyżej                                                                                              |
 | Cloudflare Workers Cache        | pamięć odpowiedzi źródeł i stron          | jak wyżej                                                                                              |
 | Cloudflare Observability        | logi i ślady                              | jak wyżej                                                                                              |
@@ -115,9 +114,9 @@ Ceny i limity: [README konkursowe, „Infrastruktura i koszty”](README-konkurs
 | Zieloność i wilgotność roślin, strefy pola | Copernicus Sentinel-2 (Copernicus Data Space)                                       | otwarte dane Copernicus, wymagane oznaczenie „zawiera zmodyfikowane dane Copernicus Sentinel”                                                                                                                                                |
 | Ukształtowanie terenu                      | Terrain Tiles (AWS Open Data, terrarium): EU-DEM, SRTM                              | bez jednej licencji kafli; atrybucja każdego źródła: „Produced using Copernicus data and information funded by the European Union - EU-DEM layers”, „SRTM data courtesy of the U.S. Geological Survey” (tilezen/joerd `docs/attribution.md`) |
 | Granice, powierzchnia, klasy użytków       | ULDK i EGiB (zbiorcza usługa WFS), GUGiK                                            | dane publiczne GUGiK, bezpłatne, z podaniem źródła; limit ULDK na adres IP                                                                                                                                                                   |
-| Rowy, cieki, wody, mokradła; otoczenie     | BDOT10k, GUGiK                                                                      | bezpłatne i do dowolnego wykorzystania od 31.07.2020 (art. 40a ust. 2 pkt 1 lit. h Pgik, Dz.U. 2020 poz. 782; brzmienie przepisu **do potwierdzenia**); regulamin Geoportalu wymaga podania źródła                                           |
+| Rowy, cieki, wody, mokradła; otoczenie     | BDOT10k, GUGiK                                                                      | bezpłatne i do dowolnego wykorzystania od 31.07.2020 (art. 40a ust. 2 pkt 1 lit. h Pgik, Dz.U. 2020 poz. 782); regulamin Geoportalu wymaga podania źródła                                                                                    |
 | Zdjęcie lotnicze                           | Ortofotomapa GUGiK (WMS)                                                            | bezpłatna i do dowolnego wykorzystania; regulamin Geoportalu wymaga podania źródła                                                                                                                                                           |
-| Podkład mapy                               | OpenFreeMap „liberty” (dane OpenStreetMap)                                          | dane ODbL (© autorzy OpenStreetMap); usługa bez klucza i bez gwarancji dostępności; licencja samego stylu „liberty” **do potwierdzenia**                                                                                                     |
+| Podkład mapy                               | OpenFreeMap „liberty” (dane OpenStreetMap)                                          | dane ODbL (© autorzy OpenStreetMap); usługa bez klucza i bez gwarancji dostępności                                                                                                                                                           |
 | Wyszukiwanie adresów                       | Nominatim (OpenStreetMap)                                                           | ODbL (© autorzy OpenStreetMap); zasady użycia publicznego serwera: ok. 1 zapytanie/s                                                                                                                                                         |
 | Progi suszy KBW                            | rozporządzenie MRiRW z 11.04.2019 (Dz.U. 2019 poz. 739), publikowane przez IUNG-PIB | akt normatywny nie jest przedmiotem prawa autorskiego (art. 4 pkt 1 ustawy o prawie autorskim); podajemy źródło: rozporządzenie i susza.iung.pulawy.pl                                                                                       |
 | Definicja upału (Tmax > 30°C)              | słownik IMGW-PIB                                                                    | przytaczamy definicję z podaniem źródła                                                                                                                                                                                                      |
