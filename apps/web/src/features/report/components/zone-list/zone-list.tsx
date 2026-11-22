@@ -87,8 +87,8 @@ export function ZoneButton({
   );
 }
 
-/** Co zrobic w miejscu: nazwy zalecen, ktore go dotycza (w kolejnosci raportu, najwyzej trzy). */
-function useZoneActions(report: WaterReport): (zoneId: string) => string[] {
+/** Co zrobic w miejscu: zalecenia, ktore go dotycza (w kolejnosci raportu, najwyzej trzy) - nazwa i krotki opis. */
+function useZoneActions(report: WaterReport): (zoneId: string) => { name: string; description: string }[] {
   const tMeasures = useTranslations('report.recommendations.measures');
   const recommendations = orderedRecommendations(report);
 
@@ -97,9 +97,14 @@ function useZoneActions(report: WaterReport): (zoneId: string) => string[] {
       ...new Set(
         recommendations
           .filter((recommendation) => recommendation.zoneId === zoneId)
-          .map((recommendation) => tMeasures(`${recommendation.measure}.name`)),
+          .map((recommendation) => recommendation.measure),
       ),
-    ].slice(0, 3);
+    ]
+      .slice(0, 3)
+      .map((measure) => ({
+        name: tMeasures(`${measure}.name`),
+        description: tMeasures(`${measure}.description`),
+      }));
 }
 
 /** Row w poblizu miejsca - ten sam prog co w zdaniu serwera ("przy rowie"). */
@@ -171,7 +176,13 @@ export function ZoneList({ report }: { report: WaterReport }) {
       <p className="sr-only">{t('hint')}</p>
       <ol className="flex flex-col gap-3 print:gap-1" aria-label={t('title')}>
         {zones.map(({ zone, number }: NumberedZone) => {
-          const names = actions(zone.id);
+          const [main, ...more] = actions(zone.id);
+          // dlaczego to miejsce jest wyroznione - jedno zdanie, zeby sama nazwa zabiegu nie wisiala bez kontekstu
+          const why = t(`card.why.${zone.kind}`, {
+            volume:
+              zone.volumeM3 === undefined ? '' : format.number(zone.volumeM3, { maximumFractionDigits: 0 }),
+            hasVolume: zone.volumeM3 === undefined ? 'no' : 'yes',
+          });
           const { title, caveat } = card(zone);
           const meta = [
             zone.position ? t(`card.positions.${zone.position}`) : null,
@@ -204,17 +215,30 @@ export function ZoneList({ report }: { report: WaterReport }) {
                     {title}
                   </span>
                   <span className="text-muted-foreground">{meta.join(' · ')}</span>
-                  <span className="flex flex-wrap gap-1.5" data-testid="zone-action">
-                    <span className="sr-only">{t('card.actions')}</span>
-                    {names.length > 0 ? (
-                      names.map((name) => (
-                        <span
-                          key={name}
-                          className="rounded-full border border-secondary-border bg-secondary px-2.5 py-0.5 text-sm font-medium text-secondary-foreground print:border-0 print:bg-transparent print:px-0"
-                        >
-                          {name}
+                  <span className="text-base">{why}</span>
+                  <span className="flex flex-col gap-1.5" data-testid="zone-action">
+                    {main ? (
+                      <>
+                        <span className="text-base">
+                          <span className="font-semibold">{t('card.actions')} </span>
+                          <span className="font-semibold">{main.name}</span>
+                          {' – '}
+                          {main.description}
                         </span>
-                      ))
+                        {more.length > 0 && (
+                          <span className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-sm text-muted-foreground">{t('card.also')}</span>
+                            {more.map((item) => (
+                              <span
+                                key={item.name}
+                                className="rounded-full border border-secondary-border bg-secondary px-2.5 py-0.5 text-sm font-medium text-secondary-foreground print:border-0 print:bg-transparent print:px-0"
+                              >
+                                {item.name}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <span className="text-sm text-muted-foreground">{t('card.noAction')}</span>
                     )}

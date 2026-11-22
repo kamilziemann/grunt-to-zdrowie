@@ -848,7 +848,16 @@
       "actions": "Co zrobić:",
       "noAction": "Bez osobnego zalecenia – obejrzyj na miejscu",
       "caveat": "Może to być inny użytek – sprawdź na miejscu",
-      "caveatLong": "Znak ostrzeżenia przy miejscu: różnica wilgotności roślin jest tam tak duża, że może oznaczać inny użytek albo inny stan pola (np. łąka obok ścierniska), a nie tylko wodę – sprawdź na miejscu."
+      "caveatLong": "Znak ostrzeżenia przy miejscu: różnica wilgotności roślin jest tam tak duża, że może oznaczać inny użytek albo inny stan pola (np. łąka obok ścierniska), a nie tylko wodę – sprawdź na miejscu.",
+      "why": {
+        "depression": "Po deszczu woda spływa tu z pola i stoi, bo nie ma którędy odpłynąć{hasVolume, select, yes { (zmieści się ok. {volume} m³)} other {}}. To naturalne miejsce, żeby ją zatrzymać na suche tygodnie.",
+        "collecting": "Tu spływa woda z wyżej położonych części pola, więc gleba dłużej zostaje wilgotna.",
+        "drying": "Rośliny mają tu mniej wody niż na reszcie pola – gleba wysycha tu najszybciej.",
+        "flow_path": "Tędy po ulewie spływa woda z pola i zabiera ze sobą glebę.",
+        "typical": "Reszta pola – woda zachowuje się tu tak jak przeciętnie na całym polu.",
+        "segment": "Ta część pola różni się od reszty ukształtowaniem albo wilgotnością."
+      },
+      "also": "Też:"
     }
   },
   "stored": {

@@ -848,7 +848,16 @@
       "actions": "What to do:",
       "noAction": "No separate advice – look at it on site",
       "caveat": "This may be a different land use – check on site",
-      "caveatLong": "Warning sign by a spot: the difference in plant moisture there is so large that it may mean a different land use or field state (e.g. a meadow next to stubble), not just water – check on site."
+      "caveatLong": "Warning sign by a spot: the difference in plant moisture there is so large that it may mean a different land use or field state (e.g. a meadow next to stubble), not just water – check on site.",
+      "why": {
+        "depression": "After rain, water runs here from the field and stays, because it has no way out{hasVolume, select, yes { (about {volume} m³ fits)} other {}}. It is the natural place to keep it for dry weeks.",
+        "collecting": "Water runs here from higher parts of the field, so the soil stays moist longer.",
+        "drying": "Plants have less water here than in the rest of the field – the soil dries out fastest here.",
+        "flow_path": "After heavy rain, water runs off the field this way and takes soil with it.",
+        "typical": "The rest of the field – water behaves here like on the field as a whole.",
+        "segment": "This part of the field differs from the rest in relief or moisture."
+      },
+      "also": "Also:"
     }
   },
   "stored": {
