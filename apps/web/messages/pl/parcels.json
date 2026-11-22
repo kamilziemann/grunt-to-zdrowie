@@ -439,16 +439,16 @@
       }
     },
     "results": {
-      "title": "Wynik w dwóch widokach i na papierze",
-      "text": "Większości wystarczy widok „Prosto”. „Szczegółowo” jest dla tych, którzy chcą wiedzieć więcej albo pokazać wynik doradcy.",
+      "title": "Wynik na jednej stronie i na papierze",
+      "text": "Najważniejsze jest na górze. Kto chce wiedzieć więcej albo pokazać wynik doradcy, rozwija „Pokaż szczegóły” na końcu.",
       "open": "Zobacz na przykładzie",
       "simple": {
-        "title": "Prosto",
-        "text": "Czy jest sucho, ile wody zostało w glebie, ile dni zostało do stresu roślin i co zrobić najpierw."
+        "title": "Najważniejsze na górze",
+        "text": "Czy jest sucho, ile wody zostało w glebie, ile dni zostało do stresu roślin, co zrobić najpierw – i Twoje pole na szkicu, zdjęciu lotniczym i zdjęciach z satelity."
       },
       "detailed": {
-        "title": "Szczegółowo",
-        "text": "Liczby z odniesieniem, 10 ostatnich lat, zdjęcia z satelity, miejsca na polu, wszystkie zalecenia i źródła."
+        "title": "Szczegóły do rozwinięcia",
+        "text": "Liczby z odniesieniem, 10 ostatnich lat, wszystkie zalecenia, źródła i ograniczenia."
       },
       "print": {
         "title": "Wydruk i PDF",

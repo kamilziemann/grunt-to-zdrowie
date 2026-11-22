@@ -11,7 +11,8 @@ export function AppFooter({ appName }: { appName: string }) {
   const t = useTranslations('common.footer');
 
   return (
-    <footer className="border-t print:hidden">
+    // telefon: na stronie raportu u dolu stoi przyklejony pasek akcji - stopka dostaje pod soba miejsce na niego
+    <footer className="border-t print:hidden max-sm:[body:has([data-testid=share-bar])_&]:pb-20">
       <div className="mx-auto flex max-w-page flex-col gap-3 px-gutter py-6 text-sm text-muted-foreground">
         <p className="max-w-3xl text-base text-foreground">{t('advice')}</p>
         <p className="max-w-4xl">{t('sources')}</p>

@@ -937,7 +937,8 @@
     "offSeason": {
       "now": "Rośliny teraz nie rosną, a suszę rolniczą liczy się od 21 marca do 30 września. Pokazujemy, ile wody gleba ma na wiosnę, jak często susza wracała w 10 latach i co zrobić przed sezonem.",
       "summer": "Zobacz, jak było latem ({date})"
-    }
+    },
+    "waterTitlePast": "Woda w dniu analizy"
   },
   "viz": {
     "tank": {

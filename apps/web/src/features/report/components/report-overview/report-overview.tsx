@@ -2,6 +2,7 @@ import type { WaterReport } from '@app/contracts';
 import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
+import { todayInPoland } from '@/features/analysis';
 import { withHash, type AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
@@ -71,7 +72,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
 
       <section aria-labelledby="woda-title" className="flex flex-col gap-4 print:space-y-3">
         <h2 id="woda-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
-          {t('waterTitle')}
+          {t(report.meta.analysisDate === todayInPoland() ? 'waterTitle' : 'waterTitlePast')}
         </h2>
         {hasWater ? (
           <div

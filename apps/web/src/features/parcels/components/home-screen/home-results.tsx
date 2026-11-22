@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn';
 import { DITCH_EXAMPLE } from '../example-reports';
 import { SectionTitle } from './section-title';
 
-/** Widoki wyniku, ktore naprawde sa w raporcie: "Prosto", "Szczegolowo" i wydruk A4 (drukuje sie z raportu). */
+/** Czesci wyniku, ktore naprawde sa w raporcie: gora strony, rozwijane szczegoly i wydruk A4. */
 const VIEWS: readonly { key: 'simple' | 'detailed' | 'print'; href?: AppHref }[] = [
   { key: 'simple', href: routes.report(DITCH_EXAMPLE) },
   { key: 'detailed', href: routes.report({ ...DITCH_EXAMPLE, widok: 'szczegoly' }) },
@@ -16,7 +16,7 @@ const VIEWS: readonly { key: 'simple' | 'detailed' | 'print'; href?: AppHref }[]
 ];
 
 /**
- * "Co dostaniesz" (`#wynik`): makieta ma piec zakladek, nasz raport ma dwa widoki i wydruk - opisujemy to, co jest.
+ * "Co dostaniesz" (`#wynik`): makieta ma piec zakladek, nasz raport to jedna strona z rozwijanymi szczegolami i wydruk - opisujemy to, co jest.
  * Pierwsza karta na ciemnym panelu (najwazniejszy widok; fokus w panelu jest mietowy), dwie pierwsze prowadza
  * do przykladu w danym widoku.
  */

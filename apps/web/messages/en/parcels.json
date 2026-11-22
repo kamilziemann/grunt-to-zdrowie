@@ -439,16 +439,16 @@
       }
     },
     "results": {
-      "title": "The result in two views and on paper",
-      "text": "Most people only need the “Simple” view. “Detailed” is for those who want to know more or show the result to an adviser.",
+      "title": "The result on one page and on paper",
+      "text": "The most important things are at the top. If you want to know more or show the result to an adviser, open “Show details” at the end.",
       "open": "See an example",
       "simple": {
-        "title": "Simple",
-        "text": "Whether it is dry, how much water is left in the soil, how many days until the plants are stressed and what to do first."
+        "title": "The essentials at the top",
+        "text": "Whether it is dry, how much water is left in the soil, how many days until the crop is stressed, what to do first – and your field as a sketch, an aerial photo and satellite images."
       },
       "detailed": {
-        "title": "Detailed",
-        "text": "Numbers with a reference, the last 10 years, satellite images, places in the field, all recommendations and sources."
+        "title": "Details to open",
+        "text": "Numbers with references, the last 10 years, all recommendations, sources and limitations."
       },
       "print": {
         "title": "Print and PDF",

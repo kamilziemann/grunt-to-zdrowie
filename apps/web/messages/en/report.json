@@ -937,7 +937,8 @@
     "offSeason": {
       "now": "Plants are not growing now, and agricultural drought is assessed from 21 March to 30 September. We show how much water the soil holds for spring, how often drought returned in 10 years and what to do before the season.",
       "summer": "See how it was in summer ({date})"
-    }
+    },
+    "waterTitlePast": "Water on the analysis day"
   },
   "viz": {
     "tank": {
