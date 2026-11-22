@@ -477,7 +477,14 @@ export interface ExcessFacts {
   /** opad z ostatnich dni na tle mediany lat (ocena `precipitation`) */
   rain: { days: number; sumMm: number; medianMm: number; rank: number; years: number } | null;
   /** 60 dni: deszcz, parowanie i to, co zostalo w glebie (bilans klimatyczny) */
-  balance: { precipMm: number; evapotranspirationMm: number; balanceMm: number } | null;
+  balance: {
+    precipMm: number;
+    evapotranspirationMm: number;
+    balanceMm: number;
+    /** okres IUNG, ktorego dotyczy bilans (ok. 60 dni, moze konczyc sie kilka dni przed dniem analizy) */
+    from: string;
+    to: string;
+  } | null;
   /** zaglebienia bez odplywu na polu i ich laczna pojemnosc (m3, 0 = nieznana) */
   depressions: { count: number; volumeM3: number };
   /** miejsca, gdzie zbiera sie woda */
@@ -520,6 +527,8 @@ export function excessFacts(report: WaterReport): ExcessFacts {
             precipMm: balance.precipMm,
             evapotranspirationMm: balance.evapotranspirationMm,
             balanceMm: balance.balanceMm,
+            from: balance.periodFrom,
+            to: balance.periodTo,
           }
         : null,
     depressions: {

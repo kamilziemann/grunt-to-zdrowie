@@ -142,6 +142,13 @@ export function ReportView({
             grasslandHref={grasslandHref}
             mapHref={mapHref}
             unknown={report.limitations.includes('land_use_unknown')}
+            guess={
+              report.limitations.includes('likely_forest')
+                ? 'forest'
+                : report.limitations.includes('likely_not_farmland')
+                  ? 'no_soil'
+                  : null
+            }
           />
           <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
           <SampleBanner report={report} />

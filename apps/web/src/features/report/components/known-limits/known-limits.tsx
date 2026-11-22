@@ -8,7 +8,11 @@ import { routes } from '@/lib/routes';
 /** Ograniczenia waznie dla rolnika (kolejnosc = waga); techniczne zostaja w sekcji zrodel. */
 const FARMER_LIMITS: readonly LimitationId[] = [
   'sample_data',
+  'likely_forest',
+  'likely_not_farmland',
   'land_use_unknown',
+  'soil_lighter_by_registry',
+  'soil_heavier_by_registry',
   'meteo_missing',
   'soil_missing',
   'vegetation_missing',

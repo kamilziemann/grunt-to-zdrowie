@@ -194,7 +194,19 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           )}
           {assessment.precipitation && (
             <Fact
-              label={t('rain', { days: assessment.precipitation.days })}
+              // okno konczy sie na ostatnim zmierzonym dniu, gdy nowszej pogody jeszcze nie ma
+              label={
+                assessment.precipitation.to
+                  ? t('rainTo', {
+                      days: assessment.precipitation.days,
+                      date: format.dateTime(new Date(`${assessment.precipitation.to}T12:00:00Z`), {
+                        day: 'numeric',
+                        month: 'long',
+                        timeZone: 'UTC',
+                      }),
+                    })
+                  : t('rain', { days: assessment.precipitation.days })
+              }
               value={t('rainValue', { sum: number(assessment.precipitation.sumMm) })}
             >
               {t('rainNote', {

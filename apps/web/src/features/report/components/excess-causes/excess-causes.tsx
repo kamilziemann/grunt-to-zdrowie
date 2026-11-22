@@ -15,6 +15,8 @@ export function ExcessCauses({ report }: { report: WaterReport }) {
   const format = useFormatter();
   const facts = excessFacts(report);
   const mm = (value: number) => format.number(value, { maximumFractionDigits: 0 });
+  const day = (iso: string) =>
+    format.dateTime(new Date(`${iso}T12:00:00Z`), { day: 'numeric', month: 'long', timeZone: 'UTC' });
   const items: { key: string; icon: ReactNode; text: string }[] = [];
   const icon = (Icon: typeof CloudRain) => (
     <Icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-water" />
@@ -46,6 +48,8 @@ export function ExcessCauses({ report }: { report: WaterReport }) {
         precip: mm(facts.balance.precipMm),
         et: mm(facts.balance.evapotranspirationMm),
         left: mm(facts.balance.balanceMm),
+        from: day(facts.balance.from),
+        to: day(facts.balance.to),
       }),
     });
   }
