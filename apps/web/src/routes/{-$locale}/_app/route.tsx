@@ -5,6 +5,7 @@ import { createFileRoute, notFound, Outlet, useMatches } from '@tanstack/react-r
 import type { ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
+import { AppFooter } from '@/components/shared/app-footer';
 import { AppNav } from '@/components/shared/app-nav';
 import { EmptyState } from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
@@ -60,15 +61,15 @@ function AppShell({ children }: { children: ReactNode }) {
     <div className={cn('flex flex-col', fullBleed ? 'h-dvh overflow-hidden' : 'min-h-dvh')}>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-1.5 focus:text-sm"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-full focus:bg-card focus:px-4 focus:py-2 focus:text-base"
       >
         {t('skipToContent')}
       </a>
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur print:hidden">
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur print:hidden">
         <div
           className={cn(
-            'flex w-full items-center gap-4 px-gutter',
-            fullBleed ? 'py-2' : 'mx-auto max-w-page py-3',
+            'flex min-h-15 w-full items-center gap-4 px-gutter',
+            fullBleed ? 'py-1.5' : 'mx-auto max-w-page py-2.5',
           )}
         >
           <AppNav appName={BRAND} />
@@ -86,15 +87,7 @@ function AppShell({ children }: { children: ReactNode }) {
           >
             {children}
           </main>
-          <footer className="flex flex-wrap items-center justify-center gap-x-4 border-t py-2 text-xs text-muted-foreground print:hidden">
-            <span>{BRAND}</span>
-            <Link
-              href={routes.method()}
-              className="inline-flex min-h-11 items-center underline-offset-4 hover:text-foreground hover:underline"
-            >
-              {t('methodLink')}
-            </Link>
-          </footer>
+          <AppFooter appName={BRAND} />
         </>
       )}
     </div>

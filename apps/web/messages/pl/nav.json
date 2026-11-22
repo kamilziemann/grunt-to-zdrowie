@@ -8,5 +8,9 @@
     "light": "jasny",
     "dark": "ciemny"
   },
-  "switchLanguage": "{code} - zmień język na {language}"
+  "switchLanguage": "{code} - zmień język na {language}",
+  "tagline": "ocena suszy dla rolników",
+  "menu": "Menu",
+  "otherParcel": "Sprawdź inną działkę",
+  "method": "Jak liczymy"
 }

@@ -4,7 +4,8 @@
   "description": "Tokens and components in all states. A developer page and the visual test target.",
   "colors": {
     "title": "Colors",
-    "description": "Semantic tokens from globals.css; light and dark theme in one place."
+    "description": "Semantic tokens from globals.css; light and dark theme in one place.",
+    "data": "Data colours (charts, drought scale, maps)"
   },
   "typography": {
     "title": "Typography",
@@ -119,5 +120,14 @@
     "sampleBanner": "SampleBanner",
     "verdict": "VerdictSection",
     "calendar": "RiskCalendar"
+  },
+  "panel": {
+    "title": "Dark panel",
+    "description": "The surface-panel class: an island of the dark theme on a light page. All tokens inside switch to dark values.",
+    "heading": "Is this your parcel?",
+    "body": "Secondary text in the panel meets AA contrast.",
+    "outline": "Not this parcel",
+    "chip": "Winter wheat",
+    "action": "Analyse parcel"
   }
 }

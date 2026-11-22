@@ -46,9 +46,23 @@ const COLOR_TOKENS = [
   { name: 'border', swatch: 'bg-border', text: '' },
   { name: 'input', swatch: 'bg-input', text: '' },
   { name: 'ring', swatch: 'bg-ring', text: '' },
+  { name: 'secondary-border', swatch: 'bg-secondary-border', text: '' },
+  { name: 'panel', swatch: 'bg-panel', text: '' },
+] as const;
+
+// Kolory danych ("Pogodynka wody"): wykresy, skala suszy, mapy - stale w obu motywach.
+const DATA_TOKENS = [
+  { name: 'data-blue', swatch: 'bg-data-blue' },
+  { name: 'data-blue-light', swatch: 'bg-data-blue-light' },
+  { name: 'data-sand', swatch: 'bg-data-sand' },
+  { name: 'data-orange', swatch: 'bg-data-orange' },
+  { name: 'data-orange-strong', swatch: 'bg-data-orange-strong' },
+  { name: 'data-orange-dark', swatch: 'bg-data-orange-dark' },
 ] as const;
 
 const TYPE_SCALE = [
+  { name: 'text-6xl', className: 'text-6xl' },
+  { name: 'text-5xl', className: 'text-5xl' },
   { name: 'text-4xl', className: 'text-4xl' },
   { name: 'text-3xl', className: 'text-3xl' },
   { name: 'text-2xl', className: 'text-2xl' },
@@ -108,7 +122,7 @@ const BUTTON_VARIANTS = [
   'accent',
   'link',
 ] as const;
-const BUTTON_SIZES = ['sm', 'default', 'lg'] as const;
+const BUTTON_SIZES = ['sm', 'default', 'lg', 'xl'] as const;
 const ALERT_VARIANTS = ['default', 'destructive', 'warning', 'success'] as const;
 
 // Przykladowe problemy do ProblemAlert: prosty (sam kod) i szczegolowy (lista pol + detail techniczny).
@@ -196,6 +210,16 @@ export function DesignCatalog() {
             </li>
           ))}
         </ul>
+        <Specimen label={t('colors.data')}>
+          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {DATA_TOKENS.map((token) => (
+              <li key={token.name} className="flex flex-col gap-1.5">
+                <div className={`${token.swatch} h-12 rounded-lg border`} />
+                <code className="font-mono text-xs">--{token.name}</code>
+              </li>
+            ))}
+          </ul>
+        </Specimen>
       </Section>
 
       <Section id="typography" title={t('typography.title')} description={t('typography.description')}>
@@ -303,6 +327,22 @@ export function DesignCatalog() {
             </Button>
           </div>
         </Specimen>
+      </Section>
+
+      <Section id="panel" title={t('panel.title')} description={t('panel.description')}>
+        <div className="surface-panel flex max-w-md flex-col gap-4 rounded-2xl p-6">
+          <h3 className="text-2xl font-medium">{t('panel.heading')}</h3>
+          <p className="text-muted-foreground">{t('panel.body')}</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline">{t('panel.outline')}</Button>
+            <span className="inline-flex h-12 items-center rounded-full bg-accent px-5 font-semibold text-accent-foreground">
+              {t('panel.chip')}
+            </span>
+          </div>
+          <Button variant="accent" size="xl">
+            {t('panel.action')}
+          </Button>
+        </div>
       </Section>
 
       <Section id="form" title={t('form.title')} description={t('form.description')}>

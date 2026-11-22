@@ -11,5 +11,11 @@
   "saving": "Zapisywanie…",
   "edit": "Edytuj",
   "delete": "Usuń",
-  "methodLink": "Jak liczymy"
+  "methodLink": "Jak liczymy",
+  "footer": {
+    "advice": "To porada dla Ciebie i Twojego doradcy, nie ekspertyza: wynik liczymy z publicznych danych dla okolicy działki, więc sprawdź go na polu.",
+    "sources": "Dane: działki i użytki GUGiK (ULDK, EGiB), rowy i wody BDOT10k (GUGiK), pogoda NASA POWER i prognoza MET Norway, gleba ISRIC SoilGrids, zdjęcia satelitarne Copernicus Sentinel-2, mapa © autorzy OpenStreetMap (OpenFreeMap).",
+    "project": "{name} · prototyp na HackNation 2026 (zadanie KOWR)",
+    "method": "Jak liczymy i skąd są dane"
+  }
 }

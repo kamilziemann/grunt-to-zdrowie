@@ -42,7 +42,8 @@ Token typografii, cienia, odstępu lub ruchu: dodaj do `@theme static` i do odpo
 
 ## Kierunek stylu (jeden na projekt)
 
-Projekt ma kierunek „polowy” (zieleń pola + błękit wody, ADR 0009). **Zmiana kierunku to decyzja: zapisz ją w ADR**
+Projekt ma kierunek „jasna powłoka z ciemnym panelem” (biel i grafit, panel `surface-panel` `#121814`, mięta
+`--accent` tylko jako wypełnienie, krój Geist, kolory danych `--data-*`; ADR 0012, wcześniej „polowy” z ADR 0009). **Zmiana kierunku to decyzja: zapisz ją w ADR**
 (`write-adr`), potem wybierz **jeden** ze skilli stylu: `design-taste-frontend`, `minimalist-ui`, `high-end-visual-design`,
 `industrial-brutalist-ui` (wykluczają się; pozostałe usuń razem z symlinkiem w `.claude/skills`). Wybrany styl
 **mapuj na tokeny** (kolory, fonty, promienie, cienie w `app.css`), nie na klasy rozsypane po komponentach.

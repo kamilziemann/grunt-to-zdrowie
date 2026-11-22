@@ -4,7 +4,8 @@
   "description": "Tokeny i komponenty we wszystkich stanach. Strona deweloperska i cel testów wizualnych.",
   "colors": {
     "title": "Kolory",
-    "description": "Tokeny semantyczne z globals.css; jasny i ciemny motyw w jednym miejscu."
+    "description": "Tokeny semantyczne z styles/app.css; jasny i ciemny motyw w jednym miejscu.",
+    "data": "Kolory danych (wykresy, skala suszy, mapy)"
   },
   "typography": {
     "title": "Typografia",
@@ -119,5 +120,14 @@
     "sampleBanner": "SampleBanner",
     "verdict": "VerdictSection",
     "calendar": "RiskCalendar"
+  },
+  "panel": {
+    "title": "Ciemny panel",
+    "description": "Klasa surface-panel: wyspa ciemnego motywu w jasnej stronie. Wszystkie tokeny w środku przechodzą na ciemne wartości.",
+    "heading": "Czy to Twoja działka?",
+    "body": "Tekst drugorzędny w panelu ma kontrast AA.",
+    "outline": "To nie ta działka",
+    "chip": "Pszenica ozima",
+    "action": "Analizuj działkę"
   }
 }

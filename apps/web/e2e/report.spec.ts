@@ -10,6 +10,7 @@ import {
 import { DITCH_THROUGH_TILES, mockBasemap, mockHydroApi } from './support/hydro-api';
 import { detailed, openSections } from './support/report-view';
 import { expectTouchTargets } from './support/touch-targets';
+import { expectNoZoomFont } from './support/font-size';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
 // zrodel danych, a e2e nie wola uslug zewnetrznych. Prawdziwy przeplyw jest sprawdzany recznie.
@@ -141,7 +142,7 @@ test.describe('analiza i raport', () => {
       await expect(submit).toBeInViewport();
       await page.getByRole('radio', { name: /Łąka lub pastwisko/ }).scrollIntoViewIfNeeded();
       await expect(submit).toBeInViewport();
-      await expect(page.getByLabel('Dzień analizy')).toHaveCSS('font-size', '16px');
+      await expectNoZoomFont(page.getByLabel('Dzień analizy'));
       await expectTouchTargets(page.getByTestId('analysis-form').locator('label:has(input[type="radio"])'));
       await expectTouchTargets(page.getByTestId('analysis-form').getByRole('button'));
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);

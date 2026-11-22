@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './report-viz.css';
+@import '@fontsource-variable/geist/wght.css';
 
 /*
  * Jedyne zrodlo tokenow designu (ADR 0007). Warstwy:
@@ -16,36 +17,54 @@
   color-scheme: light dark;
 
   /* Powierzchnie i tekst. Kazda para (token / token-foreground) ma kontrast WCAG AA (min. 4.5:1). */
-  /* Kierunek "polowy" (ADR 0009): cieply papier, zielen pola jako kolor glowny, blekit wody jako akcent. */
-  --background: light-dark(#f7f6f1, #0d100e);
-  --foreground: light-dark(#1b1d1a, #ecede8);
-  --card: light-dark(#ffffff, #151a17);
-  --card-foreground: light-dark(#1b1d1a, #ecede8);
-  --popover: light-dark(#ffffff, #151a17);
-  --popover-foreground: light-dark(#1b1d1a, #ecede8);
-  --muted: light-dark(#efeee7, #1d2420);
-  --muted-foreground: light-dark(#5a5f57, #a4aaa1);
+  /* Kierunek "jasny z ciemnym panelem" (ADR 0012): biel i grafit, ciemny zielono-czarny panel, mietowy akcent.
+     Ciemny motyw = paleta panelu (#121814), wiec panel w jasnym motywie to "wyspa" ciemnego motywu (`surface-panel`). */
+  --background: light-dark(#ffffff, #121814);
+  --foreground: light-dark(#232323, #f4f7f5);
+  --card: light-dark(#ffffff, #1a221d);
+  --card-foreground: light-dark(#232323, #f4f7f5);
+  --popover: light-dark(#ffffff, #1a221d);
+  --popover-foreground: light-dark(#232323, #f4f7f5);
+  --muted: light-dark(#f4f4f2, #1c2620);
+  --muted-foreground: light-dark(#575757, #aab6ae);
 
-  /* Kolory znaczeniowe. */
-  --primary: light-dark(#1d6b3b, #86d6a2);
-  --primary-foreground: light-dark(#ffffff, #0b140e);
-  --secondary: light-dark(#e9e8df, #232b26);
-  --secondary-foreground: light-dark(#1b1d1a, #ecede8);
-  --accent: light-dark(#e9e8df, #232b26);
-  --accent-foreground: light-dark(#1b1d1a, #ecede8);
-  --water: light-dark(#0b5f96, #7cc4f2);
-  --water-foreground: light-dark(#ffffff, #071521);
-  --destructive: light-dark(#b42318, #f97066);
+  /* Kolory znaczeniowe. Glowny przycisk: grafit z biela (jasny), mieta z grafitem (ciemny i panel). */
+  --primary: light-dark(#232323, #a1ffcb);
+  --primary-foreground: light-dark(#ffffff, #121814);
+  /* Jasna mieta: drugorzedne przyciski i pasy z podgladem (obwodka `secondary-border`). */
+  --secondary: light-dark(#ebfbf2, #1f2b24);
+  --secondary-foreground: light-dark(#232323, #f4f7f5);
+  --secondary-border: light-dark(#b9e8cd, #3a5345);
+  /* Mieta: tylko jako wypelnienie z ciemnym tekstem (znak, wybrana pigulka, numer kroku), nigdy jako tekst na bieli. */
+  --accent: #a1ffcb;
+  --accent-foreground: #121814;
+  --water: light-dark(#1f5fae, #8fc0ec);
+  --water-foreground: light-dark(#ffffff, #0b1a2b);
+  --destructive: light-dark(#b42318, #ff8f85);
   --destructive-foreground: light-dark(#ffffff, #1f0a08);
-  --success: light-dark(#1f7a45, #4fc483);
+  --success: light-dark(#1f7a4a, #7be3a8);
   --success-foreground: light-dark(#ffffff, #0a1f12);
-  --warning: light-dark(#8a5a00, #e0a030);
+  /* Ostrzezenie o suszy: ochra (ciemna na jasnym tle, jasna na ciemnym). */
+  --warning: light-dark(#8f3b06, #f2a33a);
   --warning-foreground: light-dark(#ffffff, #1a1405);
 
-  /* Linie, pola formularzy, focus. */
-  --border: light-dark(#dfded4, #2b332e);
-  --input: light-dark(#85897f, #5d665f);
-  --ring: light-dark(#1d6b3b, #86d6a2);
+  /* Linie, pola formularzy, focus (obwodki kontrolek min. 3:1 do tla). */
+  --border: light-dark(#e3e3e3, #2b3530);
+  --input: light-dark(#7a7a7a, #7f8d84);
+  --ring: light-dark(#1f7a4a, #a1ffcb);
+
+  /* Ciemny panel ("Czy to Twoja dzialka?", liczenie, przyklad wyniku). W ciemnym motywie odrobine jasniejszy od tla
+     strony, zeby panel dalej sie od niej odcinal (wartosc ustawiaja selektory motywu nizej). */
+  --panel: #121814;
+
+  /* Kolory danych (wykresy, skala suszy, mapy) z "Pogodynki wody": paleta sprawdzona pod daltonizm. Stale w obu
+     motywach - na ciemnym tle stawiaj je na karcie z obwodka, a tekst obok w `foreground`. */
+  --data-blue: #1f5fae;
+  --data-blue-light: #8fc0ec;
+  --data-sand: #f6d2a4;
+  --data-orange: #e3893b;
+  --data-orange-strong: #c2560b;
+  --data-orange-dark: #8f3b06;
 
   /* Warstwy na mapie. Podklad mapy jest jasny w obu motywach, wiec to stale kolory (MapLibre czyta je z CSS). */
   --map-selected: #12703a;
@@ -86,7 +105,8 @@
   --sketch-wetland: light-dark(#0f766e, #5eead4);
   --sketch-highlight: light-dark(#c2410c, #fb923c);
 
-  --radius: 0.5rem;
+  /* Promien bazowy: karty 18-22 px, pola w panelu 14 px; przyciski i pola tekstowe to pigulki (`rounded-full`). */
+  --radius: 0.875rem;
 }
 
 :root[data-theme='light'],
@@ -97,6 +117,23 @@
 :root[data-theme='dark'],
 :root.dark {
   color-scheme: dark;
+  --panel: #1b231e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light'], .light) {
+    --panel: #1b231e;
+  }
+}
+
+/*
+ * Ciemny panel w jasnym motywie: wyspa ciemnego motywu. `color-scheme: dark` przelacza wszystkie tokeny light-dark()
+ * wewnatrz (tekst, obwodki, focus, przyciski), wiec komponenty w panelu nie potrzebuja wlasnych kolorow.
+ */
+@utility surface-panel {
+  color-scheme: dark;
+  background-color: var(--panel);
+  color: var(--foreground);
 }
 
 /* Wariant `dark:` dla wyjatkow; zwykle wystarczy token (zmienia sie sam). Dziala przy wymuszonym motywie. */
@@ -115,6 +152,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-border: var(--secondary-border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-water: var(--water);
@@ -128,6 +166,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-panel: var(--panel);
+  --color-data-blue: var(--data-blue);
+  --color-data-blue-light: var(--data-blue-light);
+  --color-data-sand: var(--data-sand);
+  --color-data-orange: var(--data-orange);
+  --color-data-orange-strong: var(--data-orange-strong);
+  --color-data-orange-dark: var(--data-orange-dark);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -137,27 +182,36 @@
 }
 
 @theme static {
-  /* Typografia: rodziny i skala (rozmiar + interlinia). */
+  /* Typografia: Geist (OFL, plik z paczki @fontsource-variable/geist, bez Google Fonts) i skala. Tekst podstawowy
+     17 px (notatki projektanta: min. 17-18 px dla starszych rolnikow), drobny druk 15 px, naglowki ciasniej. */
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 
-  --text-xs: 0.75rem;
-  --text-xs--line-height: 1.5;
-  --text-sm: 0.875rem;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.9375rem;
   --text-sm--line-height: 1.5;
-  --text-base: 1rem;
-  --text-base--line-height: 1.6;
-  --text-lg: 1.125rem;
-  --text-lg--line-height: 1.55;
-  --text-xl: 1.25rem;
-  --text-xl--line-height: 1.4;
-  --text-2xl: 1.5rem;
-  --text-2xl--line-height: 1.3;
-  --text-3xl: 1.875rem;
-  --text-3xl--line-height: 1.2;
-  --text-4xl: 2.25rem;
-  --text-4xl--line-height: 1.15;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.55;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 1.15;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 1.08;
+  --text-5xl: 3.25rem;
+  --text-5xl--line-height: 1.05;
+  --text-6xl: 4.25rem;
+  --text-6xl--line-height: 1.04;
+  /* Naglowki: lekko scisniete litery (karta stylu: -0.03 em). */
+  --tracking-tight: -0.03em;
+  --tracking-tighter: -0.04em;
 
   /* Odstepy: skala to wielokrotnosci --spacing (p-4, gap-6...); tokeny semantyczne dla ukladu stron. */
   --spacing: 0.25rem;
@@ -177,8 +231,10 @@
     0 16px 32px -8px light-dark(rgb(24 24 27 / 0.22), rgb(0 0 0 / 0.5)),
     0 4px 8px -4px light-dark(rgb(24 24 27 / 0.12), rgb(0 0 0 / 0.35));
   --shadow-card:
-    0 1px 0 light-dark(rgb(29 107 59 / 0.06), rgb(0 0 0 / 0.25)),
-    0 8px 24px -16px light-dark(rgb(24 24 27 / 0.35), rgb(0 0 0 / 0.6));
+    0 1px 0 light-dark(rgb(18 24 20 / 0.04), rgb(0 0 0 / 0.25)),
+    0 8px 24px -16px light-dark(rgb(18 24 20 / 0.28), rgb(0 0 0 / 0.6));
+  /* Okno z przykladem wyniku na stronie glownej (cien z zielonym odcieniem jak w makiecie). */
+  --shadow-showcase: 0 20px 50px light-dark(rgb(20 60 40 / 0.12), rgb(0 0 0 / 0.45));
 
   /* Ruch: czasy i krzywe. Interakcje 100-200 ms, wejscia/wyjscia ~300 ms; ease-out dla wejsc, ease-in-out dla ruchu po ekranie. */
   --duration-instant: 80ms;
@@ -197,10 +253,20 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-base text-foreground font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
   }
   textarea {
     @apply font-mono;
+  }
+  /* Fokus z klawiatury zawsze widoczny: gruba obwodka w kolorze `ring` (w panelu mieta). */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--color-ring);
+    outline-offset: 2px;
   }
 }
 

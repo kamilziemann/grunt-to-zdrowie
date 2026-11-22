@@ -57,7 +57,7 @@ describe('tokeny designu', () => {
       'card',
       'primary',
       'secondary',
-      'accent',
+      'secondary-border',
       'water',
       'destructive',
       'success',
@@ -72,6 +72,14 @@ describe('tokeny designu', () => {
     for (const token of ['--duration-base', '--ease-out', '--shadow-card', '--text-base', '--radius']) {
       expect(css).toContain(`${token}:`);
     }
+
+    // mieta i ciemny panel sa stale (panel to wyspa ciemnego motywu), kolory danych wspolne z raportem
+    for (const token of ['--accent', '--accent-foreground', '--panel', '--data-blue', '--data-orange-dark']) {
+      expect(css).toContain(`${token}: #`);
+    }
+
+    expect(css).toContain('@utility surface-panel');
+    expect(css).toContain("'Geist Variable'");
 
     expect(css).toContain('prefers-reduced-motion');
   });

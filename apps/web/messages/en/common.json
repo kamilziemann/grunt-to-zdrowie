@@ -11,5 +11,11 @@
   "saving": "Saving…",
   "edit": "Edit",
   "delete": "Delete",
-  "methodLink": "How we calculate"
+  "methodLink": "How we calculate",
+  "footer": {
+    "advice": "This is advice for you and your adviser, not an expert opinion: we calculate it from public data for the parcel's area, so check it in the field.",
+    "sources": "Data: parcels and land use GUGiK (ULDK, EGiB), ditches and water BDOT10k (GUGiK), weather NASA POWER and MET Norway forecast, soil ISRIC SoilGrids, satellite images Copernicus Sentinel-2, map © OpenStreetMap contributors (OpenFreeMap).",
+    "project": "{name} · prototype for HackNation 2026 (KOWR challenge)",
+    "method": "How we calculate and where the data comes from"
+  }
 }

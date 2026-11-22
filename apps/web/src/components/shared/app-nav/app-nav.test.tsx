@@ -30,26 +30,33 @@ describe('AppNav', () => {
     renderNav();
 
     expect(screen.getByRole('navigation', { name: 'Nawigacja główna' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Design system' })).toHaveAttribute('href', '/design');
-    expect(screen.getByRole('link', { name: 'Grunt to Zdrowie' })).toHaveAttribute('href', '/');
+
+    // pozycje sa dwa razy: w pasku (komputer) i w menu telefonu (popover)
+    for (const link of screen.getAllByRole('link', { name: 'Design system' })) {
+      expect(link).toHaveAttribute('href', '/design');
+    }
+
+    expect(screen.getByRole('link', { name: /^Grunt to Zdrowie/ })).toHaveAttribute('href', '/');
   });
 
   it.each(['/design', '/design/kolory'])('dla %s aktywna jest pozycja Design system', (pathname) => {
     nav.pathname.mockReturnValue(pathname);
     renderNav();
 
-    expect(screen.getByRole('link', { name: 'Design system' })).toHaveAttribute('aria-current', 'page');
+    for (const link of screen.getAllByRole('link', { name: 'Design system' })) {
+      expect(link).toHaveAttribute('aria-current', 'page');
+    }
   });
 
   it('przełącznik motywu cyklicznie zmienia ciasteczko i atrybut na <html>', () => {
     nav.pathname.mockReturnValue('/');
     renderNav();
 
-    fireEvent.click(screen.getByRole('button', { name: /Motyw: systemowy/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: systemowy/ })[0] as HTMLElement);
     expect(document.documentElement.dataset.theme).toBe('light');
-    fireEvent.click(screen.getByRole('button', { name: /Motyw: jasny/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: jasny/ })[0] as HTMLElement);
     expect(document.documentElement.dataset.theme).toBe('dark');
-    fireEvent.click(screen.getByRole('button', { name: /Motyw: ciemny/ }));
+    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: ciemny/ })[0] as HTMLElement);
     expect(document.documentElement.dataset.theme).toBeUndefined();
   });
 

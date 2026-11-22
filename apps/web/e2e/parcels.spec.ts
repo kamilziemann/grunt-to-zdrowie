@@ -2,6 +2,7 @@ import { mockAnalysisApi } from './support/analysis-api';
 import { mockMapServices, openLayers, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
+import { expectNoZoomFont } from './support/font-size';
 
 // Ekran wyboru dzialek. Testy nie wolaja ULDK ani podkladu (zewnetrzne uslugi): podklad i kafle mapy sa podstawione
 // (`mockMapServices`), a testy sprawdzaja uklad, walidacje pola i przejscia, ktore nie potrzebuja danych dzialki.
@@ -128,7 +129,7 @@ test.describe('działki', () => {
       await expect(panel).toHaveAttribute('data-snap', 'full');
 
       // pole 16 px: iOS nie przybliza strony przy fokusie; brak poziomego przewijania
-      await expect(search).toHaveCSS('font-size', '16px');
+      await expectNoZoomFont(search);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
       await expectTouchTargets(panel.getByRole('button'));
       await expectTouchTargets(page.getByTestId('layers-button'));
