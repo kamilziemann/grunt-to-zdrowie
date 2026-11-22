@@ -6,7 +6,8 @@ import type * as MapLibre from 'maplibre-gl';
 
 export const HYDRO_LINES_SOURCE = 'hydro-lines';
 export const HYDRO_AREAS_SOURCE = 'hydro-areas';
-export const HYDRO_ATTRIBUTION = 'Rowy i cieki © GUGiK (BDOT10k)';
+/** Wspolny wpis dla wszystkich warstw z BDOT10k (rowy, otoczenie pola) - MapLibre laczy jednakowe wpisy w jeden. */
+export const HYDRO_ATTRIBUTION = 'BDOT10k © GUGiK';
 const WETLAND_PATTERN = 'hydro-wetland-pattern';
 
 export const HYDRO_LAYER_IDS = [

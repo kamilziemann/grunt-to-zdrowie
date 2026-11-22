@@ -6,9 +6,12 @@ import type { ContextLayer } from '@app/contracts';
 import type { FeatureCollection } from 'geojson';
 import type * as MapLibre from 'maplibre-gl';
 
+import { HYDRO_ATTRIBUTION } from '../hydro-map';
+
 import type { ContextCollections } from './context-map';
 
-export const CONTEXT_ATTRIBUTION = 'Otoczenie pola © GUGiK (BDOT10k)';
+// ten sam wpis co rowy i cieki: na telefonie atrybucja ma sie miescic w jednym-dwoch wierszach
+export const CONTEXT_ATTRIBUTION = HYDRO_ATTRIBUTION;
 const STRUCTURE_ICON = 'context-structure';
 
 export interface ContextColors {
