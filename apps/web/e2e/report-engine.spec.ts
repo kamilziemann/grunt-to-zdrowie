@@ -144,6 +144,64 @@ test.describe('miejsca na polu', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 
+  test('wybór miejsca: drugie kliknięcie, Escape i kliknięcie w tło szkicu zdejmują wyróżnienie', async ({
+    page,
+  }) => {
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+    await openSections(page);
+
+    const badge = page.getByRole('button', { name: 'Miejsce 1 na polu' });
+    const item = page.getByTestId('zone-list').getByRole('button').first();
+    const recommendation = page.locator('[data-measure="field_margin_trees"]');
+
+    await badge.click();
+    await expect(badge).toHaveAttribute('aria-pressed', 'true');
+    await expect(item).toHaveAttribute('aria-pressed', 'true');
+    await expect(recommendation).toHaveClass(/ring-2/);
+
+    await badge.click();
+    await expect(badge).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByTestId('field-sketch-zone-active')).toHaveCount(0);
+
+    await item.click();
+    await expect(badge).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Escape');
+    await expect(item).toHaveAttribute('aria-pressed', 'false');
+
+    await badge.click();
+    await page.getByTestId('field-sketch-field').click({ force: true });
+    await expect(badge).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('zdjęcie lotnicze: miejsca na polu włączone od razu, przełącznik warstwy, wybór wspólny ze szkicem', async ({
+    page,
+  }) => {
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+    await page.getByRole('button', { name: 'Zdjęcie lotnicze' }).click();
+
+    const canvas = page.getByTestId('field-map-canvas');
+    const layer = page.getByRole('checkbox', { name: 'Miejsca na polu' });
+
+    await expect(canvas).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
+    await expect(layer).toBeChecked();
+    await expect(page.getByTestId('field-map-zone-legend')).toContainText('Kropki');
+    await layer.uncheck();
+    await expect(page.getByTestId('field-map-zone-legend')).toHaveCount(0);
+    await layer.check();
+
+    // wybor z listy zalecen trafia na mape
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+    await openSections(page);
+    await page
+      .locator('[data-measure="field_margin_trees"]')
+      .getByRole('button', { name: 'Pokaż miejsce 1 na szkicu' })
+      .click();
+    await expect(canvas).toHaveAttribute('data-active-zone', /.+/);
+    await expectNoViolations(page);
+  });
+
   test('wydruk: numery miejsc na szkicu i lista bez przycisków „Pokaż na szkicu”', async ({ page }) => {
     await mockReport(page, FIELD_REPORT);
     // widok prosty: lista miejsc jest w pelnej analizie, ktora wydruk ma zawsze

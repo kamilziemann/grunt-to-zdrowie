@@ -230,3 +230,30 @@ export function SketchLegend({
     </ul>
   );
 }
+
+/**
+ * Legenda miejsc na polu pod mapa ze zdjeciem lotniczym: te same wzory co na szkicu (kropki, fale, kreski), tylko
+ * rodzaje obecne na mapie.
+ */
+export function ZoneKindLegend({ kinds }: { kinds: readonly Zone['kind'][] }) {
+  const t = useTranslations('report.fieldMap.sketch.legend');
+  const prefix = useId();
+  const shown = ZONE_LEGEND_ORDER.filter((kind) => kinds.includes(kind));
+
+  if (shown.length === 0) return null;
+
+  return (
+    <ul
+      aria-label={t('zonesTitle')}
+      className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-2"
+      data-testid="field-map-zone-legend"
+    >
+      {shown.map((kind) => (
+        <li key={kind} className="flex items-center gap-2" data-legend={`zone-${kind}`}>
+          <ZoneSample kind={kind} prefix={`${prefix}-${kind}`} />
+          <span>{t(`zones.${kind}`)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}

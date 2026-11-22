@@ -1,7 +1,15 @@
 import type { ContextFeature, ContextTile, FieldArea, HydroFeature, HydroTile } from '@app/contracts';
 import { useQueries, type UseQueryResult } from '@tanstack/react-query';
-import { PenLine, Satellite } from 'lucide-react';
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { PenLine, Satellite, ZoomIn, ZoomOut } from 'lucide-react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ChangeEvent,
+} from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
@@ -19,15 +27,16 @@ import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
 import type { NumberedZone } from '../../utils/report-data';
-import { FieldSketch, SketchLegend } from '../field-sketch';
+import { FieldSketch, SketchLegend, ZoneKindLegend } from '../field-sketch';
 import { useZoneFocus } from '../zone-focus';
+import type { FieldMapLayers } from './field-map-canvas';
 
 /** Promien okolicy pola - ten sam, w ktorym silnik szuka rowow, wod i mokradel. */
 const RADIUS_M = 500;
 /** Najmniejszy zapas wokol pola na mapie: male pole nie moze byc kropka na zdjeciu. */
 const MIN_MARGIN_M = 120;
 
-// MapLibre (ok. 250 KB gzip) dopiero po kliknieciu: osobny chunk poza budzetem JS strony raportu
+// MapLibre (ok. 250 KB gzip) dopiero po wyborze zdjecia lotniczego: osobny chunk poza budzetem JS strony raportu
 const FieldMapCanvas = lazy(() =>
   import('./field-map-canvas').then((module) => ({ default: module.FieldMapCanvas })),
 );
@@ -44,6 +53,55 @@ function expand(
 }
 
 type HydroState = 'loading' | 'ready' | 'unavailable';
+type MapMode = 'sketch' | 'aerial';
+
+/** Zapamietany wybor "Szkic / Zdjecie lotnicze" (ten sam dla kazdego raportu w tej przegladarce). */
+const MODE_STORAGE_KEY = 'gtz-field-map-mode';
+
+/**
+ * Wybor widoku jako maly magazyn dla `useSyncExternalStore`: na serwerze i przy hydratacji zawsze szkic (ten sam
+ * HTML dla kazdego), potem wartosc z `localStorage`; bez dostepu do pamieci wybor zyje do przeladowania strony.
+ */
+let modeMemory: MapMode | null = null;
+const modeListeners = new Set<() => void>();
+
+function subscribeMode(listener: () => void) {
+  modeListeners.add(listener);
+
+  return () => {
+    modeListeners.delete(listener);
+  };
+}
+
+function readMode(): MapMode {
+  try {
+    const value = window.localStorage.getItem(MODE_STORAGE_KEY);
+
+    if (value === 'aerial' || value === 'sketch') return value;
+  } catch {
+    // tryb prywatny albo zablokowana pamiec - zostaje wybor z tej wizyty
+  }
+
+  return modeMemory ?? 'sketch';
+}
+
+function serverMode(): MapMode {
+  return 'sketch';
+}
+
+function chooseMode(mode: MapMode) {
+  modeMemory = mode;
+
+  try {
+    window.localStorage.setItem(MODE_STORAGE_KEY, mode);
+  } catch {
+    // jak wyzej - przelacznik dziala dalej, tylko bez zapamietania
+  }
+
+  for (const listener of modeListeners) listener();
+}
+
+const ALL_LAYERS: FieldMapLayers = { photo: true, water: true, zones: true };
 
 /** Stan kafli jednym obiektem; TanStack Query zwraca ten sam obiekt, dopoki wyniki sie nie zmienia. */
 function combineTiles(results: UseQueryResult<HydroTile>[]): { state: HydroState; tiles: HydroTile[] } {
@@ -85,19 +143,33 @@ export interface FieldMapProps {
 }
 
 const NO_ZONES: readonly NumberedZone[] = [];
+/** Zapas wokol pola na zdjeciu, gdy sa miejsca na polu: pole wypelnia mape, a numery i wzory sa czytelne. */
+const ZONES_MARGIN_M = 40;
+/** Ile poziomow przyblizenia ponad kadr calego pola (kazdy 2x). */
+const MAX_ZOOM_STEP = 3;
 /** Okolica szkicu pola z miejscami: blizej, zeby miejsca byly czytelne (rowy i cieki w 500 m opisuja zdania nizej). */
 const ZONES_RADIUS_M = 100;
 
 /**
- * "Woda wokol pola": domyslnie szkic w skali (SVG - pole, rowy, cieki, wody i mokradla w promieniu 250 m (100 m, gdy sa miejsca na polu), wyrozniony
- * fakt, legenda, zrodla); ten szkic idzie na wydruk. Mapa na zdjeciu lotniczym (MapLibre, osobny chunk) laduje sie
- * dopiero po kliknieciu "Pokaz na zdjeciu lotniczym". Pod spodem zdania o najblizszym rowie i cieku w 500 m.
+ * "Woda wokol pola": szkic w skali (SVG - pole, rowy, cieki, wody i mokradla w promieniu 250 m, 100 m gdy sa miejsca
+ * na polu; wyrozniony fakt, legenda, zrodla) albo mapa na zdjeciu lotniczym (MapLibre, osobny chunk ladowany dopiero
+ * po wyborze). Wybor dwiema pigulkami "Szkic / Zdjecie lotnicze", zapamietany w przegladarce. Na mapie warstwy
+ * "Zdjecie lotnicze", "Rowy i cieki" i "Miejsca na polu" (te same wzory i numery co na szkicu, wlaczone od razu);
+ * klikniecie miejsca na szkicu albo mapie wyroznia jego zalecenia, drugie klikniecie, Escape albo klikniecie w tlo
+ * zdejmuje wyroznienie. Na wydruk idzie zawsze szkic. Pod spodem zdania o najblizszym rowie i cieku w 500 m.
  */
 export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES, wide = false }: FieldMapProps) {
   const t = useTranslations('report.fieldMap');
   const format = useFormatter();
-  const [aerial, setAerial] = useState(false);
+  const tLayers = useTranslations('report.fieldMap.layers');
+  const mode = useSyncExternalStore(subscribeMode, readMode, serverMode);
+  const [layers, setLayers] = useState<FieldMapLayers>(ALL_LAYERS);
   const [failed, setFailed] = useState(false);
+  const [zoomStep, setZoomStep] = useState(0);
+  const zoomIn = useCallback(() => setZoomStep((value) => Math.min(MAX_ZOOM_STEP, value + 1)), []);
+  const zoomOut = useCallback(() => setZoomStep((value) => Math.max(0, value - 1)), []);
+  const aerial = mode === 'aerial';
+
   const search = useMemo(() => expand(field.bbox, RADIUS_M), [field.bbox]);
   const tiles = useMemo(() => hydroTiles(...search), [search]);
   const { state, tiles: loaded } = useQueries({
@@ -135,15 +207,28 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES, wide =
       }),
     [field, hydro, ditchInFieldM, zoneShapes, radius, context],
   );
-  const { active, toggle, sketchRef } = useZoneFocus();
+  const { active, selected, toggle, clear, sketchRef } = useZoneFocus();
   const fail = useCallback(() => setFailed(true), []);
-  const toggleAerial = useCallback(() => setAerial((value) => !value), []);
+  const showSketch = useCallback(() => chooseMode('sketch'), []);
+  const showAerial = useCallback(() => chooseMode('aerial'), []);
+  const switchLayer = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const key = event.currentTarget.name;
+    const on = event.currentTarget.checked;
+
+    if (key === 'photo' || key === 'water' || key === 'zones')
+      setLayers((value) => ({ ...value, [key]: on }));
+  }, []);
   const fallback = useMemo(() => <MapPlaceholder text={t('loading')} />, [t]);
+  const hasZones = zoneMarks.length > 0;
+  // z miejscami na polu kadr ciasno na pole (miejsca maja po kilkadziesiat metrow), bez nich - do najblizszego rowu
   const view = useMemo(() => {
     const reach = hydro.nearest.ditch?.distanceM ?? hydro.nearest.watercourse?.distanceM ?? 0;
 
-    return expand(field.bbox, Math.min(RADIUS_M, Math.max(MIN_MARGIN_M, reach + 60)));
-  }, [field.bbox, hydro]);
+    return expand(
+      field.bbox,
+      hasZones ? ZONES_MARGIN_M : Math.min(RADIUS_M, Math.max(MIN_MARGIN_M, reach + 60)),
+    );
+  }, [field.bbox, hydro, hasZones]);
   const importedAt = latestImport(loaded);
   const meters = (value: number) => format.number(Math.round(value), { maximumFractionDigits: 0 });
   const distance = (item: NearestHydro) =>
@@ -171,15 +256,22 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES, wide =
 
   return (
     <figure
-      className="flex flex-col gap-3 print:break-inside-avoid"
+      ref={sketchRef}
+      className="flex scroll-mt-4 flex-col gap-3 print:break-inside-avoid"
       data-testid="field-map"
       data-hydro={state}
+      data-mode={mode}
     >
+      <fieldset
+        className={cn('grid grid-cols-2 gap-1 rounded-full bg-muted p-1 print:hidden', !wide && 'max-w-xl')}
+        data-testid="field-map-mode"
+      >
+        <legend className="sr-only">{t('modeLabel')}</legend>
+        <ModeButton pressed={!aerial} onClick={showSketch} icon="sketch" label={t('showSketch')} />
+        <ModeButton pressed={aerial} onClick={showAerial} icon="aerial" label={t('showAerial')} />
+      </fieldset>
       <div className={cn('flex flex-col gap-3', !wide && 'max-w-xl', aerial && 'hidden print:flex')}>
-        <div
-          ref={sketchRef}
-          className={cn('w-full scroll-mt-4 overflow-hidden rounded-lg border', !wide && 'max-w-xl')}
-        >
+        <div className={cn('w-full overflow-hidden rounded-lg border', !wide && 'max-w-xl')}>
           <FieldSketch
             model={sketch}
             fieldName={fieldName}
@@ -187,40 +279,84 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES, wide =
             label={[t('sketch.label', { field: fieldName, radius }), factText].filter(Boolean).join(' ')}
             zones={zoneMarks}
             activeZone={active}
+            selectedZone={selected}
             onZoneSelect={toggle}
+            onBackgroundSelect={clear}
           />
         </div>
         <SketchLegend model={sketch} zoneKinds={zoneKinds} />
       </div>
       {aerial && (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted sm:aspect-[16/9] print:hidden">
-          {failed ? (
-            <MapPlaceholder text={t('failed')} />
-          ) : (
-            <Suspense fallback={fallback}>
-              <FieldMapCanvas
-                field={field.geometry}
-                bbox={view}
-                features={hydro.features}
-                nearest={hydro.highlighted}
-                zones={zoneMarks}
-                zoneShapes={zoneShapes}
-                onFailed={fail}
+        <div className="flex flex-col gap-3 print:hidden">
+          <fieldset className="flex flex-wrap gap-2" data-testid="field-map-layers">
+            <legend className="sr-only">{tLayers('label')}</legend>
+            <LayerSwitch
+              name="photo"
+              checked={layers.photo}
+              onChange={switchLayer}
+              label={tLayers('photo')}
+            />
+            <LayerSwitch
+              name="water"
+              checked={layers.water}
+              onChange={switchLayer}
+              label={tLayers('water')}
+            />
+            {hasZones && (
+              <LayerSwitch
+                name="zones"
+                checked={layers.zones}
+                onChange={switchLayer}
+                label={tLayers('zones')}
               />
-            </Suspense>
+            )}
+          </fieldset>
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted sm:aspect-[16/9]">
+            {failed ? (
+              <MapPlaceholder text={t('failed')} />
+            ) : (
+              <Suspense fallback={fallback}>
+                <FieldMapCanvas
+                  field={field.geometry}
+                  bbox={view}
+                  features={hydro.features}
+                  nearest={hydro.highlighted}
+                  zones={zoneMarks}
+                  zoneShapes={zoneShapes}
+                  activeZone={active}
+                  layers={layers}
+                  zoomStep={zoomStep}
+                  onZoneToggle={toggle}
+                  onZoneClear={clear}
+                  onFailed={fail}
+                />
+              </Suspense>
+            )}
+          </div>
+          {!failed && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={zoomIn}
+                disabled={zoomStep >= MAX_ZOOM_STEP}
+              >
+                <ZoomIn aria-hidden="true" />
+                {t('zoomIn')}
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={zoomOut} disabled={zoomStep === 0}>
+                <ZoomOut aria-hidden="true" />
+                {t('zoomOut')}
+              </Button>
+            </div>
+          )}
+          {layers.zones && <ZoneKindLegend kinds={zoneKinds} />}
+          {hasZones && layers.zones && (
+            <p className="text-sm text-muted-foreground">{tLayers('zonesHint')}</p>
           )}
         </div>
       )}
-      <Button
-        type="button"
-        variant="outline"
-        className="self-start print:hidden"
-        onClick={toggleAerial}
-        data-testid="field-map-toggle"
-      >
-        {aerial ? <PenLine aria-hidden="true" /> : <Satellite aria-hidden="true" />}
-        {aerial ? t('showSketch') : t('showAerial')}
-      </Button>
       <figcaption className="flex flex-col gap-1 text-sm">
         {state === 'loading' && <span className="text-muted-foreground">{t('sketch.loading')}</span>}
         {state === 'ready' && (
@@ -281,6 +417,70 @@ function summarize(field: FieldArea, tiles: readonly { features: readonly HydroF
   );
 
   return { features, nearest, highlighted };
+}
+
+function ModeButton({
+  pressed,
+  onClick,
+  icon,
+  label,
+}: {
+  pressed: boolean;
+  onClick: () => void;
+  icon: 'sketch' | 'aerial';
+  label: string;
+}) {
+  const Icon = icon === 'sketch' ? PenLine : Satellite;
+
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={cn(
+        'flex min-h-12 items-center justify-center gap-2 rounded-full px-3 text-base font-semibold whitespace-nowrap sm:px-4 transition-colors duration-150',
+        pressed ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+      )}
+      data-testid={`field-map-mode-${icon}`}
+    >
+      <Icon aria-hidden="true" className="hidden size-5 shrink-0 sm:block" />
+      {label}
+    </button>
+  );
+}
+
+/** Przelacznik warstwy mapy: pigulka z polem wyboru (dziala klawiatura, czytnik slyszy stan). */
+function LayerSwitch({
+  name,
+  checked,
+  onChange,
+  label,
+}: {
+  name: keyof FieldMapLayers;
+  checked: boolean;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  label: string;
+}) {
+  return (
+    <label
+      className={cn(
+        'flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-2 px-3 text-sm font-medium transition-colors duration-150 has-focus-visible:ring-3 has-focus-visible:ring-ring',
+        checked
+          ? 'border-secondary-border bg-secondary text-secondary-foreground'
+          : 'border-input text-muted-foreground',
+      )}
+    >
+      <input
+        type="checkbox"
+        name={name}
+        checked={checked}
+        onChange={onChange}
+        className="size-4 accent-current"
+        data-testid={`field-map-layer-${name}`}
+      />
+      {label}
+    </label>
+  );
 }
 
 function Swatch() {

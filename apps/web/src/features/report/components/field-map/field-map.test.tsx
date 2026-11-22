@@ -6,10 +6,13 @@ import { HYDRO_TILES } from '@/features/parcels';
 import { hydroTiles } from '@/lib/hydro-map';
 import { renderWithIntl } from '@/test/render-intl';
 
+import { FIELD_REPORT } from '../../fixtures/field-report';
 import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
+import { fieldZones } from '../../utils/report-data';
 import { FieldMap } from './field-map';
 
 const FIELD = LOW_CONFIDENCE_REPORT.field;
+const ZONES = fieldZones(FIELD_REPORT);
 const EMPTY = { features: [], truncated: false, importedAt: null };
 
 /** Kafle okolicy pola w cache zapytan (bez sieci): z fixture albo puste. */
@@ -62,9 +65,36 @@ describe('FieldMap', () => {
     expect(screen.getByTestId('field-map')).toHaveTextContent('Szkic w skali, północ u góry');
     expect(screen.queryByTestId('field-map-canvas')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Pokaż na zdjęciu lotniczym' }));
+    expect(screen.getByRole('button', { name: 'Szkic' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Zdjęcie lotnicze' }));
 
-    expect(screen.getByRole('button', { name: 'Wróć do szkicu' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zdjęcie lotnicze' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Szkic' })).toHaveAttribute('aria-pressed', 'false');
+    expect(window.localStorage.getItem('gtz-field-map-mode')).toBe('aerial');
+    // bez miejsc na polu tylko dwie warstwy
+    expect(screen.getByRole('checkbox', { name: 'Zdjęcie lotnicze' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Rowy i cieki' })).toBeChecked();
+    expect(screen.queryByRole('checkbox', { name: 'Miejsca na polu' })).toBeNull();
+  });
+
+  it('zapamietany wybor zdjecia lotniczego; miejsca na polu wlaczone od razu i z legenda wzorow', () => {
+    window.localStorage.setItem('gtz-field-map-mode', 'aerial');
+    renderWithIntl(
+      <QueryClientProvider client={clientWithTiles()}>
+        <FieldMap field={FIELD} zones={ZONES} />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByTestId('field-map')).toHaveAttribute('data-mode', 'aerial');
+    const zonesLayer = screen.getByRole('checkbox', { name: 'Miejsca na polu' });
+
+    expect(zonesLayer).toBeChecked();
+    expect(screen.getByTestId('field-map-zone-legend')).toHaveTextContent('Kropki');
+
+    fireEvent.click(zonesLayer);
+    expect(zonesLayer).not.toBeChecked();
+    expect(screen.queryByTestId('field-map-zone-legend')).toBeNull();
+    window.localStorage.removeItem('gtz-field-map-mode');
   });
 
   it('dlugosc rowu w polu z raportu na szkicu', () => {

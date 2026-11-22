@@ -41,7 +41,8 @@ export function ZoneNumber({ number, active = false }: { number: number; active?
 }
 
 /**
- * Przycisk miejsca na polu: najechanie albo fokus wyroznia miejsce na szkicu, klikniecie pokazuje szkic (przewija).
+ * Przycisk miejsca na polu: najechanie albo fokus podglada miejsce na szkicu, klikniecie wybiera je i pokazuje szkic
+ * (przewija), drugie klikniecie zdejmuje wybor (`aria-pressed`).
  */
 export function ZoneButton({
   zoneId,
@@ -52,14 +53,15 @@ export function ZoneButton({
   className?: string;
   children: ReactNode;
 }) {
-  const { setActive, reveal } = useZoneFocus();
-  const show = useCallback(() => setActive(zoneId), [setActive, zoneId]);
-  const hide = useCallback(() => setActive(null), [setActive]);
+  const { preview, reveal, selected } = useZoneFocus();
+  const show = useCallback(() => preview(zoneId), [preview, zoneId]);
+  const hide = useCallback(() => preview(null), [preview]);
   const open = useCallback(() => reveal(zoneId), [reveal, zoneId]);
 
   return (
     <button
       type="button"
+      aria-pressed={selected === zoneId}
       className={className}
       onClick={open}
       onMouseEnter={show}

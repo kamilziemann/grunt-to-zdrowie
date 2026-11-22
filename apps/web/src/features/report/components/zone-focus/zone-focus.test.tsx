@@ -1,4 +1,5 @@
-// Testy wspolnego podswietlenia miejsca: klikniecie zaznacza, ponowne klikniecie tego samego miejsca odznacza.
+// Testy wspolnego podswietlenia miejsca: klikniecie zaznacza, ponowne klikniecie albo Escape odznacza, najechanie
+// tylko podglada.
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useCallback } from 'react';
 import { describe, expect, it } from 'vitest';
@@ -12,6 +13,18 @@ function Probe({ zoneId }: { zoneId: string }) {
   return (
     <button type="button" onClick={select}>
       {zoneId}: {active === zoneId ? 'zaznaczone' : 'niezaznaczone'}
+    </button>
+  );
+}
+
+function Preview({ zoneId }: { zoneId: string }) {
+  const { active, selected, preview } = useZoneFocus();
+  const show = useCallback(() => preview(zoneId), [preview, zoneId]);
+  const hide = useCallback(() => preview(null), [preview]);
+
+  return (
+    <button type="button" data-testid="preview" onMouseEnter={show} onMouseLeave={hide}>
+      aktywne: {active ?? 'brak'}, wybrane: {selected ?? 'brak'}
     </button>
   );
 }
@@ -45,5 +58,25 @@ describe('ZoneFocusProvider', () => {
 
     expect(screen.getByRole('button', { name: 'zone-1: niezaznaczone' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'zone-2: zaznaczone' })).toBeInTheDocument();
+  });
+
+  it('Escape zdejmuje wybor; podglad wyroznia, ale nie wybiera', () => {
+    render(
+      <ZoneFocusProvider>
+        <Probe zoneId="zone-1" />
+        <Preview zoneId="zone-2" />
+      </ZoneFocusProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /zone-1/ }));
+    expect(screen.getByRole('button', { name: 'zone-1: zaznaczone' })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.getByRole('button', { name: 'zone-1: niezaznaczone' })).toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getByTestId('preview'));
+    expect(screen.getByTestId('preview')).toHaveTextContent('aktywne: zone-2, wybrane: brak');
+    fireEvent.mouseLeave(screen.getByTestId('preview'));
+    expect(screen.getByTestId('preview')).toHaveTextContent('aktywne: brak, wybrane: brak');
   });
 });

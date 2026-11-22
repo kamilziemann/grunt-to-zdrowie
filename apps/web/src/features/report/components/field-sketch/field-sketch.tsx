@@ -1,8 +1,19 @@
 import type { Zone } from '@app/contracts';
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { useTranslations } from 'use-intl';
 
 import type { FieldSketchModel, SketchGroup, SketchPoint } from '@/lib/field-sketch';
+import { cn } from '@/lib/utils/cn';
 
 import { ZonePatternDefs, zoneFill, zoneStroke } from './zone-patterns';
 
@@ -25,8 +36,12 @@ export interface FieldSketchProps {
   zones?: readonly SketchZoneMark[];
   /** wyrozniona strefa (zalecenie albo pozycja listy pod fokusem) */
   activeZone?: string | null;
+  /** strefa wybrana kliknieciem (`aria-pressed`); podglad przy najechaniu wyroznia, ale nie wybiera */
+  selectedZone?: string | null;
   /** klikniecie strefy na rysunku */
   onZoneSelect?: (zoneId: string) => void;
+  /** klikniecie w tlo rysunku (poza strefami) - zdejmuje wybor */
+  onBackgroundSelect?: () => void;
 }
 
 const NO_MARKS: readonly SketchZoneMark[] = [];
@@ -279,7 +294,9 @@ export function FieldSketch({
   label,
   zones = NO_MARKS,
   activeZone = null,
+  selectedZone = null,
   onZoneSelect,
+  onBackgroundSelect,
 }: FieldSketchProps) {
   const t = useTranslations('report.fieldMap.sketch');
   const id = useId();
@@ -289,6 +306,14 @@ export function FieldSketch({
   const labelFont = LABEL_FONT_PX * unit;
   const stroke = (value: number) => value * unit;
   const pad = 10 * unit;
+  // klikniecie poza strefa (tlo, pole, rowy) zdejmuje wybor; klikniecie strefy obsluguje sama strefa
+  const backgroundClick = useCallback(
+    (event: MouseEvent<SVGSVGElement>) => {
+      if (event.target instanceof Element && event.target.closest('[data-zone]')) return;
+      onBackgroundSelect?.();
+    },
+    [onBackgroundSelect],
+  );
   const clipId = `${id}-clip`;
   const hatchId = `${id}-hatch`;
   const patternId = `${id}-zone`;
@@ -348,7 +373,7 @@ export function FieldSketch({
 
   // rysunek jest ozdoba dla czytnika ekranu - tresc niesie zdanie obok (i podpis pod szkicem)
   return (
-    <>
+    <div className="relative">
       <p className="sr-only" data-testid="field-sketch-label">
         {label}
       </p>
@@ -357,6 +382,7 @@ export function FieldSketch({
         viewBox={`0 0 ${String(width)} ${String(height)}`}
         aria-hidden="true"
         className="block h-auto w-full font-sans"
+        onClick={onBackgroundSelect ? backgroundClick : undefined}
         data-testid="field-sketch"
       >
         <defs>
@@ -441,6 +467,7 @@ export function FieldSketch({
               fill={zone.line ? 'none' : zoneFill(patternId, zone.kind)}
               unit={unit}
               dimmed={activeZone !== null && activeZone !== zone.id}
+              pressed={selectedZone === zone.id}
               onSelect={onZoneSelect}
             />
           ))}
@@ -531,20 +558,22 @@ export function FieldSketch({
               unit={unit}
             />
           ))}
-          {drawnZones.map((zone) => (
-            <ZoneBadge
-              key={zone.id}
-              zoneId={zone.id}
-              at={zone.labelAt}
-              number={zone.number}
-              unit={unit}
-              active={zone.id === activeZone}
-              onSelect={onZoneSelect}
-            />
-          ))}
         </g>
       </svg>
-    </>
+      {drawnZones.map((zone) => (
+        <ZoneBadge
+          key={zone.id}
+          zoneId={zone.id}
+          left={(zone.labelAt[0] / width) * 100}
+          top={(zone.labelAt[1] / height) * 100}
+          number={zone.number}
+          active={zone.id === activeZone}
+          pressed={selectedZone === zone.id}
+          label={t('zoneButton', { number: zone.number })}
+          onSelect={onZoneSelect}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -597,12 +626,14 @@ function ZoneShape({
   fill,
   unit,
   dimmed,
+  pressed,
   onSelect,
 }: {
   zone: SketchZoneMark & { d: string; line: boolean };
   fill: string;
   unit: number;
   dimmed: boolean;
+  pressed: boolean;
   onSelect?: (zoneId: string) => void;
 }) {
   const select = useCallback(() => onSelect?.(zone.id), [onSelect, zone.id]);
@@ -622,6 +653,7 @@ function ZoneShape({
       onClick={onSelect ? select : undefined}
       data-zone={zone.id}
       data-kind={zone.kind}
+      data-pressed={pressed ? 'true' : undefined}
     />
   );
 }
@@ -633,51 +665,64 @@ function badgeRect(at: SketchPoint, unit: number): Rect {
   return [at[0] - size, at[1] - size, size * 2, size * 2];
 }
 
-/** Numer miejsca w kolku - staly rozmiar na ekranie, czytelny na kazdym wzorze i w czerni i bieli. */
+const BADGE_CLASS =
+  'absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-card text-xs font-bold tabular-nums text-card shadow-sm transition-colors duration-150 print:size-5 print:shadow-none';
+
+/**
+ * Numer miejsca w kolku nad rysunkiem (przycisk HTML, nie SVG): da sie go wybrac klawiatura, a czytnik ekranu slyszy
+ * stan `aria-pressed`. Staly rozmiar na ekranie, czytelny na kazdym wzorze i w czerni i bieli.
+ */
 function ZoneBadge({
   zoneId,
-  at,
+  left,
+  top,
   number,
-  unit,
   active,
+  pressed,
+  label,
   onSelect,
 }: {
   zoneId: string;
-  at: SketchPoint;
+  /** polozenie srodka w procentach szerokosci i wysokosci rysunku */
+  left: number;
+  top: number;
   number: number;
-  unit: number;
   active: boolean;
+  pressed: boolean;
+  label: string;
   onSelect?: (zoneId: string) => void;
 }) {
-  const radius = 9 * unit;
   const select = useCallback(() => onSelect?.(zoneId), [onSelect, zoneId]);
+  const style = useMemo(() => ({ left: `${String(left)}%`, top: `${String(top)}%` }), [left, top]);
+  const color = active ? 'bg-(--sketch-highlight)' : 'bg-foreground';
 
-  return (
-    <g
-      className={onSelect ? 'cursor-pointer' : undefined}
-      onClick={onSelect ? select : undefined}
-      data-testid="field-sketch-zone-number"
-    >
-      <circle
-        cx={at[0]}
-        cy={at[1]}
-        r={radius}
-        fill={active ? 'var(--sketch-highlight)' : 'var(--foreground)'}
-        stroke="var(--card)"
-        strokeWidth={2 * unit}
-      />
-      <text
-        x={at[0]}
-        y={at[1]}
-        fontSize={12 * unit}
-        fontWeight={700}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="var(--card)"
+  if (!onSelect) {
+    return (
+      <span
+        aria-hidden="true"
+        className={cn(BADGE_CLASS, color)}
+        style={style}
+        data-zone={zoneId}
+        data-testid="field-sketch-zone-number"
       >
         {number}
-      </text>
-    </g>
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-pressed={pressed}
+      className={cn(BADGE_CLASS, color, 'cursor-pointer hover:scale-110 motion-reduce:hover:scale-100')}
+      style={style}
+      onClick={select}
+      data-zone={zoneId}
+      data-testid="field-sketch-zone-number"
+    >
+      {number}
+    </button>
   );
 }
 

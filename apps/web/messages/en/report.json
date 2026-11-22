@@ -614,8 +614,8 @@
     "sources": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK.",
     "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
     "highlight": "Orange – nearest ditch and watercourse.",
-    "showAerial": "Show on aerial photo",
-    "showSketch": "Back to the sketch",
+    "showAerial": "Aerial photo",
+    "showSketch": "Sketch",
     "sketch": {
       "label": "Sketch: {field} and water within {radius} m of the field.",
       "loading": "Loading ditches and streams…",
@@ -657,12 +657,24 @@
         },
         "woods": "Forest or woodland",
         "treeRows": "Tree row or hedge",
-        "structures": "Weir, dam or lock"
+        "structures": "Weir, dam or lock",
+        "zonesTitle": "Legend of spots in the field"
       },
       "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
-      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
+      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK.",
+      "zoneButton": "Spot {number} in the field"
     },
-    "above": "The field sketch with ditches and spots on the field is at the top of the report, next to the assessment."
+    "above": "The field sketch with ditches and spots on the field is at the top of the report, next to the assessment.",
+    "modeLabel": "Field view: sketch or aerial photo",
+    "layers": {
+      "label": "Layers on the aerial photo",
+      "photo": "Aerial photo",
+      "water": "Ditches and streams",
+      "zones": "Spots in the field",
+      "zonesHint": "Tap a spot on the map to highlight its recommendations; tap it again or next to it to clear the highlight."
+    },
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
   },
   "print": {
     "header": "{app} · field water report",

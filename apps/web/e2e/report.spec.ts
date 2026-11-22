@@ -258,21 +258,31 @@ test.describe('mapa pola w raporcie', () => {
     await expect(page.getByTestId('field-map-nearest')).toContainText(
       'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',
     );
-    // zdjecie lotnicze dopiero na zadanie
+    // zdjecie lotnicze dopiero na zadanie: dwie pigulki, wybor zapamietany
     await expect(page.getByTestId('field-map-canvas')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Szkic', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
 
-    await page.getByRole('button', { name: 'Pokaż na zdjęciu lotniczym' }).click();
-    await expect(page.getByTestId('field-map-canvas')).toBeVisible({ timeout: 20_000 });
+    await page.getByRole('button', { name: 'Zdjęcie lotnicze' }).click();
+    await expect(page.getByTestId('field-map-canvas')).toHaveAttribute('data-ready', 'true', {
+      timeout: 20_000,
+    });
     await expect(sketch).toBeHidden();
+    await expect(page.getByRole('checkbox', { name: 'Rowy i cieki' })).toBeChecked();
 
     // wydruk: zawsze szkic, bez plotna i bez przelacznika
     await page.emulateMedia({ media: 'print' });
     await expect(sketch).toBeVisible();
     await expect(page.getByTestId('field-map-canvas')).toBeHidden();
-    await expect(page.getByTestId('field-map-toggle')).toBeHidden();
+    await expect(page.getByTestId('field-map-mode')).toBeHidden();
 
     await page.emulateMedia({ media: 'screen' });
-    await page.getByRole('button', { name: 'Wróć do szkicu' }).click();
+    // po przeladowaniu raport otwiera sie od razu na zdjeciu lotniczym
+    await page.reload();
+    await expect(page.getByTestId('field-map')).toHaveAttribute('data-mode', 'aerial');
+    await page.getByRole('button', { name: 'Szkic', exact: true }).click();
     await expect(sketch).toBeVisible();
   });
 

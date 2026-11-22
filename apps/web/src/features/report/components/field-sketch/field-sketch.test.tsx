@@ -1,5 +1,5 @@
-import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { FieldSketchModel } from '@/lib/field-sketch';
 import { renderWithIntl } from '@/test/render-intl';
@@ -144,5 +144,46 @@ describe('FieldSketch', () => {
       '2',
     ]);
     expect(screen.getByTestId('field-sketch-zone-active')).toHaveAttribute('d', 'M300 240H388V280H300Z');
+  });
+
+  it('numery miejsc to przyciski z aria-pressed; klikniecie numeru wybiera, klikniecie w tlo zdejmuje wybor', () => {
+    const select = vi.fn<(zoneId: string) => void>();
+    const clear = vi.fn<() => void>();
+
+    renderWithIntl(
+      <FieldSketch
+        model={ZONED}
+        fieldName="Działka 1"
+        factText={null}
+        label="Szkic"
+        zones={MARKS}
+        activeZone="zone-1"
+        selectedZone="zone-1"
+        onZoneSelect={select}
+        onBackgroundSelect={clear}
+      />,
+    );
+
+    const first = screen.getByRole('button', { name: 'Miejsce 1 na polu' });
+
+    expect(first).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Miejsce 2 na polu' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+
+    fireEvent.click(first);
+    expect(select).toHaveBeenCalledWith('zone-1');
+
+    // klikniecie w strefe na rysunku nie jest kliknieciem w tlo
+    const shape = document.querySelector('path[data-zone="zone-2"]');
+
+    if (!shape) throw new Error('brak strefy 2 na rysunku');
+    fireEvent.click(shape);
+    expect(select).toHaveBeenCalledWith('zone-2');
+    expect(clear).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('field-sketch-field'));
+    expect(clear).toHaveBeenCalledOnce();
   });
 });
