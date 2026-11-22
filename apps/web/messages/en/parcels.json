@@ -11,6 +11,7 @@
   "search": {
     "label": "Parcel number, district with number or address",
     "placeholder": "e.g. 141201_1.0001.6509, Dąbrowa 12 or an address",
+    "placeholderShort": "Parcel no. or address",
     "submit": "Search",
     "hint": "Enter a parcel number, a district with a number or an address. You can also click a parcel on the map.",
     "tooShort": "Enter at least 3 characters, e.g. Dąbrowa 12.",
@@ -186,7 +187,10 @@
     "basemap": {
       "label": "Base map"
     },
-    "legends": "Map legends"
+    "legends": "Map legends",
+    "legendButton": "Legend",
+    "legendButtonLabel": "{layer, select, none {Map legend} other {Map legend: {layer}}}{status, select, attention {, check the message} loading {, loading} other {}}",
+    "legendsClose": "Close legend"
   },
   "sheet": {
     "expand": "Expand panel",

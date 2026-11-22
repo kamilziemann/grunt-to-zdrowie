@@ -12,12 +12,14 @@ export interface ParcelSearchProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
-  /** pole dostalo fokus (telefon: rozwin arkusz, zeby klawiatura nie zaslonila wynikow) */
-  onFocus?: () => void;
   pending?: boolean;
   error?: ParcelSearchError | null;
-  /** na telefonie podpowiedz ustepuje miejsca wynikom (podglad dzialki, lista kandydatow) */
-  compact?: boolean;
+  /**
+   * `panel` - pole z przyciskiem "Szukaj" i podpowiedzia pod spodem (panel boczny na komputerze);
+   * `map` - jedna pigulka na gorze mapy (telefon): krotki opis w polu, podpowiedz tylko dla czytnikow, blad w dymku
+   */
+  variant?: 'panel' | 'map';
+  className?: string;
 }
 
 /**
@@ -28,14 +30,15 @@ export function ParcelSearch({
   value,
   onChange,
   onSubmit,
-  onFocus,
   pending = false,
   error = null,
-  compact = false,
+  variant = 'panel',
+  className,
 }: ParcelSearchProps) {
   const t = useTranslations('parcels.search');
   const inputId = useId();
   const messageId = useId();
+  const onMap = variant === 'map';
   const change = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value),
     [onChange],
@@ -49,12 +52,12 @@ export function ParcelSearch({
   );
 
   return (
-    <search>
-      <form onSubmit={submit} className="flex flex-col gap-2" noValidate>
+    <search className={className}>
+      <form onSubmit={submit} className={cn('flex flex-col gap-2', onMap && 'relative')} noValidate>
         <label htmlFor={inputId} className="sr-only">
           {t('label')}
         </label>
-        <div className="flex gap-2">
+        <div className={cn('flex gap-2', onMap && 'relative')}>
           <Input
             id={inputId}
             name="q"
@@ -66,27 +69,44 @@ export function ParcelSearch({
             autoCapitalize="off"
             spellCheck={false}
             value={value}
-            placeholder={t('placeholder')}
+            placeholder={onMap ? t('placeholderShort') : t('placeholder')}
             aria-invalid={error ? true : undefined}
             aria-describedby={messageId}
             onChange={change}
-            onFocus={onFocus}
-            className="h-12 text-base"
+            className={cn(
+              'h-12 text-base',
+              onMap && 'pr-14 shadow-md [&::-webkit-search-cancel-button]:hidden',
+            )}
           />
-          <Button type="submit" size="xl" loading={pending} aria-label={t('submit')} className="px-4">
-            {!pending && <Search aria-hidden="true" />}
-            <span className="max-sm:sr-only">{t('submit')}</span>
-          </Button>
+          {onMap ? (
+            // przycisk w pigulce: ikona lupy z nazwa dostepna "Szukaj" (podpis zajalby pol pola na waskim ekranie)
+            <Button
+              type="submit"
+              size="icon"
+              loading={pending}
+              aria-label={t('submit')}
+              className="absolute top-0.5 right-0.5 size-11"
+            >
+              {!pending && <Search aria-hidden="true" />}
+            </Button>
+          ) : (
+            <Button type="submit" size="xl" loading={pending} aria-label={t('submit')} className="px-4">
+              {!pending && <Search aria-hidden="true" />}
+              <span className="max-sm:sr-only">{t('submit')}</span>
+            </Button>
+          )}
         </div>
         <p
           id={messageId}
           role={error ? 'alert' : undefined}
           className={cn(
             'text-sm',
-            error
-              ? 'text-destructive'
-              : 'text-muted-foreground max-md:group-data-[snap=peek]/sheet:invisible',
-            compact && !error && 'max-md:hidden',
+            error ? 'text-destructive' : 'text-muted-foreground',
+            // na mapie blad stoi w dymku pod polem (nad przyciskami mapy), a podpowiedz slysza tylko czytniki
+            onMap && !error && 'sr-only',
+            onMap &&
+              error &&
+              'absolute inset-x-0 top-full z-10 mt-2 rounded-lg border bg-card px-3 py-2 shadow-md',
           )}
         >
           {error ? t(error) : t('hint')}

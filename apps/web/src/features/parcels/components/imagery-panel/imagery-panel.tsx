@@ -75,14 +75,24 @@ export function ImageryPanel({ open, onOpenChange, value, status, children, clas
         aria-label={t('buttonLabel', { choice: t(`choices.${value}`) })}
         onClick={toggleOpen}
         className={cn(
-          'flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary',
+          'relative flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold whitespace-nowrap text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary max-md:gap-1.5 max-md:px-2.5',
           active && 'border-primary',
         )}
         data-testid="imagery-button"
         data-imagery-status={status}
       >
-        <Icon className={cn('size-5', iconClassName)} aria-hidden="true" />
-        {/* telefon: krotka nazwa (pelna jest w nazwie dostepnej i w legendzie), zeby przyciski miescily sie w dwoch rzedach */}
+        {/* telefon: bez ikony satelity (miejsce w rzedzie); kreciolek albo ostrzezenie jako plakietka w rogu */}
+        <Icon
+          className={cn(
+            'size-5',
+            iconClassName,
+            status === 'idle'
+              ? 'max-md:hidden'
+              : 'max-md:absolute max-md:-top-2 max-md:-right-2 max-md:rounded-full max-md:border max-md:bg-card max-md:p-0.5',
+          )}
+          aria-hidden="true"
+        />
+        {/* telefon: krotka nazwa (pelna jest w nazwie dostepnej i na pigulce legendy), zeby przyciski miescily sie w jednym rzedzie */}
         <span className="md:hidden">{t('button')}</span>
         <span className="max-md:hidden">{active ? t(`choices.${value}`) : t('button')}</span>
       </button>

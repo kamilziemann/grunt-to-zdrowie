@@ -142,14 +142,15 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, className }:
         aria-controls={panelId}
         aria-label={t('buttonLabel', { count })}
         onClick={toggleOpen}
-        className="flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary"
+        // telefon: bez ikony i ciasniej - podklad, warstwy i satelita mieszcza sie w jednym rzedzie przy 360 px
+        className="flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold whitespace-nowrap text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary max-md:gap-1.5 max-md:px-2.5"
         data-testid="layers-button"
       >
-        <Layers className="size-5 text-primary" aria-hidden="true" />
+        <Layers className="size-5 text-primary max-md:hidden" aria-hidden="true" />
         {t('button')}
         <span
           aria-hidden="true"
-          className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums"
+          className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums max-md:h-5 max-md:min-w-5"
         >
           {count}
         </span>

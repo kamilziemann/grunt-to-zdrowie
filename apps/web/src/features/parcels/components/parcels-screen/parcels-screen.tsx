@@ -1,4 +1,6 @@
 // Ekran "znajdz dzialke": mapa na cala powierzchnie i panel (boczny na komputerze, arkusz od dolu na telefonie).
+// Telefon: na gorze mapy wyszukiwarka i jeden rzad pigulek (podklad, warstwy, satelita), pod nimi po prawej przyciski
+// MapLibre, w lewym dolnym rogu pigulka "Legenda", na dole niski arkusz z glowna akcja kroku.
 // Stan: tekst wyszukiwania, wskazana dzialka (podglad) i polozenie arkusza. Lista "moje dzialki" zyje w adresie
 // strony, wiec przychodzi z trasy (`ids` + `onIdsChange`) - link da sie wyslac, a odswiezenie niczego nie gubi.
 import {
@@ -14,7 +16,7 @@ import {
 } from '@app/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Plus } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { ProblemAlert } from '@/components/shared/problem-alert';
@@ -52,15 +54,17 @@ import {
   BottomSheetBody,
   BottomSheetFooter,
   SHEET_HALF_FRACTION,
-  SHEET_PEEK_REM,
+  SHEET_PEEK_FALLBACK_REM,
   type SheetSnap,
 } from '../bottom-sheet';
 import { FieldDrawEntry, FieldDrawHint, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { MapIntro } from '../map-intro';
 import { BasemapSwitch } from '../basemap-switch';
+import { IMAGERY_GRADIENTS } from '../imagery-legend';
 import { ImageryPanel } from '../imagery-panel';
 import { ImagerySwitch } from '../imagery-switch';
 import { LayersPanel } from '../layers-panel';
+import { LegendDock, type LegendDockStatus } from '../legend-dock';
 import { MapLegends } from '../map-legends';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
@@ -138,6 +142,7 @@ export function ParcelsScreen({
 }: ParcelsScreenProps) {
   const t = useTranslations('parcels');
   const tCommon = useTranslations('common');
+  const tImagery = useTranslations('parcels.imagery');
   const queryClient = useQueryClient();
   const mapLabels = useMapLabels();
   const contextLabels = useContextKindLabels();
@@ -165,6 +170,9 @@ export function ParcelsScreen({
   const [contextStatuses, setContextStatuses] = useState(CONTEXT_OFF);
   const [layersOpen, setLayersOpen] = useState(false);
   const [imageryOpen, setImageryOpen] = useState(false);
+  const [legendsOpen, setLegendsOpen] = useState(false);
+  // zmierzona wysokosc zwinietego arkusza (telefon): mapa konczy sie tuz pod nim, pigulka legendy stoi nad nim
+  const [sheetPeek, setSheetPeek] = useState<number | null>(null);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
   const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 && !initialView ? 'half' : 'peek');
   const [hint, setHint] = useState<MapHint | null>(initialView ? 'pickHint' : null);
@@ -215,20 +223,21 @@ export function ParcelsScreen({
     }
 
     const height = rootRef.current?.clientHeight ?? window.innerHeight;
-    const visible = snap === 'peek' ? SHEET_PEEK_REM * rem : height * SHEET_HALF_FRACTION;
+    const peek = sheetPeek ?? SHEET_PEEK_FALLBACK_REM * rem;
+    const visible = snap === 'peek' ? peek : height * SHEET_HALF_FRACTION;
 
     // mapa konczy sie nad zwinietym arkuszem, wiec doliczamy tylko to, co arkusz zaslania ponad nim
-    const bottom = Math.max(0, visible - SHEET_PEEK_REM * rem) + MAP_MARGIN_PX;
-    // u gory przelaczniki i legendy siegaja na telefonie w glab mapy - dzialka ma stanac pod nimi
+    const bottom = Math.max(0, visible - peek) + MAP_MARGIN_PX;
+    // u gory wyszukiwarka i rzad pigulek siegaja na telefonie w glab mapy - dzialka ma stanac pod nimi
     const controls = controlsRef.current?.getBoundingClientRect().bottom ?? 0;
     const rootTop = rootRef.current?.getBoundingClientRect().top ?? 0;
     const top = Math.min(
       Math.max(MAP_MARGIN_PX, controls - rootTop + MAP_MARGIN_PX / 4),
-      height - SHEET_PEEK_REM * rem - bottom - MAP_MARGIN_PX * 2,
+      height - peek - bottom - MAP_MARGIN_PX * 2,
     );
 
     return { ...base, top: Math.max(MAP_MARGIN_PX, top), bottom };
-  }, [snap]);
+  }, [snap, sheetPeek]);
 
   useEffect(() => () => window.clearTimeout(hintTimer.current), []);
 
@@ -249,14 +258,14 @@ export function ParcelsScreen({
   const submitSearch = useCallback(() => {
     const input = validateParcelSearch(text);
 
-    setSnap('half');
-
+    // blad formatu stoi przy polu - arkusz zostaje, gdzie byl; wyniki pokazuje arkusz podniesiony do polowy
     if (!input.ok) {
       setInputError(input.error);
 
       return;
     }
 
+    setSnap('half');
     setInputError(null);
     setShown(null);
     setInstant(null);
@@ -278,8 +287,6 @@ export function ParcelsScreen({
     setText(value);
     setInputError(null);
   }, []);
-
-  const expandSheet = useCallback(() => setSnap('full'), []);
 
   const { addPoint, start: startDraw } = draw;
 
@@ -378,6 +385,19 @@ export function ParcelsScreen({
   const imageryLegendShown = imageryChoice !== 'none' && imagery.state !== 'off';
   const legendsShown = hydroLegendShown || contextShown || imageryLegendShown;
   const imageryStatus = IMAGERY_BUTTON_STATUS[imagery.state];
+  const legendStatus = legendDockStatus({
+    hydro: hydroLegendShown ? hydroStatus : null,
+    context: contextShown
+      ? (['cover', 'waterworks', 'protected'] as const)
+          .filter((layer) => layers[layer])
+          .map((layer) => contextStatuses[layer])
+      : [],
+    imagery: imageryLegendShown ? imageryStatus : 'idle',
+  });
+  const rootStyle = useMemo(
+    () => (sheetPeek === null ? undefined : ({ '--sheet-peek': `${sheetPeek}px` } as CSSProperties)),
+    [sheetPeek],
+  );
 
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
@@ -464,8 +484,69 @@ export function ParcelsScreen({
   const previewMissing = target !== null && previewQuery.isSuccess && previewQuery.data === null;
 
   return (
-    <div ref={rootRef} className="@container-[size] relative min-h-0 flex-1 overflow-clip">
-      <div className="absolute inset-0 max-md:bottom-44">
+    <div
+      ref={rootRef}
+      style={rootStyle}
+      className="@container-[size] relative min-h-0 flex-1 overflow-clip"
+      // telefon: przyciski MapLibre (przybliz, oddal, polozenie) po prawej pod wyszukiwarka i rzedem pigulek (app.css);
+      // w trybie "wlasne pole" gora mapy jest wolna, wiec wracaja na gore (podpowiedz zostawia im miejsce)
+      data-map-controls={drawing ? undefined : 'below-search'}
+    >
+      <div
+        ref={controlsRef}
+        // otwarty panel warstw na telefonie przykrywa arkusz dzialek (arkusz ma z-10)
+        // w trybie "wlasne pole" wyszukiwarka i przyciski ustepuja miejsca podpowiedzi (rysowane miejsce ma byc odsloniete)
+        className={cn(
+          'absolute inset-x-3 top-3 z-10 flex flex-col gap-2 has-aria-expanded:z-30 md:right-auto md:left-106 md:max-w-[calc(100%-31rem)]',
+          drawing && 'hidden',
+        )}
+      >
+        {/* telefon: wyszukiwarka na gorze mapy (klawiatura jej nie zaslania); na komputerze stoi w panelu bocznym */}
+        <ParcelSearch
+          variant="map"
+          className="md:hidden"
+          value={text}
+          onChange={changeText}
+          onSubmit={submitSearch}
+          pending={search.isFetching || (target !== null && previewQuery.isFetching)}
+          error={inputError}
+        />
+        {/* podklad i zdjecie z satelity maja wlasne przyciski - to najczestsze zmiany, nie chowamy ich w warstwach;
+            telefon: jeden rzad, ponizej 360 px przewija sie w poziomie (otwarte panele sa `fixed`, rzad ich nie przycina;
+            margines w pionie zostawia miejsce na plakietke stanu na przycisku "Satelita") */}
+        <div
+          className="flex items-start gap-2 max-md:-mx-3 max-md:-my-2 max-md:gap-1 max-md:overflow-x-auto max-md:px-3 max-md:py-2 max-md:[scrollbar-width:none] md:flex-wrap"
+          data-testid="map-controls-row"
+        >
+          <BasemapSwitch value={layers.basemap} onChange={updateLayers} />
+          <LayersPanel
+            open={layersOpen}
+            onOpenChange={setLayersOpen}
+            layers={layers}
+            onChange={updateLayers}
+            className="shrink-0"
+          />
+          <ImageryPanel
+            open={imageryOpen}
+            onOpenChange={setImageryOpen}
+            value={ids.length > 0 ? imageryChoice : 'none'}
+            status={imageryStatus}
+            className="shrink-0"
+          >
+            <ImagerySwitch
+              value={imageryChoice}
+              onChange={chooseImagery}
+              month={imageryMonth}
+              onMonthChange={setImageryMonth}
+              today={todayInPoland()}
+              enabled={ids.length > 0}
+              legendClassName="sr-only"
+            />
+          </ImageryPanel>
+        </div>
+      </div>
+
+      <div className="absolute inset-0 max-md:bottom-[calc(var(--sheet-peek,7.75rem)-0.5rem)]">
         <ParcelMap
           // w trybie "wlasne pole" dzialki tylko obrysem (tlo), zeby wybrana czesc odrozniala sie od reszty
           selected={drawing ? NO_PARCELS : selected.parcels}
@@ -487,54 +568,20 @@ export function ParcelsScreen({
           onPick={pickOnMap}
           onZoomTooLow={onZoomTooLow}
           status={target !== null && previewQuery.isFetching ? t('map.loadingParcel') : null}
-          statusClassName="md:left-[calc(50%+12.5rem)]"
+          // telefon: nad pigulka legendy (lewy dolny rog); komputer: na srodku widocznej mapy obok panelu
+          statusClassName="max-md:bottom-18 md:left-[calc(50%+12.5rem)]"
           labels={mapLabels}
         />
       </div>
 
-      <div
-        ref={controlsRef}
-        // otwarty panel warstw na telefonie przykrywa arkusz dzialek (arkusz ma z-10)
-        // w trybie "wlasne pole" warstwy i legendy ustepuja miejsca podpowiedzi (rysowane miejsce ma byc odsloniete)
-        className={cn(
-          'absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 has-aria-expanded:z-30 md:left-106',
-          drawing && 'hidden',
-        )}
-      >
-        {/* podklad i zdjecie z satelity maja wlasne przyciski - to najczestsze zmiany, nie chowamy ich w warstwach */}
-        <div className="flex flex-wrap items-start gap-2">
-          <BasemapSwitch value={layers.basemap} onChange={updateLayers} />
-          <LayersPanel
-            open={layersOpen}
-            onOpenChange={setLayersOpen}
-            layers={layers}
-            onChange={updateLayers}
-          />
-          <ImageryPanel
-            open={imageryOpen}
-            onOpenChange={setImageryOpen}
-            value={ids.length > 0 ? imageryChoice : 'none'}
-            status={imageryStatus}
-          >
-            <ImagerySwitch
-              value={imageryChoice}
-              onChange={chooseImagery}
-              month={imageryMonth}
-              onMonthChange={setImageryMonth}
-              today={todayInPoland()}
-              enabled={ids.length > 0}
-              legendClassName="sr-only"
-            />
-          </ImageryPanel>
-        </div>
-      </div>
-
-      {/* legendy stoja osobno od przyciskow, w przewijanej kolumnie; rozwinieta jest najwyzej jedna (harmonijka) */}
+      {/* legendy stoja osobno od przyciskow; rozwinieta jest najwyzej jedna (harmonijka) */}
       {legendsShown && !drawing && (
-        <aside
-          aria-label={t('map.legends')}
-          className="absolute top-31 left-3 z-10 flex max-h-[calc(100cqh-22rem)] w-72 max-w-[calc(100%-4.5rem)] flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg p-0.5 md:top-auto md:bottom-10 md:left-106 md:max-h-[calc(100cqh-8rem)]"
-          data-testid="map-legends"
+        <LegendDock
+          open={legendsOpen}
+          onOpenChange={setLegendsOpen}
+          layerName={imageryLegendShown ? tImagery(`choices.${imageryChoice}`) : null}
+          swatchClassName={imageryLegendShown ? IMAGERY_GRADIENTS[imageryChoice] : null}
+          status={legendStatus}
         >
           {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
           <MapLegends
@@ -546,8 +593,9 @@ export function ParcelsScreen({
             imageryData={imagery.data}
             imageryRequestedDate={imagery.requestedDate}
             onImageryRetry={imagery.retry}
+            itemClassName="max-md:w-full max-md:shadow-none"
           />
-        </aside>
+        </LegendDock>
       )}
 
       {drawing && (
@@ -558,12 +606,13 @@ export function ParcelsScreen({
       )}
 
       {hint && !drawing && (
-        <output className="absolute top-32 left-1/2 z-10 block w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg md:top-3 md:left-[calc(50%+12.5rem)]">
+        // telefon: pod rzedem pigulek, z lewej - kolumna przyciskow mapy po prawej zostaje odslonieta
+        <output className="absolute top-32 left-1/2 z-10 block w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-md:top-30 max-md:left-3 max-md:max-w-[calc(100%-4.5rem)] max-md:translate-x-0 md:top-3 md:left-[calc(50%+12.5rem)]">
           {t(`map.${hint}`)}
         </output>
       )}
 
-      <BottomSheet snap={snap} onSnapChange={setSnap} labels={sheetLabels}>
+      <BottomSheet snap={snap} onSnapChange={setSnap} labels={sheetLabels} onPeekChange={setSheetPeek}>
         <BottomSheetBody>
           {drawing ? (
             <div className="flex flex-col gap-4 p-4 max-md:pt-0">
@@ -571,21 +620,21 @@ export function ParcelsScreen({
             </div>
           ) : (
             <div className="flex flex-col gap-4 p-4 max-md:pt-0">
-              <div className="flex flex-col gap-3 max-md:flex-col-reverse">
+              <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2">
-                  <h1 className="text-2xl font-medium tracking-tight max-md:text-xl">{t('title')}</h1>
+                  {/* telefon: tytul tylko dla czytnikow - miejsce w arkuszu nalezy do wynikow i listy dzialek */}
+                  <h1 className="text-2xl font-medium tracking-tight max-md:sr-only">{t('title')}</h1>
                   {/* przy pierwszym wejsciu kroki opisuje karta nizej - pasek etapow bylby powtorzeniem */}
                   {!firstVisit && <StepsHeader current={step} />}
                 </div>
+                {/* komputer: wyszukiwarka w panelu bocznym; telefon ma ja na gorze mapy (ten sam stan) */}
                 <ParcelSearch
+                  className="max-md:hidden"
                   value={text}
                   onChange={changeText}
                   onSubmit={submitSearch}
-                  onFocus={expandSheet}
                   pending={search.isFetching || (target !== null && previewQuery.isFetching)}
                   error={inputError}
-                  // pierwsze wejscie: podpowiedz powtarza krok 1 karty "3 kroki" - na telefonie liczy sie miejsce
-                  compact={firstVisit || target !== null || showCandidates || showPlaces}
                 />
               </div>
 
@@ -739,3 +788,27 @@ const IMAGERY_BUTTON_STATUS: Record<ImageryState, 'idle' | 'loading' | 'problem'
   busy: 'problem',
   failed: 'problem',
 };
+
+interface LegendDockInput {
+  hydro: HydroStatus | null;
+  /** stany wlaczonych warstw otoczenia */
+  context: readonly LayerStatus[];
+  imagery: 'idle' | 'loading' | 'problem';
+}
+
+/**
+ * Stan na pigulce legendy (telefon): ostrzezenie, gdy ktoras legenda ma komunikat (warstwa niedostepna, przybliz mape,
+ * brak zdjecia, blad) - po zamknieciu panelu komunikatu nie widac, wiec pigulka musi go zapowiadac.
+ */
+function legendDockStatus({ hydro, context, imagery }: LegendDockInput): LegendDockStatus {
+  const contextStates = context.map((status) => status.state);
+  const contextAttention =
+    contextStates.includes('unavailable') ||
+    (contextStates.length > 0 && contextStates.every((state) => state === 'zoom'));
+
+  if (imagery === 'problem' || hydro?.state === 'unavailable' || contextAttention) return 'attention';
+
+  if (imagery === 'loading' || contextStates.includes('loading')) return 'loading';
+
+  return 'idle';
+}

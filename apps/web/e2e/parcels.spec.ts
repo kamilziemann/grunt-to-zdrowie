@@ -124,12 +124,14 @@ test.describe('działki', () => {
       const panel = page.getByTestId('parcels-panel');
       const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
 
-      // pierwsze wejscie: arkusz do polowy, pole wyszukiwania i podpowiedz widoczne bez przewijania
+      // pierwsze wejscie: arkusz do polowy z podpowiedzia; pole wyszukiwania na gorze mapy, nad arkuszem
       await expect(panel).toHaveAttribute('data-snap', 'half');
       await expect(search).toBeInViewport({ ratio: 1 });
+      expect((await search.boundingBox())?.y ?? 0).toBeLessThan((await panel.boundingBox())?.y ?? 0);
       await expect(page.getByTestId('map-intro')).toBeInViewport();
       await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeInViewport();
-      await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeInViewport();
+      // tytul ekranu na telefonie tylko dla czytnikow - miejsce w arkuszu nalezy do wynikow
+      await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toHaveCount(1);
 
       await page.getByRole('button', { name: 'Rozwiń panel' }).click();
       await expect(panel).toHaveAttribute('data-snap', 'full');

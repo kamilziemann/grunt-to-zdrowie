@@ -9,7 +9,7 @@ import type { VegetationImagery } from '../../api/imagery.queries';
 import type { ImageryState } from '../../hooks/use-vegetation-imagery';
 
 /** Paski skali rysowane tymi samymi tokenami co kolory PNG z API (`--vegetation-*`, `--moisture-*`). */
-const GRADIENTS: Record<ImageryLayer, string> = {
+export const IMAGERY_GRADIENTS: Record<ImageryLayer, string> = {
   condition: 'from-(--vegetation-low) via-(--vegetation-mid) to-(--vegetation-high)',
   moisture: 'from-(--moisture-low) via-(--moisture-mid) to-(--moisture-high)',
 };
@@ -79,7 +79,7 @@ export function ImageryLegend({
           <span className="flex shrink-0 items-center gap-2">
             <span
               aria-hidden="true"
-              className={cn('h-2 w-10 rounded-full bg-linear-to-r', GRADIENTS[layer])}
+              className={cn('h-2 w-10 rounded-full bg-linear-to-r', IMAGERY_GRADIENTS[layer])}
             />
             <ChevronDown
               aria-hidden="true"
@@ -88,7 +88,10 @@ export function ImageryLegend({
           </span>
         </summary>
         <div className="flex flex-col gap-2 border-t px-3 py-2 text-xs">
-          <div className={cn('h-2.5 rounded-full bg-linear-to-r', GRADIENTS[layer])} aria-hidden="true" />
+          <div
+            className={cn('h-2.5 rounded-full bg-linear-to-r', IMAGERY_GRADIENTS[layer])}
+            aria-hidden="true"
+          />
           <p className="flex justify-between font-medium text-muted-foreground">
             <span>{t(`legend.${start}`)}</span>
             <span>{t(`legend.${end}`)}</span>

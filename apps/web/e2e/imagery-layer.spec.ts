@@ -122,7 +122,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('wybór zdjęcia chowa panel, legenda mieści się na mapie, bez poziomego przewijania', async ({
+    test('wybór zdjęcia chowa panel, pigułka legendy z nazwą warstwy, panel legend od razu z tą legendą', async ({
       page,
     }) => {
       await mockImageryApi(page);
@@ -132,13 +132,23 @@ test.describe('zdjęcie z satelity na mapie', () => {
       await expect(page.getByTestId('imagery-panel')).toBeHidden();
 
       const legend = page.getByTestId('imagery-legend');
+      const pill = page.getByTestId('legend-button');
 
       await expect(legend).toHaveAttribute('data-imagery-state', 'ready');
+      // legendy schowane w panelu; na mapie tylko mala pigulka z nazwa warstwy i paskiem kolorow
+      await expect(legend).toBeHidden();
+      await expect(pill).toHaveText('Woda w roślinach');
+      await expect(pill).toHaveAccessibleName('Legenda mapy: Woda w roślinach');
 
-      const box = await legend.boundingBox();
+      const box = await pill.boundingBox();
 
       expect(box?.height).toBeLessThanOrEqual(48);
       expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(375);
+
+      await pill.click();
+      await expect(legend).toBeInViewport();
+      await expect(legend.locator('details')).toHaveAttribute('open', '');
+      await expect(page.getByTestId('hydro-legend')).not.toHaveAttribute('open');
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     });
   });

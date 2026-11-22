@@ -11,6 +11,7 @@
   "search": {
     "label": "Numer działki, obręb z numerem albo adres",
     "placeholder": "np. 141201_1.0001.6509, Dąbrowa 12 albo adres",
+    "placeholderShort": "Nr działki lub adres",
     "submit": "Szukaj",
     "hint": "Wpisz numer działki, obręb z numerem albo adres. Możesz też kliknąć działkę na mapie.",
     "tooShort": "Wpisz co najmniej 3 znaki, np. Dąbrowa 12.",
@@ -186,7 +187,10 @@
     "basemap": {
       "label": "Podkład mapy"
     },
-    "legends": "Legendy mapy"
+    "legends": "Legendy mapy",
+    "legendButton": "Legenda",
+    "legendButtonLabel": "{layer, select, none {Legenda mapy} other {Legenda mapy: {layer}}}{status, select, attention {, sprawdź komunikat} loading {, wczytuję} other {}}",
+    "legendsClose": "Zamknij legendę"
   },
   "sheet": {
     "expand": "Rozwiń panel",

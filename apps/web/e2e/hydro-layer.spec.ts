@@ -52,19 +52,33 @@ test.describe('rowy i cieki na mapie', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('przyciski mapy nad legendą, legenda zwinięta, bez poziomego przewijania', async ({ page }) => {
+    test('legenda w pigułce nad arkuszem, panel z jedną otwartą legendą, bez poziomego przewijania', async ({
+      page,
+    }) => {
       await mockHydroApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
 
       const legend = page.getByTestId('hydro-legend');
+      const pill = page.getByTestId('legend-button');
 
       await expect(legend).toHaveAttribute('data-hydro-state', 'ready', { timeout: 20_000 });
-      await expect(legend).not.toHaveAttribute('open');
+      // na mapie tylko pigulka "Legenda" w lewym dolnym rogu, tuz nad arkuszem
+      await expect(legend).toBeHidden();
+      await expect(pill).toHaveText('Legenda');
 
-      const button = await page.getByTestId('layers-button').boundingBox();
-      const legendBox = await legend.boundingBox();
+      const pillBox = await pill.boundingBox();
+      const sheetBox = await page.getByTestId('parcels-panel').boundingBox();
 
-      expect((button?.y ?? 0) + (button?.height ?? 0)).toBeLessThanOrEqual(legendBox?.y ?? 0);
+      expect((pillBox?.y ?? 0) + (pillBox?.height ?? 0)).toBeLessThanOrEqual(sheetBox?.y ?? 0);
+      expect(pillBox?.x ?? 0).toBeLessThan(375 / 2);
+
+      // panel od dolu: jedyna legenda rozwinieta od razu; Escape zamyka i oddaje fokus pigulce
+      await pill.click();
+      await expect(legend).toBeInViewport();
+      await expect(legend).toHaveAttribute('open', '');
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('map-legends')).toBeHidden();
+      await expect(pill).toBeFocused();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     });
   });

@@ -769,6 +769,9 @@ export function ParcelMap({
         if (cancelled) return;
 
         addAppLayers(created, target);
+        // waska mapa (telefon): MapLibre rozwija zrodla danych na starcie i zwija dopiero po przeciagnieciu - zwijamy
+        // od razu do przycisku "i", zeby tekst nie wchodzil pod pigulke legendy w lewym dolnym rogu
+        target.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
         created.on('moveend', refreshBoundaries);
         created.on('moveend', refreshHydro);
         created.on('moveend', refreshContext);
