@@ -51,6 +51,11 @@
     "notFound": "We could not find that parcel. Check the number or pick the parcel on the map.",
     "failed": "Could not load the parcel"
   },
+  "toast": {
+    "added": "Parcel {number} added to your parcels",
+    "removed": "Parcel {number} removed from the list",
+    "limitReached": "You have {max} parcels – the list cannot hold more"
+  },
   "list": {
     "title": "My parcels",
     "empty": "You have no parcels yet. Search by number or click one on the map.",

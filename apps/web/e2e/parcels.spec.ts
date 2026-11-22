@@ -33,6 +33,26 @@ test.describe('działki', () => {
     },
   );
 
+  test('dodanie i usunięcie działki potwierdza powiadomienie (lista bywa w zwiniętym arkuszu)', async ({
+    page,
+  }) => {
+    await mockAnalysisApi(page);
+    await page.goto('/mapa');
+    await page.getByLabel('Numer działki, obręb z numerem albo adres').fill(PARCEL_ID);
+    await page.keyboard.press('Enter');
+
+    const toasts = page.getByTestId('toasts');
+
+    await page.getByRole('button', { name: 'Dodaj do moich działek' }).click();
+    await expect(toasts).toContainText('Dodano działkę 6509 do Twoich działek');
+    await expect(page).toHaveURL(/dzialki=/);
+
+    await page.getByRole('button', { name: 'Usuń działkę 6509' }).click();
+    await expect(toasts).toContainText('Usunięto działkę 6509 z listy');
+    // powiadomienie nie przejmuje fokusu i znika samo (domyslnie po 5 s)
+    await expect(toasts.getByRole('listitem')).toHaveCount(0, { timeout: 12_000 });
+  });
+
   test('stary adres z listą działek przekierowuje na mapę', async ({ page }) => {
     await page.goto('/?dzialki=080904_5.0001.349%2F1');
     await expect(page).toHaveURL(/\/mapa\?dzialki=080904_5\.0001\.349%2F1$/);

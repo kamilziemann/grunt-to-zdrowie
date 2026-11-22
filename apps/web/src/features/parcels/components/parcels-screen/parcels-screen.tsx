@@ -22,6 +22,7 @@ import { useTranslations } from 'use-intl';
 import { ProblemAlert } from '@/components/shared/problem-alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/toast';
 import { Link } from '@/lib/navigation';
 import { toProblem } from '@/lib/problems';
 import { cn } from '@/lib/utils/cn';
@@ -146,6 +147,7 @@ export function ParcelsScreen({
   const queryClient = useQueryClient();
   const mapLabels = useMapLabels();
   const contextLabels = useContextKindLabels();
+  const { toast } = useToast();
   const rootRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const hintTimer = useRef<number | undefined>(undefined);
@@ -451,9 +453,27 @@ export function ParcelsScreen({
 
     onIdsChange([...ids, addableId]);
     clearSearch();
+    // lista jest w arkuszu - na telefonie zwykle zwinietym, wiec dodanie potwierdzamy tez powiadomieniem
+    toast({ title: t('toast.added', { number: previewShape?.number ?? addableId }), variant: 'success' });
+
+    if (ids.length + 1 >= PARCEL_LIMITS.selectionMax) {
+      toast({ title: t('toast.limitReached', { max: PARCEL_LIMITS.selectionMax }) });
+    }
 
     if (preview && focusPreview) setShown({ bbox: preview.bbox, key: `added:${preview.id}` });
-  }, [addableId, canAdd, preview, focusPreview, queryClient, onIdsChange, ids, clearSearch]);
+  }, [
+    addableId,
+    canAdd,
+    preview,
+    previewShape,
+    focusPreview,
+    queryClient,
+    onIdsChange,
+    ids,
+    clearSearch,
+    toast,
+    t,
+  ]);
 
   const showOnMap = useCallback((item: SelectedParcel) => {
     if (!item.parcel) return;
@@ -464,11 +484,31 @@ export function ParcelsScreen({
 
   const removeParcel = useCallback(
     (id: string) => {
+      const number = selected.items.find((item) => item.id === id)?.parcel?.number ?? id;
+
       setShown(null);
       onIdsChange(ids.filter((current) => current !== id));
+      toast({ title: t('toast.removed', { number }) });
     },
-    [onIdsChange, ids],
+    [onIdsChange, ids, selected.items, toast, t],
   );
+
+  // Blad szukania widac w arkuszu; gdy arkusz na telefonie jest zwiniety, mowimy o nim tez powiadomieniem.
+  const snapRef = useRef(snap);
+  const searchFailedAt = search.isError && picked === null ? search.errorUpdatedAt : 0;
+  const previewFailedAt = target !== null && previewQuery.isError ? previewQuery.errorUpdatedAt : 0;
+
+  useEffect(() => {
+    snapRef.current = snap;
+  }, [snap]);
+
+  useEffect(() => {
+    if (searchFailedAt === 0 && previewFailedAt === 0) return;
+
+    if (snapRef.current !== 'peek' || window.matchMedia(DESKTOP_QUERY).matches) return;
+
+    toast({ title: t(searchFailedAt > 0 ? 'search.failed' : 'preview.failed'), variant: 'error' });
+  }, [searchFailedAt, previewFailedAt, toast, t]);
 
   const { refetch: refetchSearch } = search;
   const { refetch: refetchPreview } = previewQuery;

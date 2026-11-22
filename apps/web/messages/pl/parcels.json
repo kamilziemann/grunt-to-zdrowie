@@ -51,6 +51,11 @@
     "notFound": "Nie znaleźliśmy takiej działki. Sprawdź numer albo wskaż działkę na mapie.",
     "failed": "Nie udało się pobrać działki"
   },
+  "toast": {
+    "added": "Dodano działkę {number} do Twoich działek",
+    "removed": "Usunięto działkę {number} z listy",
+    "limitReached": "Masz już {max} działek – więcej lista nie mieści"
+  },
   "list": {
     "title": "Moje działki",
     "empty": "Nie masz jeszcze żadnej działki. Wyszukaj ją po numerze albo kliknij na mapie.",
