@@ -26,6 +26,7 @@ import {
   verdictCaveat,
   type CaveatReason,
 } from '../../utils/report-data';
+import { EvidenceList } from '../evidence-list';
 import { ReportDetails } from '../report-section';
 
 /** Kolor, ikona i slowo dla poziomu - nigdy sam kolor (WCAG 1.4.1). Klasy jako literaly (Tailwind skanuje zrodla). */
@@ -160,7 +161,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
         )}
         {heat && (
           <p className="text-base" data-testid="verdict-heat">
-            {t('heat', { days: heat.days, normal: heat.normal })}
+            {t('heat', { window: heat.window, days: heat.days, normal: heat.normal })}
           </p>
         )}
         {zoneCount > 0 && (
@@ -380,6 +381,14 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                   share: percentOf(vegetation.validShare),
                   pixels: vegetation.pixels,
                 })}
+              </dd>
+            </>
+          )}
+          {assessment.evidence && assessment.evidence.length > 0 && (
+            <>
+              <dt className="font-medium">{t('extraEvidence')}</dt>
+              <dd data-testid="verdict-evidence">
+                <EvidenceList evidence={assessment.evidence} />
               </dd>
             </>
           )}

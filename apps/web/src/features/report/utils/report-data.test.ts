@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DROUGHT_REPORT } from '../fixtures/drought-report';
 import { FIELD_REPORT } from '../fixtures/field-report';
+import { HEAT_REPORT } from '../fixtures/heat-report';
 import { LOW_CONFIDENCE_REPORT } from '../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../fixtures/sample-report';
 import {
@@ -276,7 +277,26 @@ describe('upal w ostatnich 14 dniach', () => {
           { metric: 'hot_days_30d_normal', value: 4.3, unit: 'days', source: 'meteo' },
         ]),
       ),
-    ).toEqual({ days: 9, normal: 2 });
+    ).toEqual({ window: 14, days: 9, normal: 2 });
+  });
+
+  it('prawdziwy silnik (349/1, 30.06.2019): 3 dni z 14, ale 6 z 30 przy normie 1,1 = upal w 30 dniach', () => {
+    expect(heatSpell(HEAT_REPORT)).toEqual({ window: 30, days: 6, normal: 1 });
+  });
+
+  it('miary upalu przy samej ocenie (bez przyczyny "duze parowanie") tez licza sie', () => {
+    expect(
+      heatSpell({
+        ...FIELD_REPORT,
+        assessment: {
+          ...FIELD_REPORT.assessment,
+          evidence: [
+            { metric: 'hot_days_14d', value: 7, unit: 'days', source: 'meteo' },
+            { metric: 'hot_days_30d_normal', value: 2, unit: 'days', source: 'meteo' },
+          ],
+        },
+      }),
+    ).toEqual({ window: 14, days: 7, normal: 1 });
   });
 
   it('upal w granicach normy albo kilka dni to nie jest wyjasnienie', () => {

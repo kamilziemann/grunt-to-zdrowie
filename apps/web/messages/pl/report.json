@@ -205,7 +205,8 @@
     "etDeficitNone": "nie zabrakło w ostatnich 60 dniach",
     "etDeficitNote": "Rośliny dostały o {percent}% mniej wody, niż potrzebowały, w ostatnich 60 dniach. Przy 20% i więcej plon zwykle spada.",
     "soilRange": "Model gleby wskazuje kategorię od {from} do {to}; do progu suszy bierzemy lżejszą ({from}).",
-    "heat": "Od 14 dni było {days} dni upału (zwykle ok. {normal}) – rośliny tracą wodę szybciej niż zwykle."
+    "heat": "{window, select, 14 {Od 14 dni było} other {W ostatnich 30 dniach było}} {days} dni upału powyżej 30°C (zwykle {normal, plural, =0 {prawie wcale} other {ok. #}}) – rośliny tracą wodę szybciej niż zwykle.",
+    "extraEvidence": "Co jeszcze wyjaśnia ocenę"
   },
   "history": {
     "noData": "Brak danych historycznych dla tego pola.",

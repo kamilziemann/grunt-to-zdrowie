@@ -474,7 +474,7 @@ describe('ReportView', () => {
       const { container } = renderReport(heat);
 
       expect(screen.getByTestId('verdict-heat')).toHaveTextContent(
-        'Od 14 dni było 9 dni upału (zwykle ok. 2) – rośliny tracą wodę szybciej niż zwykle.',
+        'Od 14 dni było 9 dni upału powyżej 30°C (zwykle ok. 2) – rośliny tracą wodę szybciej niż zwykle.',
       );
       expect(screen.getByTestId('verdict')).toHaveAttribute('data-level', FIELD_REPORT.assessment.level);
 
@@ -483,6 +483,37 @@ describe('ReportView', () => {
       expect(cause).toHaveTextContent('Dni z upałem powyżej 30°C w ostatnich 14 dniach: 9 dni');
       expect(cause).toHaveTextContent('zwykle o tej porze: 4 dni');
       expect(cause).not.toHaveTextContent(t('evidence.unknownMetric'));
+    });
+
+    it('prawdziwy silnik: upal w 30 dniach, uwaga o siatce pogody w szczegolach przyczyny raz', () => {
+      const { container } = renderReport(HEAT_REPORT);
+      const cause = container.querySelector('[data-cause="high_evaporative_demand"]');
+
+      expect(screen.getByTestId('verdict-heat')).toHaveTextContent(
+        'W ostatnich 30 dniach było 6 dni upału powyżej 30°C (zwykle ok. 1)',
+      );
+      expect(cause).toHaveTextContent('Dni z upałem powyżej 30°C w ostatnich 30 dniach: 6 dni');
+      expect(cause).toHaveTextContent('zwykle o tej porze: 1,1 dni');
+      // ta sama uwaga przy 14 i 30 dniach - raz; inna przy normie
+      expect(within(cause as HTMLElement).getAllByText(/komórka ok\. 50 km/)).toHaveLength(1);
+      expect(cause).toHaveTextContent('Średnio w tych samych 30 dniach w latach 2009–2018');
+    });
+
+    it('miary upalu przy samej ocenie: w szczegolach oceny', () => {
+      renderReport({
+        ...HEAT_REPORT,
+        assessment: {
+          ...HEAT_REPORT.assessment,
+          evidence: [
+            { metric: 'hot_days_14d', value: 7, unit: 'days', source: 'meteo', note: 'Siatka ok. 50 km.' },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('verdict-evidence')).toHaveTextContent(
+        'Dni z upałem powyżej 30°C w ostatnich 14 dniach: 7 dni',
+      );
+      expect(screen.getByTestId('verdict-evidence')).toHaveTextContent('Siatka ok. 50 km.');
     });
 
     it('bez miar upalu nie ma zdania', () => {
