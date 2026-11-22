@@ -84,7 +84,7 @@ test.describe('działki', () => {
       'href',
       /^\/raport\?dzialki=142909_2\.0013\.178&uprawa=winter_wheat&data=\d{4}-\d{2}-\d{2}$/,
     );
-    await expect(examples.getByRole('link', { name: /Mokry rok: za dużo wody/ })).toContainText(
+    await expect(examples.getByRole('link', { name: /Za dużo wody na łące/ })).toContainText(
       'nadmiarem wody',
     );
 

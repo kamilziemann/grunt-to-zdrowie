@@ -111,7 +111,7 @@ test.describe('strona główna', () => {
       'href',
       '/raport?dzialki=080904_5.0001.349%2F1&uprawa=winter_wheat&data=2018-06-15',
     );
-    await expect(page.getByRole('heading', { level: 2, name: 'Zobacz inne przykłady' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: 'Zobacz, jak to działa' })).toBeVisible();
     await expect(page.getByTestId('examples').getByRole('link')).toHaveCount(4);
   });
 

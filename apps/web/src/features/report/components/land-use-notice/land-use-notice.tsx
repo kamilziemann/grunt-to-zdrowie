@@ -35,6 +35,8 @@ export interface LandUseNoticeProps {
   grasslandHref?: AppHref;
   /** mapa z wybranymi dzialkami */
   mapHref: AppHref;
+  /** ewidencja nie podala uzytku (ograniczenie `land_use_unknown`) */
+  unknown?: boolean;
 }
 
 /**
@@ -42,9 +44,31 @@ export interface LandUseNoticeProps {
  * ramka, ze liczby opisuja pogode i glebe w tym miejscu, a nie uprawe. Same laki i pastwiska przy uprawie polowej:
  * spokojna podpowiedz z linkiem do raportu dla uzytkow zielonych. Brak opisu albo zwykle pole = nic.
  */
-export function LandUseNotice({ landUse, grasslandHref, mapHref }: LandUseNoticeProps) {
+export function LandUseNotice({ landUse, grasslandHref, mapHref, unknown = false }: LandUseNoticeProps) {
   const t = useTranslations('report.landUse');
   const format = useFormatter();
+
+  // ewidencja nie podala uzytku: spokojna ramka - raport liczymy jak dla pola, ale mowimy, ze tego nie wiemy
+  if (!landUse && unknown) {
+    return (
+      <Alert variant="warning" className="text-base print:break-inside-avoid" data-testid="land-use-unknown">
+        <TreePine aria-hidden="true" />
+        <AlertTitle className="line-clamp-none text-lg leading-snug font-semibold">
+          {t('unknownTitle')}
+        </AlertTitle>
+        <AlertDescription className="flex flex-col gap-2 text-base text-foreground">
+          <span>{t('unknownText')}</span>
+          <Link
+            href={mapHref}
+            className="inline-flex min-h-11 w-fit items-center gap-1.5 font-medium text-primary underline underline-offset-4 print:hidden"
+          >
+            <MapPinned aria-hidden="true" className="size-4" />
+            {t('nonAgriculturalMap')}
+          </Link>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (!landUse?.mismatch) return null;
   const kinds = format.list(

@@ -116,7 +116,8 @@
       "confirms_deficit": "look dried out",
       "no_signal": "show no stress",
       "not_comparable": "cannot be compared with previous years",
-      "possible_other_stress": "are weaker than usual, but the cause may not be water"
+      "possible_other_stress": "are weaker than usual, but the cause may not be water",
+      "expected_seasonal": "are weaker than usual, but this is typical for this crop stage (ripening or mowing), not a lack of water"
     },
     "balance": "Climatic water balance (CWB)",
     "balanceValue": "{balance} mm = precipitation {precip} mm − evapotranspiration {et} mm",
@@ -474,7 +475,9 @@
       "consider": "Consider irrigating.",
       "yes": "The field is worth irrigating."
     },
-    "within": "{days, plural, =0 {Ideally today.} one {Within # day.} other {Within # days.}}",
+    "within": "{days, plural, =0 {Start right away.} one {Start within # day – then the reserve drops below the threshold.} other {Start within # days – then the reserve drops below the threshold.}}",
+    "withinPast": "{days, plural, =0 {It was best to start right away.} one {It was best to start within # day.} other {It was best to start within # days.}}",
+    "planShort": "{doses, plural, one {# watering} other {# waterings}} of {dose} l/m²{interval, plural, =0 {} one { every # day} other { every # days}}.",
     "forecast": "Rain forecast for the coming days: {mm} l/m².",
     "noForecast": "There is no weather forecast for this day, so we do not suggest when to water.",
     "none": "We do not assess irrigation in this report because data on the soil water reserve is missing.",
@@ -542,7 +545,9 @@
       "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
       "field_verification_needed": "Before deciding, check the soil on the field, e.g. with a spade at root depth.",
       "sample_data_partial": "Some of the data is still sample data (the box at the top of the report says which). Treat those parts as illustrative.",
-      "drainage_structures_unknown": "Maps do not show weirs or culverts on ditches. Before planning a ditch weir, check on site what is already on the ditch."
+      "drainage_structures_unknown": "Maps do not show weirs or culverts on ditches. Before planning a ditch weir, check on site what is already on the ditch.",
+      "vegetation_rotation_unknown": "We compare satellite images with the same time of year in previous years, but we do not know what grew on the field then (crop rotation).",
+      "land_use_unknown": "The land register did not say what this parcel is. We treat it as a field – check the aerial photo to make sure it is not forest or buildings."
     },
     "meta": "Report {id}, engine {version}, prepared on {date} in {seconds} s.",
     "statusNote": {
@@ -749,6 +754,8 @@
     "withClass": "{kind}, class {soilClass}",
     "withClasses": "{kind}, classes {from}–{to}",
     "nonAgriculturalTitle": "According to the land register this parcel is {kinds}, not a cultivated field.",
+    "unknownTitle": "We do not know if this is a cultivated field",
+    "unknownText": "The land register did not give the land use of this parcel. We treat it as a field – check the aerial photo in “Your field” to make sure it is not forest, buildings or a road.",
     "nonAgriculturalText": "The figures below describe the weather and soil at this place, not a crop on this parcel. If you meant a field, check the parcel number or pick the field on the map.",
     "nonAgriculturalMap": "Pick a field on the map",
     "grasslandTitle": "According to the land register this parcel is {kinds}.",

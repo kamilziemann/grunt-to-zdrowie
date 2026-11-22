@@ -137,7 +137,12 @@ export function ReportView({
             mapHref={mapHref}
             recomputeHref={recomputeHref}
           />
-          <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
+          <LandUseNotice
+            landUse={report.landUse}
+            grasslandHref={grasslandHref}
+            mapHref={mapHref}
+            unknown={report.limitations.includes('land_use_unknown')}
+          />
           <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
           <SampleBanner report={report} />
           {report.meta.status !== 'complete' && (

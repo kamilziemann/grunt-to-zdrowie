@@ -174,7 +174,7 @@
       "kbw": "Klimatyczny bilans wodny wg IUNG: opad minus ewapotranspiracja potencjalna (wzór Doroszewskiego–Górskiego, usłonecznienie z promieniowania równaniem Ångströma), 6 dekad do daty analizy, 14 okresów 21.III–30.IX, progi z tabeli IUNG dla 14 grup upraw i 4 kategorii gleby; bez współczynnika Kc.",
       "root": "Bilans strefy korzeniowej FAO-56: ET₀ Penman–Monteith, pojedynczy Kc z kalendarza uprawy, TAW/RAW, Ks, 10 sezonów.",
       "soil": "Gleba: uziarnienie SoilGrids → grupa PTG 2008 → kategoria IUNG; zapas wody Saxton–Rawls (2006) dla 0–100 cm.",
-      "plants": "Satelita: NDVI i NDMI z API statystyk Copernicus Data Space, maska chmur SCL, min. 5 czystych pikseli w polu.",
+      "plants": "Satelita: NDVI i NDMI z API statystyk Copernicus Data Space, maska chmur SCL, min. 5 czystych pikseli w polu. Odczyt zależy od uprawy i fazy: przy wschodach nie porównujemy (widać glebę), próg spadku NDMI to −0,05 dla zbóż, rzepaku i strączkowych, −0,07 dla upraw w szerokich rzędach i wieloletnich, −0,15 przy dojrzewaniu zbóż; spadek na łące bez niedoboru w bilansie traktujemy jako pokos. Nie wiemy, co rosło na polu w latach porównania (płodozmian).",
       "water": "Woda: odległości od obrysu pola w układzie PL-1992 (PostGIS), promień 500 m.",
       "zones": "Miejsca na polu: siatka 10 m; NDMI z jednego najmniej zachmurzonego zdjęcia Sentinel-2 z 30 dni względem mediany pola, wskaźnik gromadzenia wody i zagłębienia bez odpływu z modelu terenu ok. 30 m (EU-DEM / SRTM).",
       "surroundings": "Otoczenie: drzewa w pasie 15 m od granicy pola (las i rząd drzew szukane do 500 m), jazy, zapory, śluzy, wały, źródła i ujęcia do 3 km, rów wchodzący w rurę do 500 m, obszary chronione przecinające pole (BDOT10k w PostGIS).",

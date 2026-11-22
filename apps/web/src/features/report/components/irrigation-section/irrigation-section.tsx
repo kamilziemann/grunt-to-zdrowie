@@ -80,10 +80,10 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
                 mm: number(irrigation.netDepthMm),
                 volume: format.number(volumeM3(irrigation.netDepthMm, report.field.areaHa)),
               })}
-              {/* termin ("najlepiej dzis") ma sens tylko dla dzisiejszej analizy */}
-              {irrigation.withinDays === null || past
+              {/* termin startu: dla dnia analizy "zacznij", dla daty z przeszlosci "trzeba bylo zaczac" */}
+              {irrigation.withinDays === null
                 ? null
-                : ` ${t('within', { days: irrigation.withinDays })}`}
+                : ` ${t(past ? 'withinPast' : 'within', { days: irrigation.withinDays })}`}
             </p>
             {!plan && <p className="text-sm text-muted-foreground">{t('deficitNote')}</p>}
           </>

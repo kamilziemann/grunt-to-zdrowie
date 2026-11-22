@@ -38,7 +38,22 @@ export function FirstStep({ report, allHref }: { report: WaterReport; allHref: A
     report.assessment.level === 'excess'
       ? tIrrigation(past ? 'excessPast' : 'excess')
       : irrigation
-        ? tIrrigation(`${past ? 'advisablePast' : 'advisable'}.${irrigation.advisable}`)
+        ? [
+            tIrrigation(`${past ? 'advisablePast' : 'advisable'}.${irrigation.advisable}`),
+            // termin i rozmiar od razu w karcie "Co robic" - rolnik nie szuka ich w szczegolach
+            irrigation.advisable !== 'no' && irrigation.withinDays !== null
+              ? tIrrigation(past ? 'withinPast' : 'within', { days: irrigation.withinDays })
+              : null,
+            irrigation.advisable !== 'no' && irrigation.doses !== undefined && irrigation.doseMm !== undefined
+              ? tIrrigation('planShort', {
+                  doses: irrigation.doses,
+                  dose: irrigation.doseMm,
+                  interval: irrigation.intervalDays ?? 0,
+                })
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' ')
         : null;
 
   return (
