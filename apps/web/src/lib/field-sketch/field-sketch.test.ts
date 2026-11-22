@@ -5,8 +5,10 @@ import {
   buildFieldSketch,
   clipToField,
   closestPair,
+  groupDitches,
   labelPoint,
   localProjection,
+  MAX_ANCHORS,
   niceScale,
   SKETCH_WIDTH,
   sketchGroup,
@@ -123,6 +125,100 @@ describe('model szkicu', () => {
     expect(sketch.highlight).toMatch(/^M/);
     expect(sketch.groups).toEqual(['ditch']);
     expect(sketch.width).toBe(SKETCH_WIDTH);
+  });
+
+  it('jeden row: jedna linia odniesienia', () => {
+    const sketch = buildFieldSketch(FIELD, CENTER, [
+      ditch([
+        [21.5895, 52.1723],
+        [21.5915, 52.1723],
+      ]),
+    ]);
+
+    expect(sketch.fact).toMatchObject({ kind: 'ditch_through', ditches: 1 });
+    expect(sketch.fact?.kind === 'ditch_through' && sketch.fact.anchors).toHaveLength(1);
+  });
+
+  it('dwa osobne rowy: dwie linie do jednej tabliczki, dluzszy pierwszy', () => {
+    const sketch = buildFieldSketch(FIELD, CENTER, [
+      // krotszy row w polnocnej czesci pola, od zachodniej granicy do polowy
+      ditch([
+        [21.5895, 52.1725],
+        [21.5905, 52.1725],
+      ]),
+      // dluzszy row przez cale pole, poludniowa czesc
+      ditch([
+        [21.5895, 52.1722],
+        [21.5915, 52.1722],
+      ]),
+    ]);
+    const fact = sketch.fact?.kind === 'ditch_through' ? sketch.fact : null;
+
+    expect(fact).toMatchObject({ ditches: 2, lengthM: 102 });
+    expect(fact?.anchors).toHaveLength(2);
+    // polnoc u gory: dluzszy (poludniowy) row ma wieksze y
+    expect(fact?.anchors[0]?.[1]).toBeGreaterThan(fact?.anchors[1]?.[1] ?? Infinity);
+  });
+
+  it('row z trzech stykajacych sie odcinkow to jeden row', () => {
+    const sketch = buildFieldSketch(FIELD, CENTER, [
+      ditch([
+        [21.5895, 52.1723],
+        [21.5902, 52.1723],
+      ]),
+      ditch([
+        [21.5902, 52.1723],
+        [21.5908, 52.1724],
+      ]),
+      ditch([
+        [21.5908, 52.1724],
+        [21.5915, 52.1724],
+      ]),
+    ]);
+
+    expect(sketch.fact).toMatchObject({ kind: 'ditch_through', ditches: 1 });
+    expect(sketch.fact?.kind === 'ditch_through' && sketch.fact.anchors).toHaveLength(1);
+  });
+
+  it('szesc rowow: tabliczka liczy wszystkie, linie ida do czterech najdluzszych', () => {
+    // rownolegle rowy co ok. 9 m, kazdy dluzszy od poprzedniego
+    const features = [0, 1, 2, 3, 4, 5].map((index) =>
+      ditch([
+        [21.5895, 52.17205 + index * 0.00009],
+        [21.5902 + index * 0.0001, 52.17205 + index * 0.00009],
+      ]),
+    );
+    const sketch = buildFieldSketch(FIELD, CENTER, features);
+    const fact = sketch.fact?.kind === 'ditch_through' ? sketch.fact : null;
+
+    expect(fact?.ditches).toBe(6);
+    expect(fact?.anchors).toHaveLength(MAX_ANCHORS);
+    // najkrotsze rowy (dwa najbardziej na poludnie) bez linii: wszystkie punkty w polnocnej czesci
+    const southY = Math.max(...(fact?.anchors.map((point) => point[1]) ?? []));
+    const shortest = buildFieldSketch(FIELD, CENTER, features.slice(0, 1));
+    const shortestY = shortest.fact?.kind === 'ditch_through' ? shortest.fact.anchors[0]?.[1] : 0;
+
+    expect(southY).toBeLessThan(shortestY ?? 0);
+  });
+
+  it('grupuje odcinki stykajace sie koncami, odcinki rozlaczne osobno', () => {
+    const groups = groupDitches([
+      [
+        [0, 0],
+        [10, 0],
+      ],
+      [
+        [10.5, 0],
+        [20, 5],
+      ],
+      [
+        [0, 50],
+        [15, 50],
+      ],
+    ]);
+
+    expect(groups.map((group) => group.pieces.length)).toEqual([2, 1]);
+    expect(groups[1]?.length).toBeCloseTo(15);
   });
 
   it('row tuz przy granicy, w polu: row na skraju pola', () => {

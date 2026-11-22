@@ -1,6 +1,6 @@
 // Szkic "Pole i woda wokol" bez biblioteki map: rzut lokalny w metrach wokol srodka pola, wybor obiektow BDOT10k
 // w promieniu SKETCH_RADIUS_M, sciezki SVG, podzialka, jeden wyrozniony fakt (row przez pole albo najblizszy row
-// lub ciek z linia wymiarowa) i miejsca na polu (strefy z raportu) z punktem na numer. Sam model - rysuje go
+// lub ciek z linia wymiarowa; kazdy osobny row w polu z wlasnym punktem odniesienia) i miejsca na polu (strefy z raportu) z punktem na numer. Sam model - rysuje go
 // komponent raportu (`FieldSketch`).
 import type { HydroFeature, HydroFeatureKind, ParcelGeometry, Zone } from '@app/contracts';
 import type { Position } from 'geojson';
@@ -17,6 +17,12 @@ const MIN_ASPECT = 0.8;
 const MAX_ASPECT = 1.5;
 /** Odcinek rowu w polu blizej granicy niz tyle metrow = row na skraju pola. */
 const EDGE_M = 15;
+/** Konce odcinkow blizej niz tyle metrow = ten sam row (BDOT10k dzieli rowy na odcinki miedzy wezlami). */
+const JOIN_M = 1;
+/** Kawalek rowu w polu krotszy niz tyle metrow (row zahacza o rog pola) nie dostaje osobnej linii odniesienia. */
+const MIN_DITCH_M = 5;
+/** Najwiecej linii odniesienia od tabliczki - przy wiekszej liczbie rowow linie ida do najdluzszych. */
+export const MAX_ANCHORS = 4;
 const NICE_SCALES = [10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
 
 type Meters = [number, number];
@@ -43,10 +49,15 @@ export type SketchFact =
   | {
       kind: 'ditch_through';
       lengthM: number;
-      /** row biegnie skrajem pola (najdluzszy odcinek w polu lezy przy granicy), a nie przez jego srodek */
+      /** rowy biegna skrajem pola (kazdy row w polu lezy przy granicy), a nie przez jego srodek */
       alongEdge: boolean;
-      /** srodek najdluzszego odcinka rowu w polu - tu dochodzi linia odniesienia */
-      anchor: SketchPoint;
+      /** liczba osobnych rowow w polu (odcinki stykajace sie koncami to jeden row) */
+      ditches: number;
+      /**
+       * punkty odniesienia: srodek najdluzszego odcinka kazdego rowu, od najdluzszego rowu, najwyzej MAX_ANCHORS -
+       * tu dochodza linie od tabliczki
+       */
+      anchors: SketchPoint[];
     }
   | {
       kind: 'nearest_ditch' | 'nearest_watercourse';
@@ -365,6 +376,46 @@ export function labelPoint(parts: readonly Meters[][][]): Meters {
   return [xs.reduce((a, b) => a + b, 0) / xs.length, ys.reduce((a, b) => a + b, 0) / ys.length];
 }
 
+/**
+ * Odcinki rowow w polu pogrupowane w osobne rowy: odcinki, ktorych konce stykaja sie (blizej niz JOIN_M), to jeden
+ * row. Grupy od najdluzszej.
+ */
+export function groupDitches(pieces: readonly Meters[][]): { pieces: Meters[][]; length: number }[] {
+  const parent = pieces.map((_, index) => index);
+  const root = (index: number): number => {
+    let current = index;
+
+    while (parent[current] !== current) current = parent[current] ?? current;
+
+    return current;
+  };
+  const ends = pieces.map((piece) =>
+    [piece[0], piece.at(-1)].filter((point): point is Meters => point !== undefined),
+  );
+
+  for (let i = 0; i < pieces.length; i += 1) {
+    for (let j = i + 1; j < pieces.length; j += 1) {
+      const touches = (ends[i] ?? []).some((a) =>
+        (ends[j] ?? []).some((b) => Math.hypot(a[0] - b[0], a[1] - b[1]) < JOIN_M),
+      );
+
+      if (touches) parent[root(j)] = root(i);
+    }
+  }
+
+  const groups = new Map<number, Meters[][]>();
+
+  pieces.forEach((piece, index) => {
+    const key = root(index);
+
+    groups.set(key, [...(groups.get(key) ?? []), piece]);
+  });
+
+  return [...groups.values()]
+    .map((group) => ({ pieces: group, length: group.reduce((sum, piece) => sum + pathLength(piece), 0) }))
+    .toSorted((a, b) => b.length - a.length);
+}
+
 function featureKey(feature: HydroFeature): string {
   return `${feature.kind}|${JSON.stringify(feature.geometry.coordinates)}`;
 }
@@ -484,17 +535,19 @@ export function buildFieldSketch(
   let highlight: string | null = null;
 
   if (insideLength >= 1) {
-    const longest = insidePieces.reduce((best, piece) =>
-      pathLength(piece) > pathLength(best) ? piece : best,
+    const all = groupDitches(insidePieces);
+    // okruchy przy rogu pola nie licza sie jako osobny row, chyba ze innego nie ma
+    const ditches = all.filter((group, index) => index === 0 || group.length >= MIN_DITCH_M);
+    const anchors = ditches.map((group) =>
+      midpoint(group.pieces.reduce((best, piece) => (pathLength(piece) > pathLength(best) ? piece : best))),
     );
-
-    const anchor = midpoint(longest);
 
     fact = {
       kind: 'ditch_through',
       lengthM: Math.round(ditchInFieldM ?? insideLength),
-      alongEdge: closestPair([[anchor]], rings).distance < EDGE_M,
-      anchor: toSvg(anchor),
+      alongEdge: anchors.every((anchor) => closestPair([[anchor]], rings).distance < EDGE_M),
+      ditches: ditches.length,
+      anchors: anchors.slice(0, MAX_ANCHORS).map(toSvg),
     };
     highlight = insidePieces.map((piece) => d(piece, false)).join('');
   } else {

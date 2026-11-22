@@ -135,9 +135,9 @@ export function SketchLegend({
       text:
         model.fact.kind !== 'ditch_through'
           ? t('highlightNearest')
-          : model.fact.alongEdge
-            ? t('highlightAlongEdge')
-            : t('highlightThrough'),
+          : t(model.fact.alongEdge ? 'highlightAlongEdge' : 'highlightThrough', {
+              count: model.fact.ditches,
+            }),
     });
   }
 

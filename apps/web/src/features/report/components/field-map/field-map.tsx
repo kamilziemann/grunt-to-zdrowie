@@ -124,13 +124,16 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
     item.distanceM < 1 ? t('touches') : t('distance', { meters: meters(item.distanceM) });
   const fieldName = t(`sketch.field.${field.kind}`, { number: fieldNumber(field.label) });
   const fact = sketch.fact;
+  // jedna tabliczka na wszystkie rowy w polu: przy kilku liczba rowow i laczna dlugosc
+  const ditchText = (count: number, alongEdge: boolean, length: string) =>
+    count > 1
+      ? t(alongEdge ? 'sketch.ditchesAlongEdge' : 'sketch.ditchesThrough', { count, meters: length })
+      : t(alongEdge ? 'sketch.ditchAlongEdge' : 'sketch.ditchThrough', { meters: length });
   // zdanie faktu na szkicu: row przez pole albo najblizszy row lub ciek
   const factText = !fact
     ? null
     : fact.kind === 'ditch_through'
-      ? fact.alongEdge
-        ? t('sketch.ditchAlongEdge', { meters: meters(fact.lengthM) })
-        : t('sketch.ditchThrough', { meters: meters(fact.lengthM) })
+      ? ditchText(fact.ditches, fact.alongEdge, meters(fact.lengthM))
       : fact.kind === 'nearest_ditch'
         ? t('sketch.nearestDitch', { meters: meters(fact.distanceM) })
         : fact.name

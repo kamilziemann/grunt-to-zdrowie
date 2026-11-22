@@ -192,7 +192,7 @@ test.describe('mapa pola w raporcie', () => {
     await mockAnalysisApi(page);
   });
 
-  test('szkic pola: rów przez pole z linią odniesienia, legenda, podziałka; na wydruku szkic', async ({
+  test('szkic pola: rowy przez pole z liniami do jednej tabliczki, legenda, podziałka; na wydruku szkic', async ({
     page,
   }) => {
     await mockHydroApi(page, { tiles: DITCH_THROUGH_TILES });
@@ -205,10 +205,12 @@ test.describe('mapa pola w raporcie', () => {
     await expect(map).toHaveAttribute('data-hydro', 'ready');
     await expect(sketch).toBeVisible();
     await expect(sketch).toContainText('Działka 6509');
-    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^Rów przez pole, \d+ m$/);
+    // dwa osobne rowy w polu: jedna tabliczka z laczna dlugoscia, linia do kazdego rowu
+    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^2 rowy przez pole, razem \d+ m$/);
+    await expect(page.getByTestId('field-sketch-fact-line')).toHaveCount(2);
     await expect(page.getByTestId('field-sketch-highlight')).toBeAttached();
     await expect(page.getByTestId('field-sketch-scale')).toContainText(/\d+ m/);
-    await expect(page.getByTestId('field-sketch-legend')).toContainText('Rów płynący przez pole');
+    await expect(page.getByTestId('field-sketch-legend')).toContainText('Rowy płynące przez pole');
     await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
     await expect(page.getByTestId('field-map-nearest')).toContainText(
       'Najbliższy rów melioracyjny: przy samym polu albo przez pole.',

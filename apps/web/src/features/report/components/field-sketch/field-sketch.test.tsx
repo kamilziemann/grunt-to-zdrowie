@@ -16,7 +16,7 @@ const MODEL: FieldSketchModel = {
   lines: [],
   areas: [],
   highlight: null,
-  fact: { kind: 'ditch_through', lengthM: 120, alongEdge: false, anchor: [288, 230] },
+  fact: { kind: 'ditch_through', lengthM: 120, alongEdge: false, ditches: 1, anchors: [[288, 230]] },
   names: [],
   groups: [],
   scale: { meters: 250, length: 140 },
@@ -34,6 +34,20 @@ const CROWDED: FieldSketchModel = {
     { text: 'Potok Przy Podziałce', at: [60, 440] },
     { text: 'Kanał Wolny Drugi', at: [110, 62] },
   ],
+};
+
+const TWO_DITCHES: FieldSketchModel = {
+  ...MODEL,
+  fact: {
+    kind: 'ditch_through',
+    lengthM: 406,
+    alongEdge: false,
+    ditches: 2,
+    anchors: [
+      [220, 210],
+      [350, 250],
+    ],
+  },
 };
 
 const ZONED: FieldSketchModel = {
@@ -70,6 +84,39 @@ describe('FieldSketch', () => {
     expect(shown).not.toContain('Potok Przy Podziałce');
     expect(shown).not.toContain('Kanał Wolny Drugi');
     expect(screen.getByTestId('field-sketch-scale')).toHaveTextContent('250 m');
+  });
+
+  it('kazdy row w polu ma wlasna linie do jednej tabliczki, linie nie przechodza przez tabliczke', () => {
+    const { container } = renderWithIntl(
+      <FieldSketch
+        model={TWO_DITCHES}
+        fieldName="Działka 1"
+        factText="2 rowy przez pole, razem 406 m"
+        label="Szkic"
+      />,
+    );
+    const box = container.querySelector('[data-testid="field-sketch-fact"] rect');
+    const lines = screen.getAllByTestId('field-sketch-fact-line');
+    const top = Number(box?.getAttribute('y'));
+    const bottom = top + Number(box?.getAttribute('height'));
+
+    expect(screen.getAllByText('2 rowy przez pole, razem 406 m')).toHaveLength(1);
+    expect(lines).toHaveLength(2);
+
+    // obie linie wychodza z tego samego punktu krawedzi tabliczki i ida na zewnatrz
+    const starts = lines.map((line) => {
+      const segment = line.querySelector('line');
+
+      return [segment?.getAttribute('x1'), segment?.getAttribute('y1')].join(' ');
+    });
+
+    expect(new Set(starts).size).toBe(1);
+
+    for (const line of lines) {
+      const y2 = Number(line.querySelector('line')?.getAttribute('y2'));
+
+      expect(y2 > bottom || y2 < top).toBe(true);
+    }
   });
 
   it('rysuje miejsca na polu wzorem z numerem, tlo bez wzoru, wyroznia aktywne miejsce', () => {

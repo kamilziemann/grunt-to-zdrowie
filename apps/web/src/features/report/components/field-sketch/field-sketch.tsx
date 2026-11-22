@@ -90,9 +90,49 @@ interface FactPlacement {
   boxHeight: number;
 }
 
+/** Odcinek a-b przecina prostokat (albo w nim lezy) - test Liang-Barsky. */
+function segmentHitsRect(a: SketchPoint, b: SketchPoint, [rx, ry, rw, rh]: Rect): boolean {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  let t0 = 0;
+  let t1 = 1;
+
+  for (const [p, q] of [
+    [-dx, a[0] - rx],
+    [dx, rx + rw - a[0]],
+    [-dy, a[1] - ry],
+    [dy, ry + rh - a[1]],
+  ] as const) {
+    if (p === 0) {
+      if (q < 0) return false;
+      continue;
+    }
+
+    const t = q / p;
+
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+
+    if (t0 > t1) return false;
+  }
+
+  return true;
+}
+
+/** Punkt, w ktorym linie odniesienia dochodza do tabliczki: dolna albo gorna krawedz, nad srodkiem punktow. */
+function joinPoint(placement: FactPlacement, anchors: readonly SketchPoint[], pad: number): SketchPoint {
+  const { x, y, boxWidth, boxHeight } = placement;
+  const meanX = anchors.reduce((sum, point) => sum + point[0], 0) / Math.max(1, anchors.length);
+  const meanY = anchors.reduce((sum, point) => sum + point[1], 0) / Math.max(1, anchors.length);
+
+  return [clamp(meanX, x + pad, x + boxWidth - pad), y + boxHeight / 2 < meanY ? y + boxHeight : y];
+}
+
 /**
- * Gdzie stoi ramka faktu: rowu w polu - poza polem (po stronie bez podpisu pola), zeby nie zaslaniala rowu;
- * linii wymiarowej - nad jej srodkiem. Wolne sa wszystkie rogi poza dolnym lewym (podzialka) i gornym prawym (polnoc).
+ * Gdzie stoi ramka faktu: rowow w polu - poza polem (po stronie bez podpisu pola) nad srodkiem punktow odniesienia,
+ * zeby nie zaslaniala rowow; linie ze wspolnego punktu tabliczki do kazdego rowu nie krzyzuja sie, a pozycja jest
+ * dobra tylko wtedy, gdy wszystkie rowy leza po jednej stronie tabliczki i zadna linia nie biegnie przez podpis pola.
+ * Linii wymiarowej - nad jej srodkiem. Wolne sa wszystkie rogi poza dolnym lewym (podzialka) i gornym prawym (polnoc).
  */
 function placeFact({
   fact,
@@ -105,6 +145,7 @@ function placeFact({
   fieldTop,
   fieldBottom,
   avoid = [],
+  nameRect,
 }: {
   fact: NonNullable<FieldSketchModel['fact']>;
   text: string;
@@ -115,8 +156,10 @@ function placeFact({
   avoidY: number;
   fieldTop: number;
   fieldBottom: number;
-  /** zajete miejsca (numery miejsc na polu) - ramka ich nie zaslania, gdy jest gdzie indziej miejsce */
+  /** zajete miejsca (podpis pola, numery miejsc na polu) - ramka ich nie zaslania, gdy jest gdzie indziej miejsce */
   avoid?: readonly Rect[];
+  /** podpis pola - linie odniesienia przez niego nie biegna */
+  nameRect?: Rect;
 }): FactPlacement {
   const pad = 10 * unit;
   const boxWidth = textWidth(text, font) + pad * 1.6;
@@ -131,38 +174,50 @@ function placeFact({
       clamp(y - boxHeight / 2, pad, height - boxHeight - pad * 3.5),
     ];
   };
-
-  // pierwsza propozycja bez kolizji z numerami miejsc; gdy kazda koliduje - pierwsza
-  const pick = (candidates: SketchPoint[]): FactPlacement => {
-    const free = candidates.find(
-      ([x, y]) => !avoid.some((rect) => overlaps([x, y, boxWidth, boxHeight], rect)),
-    );
-    const [x, y] = free ?? candidates[0] ?? [pad, pad];
-
-    return { x, y, boxWidth, boxHeight };
-  };
+  const free = ([x, y]: SketchPoint) => !avoid.some((rect) => overlaps([x, y, boxWidth, boxHeight], rect));
 
   if (fact.kind === 'ditch_through') {
-    const nameBelow = avoidY > fact.anchor[1];
+    const anchors = fact.anchors;
+    const xs = anchors.map((point) => point[0]);
+    const ys = anchors.map((point) => point[1]);
+    const centerX = xs.reduce((sum, value) => sum + value, 0) / Math.max(1, xs.length);
+    const top = Math.min(...ys);
+    const bottom = Math.max(...ys);
+    const nameBelow = avoidY > (top + bottom) / 2;
     const outside = nameBelow ? fieldTop - boxHeight - pad * 1.5 : fieldBottom + pad * 1.5;
     const fits = outside > pad && outside + boxHeight < height - pad * 3.5;
-    const near = placeBox(fact.anchor, nameBelow);
-    const x = clamp(fact.anchor[0] - boxWidth / 2, pad, width - boxWidth - pad * 4);
-
-    return pick([
+    const x = clamp(centerX - boxWidth / 2, pad, width - boxWidth - pad * 4);
+    const candidates: SketchPoint[] = [
       ...(fits ? [[x, outside] as SketchPoint] : []),
-      near,
-      placeBox(fact.anchor, !nameBelow),
+      placeBox([centerX, nameBelow ? top : bottom], nameBelow),
+      placeBox([centerX, nameBelow ? bottom : top], !nameBelow),
       [x, pad],
       [x, height - boxHeight - pad * 3.5],
       [width - boxWidth - pad * 4, height - boxHeight - pad * 3.5],
       [pad, pad],
-    ]);
+    ];
+    // linie zbiegaja sie w jednym punkcie tabliczki: wszystkie rowy po tej samej stronie, poza tabliczka,
+    // zadna linia przez podpis pola
+    const clean = ([cx, cy]: SketchPoint) => {
+      const placement = { x: cx, y: cy, boxWidth, boxHeight };
+      const join = joinPoint(placement, anchors, pad);
+      const below = join[1] > cy;
+      const sideOk = anchors.every((point) => (below ? point[1] > cy + boxHeight : point[1] < cy));
+
+      return sideOk && !anchors.some((point) => nameRect && segmentHitsRect(join, point, nameRect));
+    };
+    const [bx, by] = candidates.find((candidate) => free(candidate) && clean(candidate)) ??
+      candidates.find(free) ??
+      candidates[0] ?? [pad, pad];
+
+    return { x: bx, y: by, boxWidth, boxHeight };
   }
 
   const middle: SketchPoint = [(fact.from[0] + fact.to[0]) / 2, (fact.from[1] + fact.to[1]) / 2];
+  const candidates = [placeBox(middle, true), placeBox(middle, false)];
+  const [x, y] = candidates.find(free) ?? candidates[0] ?? [pad, pad];
 
-  return pick([placeBox(middle, true), placeBox(middle, false)]);
+  return { x, y, boxWidth, boxHeight };
 }
 
 /** Napis z obwodka w kolorze tla - czytelny na liniach i wypelnieniach, takze w czerni i bieli. */
@@ -270,6 +325,7 @@ export function FieldSketch({
             textRect(fieldName, nameAt, labelFont),
             ...drawnZones.map((zone) => badgeRect(zone.labelAt, unit)),
           ],
+          nameRect: textRect(fieldName, nameAt, labelFont),
         })
       : null;
   // nazwy ciekow ustepuja podpisowi pola, ramce faktu, podzialce, polnocy i sobie nawzajem - pominieta nazwa
@@ -566,19 +622,40 @@ function FactCallout({
   const { x, y, boxWidth, boxHeight } = placement;
 
   if (fact.kind === 'ditch_through') {
-    const joinY = y + boxHeight / 2 < fact.anchor[1] ? y + boxHeight : y;
+    const join = joinPoint(placement, fact.anchors, pad);
 
+    // jedna linia do kazdego rowu, wszystkie ze wspolnego punktu tabliczki - liczba dotyczy rowow razem
     return (
       <g data-testid="field-sketch-fact">
-        <line
-          x1={clamp(fact.anchor[0], x + pad, x + boxWidth - pad)}
-          y1={joinY}
-          x2={fact.anchor[0]}
-          y2={fact.anchor[1]}
-          stroke="var(--foreground)"
-          strokeWidth={1.4 * unit}
-        />
-        <circle cx={fact.anchor[0]} cy={fact.anchor[1]} r={3.5 * unit} fill="var(--foreground)" />
+        {fact.anchors.map((anchor) => (
+          <g key={`${String(anchor[0])} ${String(anchor[1])}`} data-testid="field-sketch-fact-line">
+            <line
+              x1={join[0]}
+              y1={join[1]}
+              x2={anchor[0]}
+              y2={anchor[1]}
+              stroke="var(--card)"
+              strokeWidth={3.4 * unit}
+              strokeLinecap="round"
+            />
+            <line
+              x1={join[0]}
+              y1={join[1]}
+              x2={anchor[0]}
+              y2={anchor[1]}
+              stroke="var(--foreground)"
+              strokeWidth={1.4 * unit}
+            />
+            <circle
+              cx={anchor[0]}
+              cy={anchor[1]}
+              r={3.5 * unit}
+              fill="var(--foreground)"
+              stroke="var(--card)"
+              strokeWidth={1.2 * unit}
+            />
+          </g>
+        ))}
         <FactBox x={x} y={y} width={boxWidth} height={boxHeight} font={font} unit={unit} text={text} />
       </g>
     );
