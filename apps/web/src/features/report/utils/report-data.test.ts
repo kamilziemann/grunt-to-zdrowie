@@ -230,9 +230,9 @@ describe('wyliczenia raportu', () => {
   });
 
   it('miejsce na tle lat: w gornej polowie liczone od najbardziej mokrego', () => {
-    expect(rankSide(1, 10)).toEqual({ side: 'dry', rank: 1, wet: 10 });
+    expect(rankSide(1, 10)).toEqual({ side: 'dry', rank: 1, wet: 10, previous: 9 });
     expect(rankSide(5, 10).side).toBe('dry');
-    expect(rankSide(11, 11)).toEqual({ side: 'wet', rank: 11, wet: 1 });
+    expect(rankSide(11, 11)).toEqual({ side: 'wet', rank: 11, wet: 1, previous: 10 });
     expect(rankSide(1, 1).side).toBe('dry');
   });
 });

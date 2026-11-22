@@ -162,6 +162,7 @@ export function HistorySection({ report }: { report: WaterReport }) {
                         </span>
                       )}
                     </span>
+                    {row.current && <span className="text-xs font-normal">{t('currentShort')}</span>}
                     {row.current && <span className="text-xs font-normal">{analysisDay}</span>}
                   </span>
                   <span aria-hidden="true" className="h-4 overflow-hidden rounded-sm bg-muted">

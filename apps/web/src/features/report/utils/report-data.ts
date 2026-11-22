@@ -403,12 +403,17 @@ export function isoDay(date: string): Date {
 
 /**
  * Miejsce okresu na tle lat od strony, ktora lepiej go opisuje: w dolnej polowie "N. najsuchszy", w gornej
- * "N. najbardziej mokry" (11. najsuchszy z 11 lat to najbardziej mokry). Parametry do komunikatow `side`/`wet`.
+ * "N. najbardziej mokry" (11. najsuchszy z 11 lat to najbardziej mokry). Parametry do komunikatow `side`/`wet`,
+ * `previous` - ile z lat porownania to lata poprzednie (bez biezacego).
  */
-export function rankSide(rank: number, years: number): { side: 'dry' | 'wet'; rank: number; wet: number } {
+export function rankSide(
+  rank: number,
+  years: number,
+): { side: 'dry' | 'wet'; rank: number; wet: number; previous: number } {
   const wet = years - rank + 1;
 
-  return { side: years > 1 && wet < rank ? 'wet' : 'dry', rank, wet };
+  // lata porownania to rok biezacy i poprzednie ("z 11 lat (biezacy i 10 poprzednich)")
+  return { side: years > 1 && wet < rank ? 'wet' : 'dry', rank, wet, previous: years - 1 };
 }
 
 /**

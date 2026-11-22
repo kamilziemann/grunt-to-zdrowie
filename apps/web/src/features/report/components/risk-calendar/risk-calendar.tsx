@@ -59,7 +59,7 @@ export interface RiskCalendarProps {
 /**
  * Kalendarz suszy (D1): lata x okresy 60-dniowe IUNG, kolumny podpisane dniem konca okresu i zgrupowane po
  * miesiacach, ostatni wiersz = rok analizy (okresy zakonczone do dnia analizy), kolumna okresu z oceny wyrozniona
- * ("ten rok na tle 10 lat"); nadmiar wody ma wlasny stan. Tabela, wiec czytnik ekranu podaje rok, okres i status kazdej kratki. Na telefonie przewija sie
+ * ("biezacy rok na tle 10 poprzednich"); nadmiar wody ma wlasny stan. Tabela, wiec czytnik ekranu podaje rok, okres i status kazdej kratki. Na telefonie przewija sie
  * w poziomie we wlasnym kontenerze (rok przyklejony z lewej), strona nie; na wydruku miesci sie na szerokosc.
  */
 export function RiskCalendar({ calendar, current = null, currentYear = NO_CELLS }: RiskCalendarProps) {
@@ -153,7 +153,11 @@ export function RiskCalendar({ calendar, current = null, currentYear = NO_CELLS 
                     row.current && 'font-bold',
                   )}
                 >
-                  {row.current ? t('currentYear', { year: row.year }) : row.year}
+                  {row.year}
+                  {/* rok analizy: drugi wiersz, zeby waska kolumna nie wchodzila na kratki */}
+                  {row.current && (
+                    <span className="block text-xs leading-tight font-normal">{t('currentShort')}</span>
+                  )}
                 </th>
                 {row.cells.map((cell, index) => {
                   const periodNo = index + 1;

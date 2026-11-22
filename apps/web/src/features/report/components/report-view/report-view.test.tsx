@@ -601,7 +601,7 @@ describe('ReportView', () => {
       expect(causes).not.toHaveTextContent(t('causes.none'));
       expect(screen.getByTestId('excess-causes')).toHaveTextContent(
         'W ostatnich 30 dniach spadło 167 l/m² deszczu – zwykle o tej porze ok. 42 l/m², czyli ok. 4 razy więcej. ' +
-          'To najbardziej mokry taki okres z 11 lat.',
+          'To najbardziej mokry taki okres z 11 lat (bieżący i 10 poprzednich).',
       );
       expect(container.querySelector('[data-fact="balance"]')).toHaveTextContent(
         'zostało ok. 97 l/m² wody więcej',
@@ -610,6 +610,18 @@ describe('ReportView', () => {
         'Na polu są 2 zagłębienia bez odpływu, razem na ok. 8200 m³ wody.',
       );
       expect(container.querySelector('[data-fact="ditches"]')).toHaveTextContent('sprawdź, czy są drożne');
+    });
+
+    it('historia: rok analizy podpisany jako biezacy, miejsce okresu "z 11 lat (biezacy i 10 poprzednich)"', () => {
+      const { container } = renderReport(MEADOW_REPORT);
+      const history = container.querySelector('#historia');
+
+      expect(history).toHaveTextContent(
+        'to najbardziej mokry taki okres z 11 lat (bieżący i 10 poprzednich).',
+      );
+      expect(history).toHaveTextContent('Kalendarz suszy: bieżący rok na tle 10 poprzednich');
+      expect(history?.querySelector('tr[data-current] th')).toHaveTextContent('2017bieżący');
+      expect(history?.querySelector('[data-season="2017"]')).toHaveTextContent('bieżący20 wrz');
     });
 
     it('nawadnianie: jedno zdanie "nie nawadniaj"; retencja nie obiecuje zatrzymywania; bez dni niedoboru w ocenie', () => {
