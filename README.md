@@ -54,6 +54,8 @@ bun run setup:local                                      # lokalna baza D1: migr
 bun run dev                                              # jeden serwer: strony + API (vite dev w workerd)
 ```
 
+- Lokalna baza sprzed 2026-11-22 (z tabelami kont) ma starą historię migracji: `rm -rf apps/web/.wrangler/state`,
+  potem `bun run setup:local` ([ADR 0011](docs/architecture/decisions/0011-no-user-accounts.md)).
 - Aplikacja: <http://localhost:3000>
 - API: <http://localhost:3000/api> (OpenAPI: <http://localhost:3000/api/docs>, <http://localhost:3000/api/openapi.json>)
 
@@ -79,7 +81,6 @@ apps/
   server/               API: Hono + OpenAPI; warstwy entry/modules/services/repositories/infrastructure/domain
   web/                  jedyny Worker: TanStack Start (trasy src/routes, features) + API z server pod /api
 packages/
-  auth/                 opcjonalne konta (Better Auth), domyślnie wyłączone
   cache/                polityki i tagi cache brzegowego (Workers Cache)
   config/               stałe wspólne (nazwa, paginacja)
   contracts/            schematy Zod + typy: działki, miejsca, uprawy, analiza, raport, kody błędów

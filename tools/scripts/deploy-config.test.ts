@@ -71,7 +71,7 @@ describe('apps/web/wrangler.jsonc (jedyny Worker)', () => {
     expect(blocks.map((block) => block.cache?.enabled)).toEqual([true, true, true]);
   });
 
-  // API jest pod /api tego samego originu: Better Auth i linki z maili buduja adresy z PUBLIC_URL.
+  // API jest pod /api tego samego originu: OpenAPI (`servers`) buduje adresy z PUBLIC_URL.
   it('PUBLIC_URL wskazuje /api, a ALLOWED_ORIGINS - origin stron', () => {
     for (const block of blocks) {
       const publicUrl = block.vars?.PUBLIC_URL ?? '';

@@ -117,12 +117,15 @@ bun run dev                                              # jeden serwer: strony 
   `bun run bdot:import`) i `COPERNICUS_CLIENT_ID` / `COPERNICUS_CLIENT_SECRET` (darmowe konto Copernicus Data
   Space). Bez nich raport powstaje, a brakujące źródło jest opisane wprost w `sources` i ograniczeniach.
 - Kontrola jakości: `bun check` (format, lint, granice architektury, dokumentacja, typy, testy), `bun db:check`.
+- Aplikacja nie ma kont ani logowania: raport dostaje każdy, kto zna numer działki albo link do zapisanego raportu
+  ([ADR 0011](../architecture/decisions/0011-no-user-accounts.md)). Lokalna baza sprzed 2026-11-22 ma starą historię
+  migracji — usuń `apps/web/.wrangler/state` i uruchom `bun run setup:local` ponownie.
 
 ## Technologia
 
 Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i API Hono pod `/api`
 ([ADR 0008](../architecture/decisions/0008-tanstack-start-single-worker.md)); mapa MapLibre GL
-([ADR 0009](../architecture/decisions/0009-field-style-and-maplibre.md)); D1 na raporty i pamięć działek
+([ADR 0009](../architecture/decisions/0009-field-style-and-maplibre.md)); D1 na raporty i pamięć działek, bez kont
 ([ADR 0001](../architecture/decisions/0001-d1-instead-of-postgres.md)); PostGIS na Neon dla BDOT10k
 ([ADR 0010](../architecture/decisions/0010-postgis-on-neon-for-hydrography.md)); kontrakty Zod w
 `packages/contracts` wspólne dla API i stron.

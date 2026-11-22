@@ -153,8 +153,8 @@ Identyfikatory w nawiasach to reguły checkera (`--only <id>`); naruszenia pokaz
 - Zmienne środowiska wyłącznie przez `@app/env` (walidacja Zod); sekrety nigdy w `vars`/bundlu.
 - Testy obok kodu (`*.test.ts` w folderze jednostki, zob. reguła `folder-units`), integracyjne API w
   `apps/server/test`, E2E w `apps/web/e2e`.
-- Commity: Conventional Commits z zakresem z listy `web server contracts db auth env http rpc logger config tools
-  docs ci deps release`, np. `feat(server): kolejka renderów`, `fix(web): obsługa 503 w formularzu`.
+- Commity: Conventional Commits z zakresem z listy `web server contracts db env http rpc logger config tools docs
+  ci deps release`, np. `feat(server): kolejka renderów`, `fix(web): obsługa 503 w formularzu`.
 
 ## Gdzie dodać…
 

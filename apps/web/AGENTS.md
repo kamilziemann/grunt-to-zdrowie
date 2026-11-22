@@ -16,7 +16,7 @@ src/
   routes/               trasy plikowe TanStack Router (cienkie: loader + head + headers + kompozycja komponentów)
     __root.tsx          dokument HTML (shellComponent), <head>, skrypt motywu, raportowanie błędów, dostawcy
     {-$locale}/         jezyk w adresie: `/` = pl, `/en/...` = en; loader komunikatów, IntlProvider
-      _app/             powłoka aplikacji (nawigacja, menu konta, 404): strona główna, logowanie, `_protected/` (konto)
+      _app/             powłoka aplikacji (nawigacja, 404): strona główna, analiza, raport, gospodarstwo
         _dev/           sekcja deweloperska (katalog /design) - tylko development, własne komunikaty `dev`
   features/<x>/         api/ (*.queries.ts, *.mutations.ts, *.actions.ts), components/, hooks/, schemas/, utils/, index.ts
                         api/ obejmujące kilka obszarów → podfoldery obszarów (`api/<obszar>/<obszar>.queries.ts`,
@@ -35,11 +35,11 @@ e2e/                    Playwright na `vite dev` (jeden serwer: strony + API)
 
 1. **Workers Cache** (`wrangler.jsonc` → `cache.enabled`): GET z ważnym wpisem wraca z brzegu bez uruchamiania Workera.
    Klucz = ścieżka + query, **bez ciasteczek** — dlatego HTML nie może zależeć od ciasteczek (język w adresie, motyw
-   ustawia skrypt w `<head>`, stan konta pobiera przeglądarka z `/api/me`).
+   ustawia skrypt w `<head>`; kont nie ma — ADR 0011).
 2. `src/worker.ts`: `/api/*` → Hono (prefiks odcięty), reszta → `handlePageRequest` (requestId, ślad W3C, log `page`,
    domyślne `private, no-store`) → TanStack Start.
 3. Trasa: `loader` zapełnia cache TanStack Query przez **izomorficzny klient** `getApi()` (`@/lib/api`): na serwerze
-   Hono w tym samym Workerze (bez sieci, z sesją, IP i śladem bieżącego zapytania), w przeglądarce `fetch('/api')`.
+   Hono w tym samym Workerze (bez sieci, z IP i śladem bieżącego zapytania), w przeglądarce `fetch('/api')`.
 4. Komponent czyta dane `useSuspenseQuery` (ten sam klucz) — dane z SSR jadą do przeglądarki (dehydracja), przy
    nawigacji loader działa w przeglądarce, a preload `intent` pobiera dane już przy najechaniu na link.
 

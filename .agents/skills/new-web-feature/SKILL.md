@@ -45,7 +45,7 @@ wspólne helpery odczytu) i `api/testing` (dublet `getApi` dla testów).
    `apps/server/src/entry/routes/cache-rules.ts` (`PURGES`).
 3. **Komponenty** — folder na komponent; dane jako propsy albo `useSuspenseQuery(xQuery(id))`; teksty z `use-intl`
    (`useTranslations`, klucze w `messages/pl/<przestrzeń>.json` i `messages/en/...`; nowa przestrzeń = plik w obu + wpis w `src/i18n/namespaces.ts`); linki z `@/lib/navigation` i adresy z `lib/routes`.
-4. **Trasa** — `src/routes/{-$locale}/_app/<sciezka>.tsx` (strona publiczna) albo `_app/_protected/...` (prywatna):
+4. **Trasa** — `src/routes/{-$locale}/_app/<sciezka>.tsx` (wszystkie strony są publiczne, kont nie ma — ADR 0011):
    ```ts
    export const Route = createFileRoute('/{-$locale}/_app/x/$id')({
      validateSearch: searchSchema,                       // filtry w query string (zod)

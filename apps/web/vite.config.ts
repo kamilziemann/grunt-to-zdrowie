@@ -1,8 +1,8 @@
 // Jedyny Worker aplikacji budowany przez Vite: TanStack Start (strony SSR, routing plikowy w src/routes) w srodowisku
 // `ssr` wtyczki Cloudflare - dev biegnie w workerd z prawdziwymi bindingami (D1 i inne), build daje
 // Workera + pliki klienta. Konfiguracja wg oficjalnego przewodnika TanStack Start dla Cloudflare Workers.
-// Testy e2e uruchamiaja drugi serwer z wlasnym stanem lokalnym (APP_STATE_DIR) i nadpisanymi zmiennymi
-// (APP_VARS, JSON) - np. wlaczone auth; zwykly `bun run dev` ich nie uzywa.
+// Testy e2e uruchamiaja osobny serwer z wlasnym stanem lokalnym (APP_STATE_DIR) i nadpisanymi zmiennymi
+// (APP_VARS, JSON: adresy e2e); zwykly `bun run dev` ich nie uzywa.
 import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
