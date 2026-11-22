@@ -23,9 +23,10 @@ import {
 import { withCauseShares } from '../../domain/causes';
 import { drainedLowland } from '../../domain/drained-lowland';
 import { withHotDays } from '../../domain/hot-days';
-import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
+import { addDays, addYears, isoDate, isoDateInPoland, yearOf } from '../../domain/iso-date';
 import { landCoverGuess, summarizeLandUse } from '../../domain/land-use';
 import { reconcileSoilWithRegistry } from '../../domain/soil-registry';
+import { FIRST_SENTINEL_YEAR } from '../../domain/vegetation-signal';
 import { waterOutlook } from '../../domain/water-outlook';
 import type {
   AnalysisStages,
@@ -41,7 +42,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.8.5';
+export const ANALYSIS_ENGINE_VERSION = '0.8.6';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -346,7 +347,11 @@ export function createAnalysisService({
           ? registryWithin(() => Promise.all(ids.map((id) => registry.byId(id))), registryTimeoutMs)
           : Promise.resolve([]);
       const { field: resolved, source: parcelSource, parcels: found } = await resolveField(request.field);
-      const from = addDays(addYears(date, -ANALYSIS_LIMITS.historyYears), -WARMUP_DAYS);
+      const warmupFrom = addDays(addYears(date, -ANALYSIS_LIMITS.historyYears), -WARMUP_DAYS);
+      // historia liczy 10 pelnych sezonow przed rokiem analizy - dla dat z drugiej polowy roku rozbieg nie siegal
+      // poczatku najstarszego sezonu i ten wypadal jako niepelny
+      const firstSeason = isoDate(yearOf(date) - ANALYSIS_LIMITS.historyYears, 1, 1);
+      const from = firstSeason < warmupFrom ? firstSeason : warmupFrom;
       const surroundingsSource = sources.surroundings;
       const [entries, meteo, forecast, soil, terrain, hydro, vegetation, surroundings] = await Promise.all([
         found.every((parcel) => parcel.landUse) ? Promise.resolve([]) : registryLookup,
@@ -415,10 +420,15 @@ export function createAnalysisService({
       const limitations = new Set<LimitationId>(stages.limitations(input, assessment));
 
       for (const source of missing) {
-        const limitation = MISSING_LIMITATION[source.id];
+        // data sprzed archiwum Sentinel-2: to nie chmury ani awaria, tylko brak zdjec z tamtych lat
+        const beforeArchive = source.id === 'vegetation' && yearOf(date) < FIRST_SENTINEL_YEAR;
+        const limitation = beforeArchive ? 'vegetation_before_archive' : MISSING_LIMITATION[source.id];
 
         if (limitation) limitations.add(limitation);
       }
+
+      // jest zdjecie, ale nie ma z czym go porownac (pierwszy rok archiwum)
+      if (assessment.vegetation?.baselineYears === 0) limitations.add('vegetation_before_archive');
 
       if (reportSources.some((source) => source.sample)) limitations.add('sample_data');
 

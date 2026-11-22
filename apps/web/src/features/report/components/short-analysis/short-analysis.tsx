@@ -165,7 +165,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
       ? [
           {
             key: 'why',
-            label: t('lines.why'),
+            label: t(['watch', 'risk', 'drought'].includes(level) ? 'lines.why' : 'lines.whyRisk'),
             // "Gleba slabo trzyma wode, uprawa jest teraz wrazliwa..." - jedno zdanie
             text: causes
               .map((cause, index) =>

@@ -406,7 +406,67 @@ describe('recommend z otoczeniem pola', () => {
   });
 });
 
+describe('recommend: uprawa i rodzaj gruntu', () => {
+  const measures = (result: ReturnType<typeof recommend>) =>
+    [...result.retention, ...result.agrotech].map((item) => item.measure);
+
+  it('laka nie dostaje orki, miedzyplonu, mulczu ani zmiany uprawy; plantacja wieloletnia zostaje przy sciolce', () => {
+    const meadow = measures(recommend(input({ cropId: 'grassland' }), assessment('drought'), ALL));
+    const orchard = measures(recommend(input({ cropId: 'fruit_trees' }), assessment('drought'), ALL));
+
+    expect(meadow).toContain('organic_matter');
+    expect(meadow).not.toEqual(
+      expect.arrayContaining(['mulch_residue', 'reduced_tillage', 'cover_crop', 'crop_choice']),
+    );
+    expect(
+      meadow.filter((item) => ['mulch_residue', 'reduced_tillage', 'cover_crop'].includes(item)),
+    ).toEqual([]);
+    expect(orchard).toContain('mulch_residue');
+    expect(orchard.filter((item) => ['reduced_tillage', 'cover_crop', 'crop_choice'].includes(item))).toEqual(
+      [],
+    );
+  });
+
+  it('gleba juz prochniczna (>= 3,5% materii organicznej) nie dostaje "wiecej prochnicy"', () => {
+    const rich = recommend(input({ soil: { ...SOIL, organicMatterPct: 12.5 } }), assessment('drought'), ALL);
+
+    expect(rich.agrotech.map((item) => item.measure)).not.toContain('organic_matter');
+  });
+
+  it('las wg ewidencji: bez oczka, zastawki, zabiegow i nawadniania - zostaje ochrona mokradla', () => {
+    const forest = recommend(
+      input({
+        field: { ...FIELD, landUse: ['Ls'] },
+        terrain: terrainWith({ areaM2: 400, volumeM3: 120, maxDepthM: 0.6 }),
+      }),
+      assessment('drought'),
+      [...ALL, cause('no_landscape_retention', 0.3), cause('surface_runoff', 0.4)],
+    );
+
+    expect(forest.retention.map((item) => item.measure)).toEqual(['protect_wetland']);
+    expect(forest.agrotech).toEqual([]);
+    expect(forest.irrigation).toBeNull();
+  });
+
+  it('rozlegla "niecka" z modelu terenu (ponad 1 ha) nie staje sie oczkiem z pojemnoscia', () => {
+    const result = recommend(
+      input({
+        soil: { ...SOIL, availableWaterMmPerM: 140, category: 3 },
+        terrain: terrainWith({ areaM2: 384_000, volumeM3: 557_519, maxDepthM: 3 }),
+      }),
+      assessment('drought'),
+      [cause('surface_runoff', 0.4)],
+    );
+
+    expect(result.retention.map((item) => item.measure)).not.toContain('small_pond');
+  });
+});
+
 describe('irrigationAdvice', () => {
+  it('przy ocenie "obserwuj" nawet silny stres daje najwyzej "rozwaz" - nie przeczy werdyktowi', () => {
+    expect(irrigationAdvice(input(), assessment('watch'))).toMatchObject({ advisable: 'consider' });
+  });
+
   it('silny stres w okresie wzrostu przy suszy: nawodnic dawka do polowej pojemnosci', () => {
     expect(irrigationAdvice(input(), assessment('drought'))).toMatchObject({
       advisable: 'yes',

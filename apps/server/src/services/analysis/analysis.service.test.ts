@@ -102,7 +102,7 @@ describe('analysis service', () => {
     const summer = await service().analyze(request('2026-07-20'));
 
     expect(waterReportSchema.safeParse(summer).error).toBeUndefined();
-    expect(summer.meta.engineVersion).toBe('0.8.5');
+    expect(summer.meta.engineVersion).toBe('0.8.6');
     expect(summer.sources.map((source) => [source.id, source.mode])).toEqual([
       ['parcel', 'live'],
       ['meteo', 'live'],
@@ -216,7 +216,9 @@ describe('analysis service', () => {
     const report = await service().analyze(request('2016-12-01'));
 
     expect(report.assessment.vegetation).toBeNull();
-    expect(report.limitations).toEqual(expect.arrayContaining(['vegetation_missing', 'current_boundaries']));
+    expect(report.limitations).toEqual(
+      expect.arrayContaining(['vegetation_before_archive', 'current_boundaries']),
+    );
   });
 
   it('odrzuca date z przyszlosci i starsza niz 10 lat', async () => {

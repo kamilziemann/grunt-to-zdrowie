@@ -14,6 +14,11 @@ export const SOIL_CATEGORIES: readonly SoilCategory[] = [1, 2, 3, 4];
 
 /** nadmiar wody: KBW okresu (60 dni) powyzej tej wartosci (mm) - opad wyraznie przewyzsza parowanie */
 export const EXCESS_BALANCE_MM = 50;
+/**
+ * Przed pierwszym pelnym okresem IUNG (21 marca - 20 maja) okno 60 dni siega zimy: parowanie jest wtedy male i bilans
+ * +50...+80 mm to zwykle wiosenne zasilenie gleby, nie nadmiar. Nadmiar mowimy dopiero przy dwukrotnie wyzszym.
+ */
+export const EXCESS_BALANCE_EARLY_MM = 100;
 
 /** Gdy gleba jest nieznana, historia (jeden glos na sezon) liczy sie dla kategorii II - najczestszej w Polsce. */
 export const FALLBACK_SOIL_CATEGORY: SoilCategory = 2;

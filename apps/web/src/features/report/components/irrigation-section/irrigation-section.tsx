@@ -24,7 +24,16 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
   const number = (value: number) => format.number(value, { maximumFractionDigits: 0 });
   const irrigation = report.recommendations.irrigation;
 
-  if (!irrigation) return <p className="text-base text-muted-foreground">{t('none')}</p>;
+  // grunt nierolny (wg ewidencji albo domyslu z innych danych): nawadnianie wstrzymane celowo, nie z braku danych
+  const notFarmland =
+    report.landUse?.mismatch === 'non_agricultural' ||
+    report.limitations.includes('likely_forest') ||
+    report.limitations.includes('likely_not_farmland');
+
+  if (!irrigation) {
+    return <p className="text-base text-muted-foreground">{t(notFarmland ? 'noneNotFarmland' : 'none')}</p>;
+  }
+
   const past = isPastAnalysis(report);
 
   // nadmiar wody: jedno zdanie zamiast "nawadnianie rozwaz po dzialaniach wyzej"

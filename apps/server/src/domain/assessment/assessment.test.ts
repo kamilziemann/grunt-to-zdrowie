@@ -219,6 +219,29 @@ describe('assess - tabela przypadkow', () => {
   });
 });
 
+describe('levelOf: nadmiar wody', () => {
+  const balance = (balanceMm: number, periodNo: number | null) =>
+    ({
+      status: periodNo === null ? 'out_of_season' : 'ok',
+      periodNo,
+      periodFrom: '2023-02-10',
+      periodTo: '2023-04-10',
+      precipMm: 100,
+      evapotranspirationMm: 100 - balanceMm,
+      balanceMm,
+      thresholdMm: null,
+      soilCategory: 2,
+      belowThreshold: null,
+      method: 'iung_dg95',
+    }) as const;
+
+  it('przed pierwszym okresem IUNG okno siega zimy: +65 mm to zwykle zasilenie, nadmiar dopiero powyzej 100 mm', () => {
+    expect(levelOf('2023-04-10', { balance: balance(65, null), zone: null, growing: true })).toBe('ok');
+    expect(levelOf('2023-04-10', { balance: balance(120, null), zone: null, growing: true })).toBe('excess');
+    expect(levelOf('2023-07-10', { balance: balance(65, 5), zone: null, growing: true })).toBe('excess');
+  });
+});
+
 describe('levelOf: bilans strefy korzeniowej', () => {
   const zone = (stressCoefficient: number, etDeficitShare60d: number) => ({
     totalAvailableMm: 100,

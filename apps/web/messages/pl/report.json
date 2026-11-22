@@ -61,7 +61,7 @@
     }
   },
   "status": {
-    "partial": "Części danych zabrakło, więc wynik jest mniej pewny. Szczegóły są na końcu raportu.",
+    "partial": "Części danych zabrakło. Co to zmienia w wyniku, piszemy na końcu raportu.",
     "insufficient": "Za mało danych, żeby ocenić to pole. Lista źródeł jest na końcu raportu.",
     "missing": "Brak danych: {sources}."
   },
@@ -74,7 +74,8 @@
     "irrigation": "Nawadnianie",
     "sources": "Skąd są dane i na ile im ufać",
     "causesExcess": "Skąd nadmiar wody",
-    "retentionExcess": "Woda na polu i wokół niego"
+    "retentionExcess": "Woda na polu i wokół niego",
+    "causesRisk": "Co na tym polu sprzyja suszy"
   },
   "details": "Szczegóły dla doradcy",
   "verdict": {
@@ -154,7 +155,7 @@
     "cropStageValue": "{stage}, Kc {kc}, korzenie do {depth} m",
     "cropStageNoKc": "{stage}",
     "stages": {
-      "dormant": "spoczynek",
+      "dormant": "poza okresem wzrostu",
       "initial": "początek wzrostu",
       "development": "intensywny wzrost",
       "mid": "pełnia wzrostu",
@@ -162,7 +163,7 @@
       "harvested": "po zbiorze"
     },
     "vegetation": "Sentinel-2",
-    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; odchylenie od {years} lat: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; czyste piksele {share}% ({pixels})",
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; odchylenie od {years, plural, =0 {lat poprzednich (brak porównania)} one {poprzedniego roku} other {średniej z # lat}}: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; czyste piksele {share}% ({pixels})",
     "asOf": "Stan na {date}",
     "rank": "Ostatnie 60 dni na tle lat",
     "rankValue": "{side, select, wet {{wet, plural, =1 {najbardziej mokry okres} other {#. najbardziej mokry okres}}} other {{rank, plural, =1 {najsuchszy okres} other {#. najsuchszy okres}}}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}})",
@@ -276,12 +277,12 @@
         "description": "Spadło mniej deszczu niż zwykle o tej porze roku."
       },
       "high_evaporative_demand": {
-        "title": "Upał i wiatr wysuszają pole",
-        "description": "Przy wysokiej temperaturze, słońcu i wietrze rośliny i gleba tracą więcej wody niż zwykle."
+        "title": "Pole traci więcej wody niż zwykle",
+        "description": "Słońce, temperatura i wiatr wyciągnęły z roślin i gleby więcej wody niż zwykle o tej porze roku."
       },
       "low_soil_retention": {
         "title": "Gleba słabo trzyma wodę",
-        "description": "Lekka gleba szybko oddaje wodę, więc zapas starcza na krótko."
+        "description": "Gleba mieści mało wody dostępnej dla roślin, więc zapas po deszczu starcza na krótko."
       },
       "surface_runoff": {
         "title": "Woda spływa po powierzchni",
@@ -296,14 +297,14 @@
         "description": "W pobliżu brakuje oczek wodnych, mokradeł i zadrzewień, które trzymają wodę."
       },
       "crop_sensitivity": {
-        "title": "Uprawa jest teraz wrażliwa na brak wody",
-        "description": "W tej fazie rozwoju roślina potrzebuje dużo wody, więc niedobór szybciej obniża plon."
+        "title": "Tej uprawie często brakuje tu wody",
+        "description": "W wielu z ostatnich sezonów tej uprawie na tym polu zabrakło wody, więc niedobór łatwo wraca."
       }
     },
     "excess": {
       "intro": "Co mówią dane o tym polu:",
       "rain": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle o tej porze ok. {median} l/m²{times, plural, =0 {} other {, czyli ok. # razy więcej}}. {side, select, wet {{wet, plural, =1 {To najbardziej mokry taki okres} other {To #. najbardziej mokry taki okres}}} other {To {rank}. najsuchszy taki okres}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}}).",
-      "balance": "Od {from} do {to} (okres ok. 60 dni, tak jak liczy IUNG) spadło {precip} l/m², a wyparowało ok. {et} l/m² – w glebie i na polu zostało ok. {left} l/m² wody więcej, niż ubyło.",
+      "balance": "Od {from} do {to} (ok. 60 dni) spadło {precip} l/m², a wyparowało ok. {et} l/m² – w glebie i na polu zostało ok. {left} l/m² wody więcej, niż ubyło.",
       "depressions": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu.",
       "depressionsVolume": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu, razem na ok. {volume} m³ wody.",
       "collecting": "{count, plural, one {Jest też # miejsce} few {Są też # miejsca} many {Jest też # miejsc} other {Jest też # miejsca}}, gdzie zbiera się woda.",
@@ -398,8 +399,8 @@
     },
     "effect": {
       "volume_m3": "zatrzyma ok. {value} m³ wody",
-      "water_mm": "ok. {value} l/m² więcej wody w glebie",
-      "evaporation_pct": "parowanie mniejsze o ok. {value}%"
+      "water_mm": "ok. {value} l/m² więcej wody w glebie na każdy 1% próchnicy więcej (to praca na lata)",
+      "evaporation_pct": "parowanie z gleby mniejsze o ok. {value}%"
     },
     "effort": "Nakład pracy: {level}",
     "effortLevels": {
@@ -479,7 +480,7 @@
     "notesTitle": "Zanim zaczniesz"
   },
   "irrigation": {
-    "first": "Nawadnianie rozważ dopiero po działaniach opisanych wyżej. Woda zatrzymana na polu jest tańsza.",
+    "first": "Podlewanie pomaga doraźnie. Trwale pomagają działania opisane wyżej – woda zatrzymana na polu jest tańsza.",
     "advisable": {
       "no": "Nawadnianie nie jest teraz potrzebne.",
       "consider": "Rozważ nawadnianie.",
@@ -502,7 +503,8 @@
     "planVolume": "Jedno podlanie to ok. {dose} m³ wody na całe pole, cały plan ok. {total} m³.",
     "planNote": "Większej dawki naraz gleba nie przyjmie – woda spłynie albo ucieknie pod korzenie.",
     "excess": "Teraz nie nawadniaj – w glebie jest za dużo wody.",
-    "excessPast": "Wtedy nie było potrzeby nawadniać – w glebie było za dużo wody."
+    "excessPast": "Wtedy nie było potrzeby nawadniać – w glebie było za dużo wody.",
+    "noneNotFarmland": "Nawadniania nie podajemy, bo to miejsce nie wygląda na grunt rolny."
   },
   "sources": {
     "confidence": "Pewność oceny: {level}",
@@ -544,12 +546,12 @@
       "terrain_missing": "Brak modelu terenu, więc nie oceniamy spływu wody.",
       "terrain_coarse": "Model terenu jest mało dokładny. Małe zagłębienia mogą być niewidoczne.",
       "hydro_missing": "Brak danych o rowach i ciekach w okolicy.",
-      "vegetation_missing": "Brak zdjęć satelitarnych bez chmur z tego okresu.",
+      "vegetation_missing": "Nie mamy zdjęcia satelitarnego z tego okresu (chmury albo serwis zdjęć nie odpowiedział).",
       "vegetation_few_pixels": "Pole jest małe albo wąskie, więc zdjęcie satelitarne obejmuje niewiele punktów.",
-      "vegetation_before_archive": "Dla tak dawnej daty nie ma porównywalnych zdjęć satelitarnych.",
+      "vegetation_before_archive": "Zdjęcia satelitarne zaczynają się w 2017 r., więc dla tak dawnej daty nie ma ich albo nie ma z czym ich porównać.",
       "forecast_missing": "Brak prognozy pogody, więc nie podajemy terminu podlewania.",
       "out_of_season": "Ten dzień jest poza okresem oceny suszy rolniczej (21 marca – 30 września).",
-      "crop_not_monitored": "Dla tej uprawy nie ma urzędowych progów suszy. Ocena opiera się na zapasie wody w glebie.",
+      "crop_not_monitored": "W tym okresie dla tej uprawy nie ma urzędowych progów suszy. Ocena opiera się na zapasie wody w glebie.",
       "balance_estimated": "Bilans wody liczymy własną metodą, więc może się różnić od komunikatów IUNG.",
       "current_boundaries": "Granice działki są dzisiejsze. W dniu analizy mogły być inne.",
       "no_in_situ_measurement": "Nikt nie mierzył wilgotności gleby na miejscu. To obliczenia z danych zdalnych.",
@@ -933,7 +935,8 @@
       "first": "Co zrobić najpierw",
       "confidence": "Pewność",
       "nowOffSeason": "Zapas wody przed wiosną",
-      "firstOffSeason": "Co zrobić przed wiosną"
+      "firstOffSeason": "Co zrobić przed wiosną",
+      "whyRisk": "Co sprzyja suszy"
     },
     "causes": {
       "title": "Dlaczego brakuje wody",
@@ -963,7 +966,7 @@
       "method": "Jak liczymy"
     },
     "offSeason": {
-      "now": "Rośliny teraz nie rosną, a suszę rolniczą liczy się od 21 marca do 30 września. Pokazujemy, ile wody gleba ma na wiosnę, jak często susza wracała w 10 latach i co zrobić przed sezonem.",
+      "now": "Suszę rolniczą liczy się od 21 marca do 30 września, a zużycia wody przez uprawę poza tym okresem nie liczymy. Pokazujemy, ile wody gleba ma na wiosnę, jak często susza wracała w 10 latach i co zrobić przed sezonem.",
       "summer": "Zobacz, jak było latem ({date})"
     },
     "waterTitlePast": "Woda w dniu analizy"
@@ -1078,7 +1081,8 @@
       "position": {
         "below": "{years, plural, one {To mniej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok, więc to słaba wskazówka.} other {To poniżej zakresu z # lat o tej porze ({min} – {max}) – rośliny mają mniej wody niż zwykle.}}",
         "within": "{years, plural, one {To tyle samo co rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok.} other {To w zakresie z # lat o tej porze ({min} – {max}).}}",
-        "above": "{years, plural, one {To więcej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok.} other {To powyżej zakresu z # lat o tej porze ({min} – {max}).}}"
+        "above": "{years, plural, one {To więcej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok.} other {To powyżej zakresu z # lat o tej porze ({min} – {max}).}}",
+        "belowNeutral": "{years, plural, one {To mniej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok, więc to słaba wskazówka.} other {To poniżej zakresu z # lat o tej porze ({min} – {max}). Nie musi to oznaczać braku wody: tak wygląda też dojrzewanie, pokos, wschody albo inna uprawa niż w poprzednich latach.}}"
       },
       "answerNone": "Chmury zasłoniły pole na wszystkich zdjęciach z tego okresu – satelita nic nie pokaże.",
       "source": "Zdjęcia Sentinel-2 (Copernicus), wskaźnik wilgotności roślin NDMI dla całego pola.",

@@ -107,6 +107,20 @@ export function landCoverGuess(
 }
 
 /** Klasouzytki z ewidencji jako lista oznaczen ("RIVb,RV, ŁV" -> ["RIVb", "RV", "ŁV"]). */
+/**
+ * Czy pole nie jest gruntem rolnym: ewidencja zna uzytek i nie ma w nim gruntu uprawnego albo - gdy ewidencja milczy -
+ * inne dane wskazuja las lub teren bez gleby. Wtedy raport nie podaje zabiegow polowych, nawadniania ani budowy
+ * urzadzen wodnych, a "wrazliwosc uprawy" nie jest przyczyna.
+ */
+export function isNotFarmland(
+  landUse: readonly string[] | undefined,
+  hints: { woodedAreaShare?: number | undefined; soilSubstituted: boolean },
+): boolean {
+  if (landUse && landUse.length > 0) return !hasFarmland(landUse);
+
+  return landCoverGuess(landUse, hints) !== null;
+}
+
 export function parseLandUseCodes(value: string): string[] {
   return [
     ...new Set(

@@ -97,6 +97,8 @@ export function ReportView({
   const sampleRecommendations = samples.has('recommendations');
   // nadmiar wody: sekcja 3 mowi, skad woda, a sekcja 4 nie obiecuje jej zatrzymywania
   const excess = report.assessment.level === 'excess';
+  // bez niedoboru w dniu analizy sekcja mowi, co na polu sprzyja suszy - "dlaczego brakuje wody" przeczyloby ocenie
+  const deficitNow = ['watch', 'risk', 'drought'].includes(report.assessment.level);
   const extras = reportExtras(report);
   const tSources = useTranslations('report.sources.categories');
   // brakujace zrodla slowami ("Prognoza pogody, Zdjecia satelitarne"), bez powtorzen (dwa wpisy rowow)
@@ -109,13 +111,16 @@ export function ReportView({
     () => [
       { id: 'ocena', title: t('sections.verdict') },
       { id: 'historia', title: t('sections.history') },
-      { id: 'przyczyny', title: t(excess ? 'sections.causesExcess' : 'sections.causes') },
+      {
+        id: 'przyczyny',
+        title: t(excess ? 'sections.causesExcess' : deficitNow ? 'sections.causes' : 'sections.causesRisk'),
+      },
       { id: 'retencja', title: t(excess ? 'sections.retentionExcess' : 'sections.retention') },
       { id: 'agrotechnika', title: t('sections.agrotech') },
       { id: 'nawadnianie', title: t('sections.irrigation') },
       { id: 'zrodla', title: t('sections.sources') },
     ],
-    [t, excess],
+    [t, excess, deficitNow],
   );
   const title = (index: number) => sections[index]?.title ?? '';
 

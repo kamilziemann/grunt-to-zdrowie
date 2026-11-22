@@ -22,6 +22,7 @@ import { readGeoTiff } from '../geotiff';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { sourceCacheTtl } from '../../domain/source-cache-policy';
+import { FIRST_SENTINEL_YEAR } from '../../domain/vegetation-signal';
 
 export const CDSE_TOKEN_URL =
   'https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token';
@@ -31,8 +32,8 @@ export const CDSE_PROCESS_URL = 'https://sh.dataspace.copernicus.eu/api/v1/proce
 const PROVIDER = 'Copernicus Data Space Ecosystem - Sentinel-2 L2A (API statystyk)';
 const LICENCE = 'dane Copernicus Sentinel, otwarte (podać: "Contains modified Copernicus Sentinel data")';
 const RESOLUTION = '10 m (NDMI z pasma B11 20 m)';
-/** archiwum L2A w CDSE jest pelne od 2017 r. */
-export const FIRST_SENTINEL_YEAR = 2017;
+
+export { FIRST_SENTINEL_YEAR };
 const CURRENT_WINDOW_DAYS = 30;
 const BASELINE_HALF_WINDOW_DAYS = 10;
 /** 5 lat porownania: 6 zapytan na analize - darmowe konto CDSE ma limit zapytan na minute i na miesiac */

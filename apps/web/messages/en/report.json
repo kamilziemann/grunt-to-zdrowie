@@ -61,7 +61,7 @@
     }
   },
   "status": {
-    "partial": "Some data is missing, so the result is less certain. Details are at the end of the report.",
+    "partial": "Some data is missing. What it changes in the result is explained at the end of the report.",
     "insufficient": "There is too little data to assess this field. The list of sources is at the end of the report.",
     "missing": "Missing data: {sources}."
   },
@@ -74,7 +74,8 @@
     "irrigation": "Irrigation",
     "sources": "Where the data comes from and how far to trust it",
     "causesExcess": "Where the excess water comes from",
-    "retentionExcess": "Water on and around the field"
+    "retentionExcess": "Water on and around the field",
+    "causesRisk": "What makes this field prone to drought"
   },
   "details": "Details for the advisor",
   "verdict": {
@@ -154,7 +155,7 @@
     "cropStageValue": "{stage}, Kc {kc}, roots down to {depth} m",
     "cropStageNoKc": "{stage}",
     "stages": {
-      "dormant": "dormant",
+      "dormant": "outside the growth period",
       "initial": "early growth",
       "development": "rapid growth",
       "mid": "full growth",
@@ -162,7 +163,7 @@
       "harvested": "after harvest"
     },
     "vegetation": "Sentinel-2",
-    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; deviation from {years} years: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; clear pixels {share}% ({pixels})",
+    "vegetationValue": "{date}: NDVI {ndvi}, NDMI {ndmi}; deviation from {years, plural, =0 {earlier years (nothing to compare)} one {the previous year} other {the mean of # years}}: NDVI {ndviAnomaly}, NDMI {ndmiAnomaly}; clear pixels {share}% ({pixels})",
     "asOf": "As of {date}",
     "rank": "Last 60 days compared with past years",
     "rankValue": "{side, select, wet {{wet, plural, =1 {wettest period} other {wettest period no. #}}} other {{rank, plural, =1 {driest period} other {driest period no. #}}}} of {years} years (this one and {previous, plural, other {# before}})",
@@ -276,12 +277,12 @@
         "description": "Less rain fell than usual for this time of year."
       },
       "high_evaporative_demand": {
-        "title": "Heat and wind dry the field",
-        "description": "With high temperature, sun and wind, plants and soil lose more water than usual."
+        "title": "The field loses more water than usual",
+        "description": "Sun, temperature and wind drew more water from plants and soil than usual for this time of year."
       },
       "low_soil_retention": {
         "title": "The soil holds little water",
-        "description": "Light soil releases water quickly, so the reserve does not last long."
+        "description": "The soil holds little plant-available water, so the reserve after rain does not last long."
       },
       "surface_runoff": {
         "title": "Water runs off the surface",
@@ -296,14 +297,14 @@
         "description": "There are no ponds, wetlands or trees nearby that hold water."
       },
       "crop_sensitivity": {
-        "title": "The crop is sensitive to water shortage now",
-        "description": "At this growth stage the plant needs a lot of water, so a shortage cuts the yield faster."
+        "title": "This crop is often short of water here",
+        "description": "In many recent seasons this crop ran short of water on this field, so the shortage returns easily."
       }
     },
     "excess": {
       "intro": "What the data says about this field:",
       "rain": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m² at this time{times, plural, =0 {} other {, so about # times more}}. {side, select, wet {{wet, plural, =1 {This is the wettest such period} other {This is the #th wettest such period}}} other {This is the {rank}th driest such period}} in {years} years (this one and {previous, plural, other {# before}}).",
-      "balance": "From {from} to {to} (a period of about 60 days, as IUNG counts) {precip} l/m² fell and about {et} l/m² evaporated – about {left} l/m² more water stayed in the soil and on the field than left it.",
+      "balance": "From {from} to {to} (about 60 days) {precip} l/m² fell and about {et} l/m² evaporated – about {left} l/m² more water stayed in the soil and on the field than left it.",
       "depressions": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow.",
       "depressionsVolume": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow, holding about {volume} m³ of water together.",
       "collecting": "There {count, plural, one {is also # spot} other {are also # spots}} where water collects.",
@@ -398,8 +399,8 @@
     },
     "effect": {
       "volume_m3": "keeps about {value} m³ of water",
-      "water_mm": "about {value} l/m² more water in the soil",
-      "evaporation_pct": "about {value}% less evaporation"
+      "water_mm": "about {value} l/m² more water in the soil for each extra 1% of humus (this takes years)",
+      "evaporation_pct": "evaporation from the soil lower by about {value}%"
     },
     "effort": "Effort: {level}",
     "effortLevels": {
@@ -479,7 +480,7 @@
     "notesTitle": "Before you start"
   },
   "irrigation": {
-    "first": "Consider irrigation only after the measures described above. Water kept on the field is cheaper.",
+    "first": "Irrigation helps in the short term. The measures described above help for good – water kept on the field is cheaper.",
     "advisable": {
       "no": "Irrigation is not needed right now.",
       "consider": "Consider irrigating.",
@@ -502,7 +503,8 @@
     "planVolume": "One application is about {dose} m³ of water for the whole field, the whole plan about {total} m³.",
     "planNote": "The soil cannot take a bigger dose at once – the water would run off or drain below the roots.",
     "excess": "Do not irrigate now – there is too much water in the soil.",
-    "excessPast": "There was no need to irrigate then – there was too much water in the soil."
+    "excessPast": "There was no need to irrigate then – there was too much water in the soil.",
+    "noneNotFarmland": "We give no irrigation advice because this place does not look like farmland."
   },
   "sources": {
     "confidence": "Confidence: {level}",
@@ -544,12 +546,12 @@
       "terrain_missing": "The terrain model is missing, so we do not assess runoff.",
       "terrain_coarse": "The terrain model is coarse. Small dips may not be visible.",
       "hydro_missing": "Data on ditches and streams nearby is missing.",
-      "vegetation_missing": "There are no cloud-free satellite images from this period.",
+      "vegetation_missing": "We have no satellite image from this period (clouds, or the image service did not respond).",
       "vegetation_few_pixels": "The field is small or narrow, so the satellite image covers few points.",
-      "vegetation_before_archive": "There are no comparable satellite images for such an old date.",
+      "vegetation_before_archive": "Satellite images start in 2017, so for such an old date there are none or nothing to compare them with.",
       "forecast_missing": "The weather forecast is missing, so we do not suggest when to water.",
       "out_of_season": "This day is outside the agricultural drought season (21 March – 30 September).",
-      "crop_not_monitored": "There are no official drought thresholds for this crop. The assessment is based on the soil water reserve.",
+      "crop_not_monitored": "There are no official drought thresholds for this crop in this period. The assessment is based on the soil water reserve.",
       "balance_estimated": "We calculate the water balance with our own method, so it may differ from IUNG reports.",
       "current_boundaries": "The parcel boundaries are current. They may have been different on the analysis day.",
       "no_in_situ_measurement": "Nobody measured soil moisture on site. These are calculations from remote data.",
@@ -933,7 +935,8 @@
       "first": "What to do first",
       "confidence": "Confidence",
       "nowOffSeason": "Water reserve before spring",
-      "firstOffSeason": "What to do before spring"
+      "firstOffSeason": "What to do before spring",
+      "whyRisk": "What favours drought"
     },
     "causes": {
       "title": "Why water is short",
@@ -963,7 +966,7 @@
       "method": "How we calculate"
     },
     "offSeason": {
-      "now": "Plants are not growing now, and agricultural drought is assessed from 21 March to 30 September. We show how much water the soil holds for spring, how often drought returned in 10 years and what to do before the season.",
+      "now": "Agricultural drought is assessed from 21 March to 30 September, and we do not calculate crop water use outside that period. We show how much water the soil has for spring, how often drought returned in 10 years and what to do before the season.",
       "summer": "See how it was in summer ({date})"
     },
     "waterTitlePast": "Water on the analysis day"
@@ -1078,7 +1081,8 @@
       "position": {
         "below": "{years, plural, one {That is less than a year earlier at this time ({min}). We only have one year to compare, so this is a weak hint.} other {That is below the range of # years at this time ({min} – {max}) – plants have less water than usual.}}",
         "within": "{years, plural, one {That is the same as a year earlier at this time ({min}). We only have one year to compare.} other {That is within the range of # years at this time ({min} – {max}).}}",
-        "above": "{years, plural, one {That is more than a year earlier at this time ({min}). We only have one year to compare.} other {That is above the range of # years at this time ({min} – {max}).}}"
+        "above": "{years, plural, one {That is more than a year earlier at this time ({min}). We only have one year to compare.} other {That is above the range of # years at this time ({min} – {max}).}}",
+        "belowNeutral": "{years, plural, one {That is less than a year earlier at this time ({min}). We only have one year to compare, so this is a weak hint.} other {That is below the range of # years at this time ({min} – {max}). It does not have to mean a lack of water: ripening, mowing, emergence or a different crop than in earlier years look the same.}}"
       },
       "answerNone": "Clouds covered the field on all images from this period – the satellite shows nothing.",
       "source": "Sentinel-2 images (Copernicus), plant moisture index NDMI for the whole field.",

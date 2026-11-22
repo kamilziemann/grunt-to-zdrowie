@@ -24,6 +24,7 @@ import { precipitationContext, vegetationSignal } from '../sample-stages';
 import {
   assessPeriod,
   balanceSoil,
+  EXCESS_BALANCE_EARLY_MM,
   EXCESS_BALANCE_MM,
   rootZoneSimulation,
   SOIL_CATEGORIES,
@@ -232,7 +233,8 @@ export function levelOf(date: string, { balance, zone, growing }: Signals): Asse
   // gleba nieznana, a na lzejszych glebach susza: nie wiemy, czy to pole jest bezpieczne - ostrzegamy
   if (stressed || nearThreshold || drying || scenariosDisagree(balance)) return 'watch';
 
-  const wet = (balance?.balanceMm ?? 0) > EXCESS_BALANCE_MM && (zone === null || zone.depletionShare < 0.05);
+  const excessFrom = balance?.periodNo === null ? EXCESS_BALANCE_EARLY_MM : EXCESS_BALANCE_MM;
+  const wet = (balance?.balanceMm ?? 0) > excessFrom && (zone === null || zone.depletionShare < 0.05);
 
   return wet ? 'excess' : 'ok';
 }
@@ -312,7 +314,11 @@ export function assess(input: StageInput): Assessment {
     confidence: confidenceOf(uncertainties),
     climaticBalance: balance,
     rootZone: zone,
-    vegetation: vegetationSignal(input, deficit),
+    // przy "obserwuj" ze stresem w strefie korzeni spadek NDMI tez potwierdza niedobor, a nie "inny stres"
+    vegetation: vegetationSignal(
+      input,
+      deficit || (level === 'watch' && signals.growing && zone !== null && zone.stressCoefficient < 1),
+    ),
     precipitation: precipitationContext(input),
     soilBasis: assumed ? 'assumed_medium' : substituteM === undefined ? 'field' : 'nearby',
     ...(substituteM === undefined ? {} : { soilDistanceM: substituteM }),

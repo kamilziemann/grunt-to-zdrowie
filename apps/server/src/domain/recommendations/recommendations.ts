@@ -7,6 +7,7 @@ import type {
   Assessment,
   Cause,
   CauseId,
+  CropId,
   Evidence,
   IrrigationAdvice,
   Recommendation,
@@ -20,7 +21,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
-import { hasFarmland, landCoverGuess } from '../land-use';
+import { isNotFarmland } from '../land-use';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
@@ -32,6 +33,8 @@ interface Rule {
   measure: Measure;
   /** przyczyny, na ktore dzialanie odpowiada (wystarczy jedna obecna) */
   answers: readonly CauseId[];
+  /** uprawy, dla ktorych zabieg ma sens; brak = wszystkie */
+  fits?: (cropId: CropId) => boolean;
   /** dodatkowy warunek na danych; brak = zawsze, gdy jest przyczyna */
   when?: (input: StageInput) => boolean;
   /** dowody spoza przyczyn (np. odleglosc do mokradla) */
@@ -84,6 +87,14 @@ export function organicMatterGainMm(input: StageInput): number | null {
 
 /** zaglebienie mniejsze niz tyle (m3) nie jest warte oczka - wystarczy go nie zasypywac */
 const POND_MIN_M3 = 30;
+/**
+ * Zaglebienie wieksze niz 1 ha to nie miejsce na oczko: na plaskim terenie (las, dolina) model wysokosci pokazuje
+ * rozlegle "niecki" z szumu pomiaru, a ich pojemnosc szla w setki tysiecy m3. Takie obnizenie zostaje na szkicu pola,
+ * ale zalecenie nie podaje jego liczb.
+ */
+const POND_MAX_M2 = 10_000;
+/** przy takiej zawartosci materii organicznej (%) gleba jest juz prochniczna - "wiecej prochnicy" nic nie doda */
+const HUMUS_RICH_PCT = 3.5;
 /** staw do 1000 m2 (i 3 m glebokosci) na wlasnym gruncie to zgloszenie wodnoprawne; wiekszy - pozwolenie */
 const POND_NOTIFICATION_MAX_M2 = 1000;
 
@@ -91,7 +102,10 @@ const POND_NOTIFICATION_MAX_M2 = 1000;
 function fieldDepression(input: StageInput) {
   const largest = input.terrain?.summary.largestDepression;
 
-  return largest && !input.sampleSources?.includes('terrain') && largest.volumeM3 >= POND_MIN_M3
+  return largest &&
+    !input.sampleSources?.includes('terrain') &&
+    largest.volumeM3 >= POND_MIN_M3 &&
+    largest.areaM2 <= POND_MAX_M2
     ? largest
     : null;
 }
@@ -174,6 +188,12 @@ const weirEffect = ({ hydro }: StageInput): Recommendation['effect'] => {
   return length > 0 ? { kind: 'volume_m3', value: Math.round(length * WEIR_STORAGE_M3_PER_M) } : null;
 };
 
+/** trwale uzytki zielone: nie orze sie ich, nie sieje miedzyplonu i nie zmienia uprawy z sezonu na sezon */
+const isGrassland = (cropId: CropId): boolean => cropId === 'grassland';
+/** plantacje wieloletnie (sad, krzewy, chmiel, truskawka): bez orki, plodozmianu i miedzyplonu po zbiorze */
+const PERENNIAL_CROPS: ReadonlySet<CropId> = new Set(['strawberry', 'berry_shrubs', 'fruit_trees', 'hops']);
+const isArable = (cropId: CropId): boolean => !isGrassland(cropId) && !PERENNIAL_CROPS.has(cropId);
+
 const RULES: readonly Rule[] = [
   // --- retencja: zatrzymac wode w krajobrazie i w rowach, zanim odplynie ---
   {
@@ -202,7 +222,8 @@ const RULES: readonly Rule[] = [
     measure: {
       measure: 'protect_wetland',
       category: 'retention',
-      priority: 2,
+      // mokradlo lezy obok pola: chroni wode okolicy, ale nie zmienia gleby ani uprawy - po dzialaniach na polu
+      priority: 3,
       effect: null,
       effort: 'low',
       legal: 'none',
@@ -314,6 +335,8 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['precipitation_deficit', 'high_evaporative_demand'],
+    // sciolka ma sens na gruncie ornym i w plantacjach; laki sie nie sciolkuje
+    fits: (cropId) => !isGrassland(cropId),
   },
   {
     measure: {
@@ -325,6 +348,7 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['low_soil_retention'],
+    when: ({ soil }) => !soil || soil.organicMatterPct < HUMUS_RICH_PCT,
     extraEvidence: ({ soil }) =>
       soil ? [{ metric: 'organic_matter_pct', value: soil.organicMatterPct, unit: '%', source: 'soil' }] : [],
     effect: (input) => {
@@ -343,6 +367,7 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['surface_runoff'],
+    fits: isArable,
   },
   {
     measure: {
@@ -354,6 +379,7 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['low_soil_retention', 'crop_sensitivity'],
+    fits: isArable,
   },
   {
     measure: {
@@ -365,6 +391,7 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['high_evaporative_demand', 'precipitation_deficit'],
+    fits: isArable,
   },
   {
     measure: {
@@ -376,6 +403,7 @@ const RULES: readonly Rule[] = [
       legal: 'none',
     },
     answers: ['crop_sensitivity'],
+    fits: isArable,
   },
 ];
 
@@ -387,7 +415,8 @@ function fromRule(
 ): Recommendation | null {
   const matched = found.filter((cause) => rule.answers.includes(cause.id));
 
-  if (matched.length === 0 || (rule.when && !rule.when(input))) return null;
+  if (matched.length === 0 || (rule.fits && !rule.fits(input.cropId)) || (rule.when && !rule.when(input)))
+    return null;
 
   // ta sama miara z dwoch przyczyn (albo z przyczyny i reguly) idzie do zalecenia raz
   const evidence = [
@@ -430,7 +459,8 @@ function pondInZone(recommendation: Recommendation, zone: Zone | undefined): Rec
     recommendation.measure !== 'small_pond' ||
     zone?.kind !== 'depression' ||
     zone.volumeM3 === undefined ||
-    zone.volumeM3 < POND_MIN_M3
+    zone.volumeM3 < POND_MIN_M3 ||
+    zone.areaHa * 10_000 > POND_MAX_M2
   ) {
     return recommendation;
   }
@@ -534,7 +564,10 @@ export function irrigationAdvice(input: StageInput, assessment: Assessment): Irr
   let advisable: IrrigationAdvice['advisable'] = 'no';
 
   if (growing && !ripening && deficit && !rainCovers) {
-    if (stressed && zone.stressCoefficient < SEVERE_STRESS_KS) advisable = 'yes';
+    // "nawodnij" tylko przy ocenie ryzyko/susza; przy "obserwuj" najwyzej "rozwaz" - inaczej werdykt mowil
+    // "obserwuj pole", a sekcja nawadniania "zacznij od razu"
+    if (stressed && zone.stressCoefficient < SEVERE_STRESS_KS && assessment.level !== 'watch')
+      advisable = 'yes';
     else if (stressed || (withinDays !== null && withinDays <= SOON_DAYS)) advisable = 'consider';
   }
 
@@ -568,19 +601,17 @@ export function recommend(
     .filter((item, index, items) => items.findIndex((other) => other.measure === item.measure) === index)
     .toSorted((a, b) => a.priority - b.priority || weightOf(b) - weightOf(a));
 
-  // wg ewidencji to nie grunt rolny (las, zabudowa, woda): zabiegi agrotechniczne i nawadnianie nie maja sensu -
-  // zostaje woda w krajobrazie (rowy, mokradla); raport i tak mowi wprost, ze ocena dotyczy warunkow w okolicy
-  const landUse = input.field.landUse;
-  // bez ewidencji: las wg BDOT10k albo brak gleby na mapie glebowej tez wstrzymuja zabiegi polowe
-  const guess = landCoverGuess(landUse, {
+  // To nie grunt rolny (wg ewidencji albo - gdy milczy - las wg BDOT10k czy brak gleby na mapie glebowej): zabiegi
+  // polowe, nawadnianie i budowa urzadzen wodnych (oczko, zastawka, pas trawiasty, zadrzewienia) nie maja sensu.
+  // Zostaje ochrona mokradla w sasiedztwie; raport i tak mowi wprost, ze ocena dotyczy warunkow w okolicy.
+  const notFarmland = isNotFarmland(input.field.landUse, {
     woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
     soilSubstituted: input.soil?.substituteDistanceM !== undefined,
   });
-  const notFarmland =
-    guess !== null || (landUse !== undefined && landUse.length > 0 && !hasFarmland(landUse));
+  const retention = all.filter((item) => item.category === 'retention');
 
   return {
-    retention: all.filter((item) => item.category === 'retention'),
+    retention: notFarmland ? retention.filter((item) => item.measure === 'protect_wetland') : retention,
     agrotech: notFarmland ? [] : all.filter((item) => item.category === 'agrotech'),
     irrigation: notFarmland ? null : irrigationAdvice(input, assessment),
   };

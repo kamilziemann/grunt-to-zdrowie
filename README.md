@@ -35,7 +35,7 @@ wynik ma podaną pewność i źródło; raport do wydruku (A4/PDF) i do przesła
   adres), kliknięcie działki na mapie, kilka działek naraz, własne pole narysowane na mapie albo działka podzielona
   linią. Warstwy: granice działek, zdjęcie lotnicze, rowy i cieki, otoczenie pola, zdjęcia satelitarne.
 - **Uprawa i dzień** (`/analiza`): katalog 15 upraw z kalendarzem rozwoju, dzień z ostatnich 10 lat (domyślnie dziś).
-- **Raport** (`/raport`), silnik analizy w wersji **0.8.5**: ocena z pewnością (wysoka / średnia / niska); zbiornik
+- **Raport** (`/raport`), silnik analizy w wersji **0.8.6**: ocena z pewnością (wysoka / średnia / niska); zbiornik
   wody w glebie (ile procent zostało, ile zwykle, za ile dni bez deszczu zacznie się stres); prognoza na 7 dni;
   rachunek wody od 21 marca; 10 poprzednich sezonów i kalendarz ryzyka; przyczyny z dowodami liczbowymi i udziałem;
   zalecenia w stałej kolejności (retencja → agrotechnika → nawadnianie z dawką) z uwagą o formalnościach

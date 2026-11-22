@@ -155,13 +155,22 @@ export function history(input: StageInput): History {
     // jeden glos na sezon i miesiac - dlugi epizod suszy obejmujacy kilka okresow nie liczy sie wielokrotnie
     for (const month of months) droughtByMonth.set(month, (droughtByMonth.get(month) ?? 0) + 1);
 
-    const withStress = stress !== null && stress.seasonDays > 0;
+    // sezon z pogoda tylko za czesc okresow (seria zaczyna sie w jego trakcie) nie jest "sezonem z danymi":
+    // pokazywalby rok bez stresu i zawyzal "w 9 z 10 sezonow"
+    const complete = known.length === periods.length;
+    const withStress = complete && stress !== null && stress.seasonDays > 0;
 
     seasons.push({
       year,
       droughtPeriods: periods.filter((item) => item.verdict === 'drought').length,
       monitoredPeriods: monitored.length,
-      minBalanceMm: judged.length > 0 ? Math.min(...judged) : known.length > 0 ? Math.min(...known) : null,
+      minBalanceMm: !complete
+        ? null
+        : judged.length > 0
+          ? Math.min(...judged)
+          : known.length > 0
+            ? Math.min(...known)
+            : null,
       stressDays: withStress ? stress.stressDays : null,
       etDeficitMm: withStress ? round(stress.etDeficitMm) : null,
     });

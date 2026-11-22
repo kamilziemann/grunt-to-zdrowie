@@ -10,6 +10,9 @@ import type { CropId, VegetationSignal } from '@app/contracts';
 
 import type { StageInput } from '../analysis-stages';
 
+/** archiwum Sentinel-2 L2A w Copernicus Data Space jest pelne od 2017 r. - wczesniejsze daty nie maja zdjec */
+export const FIRST_SENTINEL_YEAR = 2017;
+
 type CanopyKind = 'dense' | 'row' | 'perennial' | 'grassland';
 
 const CANOPY: Readonly<Record<CropId, CanopyKind>> = {

@@ -35,7 +35,12 @@ const MAX_ITEMS = 3;
 export function KnownLimits({ report }: { report: WaterReport }) {
   const t = useTranslations('report.simple.limits');
   const tItems = useTranslations('report.sources.limitationItems');
-  const items = FARMER_LIMITS.filter((id) => report.limitations.includes(id)).slice(0, MAX_ITEMS);
+  // domysl "to raczej las / teren bez gleby" zastepuje ogolne "ewidencja nie podala uzytku" - razem sobie przeczyly
+  const guessed =
+    report.limitations.includes('likely_forest') || report.limitations.includes('likely_not_farmland');
+  const items = FARMER_LIMITS.filter(
+    (id) => report.limitations.includes(id) && !(guessed && id === 'land_use_unknown'),
+  ).slice(0, MAX_ITEMS);
 
   return (
     <section

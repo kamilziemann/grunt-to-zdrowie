@@ -8,7 +8,7 @@ import type { Assessment, Cause, Evidence, History, SourceId } from '@app/contra
 import type { StageInput } from '../analysis-stages';
 import { backgroundYears, deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
-import { soilClassNumber, soilClassesOf } from '../land-use';
+import { isNotFarmland, soilClassNumber, soilClassesOf } from '../land-use';
 import { terrainTooCoarse } from '../terrain';
 import { assessPeriod } from '../water-indicators';
 
@@ -369,6 +369,10 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
 
   const sample = new Set(input.sampleSources ?? []);
   const real = (id: SourceId) => !sample.has(id);
+  const notFarmland = isNotFarmland(input.field.landUse, {
+    woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
+    soilSubstituted: input.soil?.substituteDistanceM !== undefined,
+  });
 
   // Bez niedoboru teraz i w historii (zwykly rok, listopad) zostaja przyczyny trwale - gleba, rowy, teren: to one
   // mowia, co na tym polu sprzyja suszy, i z nich wynikaja zalecenia "na kolejny sezon". Bez tego raport "na dzis"
@@ -384,7 +388,8 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
     soilCause(input, real),
     ...landscapeCauses(input, real),
     // "uprawa jest teraz wrazliwa" ma sens tylko, gdy uprawa rosnie - poza sezonem przeczylaby "rosliny nie rosna"
-    input.crop.kc === null ? null : cropCause(history),
+    // ani na gruncie, ktory nie jest polem (las, zabudowa) - tam wybrana uprawa to tylko zalozenie obliczen
+    input.crop.kc === null || notFarmland ? null : cropCause(history),
   ].filter((cause): cause is Cause => cause !== null);
 
   return found.toSorted((a, b) => b.weight - a.weight);

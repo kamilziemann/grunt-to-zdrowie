@@ -40,7 +40,10 @@ export function VegetationChart({ report }: { report: WaterReport }) {
   const position =
     latest && range
       ? latest.ndmi < range.min
-        ? 'below'
+        ? // "rosliny maja mniej wody niz zwykle" tylko, gdy ocena to potwierdza; inaczej spadek ma inne wyjasnienia
+          report.assessment.vegetation?.interpretation === 'confirms_deficit'
+          ? 'below'
+          : 'belowNeutral'
         : latest.ndmi > range.max
           ? 'above'
           : 'within'
