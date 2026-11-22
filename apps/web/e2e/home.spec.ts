@@ -60,22 +60,26 @@ async function searchFor(page: Page, text: string) {
 }
 
 test.describe('strona główna', () => {
-  test('pierwszy ekran: pole numeru, mapa bez numeru, obietnice i podpowiedź', async ({ page }) => {
-    await page.goto('/');
+  test(
+    'pierwszy ekran: pole numeru, mapa bez numeru, obietnice i podpowiedź',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await page.goto('/');
 
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Ocena suszy dla działki rolnej' }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' }),
-    ).toBeInViewport();
-    await expect(page.getByRole('link', { name: /Nie znam numeru/ })).toHaveAttribute('href', '/mapa');
-    await expect(page.getByText('Bez zakładania konta')).toBeVisible();
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Ocena suszy dla działki rolnej' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' }),
+      ).toBeInViewport();
+      await expect(page.getByRole('link', { name: /Nie znam numeru/ })).toHaveAttribute('href', '/mapa');
+      await expect(page.getByText('Bez zakładania konta')).toBeVisible();
 
-    await expect(
-      page.getByText('Numer działki jest na wypisie z rejestru gruntów i w decyzji o podatku rolnym.'),
-    ).toBeVisible();
-  });
+      await expect(
+        page.getByText('Numer działki jest na wypisie z rejestru gruntów i w decyzji o podatku rolnym.'),
+      ).toBeVisible();
+    },
+  );
 
   test('nagłówek: kotwice sekcji i „Sprawdź działkę” przewijające do pola', async ({ page }) => {
     await page.goto('/');
@@ -111,6 +115,27 @@ test.describe('strona główna', () => {
     await expect(page.getByTestId('examples').getByRole('link')).toHaveCount(4);
   });
 
+  test(
+    'fokus z klawiatury: pole numeru i przycisk mają widoczną obwódkę',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await page.goto('/');
+
+      const field = page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' });
+      const button = page.getByRole('button', { name: 'Sprawdź działkę' }).first();
+
+      // Tab wraca na pole (Safari domyslnie pomija Tabem przyciski i linki)
+      await field.focus();
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
+      await expect(field).toBeFocused();
+      await expect(field).toHaveCSS('outline-style', 'solid');
+      // ostatnia interakcja z klawiatury, wiec fokus programowy tez jest `:focus-visible`
+      await button.focus();
+      await expect(button).toHaveCSS('outline-style', 'solid');
+    },
+  );
+
   test('za krótki tekst pokazuje podpowiedź zamiast wysyłać zapytanie', async ({ page }) => {
     const requests: string[] = [];
 
@@ -125,13 +150,17 @@ test.describe('strona główna', () => {
     expect(requests).toEqual([]);
   });
 
-  test('pełny numer prowadzi prosto do kroku „Czy to Twoja działka?”', async ({ page }) => {
-    await page.route('**/api/parcels/by-id**', (route) => route.fulfill({ status: 404, json: {} }));
-    await page.goto('/');
-    await searchFor(page, '080904_5.0001.349/1');
+  test(
+    'pełny numer prowadzi prosto do kroku „Czy to Twoja działka?”',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await page.route('**/api/parcels/by-id**', (route) => route.fulfill({ status: 404, json: {} }));
+      await page.goto('/');
+      await searchFor(page, '080904_5.0001.349/1');
 
-    await expect(page).toHaveURL(/\/analiza\?dzialki=080904_5\.0001\.349%2F1$/);
-  });
+      await expect(page).toHaveURL(/\/analiza\?dzialki=080904_5\.0001\.349%2F1$/);
+    },
+  );
 
   test('kilka trafień: lista z gminą i powiatem, wybór prowadzi do działki', async ({ page }) => {
     await mockSearch(page, { parcels: CANDIDATES });
@@ -191,20 +220,22 @@ test.describe('strona główna', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('pole i przycisk na pierwszym ekranie, duże cele, bez poziomego przewijania, axe', async ({
-      page,
-    }) => {
-      await page.goto('/');
+    test(
+      'pole i przycisk na pierwszym ekranie, duże cele, bez poziomego przewijania, axe',
+      { tag: '@smoke' },
+      async ({ page }) => {
+        await page.goto('/');
 
-      const field = page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' });
+        const field = page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' });
 
-      await expect(field).toBeInViewport();
-      await expect(page.getByRole('button', { name: 'Sprawdź działkę' }).first()).toBeInViewport();
-      await expectNoZoomFont(field);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
-      await expectTouchTargets(page.getByRole('main').getByRole('button'));
-      await expect(page.getByRole('link', { name: 'Nie znam numeru – pokaż mapę' })).toBeVisible();
-      await expectNoViolations(page);
-    });
+        await expect(field).toBeInViewport();
+        await expect(page.getByRole('button', { name: 'Sprawdź działkę' }).first()).toBeInViewport();
+        await expectNoZoomFont(field);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
+        await expectTouchTargets(page.getByRole('main').getByRole('button'));
+        await expect(page.getByRole('link', { name: 'Nie znam numeru – pokaż mapę' })).toBeVisible();
+        await expectNoViolations(page);
+      },
+    );
   });
 });

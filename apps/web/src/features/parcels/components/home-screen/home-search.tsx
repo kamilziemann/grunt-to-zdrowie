@@ -179,7 +179,7 @@ export function HomeSearch() {
               aria-invalid={error ? true : undefined}
               aria-describedby={messageId}
               onChange={change}
-              className="h-15 min-w-0 flex-[1_1_20rem] rounded-full border-2 border-foreground bg-card px-6 text-lg outline-none placeholder:text-muted-foreground focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ring aria-invalid:border-destructive"
+              className="h-15 min-w-0 flex-[1_1_20rem] rounded-full border-2 border-foreground bg-card px-6 text-lg outline-none placeholder:text-muted-foreground focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring aria-invalid:border-destructive"
             />
             <Button
               type="submit"
