@@ -516,6 +516,8 @@ export function ParcelMap({
   const clearHoverRef = useRef<() => void>(noop);
   // pierwszy dojazd swiezej mapy bez animacji: mapa nie przelatuje z widoku kraju ani z poprzedniego kadru
   const firstFocusRef = useRef(true);
+  // mapa stoi w startowym widoku calej Polski (nikt go nie wybral) - wtedy nawet miekki dojazd jedzie do dzialki
+  const countryViewRef = useRef(false);
 
   useEffect(() => {
     latest.current = {
@@ -780,6 +782,7 @@ export function ParcelMap({
 
       map = created;
       firstFocusRef.current = true;
+      countryViewRef.current = !startAtFocus && remembered === null;
 
       if (!startAtFocus && remembered) {
         jumpToVisibleCenter(created, padding, remembered.center, remembered.zoom);
@@ -798,7 +801,10 @@ export function ParcelMap({
       created.touchZoomRotate.disableRotation();
       // uzytkownik ruszyl mape sam - kolejny dojazd juz z animacja (widac, skad i dokad jedzie mapa)
       created.on('movestart', (event) => {
-        if (event.originalEvent) firstFocusRef.current = false;
+        if (!event.originalEvent) return;
+
+        firstFocusRef.current = false;
+        countryViewRef.current = false;
       });
       created.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-right');
 
@@ -1036,11 +1042,16 @@ export function ParcelMap({
     const padding = latest.current.getPadding();
     const first = firstFocusRef.current;
 
+    const countryView = countryViewRef.current;
+
     focusedKeyRef.current = focusKey;
     firstFocusRef.current = false;
+    countryViewRef.current = false;
 
-    // miekki dojazd nie rusza mapy, jesli obszar juz widac - kadr wybrany przez uzytkownika zostaje
-    if (focusSoft && showsArea(map, padding, [west, south, east, north])) return;
+    // miekki dojazd nie rusza mapy, jesli obszar juz widac - kadr wybrany przez uzytkownika zostaje. Widok calej
+    // Polski to nie wybor: dzialka doczytana po utworzeniu mapy (wejscie z linku, wolna siec) "widac" w nim zawsze,
+    // wiec bez tego warunku mapa zostawalaby na calym kraju.
+    if (focusSoft && !countryView && showsArea(map, padding, [west, south, east, north])) return;
 
     map.fitBounds(
       [

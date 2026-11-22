@@ -105,6 +105,23 @@ test.describe('kadr mapy między krokami', () => {
     expectSameView(await settledView(page), onCheck, 1);
   });
 
+  test('wejście z linku na krok działki, działka doczytuje się po mapie: mapa dojeżdża do działki', async ({
+    page,
+  }) => {
+    // swieza karta (brak zapamietanego kadru) i wolna odpowiedz API: mapa powstaje, zanim znamy dzialke
+    await page.route('**/api/parcels/by-id**', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await route.fallback();
+    });
+    await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
+    await expect(page.getByTestId('check-map')).toBeVisible();
+    await expect
+      .poll(async () => Number(await page.getByTestId('parcel-map').getAttribute('data-map-zoom')), {
+        timeout: 20_000,
+      })
+      .toBeGreaterThan(12);
+  });
+
   test('kadr przesunięty przez użytkownika zostaje po powrocie z kroku działki', async ({ page }) => {
     await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await settledView(page);
