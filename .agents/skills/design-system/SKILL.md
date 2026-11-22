@@ -11,13 +11,12 @@ Ten skill to przepis; reguły są w `AGENTS.md`.
 ## Gdzie co leży
 
 - **Tokeny: wyłącznie `apps/web/src/styles/app.css`** (jedno źródło). Trzy warstwy:
-  1. `:root` – kolory jako `light-dark(jasny, ciemny)` (jedno miejsce na oba motywy), `--radius`;
+  1. `:root` – kolory jako `light-dark(strona, ciemny panel)`, `--radius`;
   2. `@theme inline` – mapowanie kolorów i promieni na utility (`bg-primary`, `rounded-lg`);
   3. `@theme static` – typografia (`--text-*`), odstępy (`--spacing-gutter|section`, `--container-page`), cienie
      (`--shadow-*`), ruch (`--duration-*`, `--ease-*`); zawsze emitowane jako zmienne CSS.
-- **Motyw:** bez `data-theme` obowiązuje system (`prefers-color-scheme`); `data-theme="light|dark"` (lub klasa
-  `.light`/`.dark`) wymusza motyw. Serwer ustawia atrybut z ciasteczka `theme` (`lib/theme`, `providers/theme-provider`),
-  więc nie ma mignięcia. Przełącznik: `components/shared/theme-toggle`.
+- **Motyw:** tylko jasny (ADR 0012): `:root` ma `color-scheme: light`, bez reagowania na ciemny tryb systemu, bez
+  przełącznika i ciasteczka. Ciemne wartości par `light-dark()` działają tylko w ciemnym panelu (`surface-panel`).
 - **Komponenty:** prymitywy w `components/ui/<nazwa>/`, złożone bez wiedzy o featurach w `components/shared/<nazwa>/`
   (folder na komponent: `<nazwa>.tsx`, test, `index.ts`).
 - **Katalog wizualny:** trasa `/design` (`src/routes/{-$locale}/_app/_dev/design.tsx`, tylko development) – tokeny i każdy komponent ui/shared we
@@ -58,7 +57,7 @@ pisz własnych wyjątków. Animuj `transform` i `opacity`.
 
 ## Po zmianie
 
-1. Otwórz `/design` w jasnym i ciemnym motywie (przełącznik w nawigacji) i obejrzyj zmianę.
-2. `bun run --cwd apps/web test:e2e` – `e2e/a11y.spec.ts` (axe WCAG A/AA, jasny i ciemny) i zrzuty `@visual`, jeśli
+1. Otwórz `/design` (także sekcję „Ciemny panel”) i obejrzyj zmianę.
+2. `bun run --cwd apps/web test:e2e` – `e2e/a11y.spec.ts` (axe WCAG A/AA, przy systemie w trybie ciemnym) i zrzuty `@visual`, jeśli
    projekt je ma. Zmiana zamierzona → `bun run --cwd apps/web test:e2e -- --update-snapshots` i commit baseline.
 3. `bun format && bun check`.
