@@ -54,7 +54,7 @@
     "@app/tsconfig": "workspace:*",
     "@axe-core/playwright": "^4.14.0",
     "@cloudflare/vite-plugin": "1.65.0",
-    "@cloudflare/workers-types": "^5.20261015.1",
+    "@cloudflare/workers-types": "^5.20261119.1",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-router-devtools": "1.167.2",
@@ -72,6 +72,6 @@
     "typescript": "5.9.3",
     "vite": "8.3.5",
     "vitest": "4.1.11",
-    "wrangler": "^4.151.0"
+    "wrangler": "^4.165.0"
   }
 }

@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@app/tsconfig": "workspace:*",
-    "@cloudflare/workers-types": "^5.20261015.1",
+    "@cloudflare/workers-types": "^5.20261119.1",
     "@types/bun": "^1.4.2",
     "drizzle-kit": "^0.31.11",
     "typescript": "5.9.3",
