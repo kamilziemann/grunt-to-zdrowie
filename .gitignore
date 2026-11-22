@@ -39,9 +39,16 @@ Thumbs.db
 # worktree agentów Claude Code
 .claude/worktrees/
 
-# wyjscia skilla design-taste-frontend (.agents/skills/design-taste-frontend/scripts)
+# wyjscia zewnetrznych skilli stylu (lokalnie, poza repo)
 .taste-skill/
 /assets/
 
 # stan lokalny CLI Neon
 .neon
+
+# dzienniki sesji i plany robocze zostaja lokalnie (w repo tylko opis procesu)
+docs/progress/*
+!docs/progress/README.md
+docs/plans/*
+!docs/plans/README.md
+!docs/plans/_template.md

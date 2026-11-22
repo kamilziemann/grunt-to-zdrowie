@@ -1,4 +1,4 @@
-// Trzy pola wzorcowe do testow silnika analizy (plan docs/plans/silnik-analizy-i-raport.md): zwykle pole 5 ha,
+// Trzy pola wzorcowe do testow silnika analizy (plan silnika analizy): zwykle pole 5 ha,
 // waski pas 30 m x 3 km i mala dzialka 0,1 ha w miescie. Geometrie sa syntetyczne (prostokaty), identyfikatory
 // maja poprawny format TERYT, ale nie wskazuja prawdziwych dzialek.
 import type { ParcelOutlineSource } from '../../src/domain/parcel-outline-source';

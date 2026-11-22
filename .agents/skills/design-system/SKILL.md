@@ -43,15 +43,13 @@ Token typografii, cienia, odstępu lub ruchu: dodaj do `@theme static`.
 
 Projekt ma kierunek „jasna powłoka z ciemnym panelem” (biel i grafit, panel `surface-panel` `#121814`, mięta
 `--accent` tylko jako wypełnienie, krój Geist, kolory danych `--data-*`; ADR 0012, wcześniej „polowy” z ADR 0009). **Zmiana kierunku to decyzja: zapisz ją w ADR**
-(`write-adr`), potem wybierz **jeden** ze skilli stylu: `design-taste-frontend`, `minimalist-ui`, `high-end-visual-design`,
-`industrial-brutalist-ui` (wykluczają się; pozostałe usuń razem z symlinkiem w `.claude/skills`). Wybrany styl
+(`write-adr`). Nowy styl
 **mapuj na tokeny** (kolory, fonty, promienie, cienie w `app.css`), nie na klasy rozsypane po komponentach.
-Zasady repo (`AGENTS.md`, brak surowych kolorów) są ważniejsze niż zakazy i nakazy skilla stylu.
+Zasady repo (`AGENTS.md`, brak surowych kolorów) są ważniejsze niż zakazy i nakazy zewnętrznych wytycznych stylu.
 
 ## Ruch
 
-Animacje projektuj skillami Emila Kowalskiego: `animate` (czy, po co, czym, krzywa, czas), `emil-design-eng`
-(dopracowanie), `animation-performance` (budżet klatki), `review-animations` (przegląd kodu). Czasy i krzywe bierz z
+Animacje mają być krótkie i celowe. Czasy i krzywe bierz z
 tokenów `--duration-*`/`--ease-*`; `prefers-reduced-motion` obsługuje `app.css` (czasy spadają do ~0), więc nie
 pisz własnych wyjątków. Animuj `transform` i `opacity`.
 

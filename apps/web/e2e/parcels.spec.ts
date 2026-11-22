@@ -6,7 +6,7 @@ import { expectNoZoomFont } from './support/font-size';
 
 // Ekran wyboru dzialek. Testy nie wolaja ULDK ani podkladu (zewnetrzne uslugi): podklad i kafle mapy sa podstawione
 // (`mockMapServices`), a testy sprawdzaja uklad, walidacje pola i przejscia, ktore nie potrzebuja danych dzialki.
-// Przeplyw z prawdziwa dzialka jest sprawdzany recznie (docs/plans).
+// Przeplyw z prawdziwa dzialka jest sprawdzany recznie.
 test.describe('działki', () => {
   test.beforeEach(async ({ page }) => {
     await mockMapServices(page);

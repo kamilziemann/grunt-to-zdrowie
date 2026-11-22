@@ -8,7 +8,7 @@
 - **Raporty wzorcowe (PDF):** [`docs/samples/`](docs/samples/README.md)
 - **Szczegóły zgłoszenia:** [README konkursowe](docs/submission/README-konkursowe.md) (źródła, metody, koszty,
   skala, bezpieczeństwo), [licencje](docs/submission/licencje.md), [walidacja](docs/validation.md)
-- Prezentacja PDF i film: _[linki — do uzupełnienia]_
+- **Prezentacja PDF (10 slajdów):** [`docs/submission/prezentacja-grunt-to-zdrowie.pdf`](docs/submission/prezentacja-grunt-to-zdrowie.pdf)
 
 ## Opis rozwiązania
 
@@ -152,7 +152,7 @@ ograniczeniach.
 
 Zasady: każdą zmianę sprawdzają narzędzia (`bun check`: format, lint, granice architektury, typy, testy) i człowiek;
 notatki z researchu agentów są oznaczone jako niezweryfikowane ([`docs/research/`](docs/research/README.md)), a liczby
-użyte w kodzie (progi IUNG, wzory, licencje) sprawdzaliśmy u źródła. Przebieg pracy: [`docs/progress/`](docs/progress/README.md).
+użyte w kodzie (progi IUNG, wzory, licencje) sprawdzaliśmy u źródła.
 Przeglądy z 22.11.2026 szły na domyślnym modelu Codex CLI oraz w Antigravity na modelu Claude Opus; wersje modeli z
 wcześniejszego researchu — **do potwierdzenia**.
 

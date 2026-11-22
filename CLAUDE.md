@@ -17,10 +17,8 @@ Reguły repo są w `AGENTS.md` (zaimportowany wyżej), reguły aplikacji w `apps
 
 - Źródło: `.agents/skills/`; `.claude/skills/<nazwa>` to symlinki (jeden plik, dwa wejścia). Lista i opis:
   `.agents/README.md`. Projektowe: `new-server-module`, `new-web-feature`, `db-change`, `write-plan`, `write-adr`,
-  `progress-log`, `verify-change`, `architecture-rules`. Oficjalne TanStack (`tanstack-start`, `tanstack-router`,
-  `tanstack-router-query`, …) to linki do skilli z paczek npm. Design i motion (vendored): `design-taste-frontend` i
-  pozostałe skille stylu (jeden kierunek na projekt!), skille animacji Emila Kowalskiego (`emil-design-eng`, `animate`,
-  `review-animations`, …), `humanizer` dla tekstów — zasady użycia w `.agents/README.md`.
+  `progress-log`, `verify-change`, `architecture-rules`, `design-system`. Oficjalne TanStack (`tanstack-start`, `tanstack-router`,
+  `tanstack-router-query`, …) to linki do skilli z paczek npm. Zewnętrznych skilli (vendored) nie trzymamy w repo.
 
 ## Podgląd i serwery
 

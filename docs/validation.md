@@ -36,7 +36,7 @@ dzienna i zdjęć, udział przyczyn — pola obok oceny): tabela niżej co do wi
 „obserwuj” 9/13, kategorie 60/64). Powtórka 22.11.2026 na `0.8.5` (opóźnienie NASA POWER bez kary, satelita wg
 uprawy, przyczyny trwałe poza sezonem, gleba uzgadniana z klasą z ewidencji): tabela znów identyczna co do wiersza.
 Uzgodnienie gleby z ewidencją nie działa w tej walidacji, bo przypadki to prostokąty wokół punktu, a nie działki z
-klasoużytkami — tę regułę sprawdza osobno przegląd 12 działek (`docs/progress/2026-11-22/przeglad-ux-wejscia-1abb3dd6.md`).
+klasoużytkami — tę regułę sprawdza osobno przegląd 12 działek.
 Powtórka 22.11.2026 na `0.8.8` (nadmiar wody wiosną od +100 mm, pełne sezony historii, zalecenia wg uprawy i gruntu,
 woda w granicach działki z BDOT10k, nawóz zielony, wapnowanie): poziom 21/21, KBW 20/21, „obserwuj” 9/13, kategorie
 60/64 — bez zmian. Próg nadmiaru nie dotyka tej walidacji (żaden przypadek nie jest wiosennym nadmiarem).

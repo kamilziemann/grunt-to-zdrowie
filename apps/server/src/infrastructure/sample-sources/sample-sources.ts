@@ -1,7 +1,7 @@
 // Dane PRZYKLADOWE dla silnika analizy: deterministyczne (te same dla tego samego miejsca i daty), o realistycznym
 // przebiegu sezonowym, ale NIE pochodza z zadnego pomiaru. Kazde zrodlo oznacza sie `sample: true`, a raport
 // niesie wtedy `meta.sample` i ograniczenie `sample_data`. Sluza do budowy i testow reszty systemu, zanim powstana
-// prawdziwe adaptery (pakiety P1, P3-P6 planu docs/plans/silnik-analizy-i-raport.md) - te je zastepuja w container.ts.
+// prawdziwe adaptery (pakiety P1, P3-P6 planu silnika analizy) - te je zastepuja w container.ts.
 import type { FieldArea, SourceId, SourceRef } from '@app/contracts';
 
 import type {

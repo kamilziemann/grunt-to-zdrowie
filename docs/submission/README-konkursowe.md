@@ -7,7 +7,7 @@
 > potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów: [`docs/project-status.md`](../project-status.md),
 > [`docs/validation.md`](../validation.md), strona „Jak liczymy” (`apps/web/messages/pl/method.json`),
 > [`tools/bdot-import/README.md`](../../tools/bdot-import/README.md), ADR-y w
-> [`docs/architecture/decisions/`](../architecture/decisions), dzienniki w [`docs/progress/`](../progress).
+> [`docs/architecture/decisions/`](../architecture/decisions).
 
 ## Zadanie i rozwiązanie
 
