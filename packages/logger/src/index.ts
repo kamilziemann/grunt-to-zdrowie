@@ -96,4 +96,3 @@ export function createLogger(options: LoggerOptions = {}): Logger {
 }
 
 export * from './trace';
-export { redactPath } from './redact';

@@ -3,8 +3,4 @@
 // - wejscie Workera kompiluje sie z typami Workers, wiec importuje stad.
 export { getServerFetch, registerServerFetch, type ServerFetch } from '../server-fetch';
 export { withDefaultCacheControl } from '../route-cache';
-export {
-  PAGE_CONTENT_SECURITY_POLICY,
-  withSecurityHeaders,
-  type SecurityHeadersOptions,
-} from '../security-headers';
+export { PAGE_CONTENT_SECURITY_POLICY, withSecurityHeaders } from '../security-headers';

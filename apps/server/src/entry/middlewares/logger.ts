@@ -9,7 +9,6 @@ import {
   type Logger,
   type LoggerOptions,
   parseTraceparent,
-  redactPath,
   TRACEPARENT_HEADER,
 } from '@app/logger';
 import type { MiddlewareHandler } from 'hono';
@@ -35,7 +34,7 @@ export function loggerMiddleware(options: LoggerMiddlewareOptions = {}): Middlew
       traceId: trace.traceId,
       spanId: trace.spanId,
       method: c.req.method,
-      path: redactPath(c.req.path),
+      path: c.req.path,
     });
 
     c.set('trace', trace);

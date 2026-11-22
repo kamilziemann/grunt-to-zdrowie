@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  PAGE_CONTENT_SECURITY_POLICY,
-  pageContentSecurityPolicy,
-  withSecurityHeaders,
-} from './security-headers';
+import { PAGE_CONTENT_SECURITY_POLICY, withSecurityHeaders } from './security-headers';
 
 describe('withSecurityHeaders', () => {
   it('dopisuje naglowki bezpieczenstwa, HSTS tylko po HTTPS', () => {
@@ -30,16 +26,5 @@ describe('withSecurityHeaders', () => {
     expect(PAGE_CONTENT_SECURITY_POLICY).not.toContain('nonce');
     expect(PAGE_CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'");
     expect(PAGE_CONTENT_SECURITY_POLICY).toContain("form-action 'self'");
-  });
-
-  it('form-action z originem dostawcy logowania (przekierowanie formularza wylogowania)', () => {
-    const res = withSecurityHeaders(new Response('ok'), new URL('https://app.example.com/'), {
-      formActions: ['https://auth.example.com'],
-    });
-
-    expect(res.headers.get('content-security-policy')).toContain(
-      "form-action 'self' https://auth.example.com",
-    );
-    expect(pageContentSecurityPolicy()).toBe(PAGE_CONTENT_SECURITY_POLICY);
   });
 });

@@ -7,7 +7,6 @@ import {
   formatTraceparent,
   isLogLevel,
   parseTraceparent,
-  redactPath,
   REQUEST_ID_HEADER,
   TRACEPARENT_HEADER,
   type Logger,
@@ -22,19 +21,10 @@ export function logLevelOf(value: unknown): 'debug' | 'info' | 'warn' | 'error' 
   return isLogLevel(value) ? value : 'info';
 }
 
-export interface PageRequestOptions {
-  /**
-   * dodatkowe originy `form-action` w CSP - np. zewnetrzny dostawca logowania: formularz wylogowania przekierowuje
-   * przez API do jego end-session, a przegladarka sprawdza `form-action` na kazdym przekierowaniu formularza
-   */
-  formActions?: readonly string[];
-}
-
 export async function handlePageRequest(
   request: Request,
   render: PageRenderer,
   logger: Logger,
-  options: PageRequestOptions = {},
 ): Promise<Response> {
   const started = Date.now();
   const requestId = request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID();
@@ -48,19 +38,19 @@ export async function handlePageRequest(
   const url = new URL(request.url);
 
   try {
-    const response = withSecurityHeaders(withDefaultCacheControl(await render(traced)), url, options);
+    const response = withSecurityHeaders(withDefaultCacheControl(await render(traced)), url);
 
     response.headers.set(REQUEST_ID_HEADER, requestId);
     log.info('page', {
       method: request.method,
-      path: redactPath(url.pathname),
+      path: url.pathname,
       status: response.status,
       ms: Date.now() - started,
     });
 
     return response;
   } catch (error) {
-    log.error('page failed', { method: request.method, path: redactPath(url.pathname), err: error });
+    log.error('page failed', { method: request.method, path: url.pathname, err: error });
 
     throw error;
   }
