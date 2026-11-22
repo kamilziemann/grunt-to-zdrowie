@@ -367,10 +367,18 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
 
   if (assessment.level === 'unknown' || assessment.level === 'excess') return [];
 
-  if (!deficitNow && !recurrentDeficit(history)) return [];
-
   const sample = new Set(input.sampleSources ?? []);
   const real = (id: SourceId) => !sample.has(id);
+
+  // Bez niedoboru teraz i w historii (zwykly rok, listopad) zostaja przyczyny trwale - gleba, rowy, teren: to one
+  // mowia, co na tym polu sprzyja suszy, i z nich wynikaja zalecenia "na kolejny sezon". Bez tego raport "na dzis"
+  // poza sezonem bywal pusty, choc obiecuje zalecenia przed wiosna.
+  if (!deficitNow && !recurrentDeficit(history)) {
+    return [soilCause(input, real), ...landscapeCauses(input, real)]
+      .filter((cause): cause is Cause => cause !== null)
+      .toSorted((a, b) => b.weight - a.weight);
+  }
+
   const found = [
     ...(deficitNow ? weatherCauses(input, assessment) : []),
     soilCause(input, real),

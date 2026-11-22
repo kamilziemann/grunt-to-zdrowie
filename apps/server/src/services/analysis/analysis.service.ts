@@ -40,7 +40,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.8.2';
+export const ANALYSIS_ENGINE_VERSION = '0.8.3';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -302,7 +302,10 @@ export function createAnalysisService({
     const computedOnTheDay = isoDateInPoland(found.createdAt) <= key.analysisDate;
     const age = Date.parse(now()) - Date.parse(found.createdAt);
 
-    return computedOnTheDay && age > TODAY_REPORT_TTL_MS ? null : found.report;
+    // raport czesciowy (zrodlo chwilowo milczalo) nie zostaje na zawsze - po dobie liczymy od nowa
+    const incomplete = found.report.meta.status !== 'complete';
+
+    return (computedOnTheDay || incomplete) && age > TODAY_REPORT_TTL_MS ? null : found.report;
   }
 
   return {

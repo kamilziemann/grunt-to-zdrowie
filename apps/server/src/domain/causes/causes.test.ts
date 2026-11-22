@@ -242,7 +242,7 @@ describe('causes', () => {
     expect(ids(input)).not.toContain('no_landscape_retention');
   });
 
-  it('poza sezonem (listopad) nie ma przyczyn, chyba ze susza wraca w historii - wtedy tylko przyczyny trwale', () => {
+  it('poza sezonem (listopad) tylko przyczyny trwale (gleba, rowy, teren), bez pogodowych', () => {
     const wet = stageInput('2021-11-15', 0, { soil: SAND });
     const assessment = assess(wet);
     const past = history(wet);
@@ -256,7 +256,8 @@ describe('causes', () => {
     };
 
     expect(assessment.level).toBe('out_of_season');
-    expect(ids(wet, assessment)).toEqual([]);
+    // bez niedoboru w historii zostaja czynniki ryzyka pola - z nich zalecenia "przed wiosna"
+    expect(ids(wet, assessment).toSorted()).toEqual(['low_soil_retention', 'no_landscape_retention']);
     expect(deficitSeasons(recurrent)).toEqual({ deficit: 5, withData: 10 });
     expect(recurrentDeficit(recurrent)).toBe(true);
     expect(recurrentDeficit({ ...recurrent, seasons: recurrent.seasons.slice(0, 4) })).toBe(false);

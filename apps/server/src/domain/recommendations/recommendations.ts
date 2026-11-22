@@ -19,6 +19,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
+import { hasFarmland } from '../land-use';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
@@ -529,9 +530,14 @@ export function recommend(
     .filter((item, index, items) => items.findIndex((other) => other.measure === item.measure) === index)
     .toSorted((a, b) => a.priority - b.priority || weightOf(b) - weightOf(a));
 
+  // wg ewidencji to nie grunt rolny (las, zabudowa, woda): zabiegi agrotechniczne i nawadnianie nie maja sensu -
+  // zostaje woda w krajobrazie (rowy, mokradla); raport i tak mowi wprost, ze ocena dotyczy warunkow w okolicy
+  const landUse = input.field.landUse;
+  const notFarmland = landUse !== undefined && landUse.length > 0 && !hasFarmland(landUse);
+
   return {
     retention: all.filter((item) => item.category === 'retention'),
-    agrotech: all.filter((item) => item.category === 'agrotech'),
-    irrigation: irrigationAdvice(input, assessment),
+    agrotech: notFarmland ? [] : all.filter((item) => item.category === 'agrotech'),
+    irrigation: notFarmland ? null : irrigationAdvice(input, assessment),
   };
 }
