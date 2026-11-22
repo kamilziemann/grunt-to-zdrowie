@@ -36,7 +36,7 @@ function BasemapButton({ basemap, Icon, short, active, onChange }: BasemapButton
       aria-label={label}
       onClick={choose}
       className={cn(
-        'flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+        'flex h-11 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-muted-foreground [@media(hover:hover)]:hover:text-foreground',
@@ -67,7 +67,7 @@ export function BasemapSwitch({ value, onChange, className }: BasemapSwitchProps
       aria-label={t('label')}
       // komputer: dwa przyciski w ramce; telefon ma zamiast nich kafel `BasemapToggle` w szynie
       className={cn(
-        'flex h-12 shrink-0 items-center gap-1 rounded-lg border bg-card p-1 shadow-md',
+        'flex h-12 shrink-0 items-center gap-0.5 rounded-lg border bg-card p-0.5 shadow-md',
         className,
       )}
       data-testid="basemap-switch"

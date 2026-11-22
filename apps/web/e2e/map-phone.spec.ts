@@ -99,7 +99,10 @@ test.describe('mapa na telefonie', () => {
       const hint = page.getByText('Przybliż mapę, żeby wskazać działkę.');
 
       await expect(hint).toBeVisible();
+      // arkusz do polowy (pierwsze wejscie): szyna przechodzi do drugiej kolumny i konczy sie nad arkuszem
+      await expect(page.getByTestId('parcels-panel')).toHaveAttribute('data-snap', 'half');
       await expectMapButtonsUncovered(page, [
+        page.getByTestId('parcels-panel'),
         hint,
         page.getByRole('searchbox'),
         page.getByTestId('layers-button'),

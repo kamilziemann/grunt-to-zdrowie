@@ -411,10 +411,15 @@ export function ParcelsScreen({
       : [],
     imagery: imageryLegendShown ? imageryStatus : 'idle',
   });
-  const rootStyle = useMemo(
-    () => (sheetPeek === null ? undefined : ({ '--sheet-peek': `${sheetPeek}px` } as CSSProperties)),
-    [sheetPeek],
-  );
+  // --sheet-visible: ile arkusz zaslania od dolu - szyna przyciskow konczy sie nad nim (przy arkuszu do polowy
+  // przechodzi do drugiej kolumny, zamiast chowac przyblizanie pod arkuszem)
+  const rootStyle = useMemo((): CSSProperties | undefined => {
+    if (sheetPeek === null) return undefined;
+
+    const visible = snap === 'peek' ? `${sheetPeek}px` : `${SHEET_HALF_FRACTION * 100}cqh`;
+
+    return { '--sheet-peek': `${sheetPeek}px`, '--sheet-visible': visible } as CSSProperties;
+  }, [sheetPeek, snap]);
 
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
@@ -575,7 +580,7 @@ export function ParcelsScreen({
       <div
         className={cn(
           'pointer-events-none absolute z-10 *:pointer-events-auto has-aria-expanded:z-30',
-          'max-lg:right-3 max-lg:grid max-lg:max-h-[calc(100cqh-var(--sheet-peek,7.75rem)-var(--rail-top)-0.75rem)] max-lg:grid-flow-col-dense max-lg:auto-rows-[3.5rem] max-lg:[grid-template-rows:repeat(auto-fill,3.5rem)] max-lg:gap-2 max-lg:[direction:rtl] max-lg:*:[direction:ltr]',
+          'max-lg:right-3 max-lg:grid max-lg:max-h-[calc(100cqh-var(--sheet-visible,7.75rem)-var(--rail-top)-0.75rem)] max-lg:grid-flow-col-dense max-lg:auto-rows-[3.5rem] max-lg:[grid-template-rows:repeat(auto-fill,3.5rem)] max-lg:gap-2 max-lg:[direction:rtl] max-lg:*:[direction:ltr]',
           drawing
             ? 'max-lg:top-3 max-lg:[--rail-top:0.75rem]'
             : cn('max-lg:top-19 max-lg:[--rail-top:4.75rem]', SHORT_SCREEN_RAIL),
@@ -676,14 +681,15 @@ export function ParcelsScreen({
       {drawing && (
         // podpowiedz "co teraz" u gory mapy - rysowane miejsce zostaje odsloniete
         // telefon: obok kafli przyblizania po prawej; komputer: obok panelu, z miejscem na kolumne przyblizania
-        <div className="absolute top-3 right-20 left-3 z-20 lg:right-auto lg:left-106 lg:max-w-[min(36rem,calc(100%-32rem))]">
+        <div className="absolute top-3 right-20 left-3 z-20 max-lg:[@media(height<30rem)]:right-36 lg:right-auto lg:left-106 lg:max-w-[min(36rem,calc(100%-32rem))]">
           <FieldDrawHint draw={draw} splitTarget={splitTarget} />
         </div>
       )}
 
       {hint && !drawing && (
-        // telefon: pod wyszukiwarka, z lewej - szyna przyciskow po prawej zostaje odslonieta; komputer: pod rzedem pigulek
-        <output className="absolute z-10 block w-max rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-lg:top-19 max-lg:left-3 max-lg:max-w-[calc(100%-6.5rem)] max-lg:[@media(height<30rem)]:max-w-[calc(100%-14rem)] lg:top-18 lg:left-[calc(50%+12.5rem)] lg:max-w-[calc(100%-32rem)] lg:-translate-x-1/2">
+        // telefon: pod wyszukiwarka, z lewej - szyna po prawej (do dwoch kolumn przy arkuszu do polowy) zostaje
+        // odslonieta; komputer: pod rzedem pigulek
+        <output className="absolute z-10 block w-max rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-lg:top-19 max-lg:left-3 max-lg:max-w-[calc(100%-9.5rem)] max-lg:[@media(height<30rem)]:max-w-[calc(100%-14rem)] lg:top-18 lg:left-[calc(50%+12.5rem)] lg:max-w-[calc(100%-32rem)] lg:-translate-x-1/2">
           {t(`map.${hint}`)}
         </output>
       )}
