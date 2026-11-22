@@ -47,6 +47,7 @@ import { BASEMAP_STYLE_URL, loadMapLibre, ORTHO_LAYER, ORTHO_SOURCE } from '@/li
 import { createTileLayer, type TileLayer, type TileLayerState, type TileView } from '@/lib/map-tiles';
 import { cn } from '@/lib/utils/cn';
 
+import { readCamera, saveCamera } from './camera-memory';
 import {
   BOUNDARIES_ATTRIBUTION,
   BOUNDARIES_MIN_ZOOM,
@@ -86,6 +87,8 @@ export interface MapFocus {
   bbox: [number, number, number, number];
   /** zmiana klucza = nowy dojazd (ten sam klucz nie rusza mapy, np. po przerysowaniu komponentu) */
   key: string;
+  /** dojazd tylko wtedy, gdy obszaru nie widac w calosci (np. "pokaz moje dzialki") - kadr uzytkownika zostaje */
+  soft?: boolean;
 }
 
 /** Szkic wlasnego pola rysowany nad dzialkami (wspolrzedne [dlugosc, szerokosc]). */
@@ -194,6 +197,8 @@ const truncatedCoarseTiles = new Set<string>();
 const NO_CONTEXT: ContextVisibility = { cover: false, waterworks: false, protected: false };
 const NO_LABELS: ContextKindLabels = {};
 const noop = (): void => undefined;
+// dojazd do dzialki: blizej nie ma sensu (kafle zdjecia lotniczego koncza sie na ok. 19, dzialka i tak wypelnia ekran)
+const FOCUS_MAX_ZOOM = 17;
 
 function viewOf(map: MapLibre.Map): TileView {
   const bounds = map.getBounds();
@@ -217,15 +222,63 @@ interface TileLayers {
  * telefonie arkusz dol. Margines z jednej strony najwyzej pol mapy.
  */
 function visibleBounds(map: MapLibre.Map, padding: MapPadding): [number, number, number, number] {
-  const { top = 0, right = 0, bottom = 0, left = 0 } = padding;
+  const { top, right, bottom, left, width, height } = visibleInsets(map, padding);
+  const corner = map.unproject([left, top]);
+  const opposite = map.unproject([width - right, height - bottom]);
+
+  return [corner.lng, opposite.lat, opposite.lng, corner.lat];
+}
+
+function visibleInsets(map: MapLibre.Map, padding: MapPadding) {
   const canvas = map.getCanvas();
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
-  const inset = (from: number, size: number) => Math.min(Math.max(from, 0), size / 2);
-  const corner = map.unproject([inset(left, width), inset(top, height)]);
-  const opposite = map.unproject([width - inset(right, width), height - inset(bottom, height)]);
+  const inset = (from: number | undefined, size: number) => Math.min(Math.max(from ?? 0, 0), size / 2);
 
-  return [corner.lng, opposite.lat, opposite.lng, corner.lat];
+  return {
+    top: inset(padding.top, height),
+    right: inset(padding.right, width),
+    bottom: inset(padding.bottom, height),
+    left: inset(padding.left, width),
+    width,
+    height,
+  };
+}
+
+/**
+ * Czy obszar widac w calosci obok paneli. Po dojezdzie obszar dotyka marginesu co do piksela, wiec liczymy z polowa
+ * marginesu - inaczej blad zaokraglenia albo inny o kilka pikseli panel uruchamialby dojazd od nowa.
+ */
+function showsArea(map: MapLibre.Map, padding: MapPadding, bbox: readonly [number, number, number, number]) {
+  const { top, right, bottom, left, width, height } = visibleInsets(map, padding);
+  const corner = map.project([bbox[0], bbox[3]]);
+  const opposite = map.project([bbox[2], bbox[1]]);
+
+  return (
+    corner.x >= left / 2 &&
+    corner.y >= top / 2 &&
+    opposite.x <= width - right / 2 &&
+    opposite.y <= height - bottom / 2
+  );
+}
+
+/** Srodek czesci mapy widocznej obok paneli - to on jest "kadrem" przenoszonym miedzy mapami. */
+function visibleCenter(map: MapLibre.Map, padding: MapPadding): [number, number] {
+  const { top, right, bottom, left, width, height } = visibleInsets(map, padding);
+  const center = map.unproject([(left + width - right) / 2, (top + height - bottom) / 2]);
+
+  return [center.lng, center.lat];
+}
+
+/** Ustawia mape tak, zeby `center` stal na srodku czesci widocznej obok paneli (bez animacji). */
+function jumpToVisibleCenter(map: MapLibre.Map, padding: MapPadding, center: [number, number], zoom: number) {
+  const { top, right, bottom, left, width, height } = visibleInsets(map, padding);
+
+  map.jumpTo({ center, zoom });
+
+  const shift = map.unproject([width / 2 - (left - right) / 2, height / 2 - (top - bottom) / 2]);
+
+  map.jumpTo({ center: shift });
 }
 
 function statusKey(status: LayerStatus): string {
@@ -437,6 +490,7 @@ export function ParcelMap({
   const [tilesLoading, setTilesLoading] = useState<ReadonlySet<string>>(() => new Set());
   // Najnowsze wartosci dla zdarzen mapy, ktora powstaje raz - bez przepinania sluchaczy przy kazdym renderze.
   const latest = useRef({
+    focus,
     drawing,
     onPick,
     onZoomTooLow,
@@ -460,9 +514,12 @@ export function ParcelMap({
   const tileLayersRef = useRef<TileLayers | null>(null);
   // zdejmuje podswietlenie "pod kursorem" (ustawiane w zdarzeniach mapy) - przy wejsciu w tryb rysowania
   const clearHoverRef = useRef<() => void>(noop);
+  // pierwszy dojazd swiezej mapy bez animacji: mapa nie przelatuje z widoku kraju ani z poprzedniego kadru
+  const firstFocusRef = useRef(true);
 
   useEffect(() => {
     latest.current = {
+      focus,
       drawing,
       onPick,
       onZoomTooLow,
@@ -693,11 +750,18 @@ export function ParcelMap({
       if (cancelled) return;
 
       const text = latest.current.labels;
+      const padding = latest.current.getPadding();
+      // Start od razu na miejscu: dzialka znana juz teraz (dojazd "twardy") albo ostatni kadr z poprzedniej mapy;
+      // widok calej Polski tylko przy pierwszej mapie w karcie, gdy nie wiadomo jeszcze, co pokazac.
+      const initialFocus = latest.current.focus;
+      const remembered = readCamera();
+      const startAtFocus = initialFocus !== null && (!initialFocus.soft || remembered === null);
       const created = new maplibre.Map({
         container: target,
         style: BASEMAP_STYLE_URL,
-        bounds: INITIAL_BOUNDS,
-        fitBoundsOptions: { padding: latest.current.getPadding() },
+        bounds: startAtFocus ? initialFocus.bbox : INITIAL_BOUNDS,
+        // maxZoom tylko przy dzialce: `undefined` nadpisaloby domyslne przyblizenie MapLibre
+        fitBoundsOptions: startAtFocus ? { padding, maxZoom: FOCUS_MAX_ZOOM } : { padding },
         maxBounds: MAX_BOUNDS,
         interactive,
         // Obrot i pochylenie myla przy szukaniu pola: polnoc zawsze u gory.
@@ -715,7 +779,27 @@ export function ParcelMap({
       });
 
       map = created;
+      firstFocusRef.current = true;
+
+      if (!startAtFocus && remembered) {
+        jumpToVisibleCenter(created, padding, remembered.center, remembered.zoom);
+
+        // miekki dojazd (moje dzialki) tylko wtedy, gdy z poprzedniego kadru dzialek nie widac
+        if (initialFocus && !showsArea(created, padding, initialFocus.bbox)) {
+          created.fitBounds(initialFocus.bbox, { padding, maxZoom: FOCUS_MAX_ZOOM, duration: 0 });
+        }
+      }
+
+      if (initialFocus) {
+        focusedKeyRef.current = initialFocus.key;
+        firstFocusRef.current = false;
+      }
+
       created.touchZoomRotate.disableRotation();
+      // uzytkownik ruszyl mape sam - kolejny dojazd juz z animacja (widac, skad i dokad jedzie mapa)
+      created.on('movestart', (event) => {
+        if (event.originalEvent) firstFocusRef.current = false;
+      });
       created.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-right');
 
       if (interactive) {
@@ -792,10 +876,19 @@ export function ParcelMap({
         created.on('moveend', refreshBoundaries);
         created.on('moveend', refreshHydro);
         created.on('moveend', refreshContext);
-        // przyblizenie w DOM (bez renderu Reacta): testy e2e czekaja na koniec animacji przyblizania
-        created.on('moveend', () => {
+        // Kadr w DOM (bez renderu Reacta): testy e2e czekaja na koniec animacji i porownuja kadry miedzy stronami.
+        // Mapa interaktywna zapamietuje kadr dla nastepnej mapy (podglad w kroku dzialki tylko z niego korzysta).
+        const markView = () => {
+          const center = visibleCenter(created, latest.current.getPadding());
+
           target.dataset.mapZoom = created.getZoom().toFixed(2);
-        });
+          target.dataset.mapCenter = center.map((value) => value.toFixed(6)).join(',');
+
+          if (interactive) saveCamera({ center, zoom: created.getZoom() });
+        };
+
+        markView();
+        created.on('moveend', markView);
         mapRef.current = created;
         setState('ready');
       });
@@ -932,20 +1025,31 @@ export function ParcelMap({
             ? labels.zoomForBoundaries
             : null);
   const focusKey = focus?.key ?? null;
+  const focusSoft = focus?.soft ?? false;
   const [west, south, east, north] = focus?.bbox ?? [0, 0, 0, 0];
 
   useEffect(() => {
-    if (state !== 'ready' || focusKey === null || focusedKeyRef.current === focusKey) return;
+    const map = mapRef.current;
+
+    if (state !== 'ready' || !map || focusKey === null || focusedKeyRef.current === focusKey) return;
+
+    const padding = latest.current.getPadding();
+    const first = firstFocusRef.current;
 
     focusedKeyRef.current = focusKey;
-    mapRef.current?.fitBounds(
+    firstFocusRef.current = false;
+
+    // miekki dojazd nie rusza mapy, jesli obszar juz widac - kadr wybrany przez uzytkownika zostaje
+    if (focusSoft && showsArea(map, padding, [west, south, east, north])) return;
+
+    map.fitBounds(
       [
         [west, south],
         [east, north],
       ],
-      { padding: latest.current.getPadding(), maxZoom: 17, duration: 900 },
+      { padding, maxZoom: FOCUS_MAX_ZOOM, duration: first ? 0 : 900 },
     );
-  }, [state, focusKey, west, south, east, north]);
+  }, [state, focusKey, focusSoft, west, south, east, north]);
 
   return (
     <div className={cn('relative size-full overflow-hidden bg-muted', className)}>

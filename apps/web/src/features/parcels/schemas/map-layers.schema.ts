@@ -4,6 +4,8 @@ import { z } from 'zod';
 
 export const mapLayersSchema = z.object({
   basemap: z.enum(['map', 'ortho']).catch('map'),
+  // czy podklad wybral uzytkownik (na mapie albo w kroku dzialki); bez wyboru kazdy ekran ma swoj domyslny
+  basemapChosen: z.boolean().catch(false),
   boundaries: z.boolean().catch(true),
   hydro: z.boolean().catch(true),
   cover: z.boolean().catch(false),

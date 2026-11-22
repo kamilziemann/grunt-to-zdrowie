@@ -61,7 +61,15 @@ export interface MapLayersControl {
 
 export function useMapLayers(): MapLayersControl {
   const layers = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
-  const update = useCallback((patch: Partial<MapLayers>) => write({ ...snapshot(), ...patch }), []);
+  const update = useCallback(
+    (patch: Partial<MapLayers>) =>
+      write({
+        ...snapshot(),
+        ...patch,
+        basemapChosen: snapshot().basemapChosen || patch.basemap !== undefined,
+      }),
+    [],
+  );
 
   return { layers, update };
 }

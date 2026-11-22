@@ -212,7 +212,8 @@ export function ParcelsScreen({
 
     const box = selected.settled ? unionBbox(selected.parcels) : null;
 
-    return box ? { bbox: box, key: `selection:${ids.join(',')}` } : null;
+    // lista dzialek tylko wtedy, gdy jej nie widac - po powrocie z kroku dzialki mapa stoi tam, gdzie stala
+    return box ? { bbox: box, key: `selection:${ids.join(',')}`, soft: true } : null;
   }, [shown, preview, focusPreview, selected.settled, selected.parcels, ids]);
 
   // Margines dojazdu liczony w chwili dojazdu: na komputerze panel zaslania lewa strone, na telefonie arkusz dol.
@@ -329,7 +330,7 @@ export function ParcelsScreen({
       setSnap('peek');
 
       if (mode === 'split' && onlyParcel) {
-        setShown({ bbox: onlyParcel.bbox, key: `split:${onlyParcel.id}:${Date.now()}` });
+        setShown({ bbox: onlyParcel.bbox, key: `split:${onlyParcel.id}:${Date.now()}`, soft: true });
       }
     },
     [clearSearch, startDraw, onlyParcel],

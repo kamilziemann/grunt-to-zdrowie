@@ -1,6 +1,6 @@
 import { serializeParcelSelection, type Parcel, type ParcelGeometry } from '@app/contracts';
 import { Map as MapIcon, PencilRuler, RotateCw, Scissors, TriangleAlert } from 'lucide-react';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, type ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { EmptyState } from '@/components/shared/empty-state';
@@ -12,6 +12,7 @@ import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
 import { useMapLabels } from '../../hooks/use-map-labels';
+import { useMapLayers } from '../../hooks/use-map-layers';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
 import { nonFarmKinds } from '../../utils/land-use';
 import { ParcelMap, type Basemap, type MapFocus, type MapParcel } from '../parcel-map';
@@ -139,7 +140,9 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
   const formatArea = useAreaFormatter();
   const mapLabels = useMapLabels('static');
   const selected = useSelectedParcels(ids);
-  const [basemap, setBasemap] = useState<Basemap>('ortho');
+  // podklad wspolny z mapa dzialek, gdy uzytkownik go wybral; inaczej zdjecie lotnicze (latwiej poznac swoje pole)
+  const { layers, update: updateLayers } = useMapLayers();
+  const basemap: Basemap = layers.basemapChosen ? layers.basemap : 'ortho';
   const dzialki = serializeParcelSelection(ids);
   const single = ids.length === 1 ? selected.items[0] : undefined;
   const areaParcel = useMemo(
@@ -153,15 +156,17 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
   const focus = useMemo((): MapFocus | null => {
     const ring = area ? outerRing(area.geometry) : null;
 
-    if (ring) return { bbox: ringBbox(ring), key: `area:${ring.length}:${ring[0]?.join(',') ?? ''}` };
+    // miekko: z mapy wchodzimy z tym samym kadrem (jesli widac w nim pole), z numeru - od razu na dzialce
+    if (ring)
+      return { bbox: ringBbox(ring), key: `area:${ring.length}:${ring[0]?.join(',') ?? ''}`, soft: true };
 
     const box = selected.settled ? unionBbox(selected.parcels) : null;
 
-    return box ? { bbox: box, key: `check:${ids.join(',')}` } : null;
+    return box ? { bbox: box, key: `check:${ids.join(',')}`, soft: true } : null;
   }, [area, ids, selected.parcels, selected.settled]);
   const outlineGeometries = useMemo(() => mapSelected.map((parcel) => parcel.geometry), [mapSelected]);
   const outline = useMemo(() => <ParcelOutline geometries={outlineGeometries} />, [outlineGeometries]);
-  const chooseBasemap = useCallback((next: Basemap) => setBasemap(next), []);
+  const chooseBasemap = useCallback((next: Basemap) => updateLayers({ basemap: next }), [updateLayers]);
   const nonFarm = single?.parcel && !area ? nonFarmKinds(single.parcel.landUse) : [];
   const ready = area !== null || selected.parcels.length > 0;
   const splitHref = useMemo(() => routes.map({ dzialki, rysuj: 'podziel' }), [dzialki]);
