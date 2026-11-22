@@ -2,7 +2,9 @@ import type { WaterReport } from '@app/contracts';
 
 import { FIELD_REPORT } from '../src/features/report/fixtures/field-report';
 import { FOREST_REPORT } from '../src/features/report/fixtures/forest-report';
+import { HEAT_REPORT } from '../src/features/report/fixtures/heat-report';
 import { mockReport, reportUrl } from './support/analysis-api';
+import { expectNoViolations } from './support/axe';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
 import { expect, test } from './support/test';
 
@@ -206,5 +208,46 @@ test.describe('raport z zapisu (krótki link)', () => {
     await page.goto('/raport?raport=cokolwiek');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Nie ma takiego raportu' })).toBeVisible();
+  });
+});
+
+test.describe('otoczenie pola', () => {
+  const PROTECTED: WaterReport = {
+    ...HEAT_REPORT,
+    surroundings: HEAT_REPORT.surroundings && {
+      ...HEAT_REPORT.surroundings,
+      protectedAreas: [
+        { kind: 'national_park', name: 'Biebrzański Park Narodowy' },
+        { kind: 'natura2000', name: 'Dolina Biebrzy' },
+      ],
+    },
+  };
+
+  test('obszar chroniony u góry, karta otoczenia i „Zanim zaczniesz”; także na wydruku i bez naruszeń axe', async ({
+    page,
+  }) => {
+    await mockReport(page, PROTECTED);
+    await page.goto(reportUrl(PROTECTED));
+
+    await expect(page.getByTestId('protected-area-notice')).toContainText(
+      'Pole leży w obszarze chronionym: Biebrzański Park Narodowy; Natura 2000: Dolina Biebrzy.',
+    );
+    await expect(page.getByTestId('surroundings-card')).toContainText('rosną przy 0 m z 1900 m granicy pola');
+    await expect(page.getByTestId('recommendation-notes').first()).toContainText('Zanim zaczniesz');
+    await expectNoViolations(page);
+
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByTestId('protected-area-notice')).toBeVisible();
+    await expect(page.getByTestId('surroundings-card')).toBeVisible();
+    await expect(page.getByTestId('recommendation-notes').first()).toBeVisible();
+  });
+
+  test('telefon: karta otoczenia i dopiski bez przewijania w poziomie', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockReport(page, HEAT_REPORT);
+    await page.goto(reportUrl(HEAT_REPORT));
+    await expect(page.getByTestId('surroundings-card')).toBeVisible();
+
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
 });

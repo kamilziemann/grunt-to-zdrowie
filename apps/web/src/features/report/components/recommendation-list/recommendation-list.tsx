@@ -1,5 +1,5 @@
 import type { Recommendation, WaterReport } from '@app/contracts';
-import { ClipboardCheck, Hammer, MapPin } from 'lucide-react';
+import { ClipboardCheck, Hammer, ListChecks, MapPin } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
@@ -136,6 +136,22 @@ export function RecommendationList({ category, recommendations, report }: Recomm
                 )}
               </li>
             </ul>
+            {recommendation.notes && recommendation.notes.length > 0 && (
+              <div
+                className="flex flex-col gap-1.5 rounded-md border-l-4 border-warning bg-muted/60 py-2 pr-3 pl-3"
+                data-testid="recommendation-notes"
+              >
+                <p className="flex items-center gap-2 text-base font-semibold">
+                  <ListChecks aria-hidden="true" className="size-4 shrink-0 text-warning" />
+                  {t('notesTitle')}
+                </p>
+                <ul className="flex list-disc flex-col gap-1 pl-5 text-base">
+                  {recommendation.notes.map((note) => (
+                    <li key={note.id}>{note.text}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <details className="text-sm">
               <summary className="min-h-11 cursor-pointer py-2.5 font-medium text-primary print:min-h-0 print:py-1">
                 {tReport('details')}

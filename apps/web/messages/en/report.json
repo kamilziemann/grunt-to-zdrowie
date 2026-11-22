@@ -322,7 +322,13 @@
       "depression_area_m2": "Area of the hollow in the field",
       "hot_days_14d": "Hot days above 30°C in the last 14 days",
       "hot_days_30d": "Hot days above 30°C in the last 30 days",
-      "hot_days_30d_normal": "Hot days in these 30 days usually (10-year average)"
+      "hot_days_30d_normal": "Hot days in these 30 days usually (10-year average)",
+      "elevation_min_m": "Lowest point of the field above sea level",
+      "wooded_edge_m": "Field boundary lined with trees",
+      "nearest_structure_m": "Distance to the nearest weir, dam or lock",
+      "piped_junction_m": "Distance to where a ditch enters a pipe",
+      "nearest_spring_m": "Distance to the nearest spring",
+      "nearest_levee_m": "Distance to the nearest levee or dyke"
     },
     "unknownMetric": "Other indicator",
     "units": {
@@ -340,7 +346,8 @@
       "category": "{roman} ({name})",
       "index": "{value}",
       "m2": "{value} m²",
-      "soilClass": "class {roman}"
+      "soilClass": "class {roman}",
+      "mOf": "{value} m of {total} m"
     },
     "referenceNormal": "usually at this time of year: {reference}"
   },
@@ -433,7 +440,8 @@
     },
     "zoneNumbered": "Applies to spot {number}: {description}",
     "zoneRest": "Applies to the rest of the field, outside the marked spots",
-    "showOnSketch": "Show spot {number} on the sketch"
+    "showOnSketch": "Show spot {number} on the sketch",
+    "notesTitle": "Before you start"
   },
   "irrigation": {
     "first": "Consider irrigation only after the measures described above. Water kept on the field is cheaper.",
@@ -721,5 +729,46 @@
       "description": "The link points to a report we do not know – it may have been copied with a mistake or come from an older version of the app. Pick the field on the map and compute the report again.",
       "map": "Pick a field on the map"
     }
+  },
+  "surroundings": {
+    "protectedTitle": "The field lies in a protected area: {areas}.",
+    "protectedText": "A pond, a ditch weir or any change to water conditions needs to be agreed here first.",
+    "areaKinds": {
+      "national_park": "national park",
+      "nature_reserve": "nature reserve",
+      "landscape_park": "landscape park",
+      "natura2000": "Natura 2000"
+    },
+    "areaNamed": "{kind} {name}",
+    "natura2000": "Natura 2000: {names}",
+    "title": "Around the field",
+    "intro": "Trees next to the field shelter it from wind and drying out. Weirs and other structures on ditches show who already holds water back nearby.",
+    "trees": "Trees along the boundary",
+    "treesValue": "grow along {wooded} m of the {edge} m field boundary",
+    "openToWind": "the field is open to the wind",
+    "forest": "Nearest forest",
+    "treeRow": "Nearest tree row or hedge",
+    "structure": "Nearest weir, dam or lock",
+    "structureKinds": {
+      "weir": "weir",
+      "dam": "dam",
+      "lock": "lock"
+    },
+    "structureValue": "{kind}, {distance}",
+    "structureNamedValue": "{kind} “{name}”, {distance}",
+    "levees": "Levees and dykes",
+    "leveesValue": "nearest {distance} ({count, plural, one {# section} other {# sections}} within {radius})",
+    "spring": "Spring",
+    "springNamed": "“{name}”, {distance}",
+    "intake": "Water intake",
+    "junction": "Ditch enters a pipe",
+    "junctionValue": "{distance} – usually under a road; a natural place to hold water back",
+    "lowland": "Mechanically drained land (polder): water leaves through ditches to a pumping station, and a hollow in the field is part of the polder, not a place for a pond.",
+    "distance": "{meters} m from the field",
+    "touching": "right at the field boundary",
+    "none": "none within {radius}",
+    "radiusM": "{value} m",
+    "radiusKm": "{value} km",
+    "source": "From the BDOT10k topographic map (GUGiK). The map does not show weirs or culverts on ditches – check them on site."
   }
 }

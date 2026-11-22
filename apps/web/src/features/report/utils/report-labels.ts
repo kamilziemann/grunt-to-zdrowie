@@ -1,48 +1,31 @@
 // Miary z dowodow (`evidence.metric`) i ich jednostki, ktore maja nazwe w tlumaczeniach (`report.evidence.*`).
 // Silnik moze dopisac nowa miare bez zmiany kontraktu - ekran pokaze wtedy ogolna nazwe ("inny wskaznik"), nigdy
 // surowy identyfikator. Test pilnuje zgodnosci list z plikiem komunikatow.
-export const REPORT_METRICS = [
-  'available_water_mm_per_m',
-  'slope_mean_pct',
-  'precip_30d',
+import { EVIDENCE_METRICS } from '@app/contracts';
+
+/**
+ * Miary z dawnych wersji silnika - raport z linku albo fixture moze je jeszcze niesc, wiec zostaja z nazwa.
+ */
+const LEGACY_METRICS = [
   'precip_60d',
   'et0_60d',
-  'et0_period',
   'balance_60d',
   'balance_period',
   'ditch_distance_m',
-  'nearest_ditch_m',
   'water_distance_m',
   'nearest_water_m',
   'nearest_stream_m',
-  'tree_cover_share',
   'wetland_share',
   'kc',
   'stress_days_30',
   'depletion_share',
-  'ndvi_anomaly',
-  'ndmi_anomaly',
-  'precip_period',
-  'et_period',
-  'soil_category',
-  'ditch_length_in_field_m',
-  'ditches_in_radius',
-  'water_bodies_in_radius',
-  'wetlands_in_radius',
-  'drought_seasons',
-  'deficit_seasons',
-  'season_et_deficit_median',
-  'nearest_wetland_m',
-  'organic_matter_pct',
-  'registry_soil_class',
-  'slope_share_above_5_pct',
-  'depression_volume_m3',
-  'depression_area_m2',
-  // upal przy przyczynie `high_evaporative_demand` (serwer doda je w nastepnej rundzie)
-  'hot_days_14d',
-  'hot_days_30d',
-  'hot_days_30d_normal',
 ] as const;
+
+/**
+ * Wszystkie miary z nazwa: pelna lista silnika (`EVIDENCE_METRICS` z kontraktu) i dawne. Nowa miara w kontrakcie bez
+ * etykiety w `report.evidence.metrics` = blad typow i test (lista musi sie zgadzac z komunikatami).
+ */
+export const REPORT_METRICS = [...EVIDENCE_METRICS, ...LEGACY_METRICS] as const;
 
 /** Miary dni z upalem - ich odniesienie to norma z 10 lat ("zwykle o tej porze"), nie prog. */
 export const HEAT_METRICS: readonly string[] = ['hot_days_14d', 'hot_days_30d', 'hot_days_30d_normal'];
@@ -70,10 +53,27 @@ export type EvidenceUnit =
   | 'none';
 
 /**
+ * Miary z wlasnym odczytem odniesienia: granica z drzewami - "0 m z 1900 m" (dlugosc granicy); odleglosc do rury i do
+ * zrodla - odniesienie to promien szukania, ktory nic rolnikowi nie mowi.
+ */
+const METRIC_REFERENCE: Partial<Record<string, 'total' | 'hidden'>> = {
+  wooded_edge_m: 'total',
+  piped_junction_m: 'hidden',
+  nearest_spring_m: 'hidden',
+};
+
+/**
  * Jak czytac `reference` dowodu: przy liczbie obiektow to promien szukania (w nazwie miary), przy sezonach - z ilu
  * sezonow (w wartosci); pozostale jednostki maja zwykle odniesienie (prog, mediana, norma) w osobnej linii.
  */
-export function referenceRole(unit: EvidenceUnit): 'radius' | 'total' | 'reference' {
+export function referenceRole(
+  unit: EvidenceUnit,
+  metric?: string,
+): 'radius' | 'total' | 'reference' | 'hidden' {
+  const override = metric === undefined ? undefined : METRIC_REFERENCE[metric];
+
+  if (override) return override;
+
   if (unit === 'count') return 'radius';
 
   return unit === 'seasons' ? 'total' : 'reference';

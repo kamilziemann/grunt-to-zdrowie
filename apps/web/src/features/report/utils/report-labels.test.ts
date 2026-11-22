@@ -1,4 +1,4 @@
-import type { WaterReport } from '@app/contracts';
+import { EVIDENCE_METRICS, type WaterReport } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { FULL_CATALOG } from '@/i18n/full-catalog';
@@ -6,6 +6,7 @@ import { FULL_CATALOG } from '@/i18n/full-catalog';
 import { DROUGHT_REPORT } from '../fixtures/drought-report';
 import { FIELD_REPORT } from '../fixtures/field-report';
 import { FOREST_REPORT } from '../fixtures/forest-report';
+import { HEAT_REPORT } from '../fixtures/heat-report';
 import { LOW_CONFIDENCE_REPORT } from '../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../fixtures/sample-report';
 import { evidenceDisplay, isKnownMetric, REPORT_METRICS, romanSoilClass } from './report-labels';
@@ -17,12 +18,16 @@ const REPORTS: readonly WaterReport[] = [
   DROUGHT_REPORT,
   LOW_CONFIDENCE_REPORT,
   SAMPLE_REPORT,
+  HEAT_REPORT,
 ];
 
 function evidenceOf(report: WaterReport) {
-  return [...report.causes, ...report.recommendations.retention, ...report.recommendations.agrotech].flatMap(
-    (item) => item.evidence,
-  );
+  return [
+    ...(report.assessment.evidence ?? []),
+    ...[...report.causes, ...report.recommendations.retention, ...report.recommendations.agrotech].flatMap(
+      (item) => item.evidence,
+    ),
+  ];
 }
 
 describe('nazwy miar', () => {
@@ -30,6 +35,10 @@ describe('nazwy miar', () => {
     const report = FULL_CATALOG.pl.report as { evidence: { metrics: Record<string, string> } };
 
     expect(Object.keys(report.evidence.metrics).toSorted()).toEqual([...REPORT_METRICS].toSorted());
+  });
+
+  it('kazda miara, ktora silnik moze wyslac (EVIDENCE_METRICS), ma nazwe', () => {
+    expect(EVIDENCE_METRICS.filter((metric) => !isKnownMetric(metric))).toEqual([]);
   });
 
   it('kazda miara i jednostka z raportow silnika ma nazwe (zadnego "innego wskaznika")', () => {

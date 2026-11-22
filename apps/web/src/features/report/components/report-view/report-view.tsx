@@ -12,12 +12,14 @@ import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
 import { LandUseNotice } from '../land-use-notice';
 import { PrintFooter, PrintHeader, PrintPageMargins } from '../print-frame';
+import { ProtectedAreaNotice } from '../protected-area-notice';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
 import { ditchInFieldM, fieldZones, sampleParts } from '../../utils/report-data';
 import { ReportSection } from '../report-section';
 import { SampleBanner } from '../sample-banner';
 import { SourcesSection } from '../sources-section';
+import { SurroundingsCard } from '../surroundings-card';
 import { VerdictSection } from '../verdict-section';
 import { ZoneFocusProvider } from '../zone-focus';
 import { ZoneList } from '../zone-list';
@@ -92,6 +94,7 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
           recomputeHref={recomputeHref}
         />
         <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
+        <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
         <SampleBanner report={report} />
         {report.meta.status !== 'complete' && (
           <Alert variant="warning" className="text-base" data-testid="report-status">
@@ -121,6 +124,7 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
             <h3 className="text-lg font-semibold print:break-after-avoid">{t('fieldMap.title')}</h3>
             <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} zones={zones} />
           </div>
+          <SurroundingsCard surroundings={report.surroundings} />
           <ZoneList report={report} />
           <RecommendationList
             category="retention"

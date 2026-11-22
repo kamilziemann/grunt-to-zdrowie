@@ -322,7 +322,13 @@
       "depression_area_m2": "Powierzchnia zagłębienia w polu",
       "hot_days_14d": "Dni z upałem powyżej 30°C w ostatnich 14 dniach",
       "hot_days_30d": "Dni z upałem powyżej 30°C w ostatnich 30 dniach",
-      "hot_days_30d_normal": "Dni z upałem w tych 30 dniach zwykle (średnia z 10 lat)"
+      "hot_days_30d_normal": "Dni z upałem w tych 30 dniach zwykle (średnia z 10 lat)",
+      "elevation_min_m": "Najniższy punkt pola nad poziomem morza",
+      "wooded_edge_m": "Granica pola, przy której rosną drzewa",
+      "nearest_structure_m": "Odległość do najbliższego jazu, zapory albo śluzy",
+      "piped_junction_m": "Odległość do miejsca, gdzie rów wchodzi w rurę",
+      "nearest_spring_m": "Odległość do najbliższego źródła",
+      "nearest_levee_m": "Odległość do najbliższego wału albo grobli"
     },
     "unknownMetric": "Inny wskaźnik",
     "units": {
@@ -340,7 +346,8 @@
       "category": "{roman} ({name})",
       "index": "{value}",
       "m2": "{value} m²",
-      "soilClass": "klasa {roman}"
+      "soilClass": "klasa {roman}",
+      "mOf": "{value} m z {total} m"
     },
     "referenceNormal": "zwykle o tej porze: {reference}"
   },
@@ -433,7 +440,8 @@
     },
     "zoneNumbered": "Dotyczy miejsca {number}: {description}",
     "zoneRest": "Dotyczy reszty pola, poza zaznaczonymi miejscami",
-    "showOnSketch": "Pokaż miejsce {number} na szkicu"
+    "showOnSketch": "Pokaż miejsce {number} na szkicu",
+    "notesTitle": "Zanim zaczniesz"
   },
   "irrigation": {
     "first": "Nawadnianie rozważ dopiero po działaniach opisanych wyżej. Woda zatrzymana na polu jest tańsza.",
@@ -721,5 +729,46 @@
       "description": "Link prowadzi do raportu, którego nie znamy – mógł zostać skopiowany z błędem albo pochodzi ze starszej wersji aplikacji. Wybierz pole na mapie i policz raport od nowa.",
       "map": "Wybierz pole na mapie"
     }
+  },
+  "surroundings": {
+    "protectedTitle": "Pole leży w obszarze chronionym: {areas}.",
+    "protectedText": "Oczko wodne, zastawka i zmiana stosunków wodnych wymagają tu uzgodnień.",
+    "areaKinds": {
+      "national_park": "park narodowy",
+      "nature_reserve": "rezerwat przyrody",
+      "landscape_park": "park krajobrazowy",
+      "natura2000": "Natura 2000"
+    },
+    "areaNamed": "{kind} {name}",
+    "natura2000": "Natura 2000: {names}",
+    "title": "Otoczenie pola",
+    "intro": "Drzewa przy polu osłaniają je przed wiatrem i wysychaniem. Jazy i inne budowle na rowach pokazują, kto już piętrzy wodę w okolicy.",
+    "trees": "Drzewa przy granicy",
+    "treesValue": "rosną przy {wooded} m z {edge} m granicy pola",
+    "openToWind": "pole otwarte na wiatr",
+    "forest": "Najbliższy las",
+    "treeRow": "Najbliższy rząd drzew albo żywopłot",
+    "structure": "Najbliższy jaz, zapora albo śluza",
+    "structureKinds": {
+      "weir": "jaz",
+      "dam": "zapora",
+      "lock": "śluza"
+    },
+    "structureValue": "{kind}, {distance}",
+    "structureNamedValue": "{kind} „{name}”, {distance}",
+    "levees": "Wały i groble",
+    "leveesValue": "najbliższy {distance} ({count, plural, one {# odcinek} few {# odcinki} many {# odcinków} other {# odcinka}} w promieniu {radius})",
+    "spring": "Źródło",
+    "springNamed": "„{name}”, {distance}",
+    "intake": "Ujęcie wody",
+    "junction": "Rów wchodzi w rurę",
+    "junctionValue": "{distance} – zwykle pod drogą; to naturalne miejsce na piętrzenie wody",
+    "lowland": "Teren odwadniany mechanicznie (polder): woda odpływa stąd rowami do przepompowni, a obniżenie w polu to część polderu, nie miejsce na oczko.",
+    "distance": "{meters} m od pola",
+    "touching": "przy samej granicy pola",
+    "none": "brak w promieniu {radius}",
+    "radiusM": "{value} m",
+    "radiusKm": "{value} km",
+    "source": "Z mapy topograficznej BDOT10k (GUGiK). Zastawek i przepustów na rowach ta mapa nie pokazuje – sprawdź je na miejscu."
   }
 }

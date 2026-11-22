@@ -9,6 +9,7 @@ import { renderWithIntl, translator } from '@/test/render-intl';
 import { DROUGHT_REPORT } from '../../fixtures/drought-report';
 import { FIELD_REPORT } from '../../fixtures/field-report';
 import { FOREST_REPORT } from '../../fixtures/forest-report';
+import { HEAT_REPORT } from '../../fixtures/heat-report';
 import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
 import { MEADOW_REPORT } from '../../fixtures/meadow-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
@@ -488,6 +489,74 @@ describe('ReportView', () => {
       renderReport(FIELD_REPORT);
 
       expect(screen.queryByTestId('verdict-heat')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('otoczenie pola', () => {
+    const protectedReport: WaterReport = {
+      ...HEAT_REPORT,
+      surroundings: HEAT_REPORT.surroundings && {
+        ...HEAT_REPORT.surroundings,
+        protectedAreas: [
+          { kind: 'national_park', name: 'Biebrzański Park Narodowy' },
+          { kind: 'natura2000', name: 'Dolina Biebrzy' },
+          { kind: 'natura2000', name: 'Ostoja Biebrzańska' },
+          { kind: 'nature_reserve', name: 'Stawy Milickie' },
+        ],
+      },
+    };
+
+    it('obszar chroniony: ramka u gory z nazwami obszarow i zdaniem o uzgodnieniach', () => {
+      renderReport(protectedReport);
+
+      expect(screen.getByTestId('protected-area-notice')).toHaveTextContent(
+        'Pole leży w obszarze chronionym: Biebrzański Park Narodowy; rezerwat przyrody Stawy Milickie; ' +
+          'Natura 2000: Dolina Biebrzy i Ostoja Biebrzańska.',
+      );
+      expect(screen.getByTestId('protected-area-notice')).toHaveTextContent(
+        'Oczko wodne, zastawka i zmiana stosunków wodnych wymagają tu uzgodnień.',
+      );
+    });
+
+    it('poza obszarami chronionymi i bez otoczenia: bez ramki i bez karty', () => {
+      const { unmount } = renderReport(HEAT_REPORT);
+
+      expect(screen.queryByTestId('protected-area-notice')).not.toBeInTheDocument();
+      unmount();
+      renderReport(FIELD_REPORT);
+      expect(screen.queryByTestId('surroundings-card')).not.toBeInTheDocument();
+    });
+
+    it('karta otoczenia: drzewa przy granicy, las, jaz; wiersze bez obiektu znikaja', () => {
+      renderReport(HEAT_REPORT);
+      const card = screen.getByTestId('surroundings-card');
+
+      expect(card).toHaveTextContent('Drzewa przy granicy');
+      expect(card).toHaveTextContent('rosną przy 0 m z 1900 m granicy pola – pole otwarte na wiatr');
+      expect(card).toHaveTextContent('jaz, 347 m od pola');
+      expect(card.querySelector('[data-row="spring"]')).toBeNull();
+      expect(card.querySelector('[data-row="lowland"]')).toBeNull();
+    });
+
+    it('dopiski serwera pod zaleceniem jako lista "Zanim zaczniesz"', () => {
+      const { container } = renderReport(HEAT_REPORT);
+      const weir = container.querySelector('[data-measure="ditch_weir"]');
+      const notes = weir?.querySelector('[data-testid="recommendation-notes"]');
+
+      expect(notes).toHaveTextContent('Zanim zaczniesz');
+      expect(notes?.querySelectorAll('li')).toHaveLength(2);
+      expect(notes).toHaveTextContent('347 m od pola jest jaz');
+    });
+
+    it('nowe miary otoczenia nazwane slowami; granica z drzewami jako "0 m z 1900 m"', () => {
+      const { container } = renderReport(HEAT_REPORT);
+      const weir = container.querySelector('[data-measure="ditch_weir"]');
+
+      expect(weir).toHaveTextContent('Odległość do najbliższego jazu, zapory albo śluzy: 347 m');
+      expect(container.querySelector('[data-cause="high_evaporative_demand"]')).toHaveTextContent(
+        'Granica pola, przy której rosną drzewa: 0 m z 1900 m',
+      );
+      expect(container).not.toHaveTextContent(t('evidence.unknownMetric'));
     });
   });
 });

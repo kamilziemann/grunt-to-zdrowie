@@ -14,7 +14,8 @@ import {
 const DEFAULT_RADIUS_M = 500;
 
 /**
- * Liczby, na ktorych opiera sie wniosek: miara, wartosc, odniesienie i zrodlo. Nieznana miara albo jednostka nie
+ * Liczby, na ktorych opiera sie wniosek: miara, wartosc, odniesienie, zrodlo i uwaga silnika (np. o siatce pogody;
+ * ta sama uwaga przy kolejnych miarach raz). Nieznana miara albo jednostka nie
  * trafia na ekran jako identyfikator - zostaje ogolna nazwa i sama liczba. Liczba obiektow niesie promien w nazwie
  * ("Mokradla w promieniu 500 m: 2"), sezony - z ilu sezonow ("3 z 10 sezonow").
  */
@@ -48,9 +49,15 @@ export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
 
   return (
     <ul className="flex flex-col gap-1.5">
-      {evidence.map((item) => {
-        const role = referenceRole(evidenceDisplay(item.value, item.unit).unit);
+      {evidence.map((item, index) => {
+        const shown = evidenceDisplay(item.value, item.unit);
+        const role = referenceRole(shown.unit, item.metric);
         const radius = role === 'radius' ? (item.reference ?? DEFAULT_RADIUS_M) : DEFAULT_RADIUS_M;
+        // "0 m z 1900 m" - odniesienie to calosc (granica pola), nie prog
+        const value =
+          role === 'total' && shown.unit === 'm' && item.reference !== undefined
+            ? t('evidence.units.mOf', { value: number(shown.value, 0), total: number(item.reference, 0) })
+            : withUnit(item, item.value);
 
         return (
           <li key={`${item.metric}:${item.source}:${item.value}`} className="flex flex-col">
@@ -59,7 +66,7 @@ export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
                 metric: isKnownMetric(item.metric)
                   ? t(`evidence.metrics.${item.metric}`, { radius: number(radius, 0) })
                   : t('evidence.unknownMetric'),
-                value: withUnit(item, item.value),
+                value,
               })}
             </span>
             <span className="text-muted-foreground">
@@ -73,6 +80,11 @@ export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
                   )}; `}
               {t('evidence.source', { source: t(`sources.categories.${item.source}`) })}
             </span>
+            {item.note && item.note !== evidence[index - 1]?.note && (
+              <span className="text-muted-foreground" data-testid="evidence-note">
+                {item.note}
+              </span>
+            )}
           </li>
         );
       })}
