@@ -1,6 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { withFallback, type ParcelRecord, type ParcelSource } from './parcel-source';
+import {
+  withFallback,
+  withRegistryLandUse,
+  type ParcelRecord,
+  type ParcelRegistryEntry,
+  type ParcelSource,
+} from './parcel-source';
 
 const record = (origin: ParcelRecord['origin']): ParcelRecord => ({
   id: '141201_1.0001.6509',
@@ -49,5 +55,53 @@ describe('withFallback', () => {
     const sources = withFallback(source('uldk', 'down'), source('egib-wfs', 'ok'));
 
     await expect(sources.byName('Dąbrowa 12', 10)).rejects.toThrow('uldk down');
+  });
+});
+
+describe('withRegistryLandUse', () => {
+  const registry = (entry: { landUse: string[]; registryAreaHa?: number } | null) => ({
+    byId: vi.fn<(id: string) => Promise<ParcelRegistryEntry | null>>(() => Promise.resolve(entry)),
+  });
+
+  it('dopisuje uzytki z ewidencji do dzialki z ULDK i oddaje rekord do zapamietania', async () => {
+    const onEnriched = vi.fn<(record: ParcelRecord) => void>();
+    const sources = withRegistryLandUse(
+      source('uldk', 'ok'),
+      registry({ landUse: ['Ls'], registryAreaHa: 0.27 }),
+      { timeoutMs: 50, onEnriched },
+    );
+
+    const found = await sources.byId('x');
+
+    expect(found).toMatchObject({ origin: 'uldk', landUse: ['Ls'], registryAreaHa: 0.27 });
+    expect(onEnriched).toHaveBeenCalledWith(found);
+  });
+
+  it('nie pyta ewidencji, gdy rekord ma juz uzytki, i nie dopytuje dzialki pod punktem', async () => {
+    const withLandUse: ParcelSource = {
+      ...source('egib-wfs', 'ok'),
+      byId: () => Promise.resolve({ ...record('egib-wfs'), landUse: ['RIVa'] }),
+    };
+    const egib = registry({ landUse: ['Ls'] });
+    const sources = withRegistryLandUse(withLandUse, egib, { timeoutMs: 50 });
+
+    expect((await sources.byId('x'))?.landUse).toEqual(['RIVa']);
+    expect((await sources.byPoint(21, 52))?.landUse).toBeUndefined();
+    expect(egib.byId).not.toHaveBeenCalled();
+  });
+
+  it('oddaje dzialke bez uzytkow, gdy ewidencja milczy, nie zna dzialki albo zglasza blad', async () => {
+    const onEnriched = vi.fn<(record: ParcelRecord) => void>();
+    const silent = { byId: () => new Promise<null>(() => {}) };
+    const broken = { byId: () => Promise.reject(new Error('wfs down')) };
+    const options = { timeoutMs: 10, onEnriched };
+
+    for (const egib of [silent, broken, registry(null)]) {
+      const found = await withRegistryLandUse(source('uldk', 'ok'), egib, options).byId('x');
+
+      expect(found).toEqual(record('uldk'));
+    }
+
+    expect(onEnriched).not.toHaveBeenCalled();
   });
 });

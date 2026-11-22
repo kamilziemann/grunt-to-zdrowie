@@ -78,3 +78,60 @@ export function withFallback(primary: ParcelSource, fallback: ParcelSource): Par
     byName: (query, limit) => primary.byName(query, limit),
   };
 }
+
+export interface RegistryLandUseOptions {
+  /** dluzej na ewidencje nie czekamy - dzialka wraca bez uzytkow, zamiast wstrzymywac ekran */
+  timeoutMs: number;
+  /** rekord uzupelniony o uzytki (do zapamietania, zeby nastepny odczyt nie pytal ewidencji) */
+  onEnriched?: (record: ParcelRecord) => void;
+}
+
+/**
+ * Dzialka po identyfikatorze z uzytkami z ewidencji: ULDK ich nie podaje, wiec rekord bez `landUse` dopytujemy
+ * w rejestrze (WFS EGiB). Dzieki temu krok "Czy to Twoja dzialka?" od razu mowi, ze dzialka to np. las. Rejestr
+ * jest dodatkiem: jego brak, blad albo powolnosc oddaja rekord bez zmian. Odczyt pod punktem (klik na mapie)
+ * zostaje szybki - bez dopytywania.
+ */
+export function withRegistryLandUse(
+  source: ParcelSource,
+  registry: ParcelRegistry,
+  { timeoutMs, onEnriched }: RegistryLandUseOptions,
+): ParcelSource {
+  async function lookup(id: string): Promise<ParcelRegistryEntry | null> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), timeoutMs);
+    });
+
+    try {
+      return await Promise.race([registry.byId(id).catch(() => null), timeout]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  }
+
+  return {
+    async byId(id) {
+      const record = await source.byId(id);
+
+      if (!record || record.landUse) return record;
+
+      const entry = await lookup(record.id);
+
+      if (!entry) return record;
+
+      const enriched: ParcelRecord = {
+        ...record,
+        landUse: entry.landUse,
+        ...(entry.registryAreaHa === undefined ? {} : { registryAreaHa: entry.registryAreaHa }),
+      };
+
+      // przeterminowany wpis (GUGiK nie odpowiadal) nie wraca do pamieci jako swiezy
+      if (!record.stale) onEnriched?.(enriched);
+
+      return enriched;
+    },
+    byPoint: (lng, lat) => source.byPoint(lng, lat),
+    byName: (query, limit) => source.byName(query, limit),
+  };
+}

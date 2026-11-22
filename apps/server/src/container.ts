@@ -9,7 +9,12 @@ import type { ContextMapSource } from './domain/context-map-source';
 import type { HydroMapSource } from './domain/hydro-map-source';
 import { engineStages } from './domain/engine-stages';
 import type { ParcelOutlineSource } from './domain/parcel-outline-source';
-import { withFallback, type ParcelRegistry, type ParcelSource } from './domain/parcel-source';
+import {
+  withFallback,
+  withRegistryLandUse,
+  type ParcelRegistry,
+  type ParcelSource,
+} from './domain/parcel-source';
 import type { PlaceSource } from './domain/place-source';
 import type { ReportStore } from './domain/report-store';
 import { createEdgeCachePurger } from './infrastructure/edge-cache';
@@ -77,11 +82,16 @@ export interface ContainerOverrides {
 export function createContainer(deps: ContainerDeps, overrides: ContainerOverrides = {}): Container {
   const now = overrides.now ?? nowIso;
 
-  const parcels = createParcelsService({
-    source: overrides.parcelSource ?? rememberedParcels(deps, now),
-    outlines: overrides.parcelOutlineSource ?? createEgibWfsOutlineSource(),
-    now,
-  });
+  // klasouzytki i powierzchnia ewidencyjna z WFS ewidencji (ULDK ich nie podaje)
+  const registry =
+    overrides.parcelRegistry === null ? null : (overrides.parcelRegistry ?? createEgibWfsRegistry());
+  const sources = overrides.parcelSource
+    ? { plain: overrides.parcelSource, described: overrides.parcelSource }
+    : rememberedParcels(deps, now, registry);
+  const outlines = overrides.parcelOutlineSource ?? createEgibWfsOutlineSource();
+  // API dzialek oddaje dzialke z uzytkami; analiza i zdjecia biora zrodlo bez dopytywania ewidencji
+  const parcels = createParcelsService({ source: sources.described, outlines, now });
+  const fieldParcels = createParcelsService({ source: sources.plain, outlines, now });
 
   const places = createPlacesService({ source: overrides.placeSource ?? createNominatimPlaceSource() });
   const sqlRunner = deps.vars.DATABASE_URL ? createNeonSqlRunner(deps.vars.DATABASE_URL) : null;
@@ -112,7 +122,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     cachedFetch((url, init) => fetch(url, init), store, ttl);
 
   const analysis = createAnalysisService({
-    parcels,
+    parcels: fieldParcels,
     sources: {
       meteo: createNasaPowerMeteoSource({ fetch: remember(nasaPowerCacheTtl(today)) }),
       forecast: createMetNorwayForecastSource(),
@@ -136,10 +146,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     ...(overrides.reportStore === null
       ? {}
       : { reports: overrides.reportStore ?? createReportsRepository(createDb(deps.env.DB)) }),
-    // klasouzytki i powierzchnia ewidencyjna z WFS ewidencji (ULDK ich nie podaje)
-    ...(overrides.parcelRegistry === null
-      ? {}
-      : { registry: overrides.parcelRegistry ?? createEgibWfsRegistry() }),
+    ...(registry ? { registry } : {}),
     now,
   });
 
@@ -149,7 +156,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     places,
     hydro,
     imagery: createImageryService({
-      parcels,
+      parcels: fieldParcels,
       source: createCopernicusImagerySource(copernicusKeys(deps)),
       now,
     }),
@@ -158,20 +165,46 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   };
 }
 
+/** Dluzej na uzytki z ewidencji krok "Czy to Twoja dzialka?" nie czeka - dzialka wraca wtedy bez nich. */
+const LAND_USE_TIMEOUT_MS = 2500;
+
 /**
  * ULDK jest zrodlem podstawowym (pelny opis, cala Polska); gdy zawiedzie albo przytnie limit, dzialke oddaje WFS.
  * Na wierzchu pamiec w D1: dzialka raz pobrana wraca bez pytania GUGiK (nocny limit ULDK), a gdy GUGiK lezy -
- * nawet z wpisu starszego niz miesiac.
+ * nawet z wpisu starszego niz miesiac. `described` dopisuje do dzialki z ULDK uzytki z ewidencji (dla API dzialek:
+ * krok "Czy to Twoja dzialka?") i zapamietuje je; analiza bierze `plain` i pyta ewidencje sama, rownolegle.
  */
-function rememberedParcels(deps: ContainerDeps, now: () => string): ParcelSource {
+function rememberedParcels(
+  deps: ContainerDeps,
+  now: () => string,
+  registry: ParcelRegistry | null,
+): { plain: ParcelSource; described: ParcelSource } {
   const log = deps.logger.child({ component: 'parcel-memory' });
-
-  return withParcelMemory(withFallback(createUldkParcelSource(), createEgibWfsParcelSource()), {
-    store: createParcelRecordsRepository(createDb(deps.env.DB)),
+  const store = createParcelRecordsRepository(createDb(deps.env.DB));
+  const onError = (error: unknown, operation: 'get' | 'put') =>
+    log.warn('parcel memory unavailable', { operation, error: String(error) });
+  const plain = withParcelMemory(withFallback(createUldkParcelSource(), createEgibWfsParcelSource()), {
+    store,
     now,
     defer: deps.waitUntil,
-    onError: (error, operation) => log.warn('parcel memory unavailable', { operation, error: String(error) }),
+    onError,
   });
+
+  if (!registry) return { plain, described: plain };
+
+  return {
+    plain,
+    described: withRegistryLandUse(plain, registry, {
+      timeoutMs: LAND_USE_TIMEOUT_MS,
+      onEnriched: (record) => {
+        const write = store
+          .put(record.id, { ...record, fetchedAt: record.fetchedAt ?? now() })
+          .catch((error: unknown) => onError(error, 'put'));
+
+        deps.waitUntil?.(write);
+      },
+    }),
+  };
 }
 
 const copernicusKeys = ({ vars }: ContainerDeps) => ({
