@@ -13,20 +13,6 @@ export interface MapControls {
 
 const PERMISSION_DENIED = 1;
 
-interface PolicyDocument {
-  featurePolicy?: { allowsFeature: (feature: string) => boolean };
-}
-
-/**
- * Polozenie zablokowane naglowkiem `Permissions-Policy` strony (przegladarka zglasza to jak odmowe zgody). Wtedy
- * rolnik nic nie zmieni w ustawieniach - mowimy "niedostepne", nie "brak zgody". `featurePolicy` zna tylko Chromium.
- */
-function blockedByPolicy(): boolean {
-  const policy = (document as PolicyDocument).featurePolicy;
-
-  return policy !== undefined && !policy.allowsFeature('geolocation');
-}
-
 /** Dodaje do mapy ukryta kontrolke polozenia i zwraca polecenia dla przyciskow ekranu. */
 export function createMapControls(
   maplibre: typeof MapLibre,
@@ -43,9 +29,8 @@ export function createMapControls(
   map.getContainer().querySelector('.maplibregl-ctrl-geolocate')?.parentElement?.setAttribute('hidden', '');
   geolocate.on('geolocate', () => onLocate('found'));
   geolocate.on('outofmaxbounds', () => onLocate('outside'));
-  geolocate.on('error', (event) =>
-    onLocate(event.code === PERMISSION_DENIED && !blockedByPolicy() ? 'denied' : 'unavailable'),
-  );
+  // odmowa: rolnik nie zgodzil sie albo polozenie blokuje strona (przegladarka zglasza oba tak samo)
+  geolocate.on('error', (event) => onLocate(event.code === PERMISSION_DENIED ? 'denied' : 'unavailable'));
 
   return {
     zoomIn: () => map.zoomIn(),

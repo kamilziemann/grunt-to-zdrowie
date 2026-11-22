@@ -200,7 +200,7 @@
     "locateStatus": {
       "searching": "Finding your location…",
       "found": "The map shows your location (blue dot).",
-      "denied": "Location permission denied. Allow it in your browser settings or type the parcel number.",
+      "denied": "No access to your location. Check the permission in your browser settings or type the parcel number.",
       "unavailable": "Could not find your location on this device. Type the parcel number or address.",
       "outside": "Your location is outside Poland - the map shows Poland only."
     }

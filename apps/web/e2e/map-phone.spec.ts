@@ -131,18 +131,22 @@ test.describe('mapa na telefonie', () => {
 
     test('„Gdzie jestem” bez dostępu do położenia: komunikat słowny i ostrzeżenie na kaflu', async ({
       page,
+      browserName,
     }) => {
+      test.skip(
+        browserName === 'firefox',
+        'Firefox w Playwright nie zwraca bledu geolokalizacji (czeka bez konca)',
+      );
       await mockHydroApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
       await waitForMap(page);
 
       const locate = page.getByRole('button', { name: 'Gdzie jestem' });
 
-      // naglowek Permissions-Policy strony wylacza dzis geolokalizacje - przegladarka zglasza odmowe, a my mowimy
-      // uczciwie "nie udalo sie" (rolnik nic nie zmieni w ustawieniach)
+      // brak zgody w przegladarce testu (dzis polozenie blokuje tez naglowek Permissions-Policy strony)
       await locate.click();
-      await expect(page.getByText('Nie udało się ustalić położenia', { exact: false })).toBeVisible();
-      await expect(locate).toHaveAttribute('data-locate-state', 'unavailable');
+      await expect(locate).toHaveAttribute('data-locate-state', 'denied');
+      await expect(page.getByText('Brak dostępu do położenia.', { exact: false })).toBeVisible();
     });
 
     test('„Gdzie jestem” ze zgodą: mapa pokazuje położenie', async ({ page, context }) => {

@@ -200,7 +200,7 @@
     "locateStatus": {
       "searching": "Szukam Twojego położenia…",
       "found": "Mapa pokazuje Twoje położenie (niebieska kropka).",
-      "denied": "Brak zgody na położenie. Zezwól na nie w ustawieniach przeglądarki albo wpisz numer działki.",
+      "denied": "Brak dostępu do położenia. Sprawdź zgodę w ustawieniach przeglądarki albo wpisz numer działki.",
       "unavailable": "Nie udało się ustalić położenia na tym urządzeniu. Wpisz numer działki albo adres.",
       "outside": "Twoje położenie jest poza Polską - mapa pokazuje tylko Polskę."
     }
