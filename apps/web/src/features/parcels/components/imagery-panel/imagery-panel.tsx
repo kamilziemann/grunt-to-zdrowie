@@ -5,13 +5,16 @@ import { useTranslations } from 'use-intl';
 import { cn } from '@/lib/utils/cn';
 
 import type { ImageryChoice } from '../../hooks/use-vegetation-imagery';
+import { IMAGERY_ICONS } from '../imagery-legend';
+import { RAIL_PILL, RAIL_TILE, RailBadge } from '../map-rail';
 
 type ImageryStatus = 'idle' | 'loading' | 'problem';
 
-const STATUS_ICON: Record<ImageryStatus, { Icon: LucideIcon; className: string }> = {
-  idle: { Icon: Satellite, className: 'text-primary' },
-  loading: { Icon: LoaderCircle, className: 'animate-spin text-primary' },
-  problem: { Icon: TriangleAlert, className: 'text-warning' },
+/** Stan pobierania jako plakietka w rogu przycisku (widac go przy zamknietym panelu i zwinietej legendzie). */
+const STATUS_BADGE: Record<ImageryStatus, ReactNode> = {
+  idle: null,
+  loading: <LoaderCircle className="animate-spin" />,
+  problem: <TriangleAlert />,
 };
 
 export interface ImageryPanelProps {
@@ -38,7 +41,9 @@ export function ImageryPanel({ open, onOpenChange, value, status, children, clas
   const panelId = useId();
   const titleId = useId();
   const active = value !== 'none';
-  const { Icon, className: iconClassName } = STATUS_ICON[status];
+  // ikona mowi, co jest na mapie: satelita (nic), lisc (kondycja roslin), kropla (woda w roslinach)
+  const Icon: LucideIcon = value === 'none' ? Satellite : IMAGERY_ICONS[value];
+  const badge = STATUS_BADGE[status];
 
   const toggleOpen = useCallback(() => onOpenChange(!open), [onOpenChange, open]);
   const close = useCallback(() => {
@@ -73,34 +78,32 @@ export function ImageryPanel({ open, onOpenChange, value, status, children, clas
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={t('buttonLabel', { choice: t(`choices.${value}`) })}
+        title={t('title')}
         onClick={toggleOpen}
-        className={cn(
-          'relative flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold whitespace-nowrap text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary max-md:gap-1.5 max-md:px-2.5',
-          active && 'border-primary',
-        )}
+        // telefon: kafel szyny z podpisem "Satelita"; komputer: pigulka z nazwa wybranej warstwy
+        className={cn(RAIL_TILE, RAIL_PILL, active && 'border-primary')}
         data-testid="imagery-button"
         data-imagery-status={status}
       >
-        {/* telefon: bez ikony satelity (miejsce w rzedzie); kreciolek albo ostrzezenie jako plakietka w rogu */}
-        <Icon
-          className={cn(
-            'size-5',
-            iconClassName,
-            status === 'idle'
-              ? 'max-md:hidden'
-              : 'max-md:absolute max-md:-top-2 max-md:-right-2 max-md:rounded-full max-md:border max-md:bg-card max-md:p-0.5',
-          )}
-          aria-hidden="true"
-        />
-        {/* telefon: krotka nazwa (pelna jest w nazwie dostepnej i na pigulce legendy), zeby przyciski miescily sie w jednym rzedzie */}
-        <span className="md:hidden">{t('button')}</span>
-        <span className="max-md:hidden">{active ? t(`choices.${value}`) : t('button')}</span>
+        <Icon className="lg:text-primary" aria-hidden="true" />
+        <span className="lg:hidden">{t('button')}</span>
+        <span className="max-lg:hidden">{active ? t(`choices.${value}`) : t('button')}</span>
+        {badge && (
+          <RailBadge
+            className={cn(
+              status === 'problem' ? 'bg-warning' : 'bg-card text-primary',
+              'lg:-top-2 lg:-right-2',
+            )}
+          >
+            {badge}
+          </RailBadge>
+        )}
       </button>
       <section
         id={panelId}
         aria-labelledby={titleId}
         hidden={!open}
-        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-80 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0 max-md:max-h-[72cqh] max-md:w-auto max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)] max-md:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
+        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-80 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
         data-testid="imagery-panel"
       >
         <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4">

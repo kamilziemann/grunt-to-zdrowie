@@ -1,55 +1,17 @@
-import type { Locator, Page } from '@playwright/test';
-
 import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { CONTEXT_TILES, mockContextApi } from './support/context-api';
 import { expectNoZoomFont } from './support/font-size';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
 import { mockImageryApi } from './support/imagery-api';
+import { boxOf, expectMapButtonsUncovered, mapButtons } from './support/map-layout';
 import { openImagery, setLayer, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
 
-type Box = { x: number; y: number; width: number; height: number };
-
-async function boxOf(locator: Locator): Promise<Box> {
-  const box = await locator.boundingBox();
-
-  expect(box, 'element widoczny na ekranie').not.toBeNull();
-
-  return box ?? { x: 0, y: 0, width: 0, height: 0 };
-}
-
-function overlaps(a: Box, b: Box): boolean {
-  return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-}
-
-/** Przyciski MapLibre: przybliz, oddal, pokaz moje polozenie (bez geolokalizacji w przegladarce testu nazywa sie
- * "Polozenie niedostepne", wiec bierzemy go po klasie). */
-function mapButtons(page: Page): Locator[] {
-  const map = page.getByTestId('parcel-map');
-
-  return [
-    map.getByRole('button', { name: 'Przybliż' }),
-    map.getByRole('button', { name: 'Oddal' }),
-    map.locator('.maplibregl-ctrl-geolocate'),
-  ];
-}
-
-/** Zaden z elementow sterujacych nie wchodzi na przyciski mapy (porownanie prostokatow). */
-async function expectMapButtonsUncovered(page: Page, others: readonly Locator[]) {
-  const buttons = await Promise.all(mapButtons(page).map(boxOf));
-  const covering = await Promise.all(others.map(boxOf));
-
-  for (const button of buttons) {
-    for (const [index, other] of covering.entries()) {
-      expect(overlaps(button, other), `element ${index} zaslania przycisk mapy`).toBe(false);
-    }
-  }
-}
-
-// Uklad ekranu mapy na telefonie: wyszukiwarka na gorze, jeden rzad pigulek, przyciski mapy po prawej pod nimi,
-// pigulka "Legenda" nad niskim arkuszem. Podklad, dzialka, kafle i zdjecie z satelity sa podstawione.
+// Uklad ekranu mapy na telefonie: wyszukiwarka na gorze, pod nia przy prawej krawedzi szyna kafli z podpisami (warstwy,
+// zdjecie, satelita, przyblizanie, gdzie jestem), pigulka "Legenda" nad niskim arkuszem. Podklad, dzialka, kafle
+// i zdjecie z satelity sa podstawione.
 test.describe('mapa na telefonie', () => {
   test.beforeEach(async ({ page }) => {
     await mockBasemap(page);
@@ -68,7 +30,7 @@ test.describe('mapa na telefonie', () => {
     test.describe(`${viewport.width} px`, () => {
       test.use({ viewport, hasTouch: true });
 
-      test('wyszukiwarka na górze, pigułki w jednym rzędzie, nic nie zasłania przycisków mapy', async ({
+      test('wyszukiwarka na górze, szyna kafli po prawej, nic nie zasłania przycisków mapy', async ({
         page,
       }) => {
         await mockHydroApi(page);
@@ -76,40 +38,50 @@ test.describe('mapa na telefonie', () => {
         await waitForMap(page);
 
         const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
-        const basemap = page.getByTestId('basemap-switch');
         const layers = page.getByTestId('layers-button');
+        const basemap = page.getByTestId('basemap-toggle');
         const imagery = page.getByTestId('imagery-button');
         const pill = page.getByTestId('legend-button');
         const sheet = page.getByTestId('parcels-panel');
+        const rail = [layers, basemap, imagery, ...mapButtons(page)];
 
         await expect(pill).toBeVisible();
         await expect(search).toBeInViewport({ ratio: 1 });
         await expectNoZoomFont(search);
 
-        // jeden rzad: te same wspolrzedne y, kazda pigulka cala na ekranie, rzad sie nie przewija
-        const [searchBox, ...row] = await Promise.all([search, basemap, layers, imagery].map(boxOf));
+        // jedna kolumna przy prawej krawedzi pod polem, w kolejnosci ze szkicu
+        const searchBox = await boxOf(search);
+        const boxes = await Promise.all(rail.map(boxOf));
 
-        expect(new Set(row.map((box) => Math.round(box.y))).size).toBe(1);
-        expect(row[0]?.y ?? 0).toBeGreaterThanOrEqual((searchBox?.y ?? 0) + (searchBox?.height ?? 0));
+        const rightEdge = searchBox.x + searchBox.width;
 
-        for (const item of [basemap, layers, imagery]) await expect(item).toBeInViewport({ ratio: 1 });
+        for (const box of boxes) expect(Math.abs(box.x + box.width - rightEdge)).toBeLessThanOrEqual(2);
+        expect(boxes[0]?.y ?? 0).toBeGreaterThanOrEqual(searchBox.y + searchBox.height);
 
-        const scroll = await page
-          .getByTestId('map-controls-row')
-          .evaluate((element) => element.scrollWidth - element.clientWidth);
+        for (const [index, box] of boxes.slice(1).entries()) {
+          expect(box.y).toBeGreaterThan(boxes[index]?.y ?? 0);
+        }
 
-        expect(scroll).toBe(0);
+        for (const item of rail) await expect(item).toBeInViewport({ ratio: 1 });
+
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
 
-        await expectMapButtonsUncovered(page, [search, basemap, layers, imagery, pill, sheet]);
+        await expectMapButtonsUncovered(page, [search, layers, basemap, imagery, pill, sheet]);
         await expectTouchTargets(page.getByTestId('map-controls-row').getByRole('button'));
         await expectTouchTargets(pill);
 
-        // podklad: krotki podpis na ekranie, pelna nazwa dla czytnikow
-        await expect(basemap.getByRole('button', { name: 'Zdjęcie lotnicze', exact: true })).toHaveText(
-          'Zdjęcie',
-          { useInnerText: true },
+        // pod ikona krotki podpis (odbiorca ma tez 75 lat), pelna nazwa dla czytnikow i w dymku
+        await expect(layers).toContainText('Warstwy');
+        await expect(imagery).toContainText('Satelita');
+        await expect(page.getByRole('button', { name: 'Gdzie jestem' })).toHaveAttribute(
+          'title',
+          'Pokaż moje położenie',
         );
+        await expect(basemap).toHaveAccessibleName('Zdjęcie lotnicze');
+        await expect(basemap).toHaveText('Zdjęcie', { useInnerText: true });
+        await expect(basemap).toHaveAttribute('aria-pressed', 'false');
+        await basemap.click();
+        await expect(basemap).toHaveAttribute('aria-pressed', 'true');
       });
     });
   }
@@ -134,16 +106,76 @@ test.describe('mapa na telefonie', () => {
       ]);
     });
 
-    test('kolejność fokusu: wyszukiwarka, pigułki, mapa, arkusz', async ({ page }) => {
+    test('otwarte panele warstw, satelity i legend kończą się przed szyną - przyciski mapy odsłonięte', async ({
+      page,
+    }) => {
+      await mockHydroApi(page);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
+      await waitForMap(page);
+
+      for (const [button, panel] of [
+        ['layers-button', 'layers-panel'],
+        ['imagery-button', 'imagery-panel'],
+        ['legend-button', 'map-legends'],
+      ] as const) {
+        await page.getByTestId(button).click();
+        await expect(page.getByTestId(panel)).toBeVisible();
+        await expectMapButtonsUncovered(page, [page.getByTestId(panel)]);
+        await page.keyboard.press('Escape');
+        await expect(page.getByTestId(panel)).toBeHidden();
+      }
+    });
+
+    test('„Gdzie jestem” bez dostępu do położenia: komunikat słowny i ostrzeżenie na kaflu', async ({
+      page,
+    }) => {
+      await mockHydroApi(page);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
+      await waitForMap(page);
+
+      const locate = page.getByRole('button', { name: 'Gdzie jestem' });
+
+      // naglowek Permissions-Policy strony wylacza dzis geolokalizacje - przegladarka zglasza odmowe, a my mowimy
+      // uczciwie "nie udalo sie" (rolnik nic nie zmieni w ustawieniach)
+      await locate.click();
+      await expect(page.getByText('Nie udało się ustalić położenia', { exact: false })).toBeVisible();
+      await expect(locate).toHaveAttribute('data-locate-state', 'unavailable');
+    });
+
+    test('„Gdzie jestem” ze zgodą: mapa pokazuje położenie', async ({ page, context }) => {
+      await context.grantPermissions(['geolocation']);
+      await context.setGeolocation({ latitude: 52.172, longitude: 21.59 });
+      // strona bez naglowka Permissions-Policy, ktory dzis wylacza geolokalizacje (prosba do integratora)
+      await page.route('**/mapa?*', async (route) => {
+        const response = await route.fetch();
+        const headers = { ...response.headers() };
+
+        delete headers['permissions-policy'];
+        await route.fulfill({ response, headers });
+      });
+      await mockHydroApi(page);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
+      await waitForMap(page);
+
+      const locate = page.getByRole('button', { name: 'Gdzie jestem' });
+
+      await locate.click();
+      await expect(locate).toHaveAttribute('data-locate-state', 'found');
+      await expect(page.getByText('Mapa pokazuje Twoje położenie')).toBeVisible();
+    });
+
+    test('kolejność fokusu: wyszukiwarka, szyna przycisków, mapa, arkusz', async ({ page }) => {
       await mockHydroApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
       await waitForMap(page);
 
       const order = await page.evaluate(() => {
         const items = [
-          'search:not(.max-md\\:hidden) input',
-          '[data-testid=basemap-switch]',
+          'search:not(.max-lg\\:hidden) input',
+          '[data-testid=layers-button]',
+          '[data-testid=basemap-toggle]',
           '[data-testid=imagery-button]',
+          '[data-map-button=locate]',
           '[data-testid=parcel-map]',
           '[data-testid=parcels-panel]',
         ].flatMap((selector) => {
@@ -153,7 +185,7 @@ test.describe('mapa na telefonie', () => {
         });
 
         return (
-          items.length === 5 &&
+          items.length === 7 &&
           items.slice(1).every((item, index) => {
             const previous = items[index];
 
@@ -234,7 +266,7 @@ test.describe('mapa na telefonie', () => {
       await expect(page.getByTestId('map-legends')).toBeHidden();
     });
 
-    test('tryb „własne pole”: wyszukiwarka i pigułki ustępują podpowiedzi, przyciski mapy odsłonięte', async ({
+    test('tryb „własne pole”: wyszukiwarka i kafle warstw ustępują podpowiedzi, przyciski mapy odsłonięte', async ({
       page,
     }) => {
       await mockHydroApi(page);

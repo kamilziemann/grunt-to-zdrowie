@@ -97,7 +97,7 @@ export function LegendDock({
         aria-label={t('legendButtonLabel', { layer: layerName ?? 'none', status })}
         onClick={toggleOpen}
         // telefon: lewy dolny rog widocznej mapy, tuz nad zwinietym arkuszem (`--sheet-peek` z ekranu)
-        className="absolute bottom-[calc(var(--sheet-peek,7.75rem)+0.75rem)] left-3 z-10 flex h-11 max-w-[calc(100%-5rem)] items-center gap-2 rounded-full border bg-card px-3.5 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary md:hidden"
+        className="absolute bottom-[calc(var(--sheet-peek,7.75rem)+0.75rem)] left-3 z-10 flex h-11 max-w-[calc(100%-5rem)] items-center gap-2 rounded-full border bg-card px-3.5 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary lg:hidden"
         data-testid="legend-button"
         data-legend-status={status}
       >
@@ -115,14 +115,14 @@ export function LegendDock({
         aria-label={t('legends')}
         className={cn(
           'flex flex-col',
-          'md:absolute md:bottom-10 md:left-106 md:z-10 md:max-h-[calc(100cqh-8rem)] md:w-72',
+          'lg:absolute lg:bottom-10 lg:left-106 lg:z-10 lg:max-h-[calc(100cqh-8rem)] lg:w-72',
           // telefon: arkusz od dolu ekranu mapy nad panelem dzialek (korzen ekranu ma `container-type: size`)
-          'max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-30 max-md:max-h-[72cqh] max-md:rounded-t-xl max-md:border-t max-md:bg-card max-md:pb-[env(safe-area-inset-bottom)] max-md:text-card-foreground max-md:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]',
-          !open && 'max-md:hidden',
+          'max-lg:fixed max-lg:bottom-0 max-lg:left-0 max-lg:right-19 max-lg:z-30 max-lg:max-h-[72cqh] max-lg:rounded-t-xl max-lg:border-t max-lg:border-r max-lg:bg-card max-lg:pb-[env(safe-area-inset-bottom)] max-lg:text-card-foreground max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]',
+          !open && 'max-lg:hidden',
         )}
         data-testid="map-legends"
       >
-        <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4 md:hidden">
+        <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4 lg:hidden">
           <h2 className="text-base font-semibold">{t('legends')}</h2>
           <button
             type="button"
@@ -135,7 +135,7 @@ export function LegendDock({
         </header>
         <div
           ref={listRef}
-          className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg p-0.5 max-md:p-3"
+          className="flex min-h-0 flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg p-0.5 max-lg:p-3"
         >
           {children}
         </div>

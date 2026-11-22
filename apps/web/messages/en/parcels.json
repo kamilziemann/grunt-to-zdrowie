@@ -195,7 +195,15 @@
     "legends": "Map legends",
     "legendButton": "Legend",
     "legendButtonLabel": "{layer, select, none {Map legend} other {Map legend: {layer}}}{status, select, attention {, check the message} loading {, loading} other {}}",
-    "legendsClose": "Close legend"
+    "legendsClose": "Close legend",
+    "locateShort": "Where am I",
+    "locateStatus": {
+      "searching": "Finding your location…",
+      "found": "The map shows your location (blue dot).",
+      "denied": "Location permission denied. Allow it in your browser settings or type the parcel number.",
+      "unavailable": "Could not find your location on this device. Type the parcel number or address.",
+      "outside": "Your location is outside Poland - the map shows Poland only."
+    }
   },
   "sheet": {
     "expand": "Expand panel",
@@ -356,7 +364,7 @@
       }
     },
     "button": "Satellite",
-    "buttonLabel": "Satellite image: {choice}",
+    "buttonLabel": "Satellite: {choice}",
     "close": "Close image choice"
   },
   "home": {

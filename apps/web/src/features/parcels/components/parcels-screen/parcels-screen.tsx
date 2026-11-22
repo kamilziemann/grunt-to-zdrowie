@@ -1,6 +1,7 @@
-// Ekran "znajdz dzialke": mapa na cala powierzchnie i panel (boczny na komputerze, arkusz od dolu na telefonie).
-// Telefon: na gorze mapy wyszukiwarka i jeden rzad pigulek (podklad, warstwy, satelita), pod nimi po prawej przyciski
-// MapLibre, w lewym dolnym rogu pigulka "Legenda", na dole niski arkusz z glowna akcja kroku.
+// Ekran "znajdz dzialke": mapa na cala powierzchnie i panel (boczny od 1024 px, arkusz od dolu ponizej - telefon
+// i tablet w pionie). Ponizej 1024 px: na gorze mapy wyszukiwarka, pod nia przy prawej krawedzi szyna kafli (warstwy,
+// zdjecie, satelita, przyblizanie, gdzie jestem), w lewym dolnym rogu pigulka "Legenda", na dole niski arkusz z glowna
+// akcja kroku.
 // Stan: tekst wyszukiwania, wskazana dzialka (podglad) i polozenie arkusza. Lista "moje dzialki" zyje w adresie
 // strony, wiec przychodzi z trasy (`ids` + `onIdsChange`) - link da sie wyslac, a odswiezenie niczego nie gubi.
 import {
@@ -60,13 +61,14 @@ import {
 } from '../bottom-sheet';
 import { FieldDrawEntry, FieldDrawHint, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { MapIntro } from '../map-intro';
-import { BasemapSwitch } from '../basemap-switch';
+import { BasemapSwitch, BasemapToggle } from '../basemap-switch';
 import { IMAGERY_GRADIENTS } from '../imagery-legend';
 import { ImageryPanel } from '../imagery-panel';
 import { ImagerySwitch } from '../imagery-switch';
 import { LayersPanel } from '../layers-panel';
 import { LegendDock, type LegendDockStatus } from '../legend-dock';
 import { MapLegends } from '../map-legends';
+import { MapZoomLocate } from '../map-rail';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
 import {
@@ -74,6 +76,8 @@ import {
   type ContextVisibility,
   type HydroStatus,
   type LayerStatus,
+  type LocateState,
+  type MapControls,
   type MapFocus,
   type MapPadding,
 } from '../parcel-map';
@@ -94,13 +98,14 @@ export interface ParcelsScreenProps {
   initialDraw?: FieldDrawMode | null;
 }
 
-const DESKTOP_QUERY = '(min-width: 48rem)';
+const DESKTOP_QUERY = '(min-width: 64rem)';
 const PANEL_WIDTH_REM = 25;
 const MAP_MARGIN_PX = 56;
+const RAIL_WIDTH_PX = 68;
 const HINT_MS = 4000;
 const NO_PARCELS: readonly Parcel[] = [];
 
-type MapHint = 'zoomHint' | 'outsidePoland' | 'pickHint';
+type MapHint = 'zoomHint' | 'outsidePoland' | 'pickHint' | `locateStatus.${Exclude<LocateState, 'idle'>}`;
 
 function unionBbox(parcels: readonly Parcel[]): MapFocus['bbox'] | null {
   const [first, ...rest] = parcels;
@@ -173,6 +178,9 @@ export function ParcelsScreen({
   const [layersOpen, setLayersOpen] = useState(false);
   const [imageryOpen, setImageryOpen] = useState(false);
   const [legendsOpen, setLegendsOpen] = useState(false);
+  // polecenia mapy dla przyciskow szyny (przybliz, oddal, gdzie jestem) i stan szukania polozenia
+  const [mapControls, setMapControls] = useState<MapControls | null>(null);
+  const [locateState, setLocateState] = useState<LocateState>('idle');
   // zmierzona wysokosc zwinietego arkusza (telefon): mapa konczy sie tuz pod nim, pigulka legendy stoi nad nim
   const [sheetPeek, setSheetPeek] = useState<number | null>(null);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
@@ -231,6 +239,8 @@ export function ParcelsScreen({
 
     // mapa konczy sie nad zwinietym arkuszem, wiec doliczamy tylko to, co arkusz zaslania ponad nim
     const bottom = Math.max(0, visible - peek) + MAP_MARGIN_PX;
+    // po prawej szyna przyciskow (kafle 56 px)
+    const right = MAP_MARGIN_PX + RAIL_WIDTH_PX;
     // u gory wyszukiwarka i rzad pigulek siegaja na telefonie w glab mapy - dzialka ma stanac pod nimi
     const controls = controlsRef.current?.getBoundingClientRect().bottom ?? 0;
     const rootTop = rootRef.current?.getBoundingClientRect().top ?? 0;
@@ -239,7 +249,7 @@ export function ParcelsScreen({
       height - peek - bottom - MAP_MARGIN_PX * 2,
     );
 
-    return { ...base, top: Math.max(MAP_MARGIN_PX, top), bottom };
+    return { ...base, top: Math.max(MAP_MARGIN_PX, top), right, bottom };
   }, [snap, sheetPeek]);
 
   useEffect(() => () => window.clearTimeout(hintTimer.current), []);
@@ -404,6 +414,16 @@ export function ParcelsScreen({
 
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
+  // stan polozenia slowami: sama plakietka na kaflu nie mowi, dlaczego polozenia nie ma
+  const changeLocateState = useCallback(
+    (state: LocateState) => {
+      setLocateState(state);
+
+      if (state !== 'idle') showHint(`locateStatus.${state}`);
+    },
+    [showHint],
+  );
+
   const chooseImagery = useCallback(
     (choice: ImageryChoice) => {
       updateLayers({ imagery: choice });
@@ -525,69 +545,71 @@ export function ParcelsScreen({
   const previewMissing = target !== null && previewQuery.isSuccess && previewQuery.data === null;
 
   return (
-    <div
-      ref={rootRef}
-      style={rootStyle}
-      className="@container-[size] relative min-h-0 flex-1 overflow-clip"
-      // telefon: przyciski MapLibre (przybliz, oddal, polozenie) po prawej pod wyszukiwarka i rzedem pigulek (app.css);
-      // w trybie "wlasne pole" gora mapy jest wolna, wiec wracaja na gore (podpowiedz zostawia im miejsce)
-      data-map-controls={drawing ? undefined : 'below-search'}
-    >
-      <div
-        ref={controlsRef}
-        // otwarty panel warstw na telefonie przykrywa arkusz dzialek (arkusz ma z-10)
-        // w trybie "wlasne pole" wyszukiwarka i przyciski ustepuja miejsca podpowiedzi (rysowane miejsce ma byc odsloniete)
-        className={cn(
-          'absolute inset-x-3 top-3 z-10 flex flex-col gap-2 has-aria-expanded:z-30 md:right-auto md:left-106 md:max-w-[calc(100%-31rem)]',
-          drawing && 'hidden',
-        )}
-      >
-        {/* telefon: wyszukiwarka na gorze mapy (klawiatura jej nie zaslania); na komputerze stoi w panelu bocznym */}
+    <div ref={rootRef} style={rootStyle} className="@container-[size] relative min-h-0 flex-1 overflow-clip">
+      {/* telefon i waski tablet: wyszukiwarka na gorze mapy (klawiatura jej nie zaslania); od `lg` stoi w panelu bocznym;
+          w trybie "wlasne pole" ustepuje miejsca podpowiedzi (rysowane miejsce ma byc odsloniete) */}
+      <div ref={controlsRef} className={cn('absolute inset-x-3 top-3 z-20 lg:hidden', drawing && 'hidden')}>
         <ParcelSearch
           variant="map"
-          className="md:hidden"
           value={text}
           onChange={changeText}
           onSubmit={submitSearch}
           pending={search.isFetching || (target !== null && previewQuery.isFetching)}
           error={inputError}
         />
-        {/* podklad i zdjecie z satelity maja wlasne przyciski - to najczestsze zmiany, nie chowamy ich w warstwach;
-            telefon: jeden rzad, ponizej 360 px przewija sie w poziomie (otwarte panele sa `fixed`, rzad ich nie przycina;
-            margines w pionie zostawia miejsce na plakietke stanu na przycisku "Satelita") */}
-        <div
-          className="flex items-start gap-2 max-md:-mx-3 max-md:-my-2 max-md:gap-1 max-md:overflow-x-auto max-md:px-3 max-md:py-2 max-md:[scrollbar-width:none] md:flex-wrap"
-          data-testid="map-controls-row"
-        >
-          <BasemapSwitch value={layers.basemap} onChange={updateLayers} />
-          <LayersPanel
-            open={layersOpen}
-            onOpenChange={setLayersOpen}
-            layers={layers}
-            onChange={updateLayers}
-            className="shrink-0"
-          />
-          <ImageryPanel
-            open={imageryOpen}
-            onOpenChange={setImageryOpen}
-            value={ids.length > 0 ? imageryChoice : 'none'}
-            status={imageryStatus}
-            className="shrink-0"
-          >
-            <ImagerySwitch
-              value={imageryChoice}
-              onChange={chooseImagery}
-              month={imageryMonth}
-              onMonthChange={setImageryMonth}
-              today={todayInPoland()}
-              enabled={ids.length > 0}
-              legendClassName="sr-only"
-            />
-          </ImageryPanel>
-        </div>
       </div>
 
-      <div className="absolute inset-0 max-md:bottom-[calc(var(--sheet-peek,7.75rem)-0.5rem)]">
+      {/* Szyna przyciskow mapy. Telefon i waski tablet: kolumna kafli przy prawej krawedzi pod wyszukiwarka (warstwy,
+          zdjecie, satelita, przyblizanie, gdzie jestem); gdy brakuje wysokosci (telefon poziomo), kafle przechodza do
+          kolejnej kolumny w lewo (siatka `direction: rtl`). Komputer: rzad pigulek z napisami obok panelu i przyblizanie
+          z polozeniem w prawym gornym rogu. Kontener nie lapie klikniec - mapa pod nim zostaje klikalna.
+          Otwarty panel warstw albo satelity przykrywa arkusz dzialek (arkusz ma z-10). */}
+      <div
+        className={cn(
+          'pointer-events-none absolute z-10 *:pointer-events-auto has-aria-expanded:z-30',
+          'max-lg:right-3 max-lg:grid max-lg:max-h-[calc(100cqh-var(--sheet-peek,7.75rem)-var(--rail-top)-0.75rem)] max-lg:grid-flow-col-dense max-lg:auto-rows-[3.5rem] max-lg:[grid-template-rows:repeat(auto-fill,3.5rem)] max-lg:gap-2 max-lg:[direction:rtl] max-lg:*:[direction:ltr]',
+          drawing ? 'max-lg:top-3 max-lg:[--rail-top:0.75rem]' : 'max-lg:top-19 max-lg:[--rail-top:4.75rem]',
+          'lg:top-3 lg:right-3 lg:left-106 lg:flex lg:items-start lg:gap-2',
+        )}
+        data-testid="map-controls-row"
+      >
+        {!drawing && (
+          <>
+            <LayersPanel
+              open={layersOpen}
+              onOpenChange={setLayersOpen}
+              layers={layers}
+              onChange={updateLayers}
+            />
+            <BasemapToggle value={layers.basemap} onChange={updateLayers} className="lg:hidden" />
+            <BasemapSwitch value={layers.basemap} onChange={updateLayers} className="max-lg:hidden" />
+            <ImageryPanel
+              open={imageryOpen}
+              onOpenChange={setImageryOpen}
+              value={ids.length > 0 ? imageryChoice : 'none'}
+              status={imageryStatus}
+            >
+              <ImagerySwitch
+                value={imageryChoice}
+                onChange={chooseImagery}
+                month={imageryMonth}
+                onMonthChange={setImageryMonth}
+                today={todayInPoland()}
+                enabled={ids.length > 0}
+                legendClassName="sr-only"
+              />
+            </ImageryPanel>
+          </>
+        )}
+        {/* telefon: dwa elementy siatki (przyblizanie na dwa wiersze); komputer: kolumna w prawym gornym rogu */}
+        <MapZoomLocate
+          controls={mapControls}
+          locate={locateState}
+          className="max-lg:contents max-lg:*:first:row-span-2 lg:ml-auto lg:flex lg:flex-col lg:gap-2"
+        />
+      </div>
+
+      <div className="absolute inset-0 max-lg:bottom-[calc(var(--sheet-peek,7.75rem)-0.5rem)]">
         <ParcelMap
           // w trybie "wlasne pole" dzialki tylko obrysem (tlo), zeby wybrana czesc odrozniala sie od reszty
           selected={drawing ? NO_PARCELS : selected.parcels}
@@ -609,8 +631,10 @@ export function ParcelsScreen({
           onPick={pickOnMap}
           onZoomTooLow={onZoomTooLow}
           status={target !== null && previewQuery.isFetching ? t('map.loadingParcel') : null}
-          // telefon: nad pigulka legendy (lewy dolny rog); komputer: na srodku widocznej mapy obok panelu
-          statusClassName="max-md:bottom-18 md:left-[calc(50%+12.5rem)]"
+          // telefon: nad pigulka legendy (lewy dolny rog); komputer: w prawym dolnym rogu, z dala od kolumny legend
+          statusClassName="max-lg:bottom-18 lg:right-3 lg:bottom-10 lg:left-auto lg:translate-x-0"
+          onControls={setMapControls}
+          onLocateState={changeLocateState}
           labels={mapLabels}
         />
       </div>
@@ -634,21 +658,22 @@ export function ParcelsScreen({
             imageryData={imagery.data}
             imageryRequestedDate={imagery.requestedDate}
             onImageryRetry={imagery.retry}
-            itemClassName="max-md:w-full max-md:shadow-none"
+            itemClassName="max-lg:w-full max-lg:shadow-none"
           />
         </LegendDock>
       )}
 
       {drawing && (
-        // podpowiedz "co teraz" u gory mapy (obok przyciskow przyblizenia) - rysowane miejsce zostaje odsloniete
-        <div className="absolute top-3 right-14 left-3 z-20 md:right-auto md:left-106 md:max-w-xl">
+        // podpowiedz "co teraz" u gory mapy - rysowane miejsce zostaje odsloniete
+        // telefon: obok kafli przyblizania po prawej; komputer: obok panelu, z miejscem na kolumne przyblizania
+        <div className="absolute top-3 right-20 left-3 z-20 lg:right-auto lg:left-106 lg:max-w-[min(36rem,calc(100%-32rem))]">
           <FieldDrawHint draw={draw} splitTarget={splitTarget} />
         </div>
       )}
 
       {hint && !drawing && (
-        // telefon: pod rzedem pigulek, z lewej - kolumna przyciskow mapy po prawej zostaje odslonieta
-        <output className="absolute top-32 left-1/2 z-10 block w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-md:top-30 max-md:left-3 max-md:max-w-[calc(100%-4.5rem)] max-md:translate-x-0 md:top-3 md:left-[calc(50%+12.5rem)]">
+        // telefon: pod wyszukiwarka, z lewej - szyna przyciskow po prawej zostaje odslonieta; komputer: pod rzedem pigulek
+        <output className="absolute z-10 block w-max rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-lg:top-19 max-lg:left-3 max-lg:max-w-[calc(100%-6.5rem)] lg:top-18 lg:left-[calc(50%+12.5rem)] lg:max-w-[calc(100%-32rem)] lg:-translate-x-1/2">
           {t(`map.${hint}`)}
         </output>
       )}
@@ -656,21 +681,21 @@ export function ParcelsScreen({
       <BottomSheet snap={snap} onSnapChange={setSnap} labels={sheetLabels} onPeekChange={setSheetPeek}>
         <BottomSheetBody>
           {drawing ? (
-            <div className="flex flex-col gap-4 p-4 max-md:pt-0">
+            <div className="flex flex-col gap-4 p-4 max-lg:pt-0">
               <FieldDrawPanel draw={draw} splitTarget={splitTarget} />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 p-4 max-md:pt-0">
+            <div className="flex flex-col gap-4 p-4 max-lg:pt-0">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-2">
                   {/* telefon: tytul tylko dla czytnikow - miejsce w arkuszu nalezy do wynikow i listy dzialek */}
-                  <h1 className="text-2xl font-medium tracking-tight max-md:sr-only">{t('title')}</h1>
+                  <h1 className="text-2xl font-medium tracking-tight max-lg:sr-only">{t('title')}</h1>
                   {/* przy pierwszym wejsciu kroki opisuje karta nizej - pasek etapow bylby powtorzeniem */}
                   {!firstVisit && <StepsHeader current={step} />}
                 </div>
                 {/* komputer: wyszukiwarka w panelu bocznym; telefon ma ja na gorze mapy (ten sam stan) */}
                 <ParcelSearch
-                  className="max-md:hidden"
+                  className="max-lg:hidden"
                   value={text}
                   onChange={changeText}
                   onSubmit={submitSearch}
@@ -778,7 +803,7 @@ export function ParcelsScreen({
               </div>
               {/* pole powierzchni tez w pasku: w zwinietym arkuszu na telefonie panel widac tylko u gory */}
               {draw.area ? (
-                <p aria-hidden="true" className="text-center text-xs font-medium md:hidden">
+                <p aria-hidden="true" className="text-center text-xs font-medium lg:hidden">
                   {t('field.area', { area: formatArea(draw.area.areaHa) })}
                 </p>
               ) : (

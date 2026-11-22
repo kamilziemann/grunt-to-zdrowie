@@ -5,6 +5,7 @@ import { useTranslations } from 'use-intl';
 import { cn } from '@/lib/utils/cn';
 
 import type { MapLayers } from '../../schemas/map-layers.schema';
+import { RAIL_PILL, RAIL_PILL_BADGE, RAIL_TILE, RailBadge } from '../map-rail';
 
 /** Warstwy wlaczane pojedynczo (pola z wartoscia tak/nie). */
 type ToggleLayer = 'boundaries' | 'hydro' | 'cover' | 'waterworks' | 'protected';
@@ -142,26 +143,22 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, className }:
         aria-controls={panelId}
         aria-label={t('buttonLabel', { count })}
         onClick={toggleOpen}
-        // telefon: bez ikony i ciasniej - podklad, warstwy i satelita mieszcza sie w jednym rzedzie przy 360 px
-        className="flex h-12 items-center gap-2 rounded-lg border bg-card px-3 text-sm font-semibold whitespace-nowrap text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary max-md:gap-1.5 max-md:px-2.5"
+        // telefon: kafel szyny z podpisem i licznikiem w rogu; komputer: pigulka z napisem w rzedzie nad mapa
+        className={cn(RAIL_TILE, RAIL_PILL)}
         data-testid="layers-button"
       >
-        <Layers className="size-5 text-primary max-md:hidden" aria-hidden="true" />
-        {t('button')}
-        <span
-          aria-hidden="true"
-          className="flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums max-md:h-5 max-md:min-w-5"
-        >
-          {count}
-        </span>
+        <Layers className="lg:text-primary" aria-hidden="true" />
+        <span>{t('button')}</span>
+        <RailBadge className={RAIL_PILL_BADGE}>{count}</RailBadge>
       </button>
       <section
         id={panelId}
         aria-labelledby={titleId}
         hidden={!open}
         // komputer: rozwijany panel pod przyciskiem; telefon: arkusz od dolu ekranu mapy nad panelem dzialek (korzen
-        // ekranu ma `container-type: size`, wiec `fixed` liczy sie od niego), mapa zostaje widoczna nad arkuszem
-        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-88 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-md:fixed max-md:inset-x-0 max-md:top-auto max-md:bottom-0 max-md:mt-0 max-md:max-h-[72cqh] max-md:w-auto max-md:max-w-none max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 max-md:pb-[env(safe-area-inset-bottom)] max-md:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
+        // ekranu ma `container-type: size`, wiec `fixed` liczy sie od niego), mapa zostaje widoczna nad arkuszem, a szyna
+        // przyciskow obok niego (arkusz konczy sie przed nia)
+        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-88 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
         data-testid="layers-panel"
       >
         <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4">

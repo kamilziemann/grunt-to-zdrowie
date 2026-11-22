@@ -307,11 +307,3 @@
 .maplibregl-map .maplibregl-ctrl-attrib a {
   text-decoration: underline;
 }
-
-/* Telefon: przyciski MapLibre (przybliz, oddal, polozenie) pod wyszukiwarka i rzedem pigulek ekranu mapy. Poza
-   warstwa, bo arkusz MapLibre tez jest poza warstwami (regula z `@layer utilities` by przegrala). */
-@media (width < 48rem) {
-  [data-map-controls='below-search'] .maplibregl-ctrl-top-right {
-    top: calc(var(--spacing) * 29);
-  }
-}

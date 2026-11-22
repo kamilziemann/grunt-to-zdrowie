@@ -32,7 +32,7 @@ export function FieldDrawEntry({ splitTarget, onStart }: FieldDrawEntryProps) {
         </h2>
         <p className="text-sm text-muted-foreground">{t('introDescription')}</p>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
         <Button variant="outline" size="xl" onClick={startDraw}>
           <PencilRuler aria-hidden="true" />
           {t('startDraw')}
@@ -111,7 +111,7 @@ export function FieldDrawHint({ draw, splitTarget }: FieldDrawPanelProps) {
   return (
     <output
       aria-live="polite"
-      className="block rounded-2xl bg-foreground px-4 py-3 text-base font-medium text-background shadow-lg md:text-lg"
+      className="block rounded-2xl bg-foreground px-4 py-3 text-base font-medium text-background shadow-lg lg:text-lg"
       data-testid="field-draw-hint"
     >
       {t(hint, { area: formatArea(draw.areaHa ?? 0), count: draw.missingPoints })}
@@ -159,7 +159,7 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
       data-testid="field-draw"
     >
       <div className="flex items-center justify-between gap-2">
-        <h1 id={`${ids}-title`} className="text-2xl font-medium tracking-tight max-md:text-xl">
+        <h1 id={`${ids}-title`} className="text-2xl font-medium tracking-tight max-lg:text-xl">
           {mode === 'split' ? t('titleSplit') : t('titleDraw')}
         </h1>
         <Button variant="ghost" size="sm" className="min-w-11 px-3" onClick={stop}>

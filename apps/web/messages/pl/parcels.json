@@ -195,7 +195,15 @@
     "legends": "Legendy mapy",
     "legendButton": "Legenda",
     "legendButtonLabel": "{layer, select, none {Legenda mapy} other {Legenda mapy: {layer}}}{status, select, attention {, sprawdź komunikat} loading {, wczytuję} other {}}",
-    "legendsClose": "Zamknij legendę"
+    "legendsClose": "Zamknij legendę",
+    "locateShort": "Gdzie jestem",
+    "locateStatus": {
+      "searching": "Szukam Twojego położenia…",
+      "found": "Mapa pokazuje Twoje położenie (niebieska kropka).",
+      "denied": "Brak zgody na położenie. Zezwól na nie w ustawieniach przeglądarki albo wpisz numer działki.",
+      "unavailable": "Nie udało się ustalić położenia na tym urządzeniu. Wpisz numer działki albo adres.",
+      "outside": "Twoje położenie jest poza Polską - mapa pokazuje tylko Polskę."
+    }
   },
   "sheet": {
     "expand": "Rozwiń panel",
@@ -356,7 +364,7 @@
       }
     },
     "button": "Satelita",
-    "buttonLabel": "Zdjęcie z satelity: {choice}",
+    "buttonLabel": "Satelita: {choice}",
     "close": "Zamknij wybór zdjęcia"
   },
   "home": {

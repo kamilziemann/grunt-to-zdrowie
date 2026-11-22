@@ -1,17 +1,18 @@
-import { Map as MapIcon, Satellite, type LucideIcon } from 'lucide-react';
+import { Image as ImageIcon, Map as MapIcon, type LucideIcon } from 'lucide-react';
 import { useCallback } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
 import type { MapLayers } from '../../schemas/map-layers.schema';
+import { RAIL_TILE } from '../map-rail';
 
 type Basemap = MapLayers['basemap'];
 
-// krotki podpis na telefonie (jeden rzad przyciskow przy 360 px); pelna nazwa zostaje w nazwie dostepnej
+// krotki podpis na waskim komputerze (rzad przyciskow obok panelu przy 1024 px); pelna nazwa w nazwie dostepnej
 const BASEMAPS: readonly { basemap: Basemap; Icon: LucideIcon; short: 'basemapMap' | 'basemapOrtho' }[] = [
   { basemap: 'map', Icon: MapIcon, short: 'basemapMap' },
-  { basemap: 'ortho', Icon: Satellite, short: 'basemapOrtho' },
+  { basemap: 'ortho', Icon: ImageIcon, short: 'basemapOrtho' },
 ];
 
 interface BasemapButtonProps {
@@ -35,15 +36,15 @@ function BasemapButton({ basemap, Icon, short, active, onChange }: BasemapButton
       aria-label={label}
       onClick={choose}
       className={cn(
-        'flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset max-md:h-full max-md:rounded-none max-md:px-2',
+        'flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-muted-foreground [@media(hover:hover)]:hover:text-foreground',
       )}
     >
-      <Icon className="size-4 shrink-0 max-md:hidden" aria-hidden="true" />
-      <span className="md:hidden">{tMap(short)}</span>
-      <span className="max-md:hidden">{label}</span>
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span className="xl:hidden">{tMap(short)}</span>
+      <span className="max-xl:hidden">{label}</span>
     </button>
   );
 }
@@ -64,9 +65,9 @@ export function BasemapSwitch({ value, onChange, className }: BasemapSwitchProps
   return (
     <fieldset
       aria-label={t('label')}
-      // telefon: dwa segmenty na pelna wysokosc pigulki (cel dotykowy 46 px), komputer: przyciski w ramce
+      // komputer: dwa przyciski w ramce; telefon ma zamiast nich kafel `BasemapToggle` w szynie
       className={cn(
-        'flex h-12 shrink-0 items-center gap-1 rounded-lg border bg-card p-1 shadow-md max-md:gap-0 max-md:overflow-hidden max-md:p-0',
+        'flex h-12 shrink-0 items-center gap-1 rounded-lg border bg-card p-1 shadow-md',
         className,
       )}
       data-testid="basemap-switch"
@@ -82,5 +83,32 @@ export function BasemapSwitch({ value, onChange, className }: BasemapSwitchProps
         />
       ))}
     </fieldset>
+  );
+}
+
+/**
+ * Telefon: podklad jako jeden kafel szyny "Zdjecie" (przelacznik `aria-pressed`): wcisniety = zdjecie lotnicze,
+ * zwolniony = mapa. Pelna nazwa "Zdjecie lotnicze" w nazwie dostepnej i w dymku.
+ */
+export function BasemapToggle({ value, onChange, className }: BasemapSwitchProps) {
+  const t = useTranslations('parcels.map');
+  const tItems = useTranslations('parcels.map.layers.items');
+  const label = tItems('ortho.label');
+  const ortho = value === 'ortho';
+  const toggle = useCallback(() => onChange({ basemap: ortho ? 'map' : 'ortho' }), [onChange, ortho]);
+
+  return (
+    <button
+      type="button"
+      aria-pressed={ortho}
+      aria-label={label}
+      title={label}
+      onClick={toggle}
+      className={cn(RAIL_TILE, className)}
+      data-testid="basemap-toggle"
+    >
+      <ImageIcon aria-hidden="true" />
+      <span aria-hidden="true">{t('basemapOrtho')}</span>
+    </button>
   );
 }

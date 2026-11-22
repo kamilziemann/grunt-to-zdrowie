@@ -48,6 +48,7 @@ import { createTileLayer, type TileLayer, type TileLayerState, type TileView } f
 import { cn } from '@/lib/utils/cn';
 
 import { readCamera, saveCamera } from './camera-memory';
+import { createMapControls, type LocateState, type MapControls } from './map-controls';
 import {
   BOUNDARIES_ATTRIBUTION,
   BOUNDARIES_MIN_ZOOM,
@@ -180,6 +181,13 @@ export interface ParcelMapProps {
   statusClassName?: string;
   /** klikniecie przy zbyt malym przyblizeniu (mapa sama przybliza, wywolujacy pokazuje podpowiedz) */
   onZoomTooLow?: () => void;
+  /**
+   * Polecenia dla wlasnych przyciskow ekranu (przybliz, oddal, gdzie jestem) po zaladowaniu mapy; null po jej
+   * usunieciu. Mapa interaktywna nie ma domyslnych przyciskow MapLibre - rysuje je wywolujacy.
+   */
+  onControls?: (controls: MapControls | null) => void;
+  /** stan szukania polozenia (przycisk "Gdzie jestem" i komunikat) */
+  onLocateState?: (state: LocateState) => void;
   labels: ParcelMapLabels;
   /** co pokazac, zanim mapa sie wczyta (np. obrys dzialki z geometrii); brak = sam napis "Wczytuje mape" */
   placeholder?: ReactNode;
@@ -472,6 +480,8 @@ export function ParcelMap({
   interactive = true,
   onPick,
   onZoomTooLow,
+  onControls,
+  onLocateState,
   status = null,
   statusClassName,
   labels,
@@ -494,6 +504,8 @@ export function ParcelMap({
     drawing,
     onPick,
     onZoomTooLow,
+    onControls,
+    onLocateState,
     getPadding,
     labels,
     boundaries,
@@ -525,6 +537,8 @@ export function ParcelMap({
       drawing,
       onPick,
       onZoomTooLow,
+      onControls,
+      onLocateState,
       getPadding,
       labels,
       boundaries,
@@ -808,12 +822,11 @@ export function ParcelMap({
       });
       created.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-right');
 
+      const controls = interactive
+        ? createMapControls(maplibre, created, (locate) => latest.current.onLocateState?.(locate))
+        : null;
+
       if (interactive) {
-        created.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
-        created.addControl(
-          new maplibre.GeolocateControl({ positionOptions: { enableHighAccuracy: true } }),
-          'top-right',
-        );
         created.on('click', (event) => {
           if (created.getZoom() < MIN_PICK_ZOOM) {
             created.easeTo({ center: event.lngLat, zoom: MIN_PICK_ZOOM + 1 });
@@ -897,6 +910,7 @@ export function ParcelMap({
         created.on('moveend', markView);
         mapRef.current = created;
         setState('ready');
+        latest.current.onControls?.(controls);
       });
     }
 
@@ -910,6 +924,7 @@ export function ParcelMap({
       cancelled = true;
       mapRef.current = null;
       clearHoverRef.current = noop;
+      latest.current.onControls?.(null);
       focusedKeyRef.current = null;
       imageryCountRef.current = 0;
       boundaryCache.clear();

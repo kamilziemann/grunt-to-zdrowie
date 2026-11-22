@@ -191,9 +191,9 @@ export function BottomSheet({
       style={style}
       className={cn(
         'group/sheet absolute z-10 flex flex-col bg-card text-card-foreground shadow-lg',
-        'max-md:inset-x-0 max-md:bottom-0 max-md:h-(--sheet-h) max-md:translate-y-(--sheet-offset) max-md:rounded-t-2xl max-md:border-t max-md:[--sheet-h:calc(100cqh-0.75rem)]',
-        'max-md:transition-transform max-md:duration-(--duration-slow) max-md:ease-(--ease-out) max-md:data-dragging:transition-none',
-        'md:top-3 md:bottom-3 md:left-3 md:w-100 md:rounded-xl md:border',
+        'max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-(--sheet-h) max-lg:translate-y-(--sheet-offset) max-lg:rounded-t-2xl max-lg:border-t max-lg:[--sheet-h:calc(100cqh-0.75rem)]',
+        'max-lg:transition-transform max-lg:duration-(--duration-slow) max-lg:ease-(--ease-out) max-lg:data-dragging:transition-none',
+        'lg:top-3 lg:bottom-3 lg:left-3 lg:w-100 lg:rounded-xl lg:border',
         className,
       )}
     >
@@ -207,11 +207,11 @@ export function BottomSheet({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
-        className="flex h-11 w-full shrink-0 touch-none items-center justify-center rounded-t-2xl text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/60 md:hidden"
+        className="flex h-11 w-full shrink-0 touch-none items-center justify-center rounded-t-2xl text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/60 lg:hidden"
       >
         <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-border" />
       </button>
-      <div className="flex min-h-0 flex-col max-md:h-[calc(var(--sheet-h)-var(--sheet-offset)-2.75rem)] md:flex-1">
+      <div className="flex min-h-0 flex-col max-lg:h-[calc(var(--sheet-h)-var(--sheet-offset)-2.75rem)] lg:flex-1">
         {children}
       </div>
     </div>
@@ -221,7 +221,7 @@ export function BottomSheet({
 /** Przewijana tresc arkusza; w zwinietym arkuszu na telefonie jej nie widac (i nie da sie do niej przejsc Tabem). */
 export function BottomSheetBody({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain max-md:group-data-[snap=peek]/sheet:invisible max-md:group-data-[snap=peek]/sheet:overflow-hidden">
+    <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain max-lg:group-data-[snap=peek]/sheet:invisible max-lg:group-data-[snap=peek]/sheet:overflow-hidden">
       {children}
     </div>
   );
