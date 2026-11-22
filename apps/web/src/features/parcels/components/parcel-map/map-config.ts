@@ -266,9 +266,12 @@ export const INITIAL_BOUNDS: LngLatBoundsLike = [
   [POLAND_BOUNDS.east, POLAND_BOUNDS.north],
 ];
 
-/** Mapa nie odjezdza daleko poza Polske (zapas na panele zaslaniajace krawedzie). */
+/**
+ * Mapa nie odjezdza daleko poza Polske (zapas na panele zaslaniajace krawedzie). Na poludnie zapas jest wiekszy: na
+ * telefonie arkusz zaslania dolna polowe mapy, wiec Polska miesci sie nad nim dopiero, gdy kadr siega daleko w dol.
+ */
 export const MAX_BOUNDS: LngLatBoundsLike = [
-  [POLAND_BOUNDS.west - 6, POLAND_BOUNDS.south - 4],
+  [POLAND_BOUNDS.west - 6, POLAND_BOUNDS.south - 12],
   [POLAND_BOUNDS.east + 6, POLAND_BOUNDS.north + 4],
 ];
 

@@ -77,7 +77,8 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
         {hasWater ? (
           <div
             className={cn(
-              'grid gap-4 print:gap-3',
+              // karty bez rozciagania do najwyzszej w rzedzie - krotka karta nie ma pustego srodka
+              'grid items-start gap-4 print:gap-3',
               waterCards > 1 && 'md:grid-cols-2 print:grid-cols-2',
               waterCards >= 3 && 'lg:grid-cols-3 print:grid-cols-3',
             )}

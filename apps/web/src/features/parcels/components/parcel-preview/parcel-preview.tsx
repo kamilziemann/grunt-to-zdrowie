@@ -32,7 +32,7 @@ export function ParcelPreview({ parcel, alreadyAdded, listFull, listMax, onDismi
   const rows = [
     [t('region'), parcel.region],
     [t('commune'), parcel.commune],
-    [t('county'), parcel.county],
+    [t('county'), parcel.county.replace(/^powiat\s+/i, '')],
     [t('voivodeship'), parcel.voivodeship],
     [t('id'), parcel.id],
   ].filter(([, value]) => value !== '');

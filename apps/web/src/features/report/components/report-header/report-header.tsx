@@ -15,7 +15,8 @@ import { useLandUseWords } from '../land-use-notice';
 import { PrintButton } from '../print-button';
 
 // na telefonie dwa przyciski obok siebie: tekst moze sie zawinac, cel dotykowy zostaje >= 48 px
-const COMPACT = 'h-auto min-h-12 py-2 leading-tight whitespace-normal max-sm:px-3 max-sm:text-sm';
+// przyciski naglowka w jednym rzedzie (48 px, tekst 16 px); na telefonie zawijaja sie w dwie linie, nie wychodza poza ekran
+const COMPACT = 'h-auto min-h-12 px-4 py-2 text-base leading-tight whitespace-normal';
 
 interface HeaderItem {
   label: string;
@@ -84,16 +85,24 @@ export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: Rep
     <header className="flex flex-col gap-5" data-testid="report-header">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl leading-tight font-bold text-primary print:text-2xl">{t('title')}</h1>
-        {field.label && <p className="text-lg font-medium">{field.label}</p>}
+        <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          {field.label && <span className="text-lg font-medium">{field.label}</span>}
+          {/* powrot do mapy jako link przy nazwie pola - przyciski zostaja dla PDF, zmiany i linku */}
+          <Link
+            href={mapHref}
+            className="inline-flex min-h-11 items-center gap-1.5 font-medium underline underline-offset-4 print:hidden"
+          >
+            <MapPinned aria-hidden="true" className="size-4" />
+            {t('actions.map')}
+          </Link>
+        </p>
       </div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 print:grid-cols-4">
+      {/* telefon: dwie kolumny; od `sm` pozycje w rzedzie, kazda tak szeroka, jak jej tresc (bez dziur w siatce) */}
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-10 print:flex print:flex-wrap print:gap-x-8">
         {items
           .filter((item) => item !== null)
           .map((item) => (
-            <div
-              key={item.label}
-              className={cn('flex min-w-0 flex-col', item.wide && 'col-span-2 print:col-span-2')}
-            >
+            <div key={item.label} className={cn('flex min-w-0 flex-col', item.wide && 'col-span-2')}>
               <dt className="text-sm text-muted-foreground">{item.label}</dt>
               <dd className="text-base font-semibold wrap-anywhere">{item.value}</dd>
               {item.note && <dd className="text-sm text-muted-foreground">{item.note}</dd>}
@@ -121,22 +130,20 @@ export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: Rep
           )}
         </div>
       )}
-      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap print:hidden">
+      <div className="flex flex-wrap gap-2 print:hidden">
         {/* na telefonie PDF i link sa w pasku na dole ekranu */}
         <PrintButton className={cn(COMPACT, 'max-sm:hidden')} />
-        <Button asChild size="xl" variant="outline" className={COMPACT}>
+        <Button asChild variant="outline" className={COMPACT}>
           <Link href={changeHref}>
             <ArrowLeft aria-hidden="true" />
             {t('actions.change')}
           </Link>
         </Button>
-        <CopyLinkButton className="max-sm:hidden" path={routes.report({ raport: report.meta.reportId })} />
-        <Button asChild size="xl" variant="outline" className={COMPACT}>
-          <Link href={mapHref}>
-            <MapPinned aria-hidden="true" />
-            {t('actions.map')}
-          </Link>
-        </Button>
+        <CopyLinkButton
+          className="max-sm:hidden"
+          buttonClassName="h-12 w-auto px-4 text-base"
+          path={routes.report({ raport: report.meta.reportId })}
+        />
       </div>
     </header>
   );

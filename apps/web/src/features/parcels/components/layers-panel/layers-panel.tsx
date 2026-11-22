@@ -142,13 +142,14 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, className }:
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={t('buttonLabel', { count })}
+        title={t('button')}
         onClick={toggleOpen}
-        // telefon: kafel szyny z podpisem i licznikiem w rogu; komputer: pigulka z napisem w rzedzie nad mapa
+        // telefon: kafel szyny z ikona i licznikiem w rogu; komputer: pigulka z napisem w rzedzie nad mapa
         className={cn(RAIL_TILE, RAIL_PILL)}
         data-testid="layers-button"
       >
         <Layers className="lg:text-primary" aria-hidden="true" />
-        <span>{t('button')}</span>
+        <span data-rail-label>{t('button')}</span>
         <RailBadge className={RAIL_PILL_BADGE}>{count}</RailBadge>
       </button>
       <section

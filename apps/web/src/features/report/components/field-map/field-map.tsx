@@ -1,6 +1,6 @@
 import type { ContextFeature, ContextTile, FieldArea, HydroFeature, HydroTile } from '@app/contracts';
 import { useQueries, type UseQueryResult } from '@tanstack/react-query';
-import { Droplets, PenLine, Plane, Sprout, ZoomIn, ZoomOut, type LucideIcon } from 'lucide-react';
+import { Droplets, Minus, PenLine, Plane, Plus, Sprout, type LucideIcon } from 'lucide-react';
 import {
   lazy,
   Suspense,
@@ -13,7 +13,6 @@ import {
 } from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
-import { Button } from '@/components/ui/button';
 import { hydroTileQuery } from '@/features/parcels';
 import { buildFieldSketch, fetchContextTile, SKETCH_RADIUS_M } from '@/lib/field-sketch';
 import {
@@ -34,6 +33,10 @@ import { useZoneFocus } from '../zone-focus';
 import type { FieldMapLayers } from './field-map-canvas';
 import { chooseFieldMode, FIELD_MODES, useFieldMode, type FieldMode } from './field-mode';
 import { SatelliteImage, SatelliteNotes, useSatelliteLayer } from './field-satellite';
+
+/** Polowka przycisku "+"/"-" w rogu zdjecia pola (48 x 48 px, jak na mapie dzialek). */
+const ZOOM_BUTTON =
+  'flex size-12 items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset disabled:opacity-40 [@media(hover:hover)]:hover:bg-muted';
 
 /** Promien okolicy pola - ten sam, w ktorym silnik szuka rowow, wod i mokradel. */
 const RADIUS_M = 500;
@@ -371,6 +374,31 @@ export function FieldMap({
                     />
                   </Suspense>
                 )}
+                {!failed && (
+                  // przyblizanie jak na zwyklej mapie: "+" i "-" w rogu obrazu (decyzja wlasciciela 2026-11-22)
+                  <div className="absolute top-3 right-3 z-10 flex w-12 flex-col divide-y overflow-hidden rounded-lg border bg-card text-card-foreground shadow-md">
+                    <button
+                      type="button"
+                      aria-label={t('zoomIn')}
+                      title={t('zoomIn')}
+                      onClick={zoomIn}
+                      disabled={zoomStep >= MAX_ZOOM_STEP}
+                      className={ZOOM_BUTTON}
+                    >
+                      <Plus aria-hidden="true" className="size-5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t('zoomOut')}
+                      title={t('zoomOut')}
+                      onClick={zoomOut}
+                      disabled={zoomStep === 0}
+                      className={ZOOM_BUTTON}
+                    >
+                      <Minus aria-hidden="true" className="size-5" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
             {layer && (
@@ -433,30 +461,6 @@ export function FieldMap({
                     />
                   )}
                 </fieldset>
-                {!failed && (
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      onClick={zoomIn}
-                      disabled={zoomStep >= MAX_ZOOM_STEP}
-                    >
-                      <ZoomIn aria-hidden="true" />
-                      {t('zoomIn')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      onClick={zoomOut}
-                      disabled={zoomStep === 0}
-                    >
-                      <ZoomOut aria-hidden="true" />
-                      {t('zoomOut')}
-                    </Button>
-                  </div>
-                )}
                 {layers.zones && <ZoneKindLegend kinds={zoneKinds} />}
               </div>
             )}

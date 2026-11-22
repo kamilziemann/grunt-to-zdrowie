@@ -24,7 +24,8 @@ const LINK_CLASS =
 
 /**
  * Naglowek aplikacji: znak i nazwa (powrot na strone glowna), "Sprawdz inna dzialke" poza strona glowna, pozycje
- * menu i jezyk. Na stronie glownej zamiast pozycji menu sa kotwice jej sekcji i "Sprawdz dzialke" (przewija do pola). Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
+ * menu i jezyk - te same na kazdej stronie, w tym samym stylu. Na stronie glownej przed menu stoja kotwice jej sekcji,
+ * a przycisk to "Sprawdz dzialke" (przewija do pola). Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
  * i klikniecie obok zamykaja, fokus wraca na przycisk).
  */
 export function AppNav({ appName }: { appName: string }) {
@@ -42,18 +43,17 @@ export function AppNav({ appName }: { appName: string }) {
     if (menu && 'hidePopover' in menu && menu.matches(':popover-open')) menu.hidePopover();
   }, []);
 
-  const links = onHome ? (
+  // jedno menu na kazdej stronie ("Jak liczymy" szuka tez jury); strona glowna dokleja przed nim kotwice swoich sekcji
+  const links = (
     <>
-      {HOME_ANCHORS.map((anchor) => (
-        <li key={anchor.href}>
-          <Link href={anchor.href} onClick={closeMenu} className={cn(LINK_CLASS, 'text-foreground')}>
-            {t(anchor.labelKey)}
-          </Link>
-        </li>
-      ))}
-    </>
-  ) : (
-    <>
+      {onHome &&
+        HOME_ANCHORS.map((anchor) => (
+          <li key={anchor.href}>
+            <Link href={anchor.href} onClick={closeMenu} className={cn(LINK_CLASS, 'text-foreground')}>
+              {t(anchor.labelKey)}
+            </Link>
+          </li>
+        ))}
       {items.map((item) => {
         const active = isNavItemActive(item, pathname);
 
@@ -75,7 +75,7 @@ export function AppNav({ appName }: { appName: string }) {
   // glowne dzialanie w naglowku: poza strona glowna inna dzialka, na glownej przewiniecie do pola numeru
   const action = onHome
     ? { href: '#szukaj' as const, label: t('homeCheck'), variant: 'default' as const }
-    : { href: routes.home(), label: t('otherParcel'), variant: 'outline' as const };
+    : { href: routes.home(), label: t('otherParcel'), variant: 'default' as const };
 
   return (
     <nav aria-label={t('main')} className="flex min-w-0 flex-1 items-center gap-3 md:gap-4 lg:gap-6">

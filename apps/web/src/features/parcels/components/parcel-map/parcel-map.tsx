@@ -171,6 +171,17 @@ export interface ParcelMapProps {
   /** false = mapa pogladowa bez gestow i klikania */
   interactive?: boolean;
   /**
+   * Start od widoku calej Polski zamiast ostatniego kadru z pamieci karty - pusta mapa ("Nie znam numeru"), na
+   * ktorej rolnik dopiero szuka swojej wsi. Czytane raz, przy tworzeniu mapy.
+   */
+  startFromCountry?: boolean;
+  /**
+   * Dzialki jeszcze sie wczytuja: mapa, ktora wystartowala z widoku calej Polski (brak kadru w pamieci), zostaje
+   * zasloneta obrysem-zastepnikiem, zamiast pokazywac kraj przez kilka sekund. Gdy przyjdzie dojazd albo blad -
+   * wywolujacy daje `false`.
+   */
+  awaitFocus?: boolean;
+  /**
    * Klikniecie w mape. `outline` = dzialka z warstwy granic pod kursorem (znana od razu, bez pytania API);
    * brak = warstwa wylaczona albo jeszcze niepobrana - wtedy dzialke trzeba znalezc po punkcie.
    */
@@ -197,6 +208,11 @@ export interface ParcelMapProps {
 type MapState = 'loading' | 'ready' | 'failed';
 
 const DEFAULT_PADDING: MapPadding = { top: 48, right: 48, bottom: 48, left: 48 };
+/**
+ * Ponizej tego przyblizenia kadr to "widok z daleka" (kraj, wojewodztwo), a nie wybor uzytkownika: dzialka
+ * "widoczna" na takim kadrze to kropka, wiec dojazd do niej jedzie zawsze - takze z kadru zapamietanego z pustej mapy.
+ */
+const FAR_ZOOM = 10;
 const defaultPadding = () => DEFAULT_PADDING;
 const NO_IMAGERY: readonly ImageryOverlay[] = [];
 // Kafle z14 obciete przez usluge (klucze "14/x/y"), pamietane przez cala sesje karty, takze po wyjsciu z mapy i powrocie:
@@ -478,6 +494,8 @@ export function ParcelMap({
   focus = null,
   getPadding = defaultPadding,
   interactive = true,
+  startFromCountry = false,
+  awaitFocus = false,
   onPick,
   onZoomTooLow,
   onControls,
@@ -528,6 +546,9 @@ export function ParcelMap({
   const clearHoverRef = useRef<() => void>(noop);
   // pierwszy dojazd swiezej mapy bez animacji: mapa nie przelatuje z widoku kraju ani z poprzedniego kadru
   const firstFocusRef = useRef(true);
+  const startFromCountryRef = useRef(startFromCountry);
+  // mapa powstala w widoku calej Polski (bez kadru i bez dzialki) - do pierwszego dojazdu zaslaniamy ja
+  const [countryStart, setCountryStart] = useState(false);
   // mapa stoi w startowym widoku calej Polski (nikt go nie wybral) - wtedy nawet miekki dojazd jedzie do dzialki
   const countryViewRef = useRef(false);
 
@@ -770,7 +791,7 @@ export function ParcelMap({
       // Start od razu na miejscu: dzialka znana juz teraz (dojazd "twardy") albo ostatni kadr z poprzedniej mapy;
       // widok calej Polski tylko przy pierwszej mapie w karcie, gdy nie wiadomo jeszcze, co pokazac.
       const initialFocus = latest.current.focus;
-      const remembered = readCamera();
+      const remembered = startFromCountryRef.current ? null : readCamera();
       const startAtFocus = initialFocus !== null && (!initialFocus.soft || remembered === null);
       const created = new maplibre.Map({
         container: target,
@@ -796,13 +817,14 @@ export function ParcelMap({
 
       map = created;
       firstFocusRef.current = true;
-      countryViewRef.current = !startAtFocus && remembered === null;
+      countryViewRef.current = !startAtFocus && (remembered === null || remembered.zoom < FAR_ZOOM);
+      setCountryStart(countryViewRef.current && !startFromCountryRef.current);
 
       if (!startAtFocus && remembered) {
         jumpToVisibleCenter(created, padding, remembered.center, remembered.zoom);
 
         // miekki dojazd (moje dzialki) tylko wtedy, gdy z poprzedniego kadru dzialek nie widac
-        if (initialFocus && !showsArea(created, padding, initialFocus.bbox)) {
+        if (initialFocus && (remembered.zoom < FAR_ZOOM || !showsArea(created, padding, initialFocus.bbox))) {
           created.fitBounds(initialFocus.bbox, { padding, maxZoom: FOCUS_MAX_ZOOM, duration: 0 });
         }
       }
@@ -1066,7 +1088,14 @@ export function ParcelMap({
     // miekki dojazd nie rusza mapy, jesli obszar juz widac - kadr wybrany przez uzytkownika zostaje. Widok calej
     // Polski to nie wybor: dzialka doczytana po utworzeniu mapy (wejscie z linku, wolna siec) "widac" w nim zawsze,
     // wiec bez tego warunku mapa zostawalaby na calym kraju.
-    if (focusSoft && !countryView && showsArea(map, padding, [west, south, east, north])) return;
+    if (
+      focusSoft &&
+      !countryView &&
+      map.getZoom() >= FAR_ZOOM &&
+      showsArea(map, padding, [west, south, east, north])
+    ) {
+      return;
+    }
 
     map.fitBounds(
       [
@@ -1101,6 +1130,15 @@ export function ParcelMap({
         </output>
       )}
       {state === 'loading' && placeholder}
+      {state === 'ready' && awaitFocus && countryStart && (
+        // zaslona do pierwszego dojazdu: zamiast mapy kraju - obrys dzialki (jesli znany) i napis
+        <div className="absolute inset-0 z-10 bg-muted" data-testid="map-veil">
+          {placeholder}
+          <output className="absolute bottom-3 left-1/2 z-10 w-max max-w-[calc(100%-6rem)] -translate-x-1/2 rounded-full bg-card/95 px-3 py-1.5 text-sm text-muted-foreground shadow-md">
+            {labels.loading}
+          </output>
+        </div>
+      )}
       {state !== 'ready' && (
         <output
           className={cn(

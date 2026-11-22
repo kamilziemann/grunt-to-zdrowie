@@ -36,7 +36,7 @@ function BasemapButton({ basemap, Icon, short, active, onChange }: BasemapButton
       aria-label={label}
       onClick={choose}
       className={cn(
-        'flex h-11 items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
+        'flex h-full items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset',
         active
           ? 'bg-primary text-primary-foreground'
           : 'text-muted-foreground [@media(hover:hover)]:hover:text-foreground',
@@ -65,9 +65,10 @@ export function BasemapSwitch({ value, onChange, className }: BasemapSwitchProps
   return (
     <fieldset
       aria-label={t('label')}
-      // komputer: dwa przyciski w ramce; telefon ma zamiast nich kafel `BasemapToggle` w szynie
+      // komputer: dwa przyciski w ramce tej samej wysokosci co pigulki obok (48 px), segmenty wypelniaja jej wnetrze;
+      // telefon ma zamiast nich kafel `BasemapToggle` w szynie
       className={cn(
-        'flex h-12 shrink-0 items-center gap-0.5 rounded-lg border bg-card p-0.5 shadow-md',
+        'flex h-12 shrink-0 items-stretch gap-0.5 rounded-lg border bg-card p-1 shadow-md',
         className,
       )}
       data-testid="basemap-switch"
@@ -108,7 +109,9 @@ export function BasemapToggle({ value, onChange, className }: BasemapSwitchProps
       data-testid="basemap-toggle"
     >
       <ImageIcon aria-hidden="true" />
-      <span aria-hidden="true">{t('basemapOrtho')}</span>
+      <span aria-hidden="true" data-rail-label>
+        {t('basemapOrtho')}
+      </span>
     </button>
   );
 }

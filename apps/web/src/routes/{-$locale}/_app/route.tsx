@@ -2,12 +2,12 @@
 // w adresie (`_app`). 404 (`notFound()` z loadera albo nieznany adres) obsluguje ta trasa: SSR szuka granicy tylko
 // w `notFoundComponent` tras, a granica zastepuje komponent trasy - stad powloka tez tu.
 import { createFileRoute, notFound, Outlet, useMatches } from '@tanstack/react-router';
+import { MapPinOff } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { AppFooter } from '@/components/shared/app-footer';
 import { AppNav } from '@/components/shared/app-nav';
-import { EmptyState } from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
@@ -40,11 +40,20 @@ function AppNotFound() {
 
   return (
     <AppShell>
-      <EmptyState titleAs="h1" title={t('notFoundTitle')} description={t('notFoundDescription')}>
-        <Button asChild variant="outline">
-          <Link href={routes.home()}>{t('backHome')}</Link>
-        </Button>
-      </EmptyState>
+      {/* zwykla strona w siatce, nie ramka: popsuty link do raportu = od razu droga do sprawdzenia dzialki jeszcze raz */}
+      <div className="mx-auto flex w-full max-w-page flex-col items-start gap-4 px-gutter py-16 md:py-24">
+        <MapPinOff aria-hidden="true" className="size-10 text-muted-foreground" />
+        <h1 className="text-4xl font-medium tracking-tight md:text-5xl">{t('notFoundTitle')}</h1>
+        <p className="max-w-xl text-lg text-muted-foreground">{t('notFoundDescription')}</p>
+        <div className="mt-2 flex flex-wrap gap-3">
+          <Button asChild size="xl">
+            <Link href={routes.home()}>{t('backHome')}</Link>
+          </Button>
+          <Button asChild size="xl" variant="outline">
+            <Link href={routes.map()}>{t('openMap')}</Link>
+          </Button>
+        </div>
+      </div>
     </AppShell>
   );
 }

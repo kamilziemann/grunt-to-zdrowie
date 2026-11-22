@@ -88,16 +88,22 @@ test.describe('kadr mapy między krokami', () => {
     expectSameView(await settledView(page), onMap);
   });
 
-  test('strona główna → numer → krok działki → „Tylko część”: mapa od razu na działce', async ({ page }) => {
+  test('strona główna → numer → mapa → krok działki → „Tylko część”: mapa od razu na działce', async ({
+    page,
+  }) => {
     await page.goto('/');
     await page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' }).fill(PARCEL_ID);
     await page.getByRole('button', { name: 'Sprawdź działkę' }).first().click();
-    await expect(page.getByTestId('check-map')).toBeVisible();
+    // numer otwiera mape z dzialka na liscie (mozna dodac kolejne, podzielic, obrysowac)
+    await expect(page).toHaveURL(/\/mapa\?dzialki=/);
 
     // bez kadru z poprzedniej mapy: start od razu na dzialce, bez przelotu
-    const onCheck = await settledView(page);
+    expect((await settledView(page)).zoom).toBeGreaterThan(15);
 
-    expect(onCheck.zoom).toBeGreaterThan(15);
+    await page.getByRole('link', { name: 'Analizuj działkę' }).click();
+    await expect(page.getByTestId('check-map')).toBeVisible();
+
+    const onCheck = await settledView(page);
 
     await page.getByRole('link', { name: 'Tylko część' }).click();
     await expect(page.getByTestId('field-draw')).toBeVisible();

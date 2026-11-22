@@ -1,4 +1,4 @@
-// Szyna przyciskow przy mapie: wspolny wyglad kafla (bialy, kwadratowy, mocno zaokraglony, ikona z podpisem pod nia)
+// Szyna przyciskow przy mapie: wspolny wyglad kafla (bialy, kwadratowy, mocno zaokraglony, sama ikona)
 // i przyciski przyblizania oraz "gdzie jestem" rysowane przez ekran zamiast domyslnych kontrolek MapLibre.
 import { LoaderCircle, LocateFixed, Minus, Plus, TriangleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -9,15 +9,16 @@ import { cn } from '@/lib/utils/cn';
 import type { LocateState, MapControls } from '../parcel-map';
 
 /**
- * Kafel szyny: 56 x 56 px, ikona 22 px i podpis 12 px pod nia (odbiorca ma tez 75 lat - sama ikona nie wystarcza).
+ * Kafel szyny: 56 x 56 px, sama ikona 24 px. Podpisy pod ikonami zaslanialy mape (decyzja wlasciciela 2026-11-22),
+ * wiec napis oznaczony `data-rail-label` zostaje tylko dla czytnikow ekranu, a przycisk ma dymek `title`.
  * `aria-pressed` (np. podklad "Zdjecie") i `aria-expanded` (otwarty panel) wypelniaja kafel jak aktywny segment.
  */
 export const RAIL_TILE =
-  'relative flex size-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border bg-card px-0.5 text-center text-xs leading-none font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-60 aria-expanded:bg-secondary aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground [&>svg]:size-5.5 [&>svg]:shrink-0';
+  'relative flex size-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border bg-card px-0.5 text-center text-xs leading-none font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:opacity-60 aria-expanded:bg-secondary aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground [&>[data-rail-label]]:sr-only [&>svg]:size-6 [&>svg]:shrink-0';
 
 /** Komputer (od `lg`): ten sam przycisk jako pigulka z ikona i napisem w jednym wierszu (jest miejsce w rzedzie). */
 export const RAIL_PILL =
-  'lg:h-12 lg:w-auto lg:flex-row lg:gap-2 lg:px-3 lg:text-sm lg:leading-normal lg:whitespace-nowrap lg:[&>svg]:size-5';
+  'lg:h-12 lg:w-auto lg:flex-row lg:gap-2 lg:px-3 lg:text-sm lg:leading-normal lg:whitespace-nowrap lg:[&>[data-rail-label]]:not-sr-only lg:[&>svg]:size-5';
 
 /** Plakietka licznika w pigulce na komputerze: w wierszu za napisem, nie w rogu. */
 export const RAIL_PILL_BADGE = 'lg:static lg:h-6 lg:min-w-6 lg:border-0 lg:px-1.5 lg:text-xs';
@@ -90,7 +91,7 @@ export function MapZoomLocate({ controls, locate, className }: MapZoomLocateProp
       </div>
       <button
         type="button"
-        // nazwa = podpis na kaflu ("Gdzie jestem"), pelniejszy opis w dymku
+        // nazwa = ukryty napis kafla ("Gdzie jestem"), pelniejszy opis w dymku
         title={t('locate')}
         disabled={!controls}
         onClick={controls?.locate}
@@ -99,7 +100,7 @@ export function MapZoomLocate({ controls, locate, className }: MapZoomLocateProp
         data-locate-state={locate}
       >
         <LocateFixed aria-hidden="true" />
-        <span>{t('locateShort')}</span>
+        <span data-rail-label>{t('locateShort')}</span>
         {badge && (
           <RailBadge className={locate === 'searching' ? undefined : 'bg-warning'}>{badge}</RailBadge>
         )}

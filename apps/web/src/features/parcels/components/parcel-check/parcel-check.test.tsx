@@ -51,11 +51,14 @@ describe('ParcelCheck', () => {
   it('pokazuje opis dzialki, uzytek z ewidencji i pytanie o cala dzialke', () => {
     renderCheck({ ...PARCEL, landUse: ['RIVb', 'ŁV'] });
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Czy to Twoja działka?' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Co rośnie i na jaki dzień?' })).toBeInTheDocument();
     expect(screen.getByTestId('parcel-facts')).toHaveTextContent('Chwalim');
     expect(screen.getByTestId('parcel-facts')).toHaveTextContent('RIVb, ŁV');
     expect(screen.queryByTestId('non-farm')).toBeNull();
-    expect(screen.getByRole('link', { name: 'To nie ta działka' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Zmień działkę' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^\/mapa\?dzialki=/),
+    );
     expect(screen.getByRole('link', { name: 'Tylko część' })).toHaveAttribute(
       'href',
       '/mapa?dzialki=080904_5.0001.349%2F1&rysuj=podziel',

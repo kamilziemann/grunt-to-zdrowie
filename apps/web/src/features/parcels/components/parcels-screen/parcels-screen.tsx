@@ -546,8 +546,13 @@ export function ParcelsScreen({
   const retryPreview = useCallback(() => void refetchPreview(), [refetchPreview]);
   const sheetLabels = useMemo(() => ({ expand: t('sheet.expand'), collapse: t('sheet.collapse') }), [t]);
 
-  const step: ParcelStep = target ? 'check' : ids.length > 0 ? 'analyze' : 'find';
+  // kroki to miejsca, nie stany: mapa to zawsze krok 1 "Dzialka", `/analiza` - 2 "Uprawa i dzien", raport - 3
+  const step: ParcelStep = 'find';
   const firstVisit = ids.length === 0 && target === null && submitted === null;
+  // szukanie trwa, dopoki odpowiada ktorekolwiek zrodlo (dzialki albo adresy) - przycisk kreci sie do konca
+  const searching =
+    (submitted !== null && (search.isFetching || places.isFetching)) ||
+    (target !== null && previewQuery.isFetching);
   const showCandidates = submitted !== null && picked === null && !onlyMatch && search.data !== undefined;
   const hasPlaces = (places.data?.items.length ?? 0) > 0;
   const showPlaces = submitted !== null && picked === null && !onlyMatch && hasPlaces;
@@ -567,7 +572,7 @@ export function ParcelsScreen({
           value={text}
           onChange={changeText}
           onSubmit={submitSearch}
-          pending={search.isFetching || (target !== null && previewQuery.isFetching)}
+          pending={searching}
           error={inputError}
         />
       </div>
@@ -651,6 +656,9 @@ export function ParcelsScreen({
           onControls={setMapControls}
           onLocateState={changeLocateState}
           labels={mapLabels}
+          // pusta mapa (np. "Nie znam numeru") zaczyna od calej Polski, nie od kadru z poprzedniej wizyty
+          startFromCountry={ids.length === 0 && initialView === null && initialDraw === null}
+          awaitFocus={ids.length > 0 && !selected.settled}
         />
       </div>
 
@@ -715,13 +723,19 @@ export function ParcelsScreen({
                   value={text}
                   onChange={changeText}
                   onSubmit={submitSearch}
-                  pending={search.isFetching || (target !== null && previewQuery.isFetching)}
+                  pending={searching}
                   error={inputError}
                 />
               </div>
 
-              {search.isFetching && picked === null && (
-                <output className="block rounded-lg bg-muted px-3 py-3 text-sm">{t('search.slow')}</output>
+              {submitted !== null && picked === null && (search.isFetching || places.isFetching) && (
+                <output className="flex flex-col gap-2" aria-label={t('search.searching')}>
+                  {search.isFetching && (
+                    <span className="block rounded-lg bg-muted px-3 py-3 text-sm">{t('search.slow')}</span>
+                  )}
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </output>
               )}
 
               {search.isError && picked === null && !hasPlaces && !places.isFetching && (
@@ -736,9 +750,12 @@ export function ParcelsScreen({
                 <PlaceResults places={places.data.items} onChoose={choosePlace} />
               )}
 
-              {showCandidates && search.data && (search.data.items.length > 0 || !hasPlaces) && (
-                <ParcelCandidates result={search.data} onChoose={chooseCandidate} />
-              )}
+              {/* "nie znaleziono" dopiero, gdy odpowiedzialy oba zrodla - adres moze przyjsc pozniej niz dzialki */}
+              {showCandidates &&
+                search.data &&
+                (search.data.items.length > 0 || (!hasPlaces && !places.isFetching)) && (
+                  <ParcelCandidates result={search.data} onChoose={chooseCandidate} />
+                )}
 
               {target !== null && previewQuery.isPending && (
                 <output aria-label={t('preview.loading')} className="flex flex-col gap-2">

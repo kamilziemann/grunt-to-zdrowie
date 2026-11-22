@@ -90,7 +90,8 @@ export function ParcelSearch({
               {!pending && <Search aria-hidden="true" />}
             </Button>
           ) : (
-            <Button type="submit" size="xl" loading={pending} aria-label={t('submit')} className="px-4">
+            // ta sama wysokosc co pole obok (48 px)
+            <Button type="submit" loading={pending} aria-label={t('submit')} className="px-4">
               {!pending && <Search aria-hidden="true" />}
               <span className="max-sm:sr-only">{t('submit')}</span>
             </Button>

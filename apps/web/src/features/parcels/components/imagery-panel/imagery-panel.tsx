@@ -80,13 +80,15 @@ export function ImageryPanel({ open, onOpenChange, value, status, children, clas
         aria-label={t('buttonLabel', { choice: t(`choices.${value}`) })}
         title={t('title')}
         onClick={toggleOpen}
-        // telefon: kafel szyny z podpisem "Satelita"; komputer: pigulka z nazwa wybranej warstwy
+        // telefon: kafel szyny z sama ikona; komputer: pigulka z nazwa wybranej warstwy
         className={cn(RAIL_TILE, RAIL_PILL, active && 'border-primary')}
         data-testid="imagery-button"
         data-imagery-status={status}
       >
         <Icon className="lg:text-primary" aria-hidden="true" />
-        <span className="lg:hidden">{t('button')}</span>
+        <span data-rail-label className="lg:hidden">
+          {t('button')}
+        </span>
         <span className="max-lg:hidden">{active ? t(`choices.${value}`) : t('button')}</span>
         {badge && (
           <RailBadge

@@ -931,7 +931,7 @@
     },
     "limits": {
       "title": "What this assessment does not know",
-      "advice": "This is advice from open data, not an expert opinion. Talk to an agricultural adviser before investing.",
+      "advice": "Talk to an agricultural adviser before investing (a weir, irrigation).",
       "method": "How we calculate"
     },
     "offSeason": {
@@ -959,6 +959,7 @@
     },
     "countdown": {
       "title": "How many days until the crop stops growing?",
+      "stressedTitle": "For how many days have the plants been short of water?",
       "lead": "days without rain before the plants start to suffer",
       "unit": "{days, plural, one {day of reserve} other {days of reserve}}",
       "answer": "Without rain the reserve drops below the threshold in {days, plural, one {# day} other {# days}}.",
@@ -966,8 +967,7 @@
       "beyond": "{days}+",
       "beyondAnswer": "The water reserve will last more than {days} days even without rain.",
       "stressedUnit": "{days, plural, one {day in a row} other {days in a row}}",
-      "stressedLead": "the plants have been short of soil water – they grow slower",
-      "stressedAnswer": "The water reserve has been below the threshold for {days, plural, one {# day} other {# days}} – plants are suffering and the yield may drop.",
+      "stressedAnswer": "The soil water reserve is below the threshold – plants grow slower and the yield may drop.",
       "noRain": "If no rain falls",
       "withRain": "With the forecast rain",
       "source": "Crop water use from the average evaporation of the last 7 days (FAO-56); the forecast variant uses the forecast rain."
@@ -1002,10 +1002,10 @@
     "seasons": {
       "title": "How was it over 10 years?",
       "headline": "{dry} of {total}",
-      "headlineNote": "seasons short of water",
-      "answer": "Water was short in {dry} of {total} previous seasons.",
-      "answerMonths": "Water was short in {dry} of {total} previous seasons – most often: {months}.",
-      "source": "Days short of water from the root-zone balance; agricultural drought by IUNG thresholds.",
+      "headlineNote": "previous seasons when the crop was clearly short of water",
+      "answer": "Water was clearly short in {dry} of {total} previous seasons.",
+      "answerMonths": "Water was clearly short in {dry} of {total} previous seasons – most often: {months}.",
+      "source": "Bars: days short of water from the root-zone balance – a few such days happen every year. A season counts as dry when the crop was short of at least 50 l/m² of water or there was an agricultural drought period by IUNG thresholds.",
       "barDescription": "{year}: {days} days short of water{drought, select, yes {, agricultural drought} other {}}",
       "barMissing": "{year}: no data",
       "legendDays": "days short of water",

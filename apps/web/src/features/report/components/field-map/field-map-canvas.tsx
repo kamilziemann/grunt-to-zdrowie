@@ -226,7 +226,7 @@ export function FieldMapCanvas({
     setZoneActive(map, activeZone, colors);
   }, [ready, activeZone]);
 
-  // przyciski "Przybliz / Oddal" sa poza plotnem (HTML), tu tylko ruch mapy; cale pole = wroc do kadru
+  // przyciski "+" i "-" leza nad plotnem (HTML), tu tylko ruch mapy; cale pole = wroc do kadru
   useEffect(() => {
     const map = mapRef.current;
 

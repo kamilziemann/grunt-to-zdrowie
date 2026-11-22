@@ -1,7 +1,8 @@
 {
   "pageTitle": "Could not display the page",
-  "backHome": "Back to the home page",
+  "backHome": "Check a parcel",
+  "openMap": "Point to the parcel on the map",
   "globalTitle": "The application ran into an unexpected error",
   "notFoundTitle": "Page not found",
-  "notFoundDescription": "The address is wrong or the page was removed."
+  "notFoundDescription": "The address is wrong or the page was removed. If it was a report link, check the parcel again – we will calculate the result anew."
 }

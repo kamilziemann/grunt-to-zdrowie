@@ -4,19 +4,20 @@
   "title": "Znajdź działkę",
   "steps": {
     "label": "Etapy",
-    "find": "Znajdź",
-    "check": "Sprawdź",
-    "analyze": "Analizuj"
+    "find": "Działka",
+    "check": "Uprawa i dzień",
+    "analyze": "Wynik"
   },
   "search": {
     "label": "Numer działki, obręb z numerem albo adres",
-    "placeholder": "np. 141201_1.0001.6509, Dąbrowa 12 albo adres",
+    "placeholder": "np. Chwalim 349/1",
     "placeholderShort": "Nr działki lub adres",
     "submit": "Szukaj",
     "hint": "Wpisz numer działki, obręb z numerem albo adres. Możesz też kliknąć działkę na mapie.",
-    "tooShort": "Wpisz co najmniej 3 znaki, np. Dąbrowa 12.",
+    "tooShort": "Wpisz co najmniej 3 znaki, np. Chwalim 349/1.",
     "tooLong": "To za długi tekst. Wpisz numer działki albo obręb i numer.",
     "failed": "Nie udało się wyszukać działki",
+    "searching": "Szukam…",
     "slow": "Szukam też działek o tym numerze w całej Polsce. To może potrwać kilkanaście sekund."
   },
   "candidates": {
@@ -374,10 +375,10 @@
     "lead": "Wpisz numer działki. W kilkanaście sekund zobaczysz, jak sucho jest na niej teraz i przez ostatnie 10 lat, i co zrobić, żeby woda z deszczu nie uciekała z pola.",
     "search": {
       "label": "Numer działki albo nazwa wsi i numer",
-      "placeholder": "np. Dąbrowa 12",
+      "placeholder": "np. Chwalim 349/1",
       "submit": "Sprawdź działkę",
       "searching": "Szukam działki…",
-      "hint": "Pełny numer (np. 141201_1.0001.6509), nazwa wsi i numer działki albo adres."
+      "hint": "Pełny numer (np. 080904_5.0001.349/1), nazwa wsi i numer działki albo adres."
     },
     "noNumber": "Nie znam numeru – wskażę na mapie",
     "noNumberShort": "Nie znam numeru – pokaż mapę",
@@ -408,7 +409,7 @@
     },
     "states": {
       "notFoundTitle": "Nie znaleźliśmy działki o tym numerze",
-      "notFoundText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Możesz też wpisać nazwę wsi i numer, np. „Dąbrowa 12”, albo wskazać działkę na mapie.",
+      "notFoundText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Możesz też wpisać nazwę wsi i numer, np. „Chwalim 349/1”, albo wskazać działkę na mapie.",
       "fixNumber": "Popraw numer",
       "showMap": "Wskaż działkę na mapie",
       "serviceTitle": "Nie możemy teraz pobrać działek",
@@ -504,7 +505,7 @@
       },
       "number": {
         "q": "Skąd wziąć numer działki?",
-        "a": "Z wypisu z rejestru gruntów albo z decyzji o podatku rolnym. Wystarczy nazwa wsi i numer, np. „Dąbrowa 12”. Możesz też wskazać działkę na mapie."
+        "a": "Z wypisu z rejestru gruntów albo z decyzji o podatku rolnym. Wystarczy nazwa wsi i numer, np. „Chwalim 349/1”. Możesz też wskazać działkę na mapie."
       },
       "aid": {
         "q": "Czy to wniosek o pomoc suszową?",
@@ -516,7 +517,7 @@
       },
       "privacy": {
         "q": "Co z moimi danymi?",
-        "a": "Nie zbieramy danych osobowych: nie pytamy o imię, adres ani telefon. Zapisujemy tylko wynik dla działki (numer, uprawę i dzień), żeby działał link do raportu."
+        "a": "Nie zbieramy danych osobowych: nie pytamy o imię, adres ani telefon, nie ma kont, ciasteczek ani statystyk odwiedzin. Zapisujemy tylko wynik dla działki (numer, uprawę i dzień), żeby działał link do raportu. Twoja przeglądarka pamięta u siebie ostatni widok mapy. Gdy strona się zepsuje, dostajemy techniczny opis błędu. Podkład mapy przeglądarka pobiera z serwisu OpenFreeMap, a wpisany adres wyszukujemy w OpenStreetMap."
       }
     },
     "cta": {
@@ -534,9 +535,9 @@
     }
   },
   "check": {
-    "title": "Czy to Twoja działka?",
-    "titleMany": "Czy to Twoje działki?",
-    "titleArea": "Twoje pole",
+    "title": "Co rośnie i na jaki dzień?",
+    "titleMany": "Co rośnie i na jaki dzień?",
+    "titleArea": "Co rośnie i na jaki dzień?",
     "parcel": "Działka {number}",
     "idLabel": "nr {id}",
     "region": "Obręb",
@@ -549,7 +550,7 @@
     "areaNote": "Powierzchnię liczymy z granic na mapie, może się różnić od ewidencji.",
     "source": "Granice: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (ewidencja gruntów)}}.",
     "total": "Razem {area} ha",
-    "notThis": "To nie ta działka",
+    "notThis": "Zmień działkę",
     "loading": "Wczytuję działkę {id}…",
     "missingTitle": "Nie znaleźliśmy takiej działki",
     "missingText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Pełny numer jest na wypisie z rejestru gruntów albo we wniosku o dopłaty.",

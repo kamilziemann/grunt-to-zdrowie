@@ -63,11 +63,12 @@ function SearchState({
 }
 
 /**
- * Pole "numer dzialki" na pierwszym ekranie. Pelny numer prowadzi prosto do kroku "Czy to Twoja dzialka?", "obreb
+ * Pole "numer dzialki" na pierwszym ekranie. Znaleziona dzialka otwiera mape z ta dzialka na liscie (tam mozna dodac
+ * kolejne, podzielic ja albo obrysowac pole - decyzja wlasciciela 2026-11-22). Pelny numer prowadzi tam prosto, "obreb
  * numer" pyta API o kandydatow (jedno trafienie = od razu dalej, kilka = lista do wyboru), a adres pokazuje miejsca,
- * ktore otwieraja mape w tej okolicy. Tekst 19 px, pole i przycisk 60 px (na telefonie jeden pod drugim).
+ * ktore otwieraja mape w tej okolicy. `initialQuery` (z adresu strony) startuje wyszukiwanie bez klikania. Tekst 19 px, pole i przycisk 60 px (na telefonie jeden pod drugim).
  */
-export function HomeSearch() {
+export function HomeSearch({ initialQuery }: { initialQuery?: string | undefined }) {
   const t = useTranslations('parcels.home');
   const tSearch = useTranslations('parcels.search');
   const tCommon = useTranslations('common');
@@ -75,9 +76,14 @@ export function HomeSearch() {
   const inputId = useId();
   const messageId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [text, setText] = useState('');
+  // tekst z adresu (`/?q=...`): formularz wyslany, zanim strona ozyla - wpisujemy go w pole i szukamy od razu
+  const [text, setText] = useState(initialQuery ?? '');
   const [error, setError] = useState<ParcelSearchError | null>(null);
-  const [submitted, setSubmitted] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<string | null>(() => {
+    const input = initialQuery ? validateParcelSearch(initialQuery) : null;
+
+    return input?.ok ? input.query : null;
+  });
 
   const search = useQuery({ ...parcelSearchQuery(submitted ?? ''), enabled: submitted !== null });
   const places = useQuery({ ...placeSearchQuery(submitted ?? ''), enabled: submitted !== null });
@@ -85,9 +91,9 @@ export function HomeSearch() {
   const onlyMatch = items?.length === 1 ? items[0] : undefined;
   const hasPlaces = (places.data?.items.length ?? 0) > 0;
 
-  // jedno trafienie jest jednoznaczne - od razu krok "Czy to Twoja dzialka?"
+  // jedno trafienie jest jednoznaczne - od razu mapa z ta dzialka na liscie
   useEffect(() => {
-    if (onlyMatch) router.push(routes.analysis(onlyMatch.id));
+    if (onlyMatch) router.push(routes.parcels(onlyMatch.id));
   }, [onlyMatch, router]);
 
   const change = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +119,7 @@ export function HomeSearch() {
 
       // pelny numer wskazuje jedna dzialke - bez listy kandydatow (jedno zapytanie mniej)
       if (PARCEL_ID_PATTERN.test(input.query)) {
-        router.push(routes.analysis(input.query));
+        router.push(routes.parcels(input.query));
 
         return;
       }
@@ -139,7 +145,7 @@ export function HomeSearch() {
   }, []);
 
   const chooseCandidate = useCallback(
-    (candidate: ParcelCandidate) => router.push(routes.analysis(candidate.id)),
+    (candidate: ParcelCandidate) => router.push(routes.parcels(candidate.id)),
     [router],
   );
 

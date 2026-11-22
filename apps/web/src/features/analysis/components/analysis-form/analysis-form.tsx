@@ -43,7 +43,7 @@ export interface AnalysisFormProps {
 
 /**
  * Drugi krok ("Czy to Twoja dzialka?"): uprawa jako pigulki i dzien (dzis albo inny dzien z 10 lat), potem raport.
- * Stoi w ciemnym panelu (`surface-panel`). Bez JavaScriptu formularz wysyla GET na `/raport` (te same nazwy pol co
+ * Stoi w bialym panelu kroku dzialki (ten sam styl co panel mapy). Bez JavaScriptu formularz wysyla GET na `/raport` (te same nazwy pol co
  * parametry adresu); z JavaScriptem sprawdza pola i przechodzi bez przeladowania. Przycisk "Analizuj dzialke" jest
  * przyklejony do dolu panelu, wiec na telefonie zawsze go widac.
  */
@@ -172,7 +172,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
             {(['together', 'separate'] as const).map((mode) => (
               <label
                 key={mode}
-                className="grid min-h-16 cursor-pointer grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 rounded-xl border-2 border-input p-3 has-checked:border-accent has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+                className="grid min-h-16 cursor-pointer grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 rounded-xl border-2 border-input p-3 has-checked:border-primary has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
               >
                 <input
                   type="radio"
@@ -180,7 +180,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
                   value={mode}
                   checked={separate === (mode === 'separate')}
                   onChange={changeMode}
-                  className="row-span-2 mt-1 size-5 shrink-0 accent-accent"
+                  className="row-span-2 mt-1 size-5 shrink-0 accent-primary"
                 />
                 <span className="text-base font-medium">{t(`mode.${mode}`)}</span>
                 <span className="text-sm text-muted-foreground">{t(`mode.${mode}Hint`)}</span>
@@ -191,19 +191,19 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
       )}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-3 text-lg font-medium">{t('dayLegend')}</legend>
-        <label className="flex min-h-13 cursor-pointer items-center gap-3 rounded-xl border-2 border-input px-4 py-2 has-checked:border-accent has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring">
+        <label className="flex min-h-13 cursor-pointer items-center gap-3 rounded-xl border-2 border-input px-4 py-2 has-checked:border-primary has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring">
           <input
             type="radio"
             name={`${ids}-day`}
             checked={!otherDay}
             onChange={resetDate}
-            className="size-5 shrink-0 accent-accent"
+            className="size-5 shrink-0 accent-primary"
           />
           {today ? t('todayOption', { date: todayLabel }) : t('today')}
         </label>
         <div
           ref={dateAreaRef}
-          className="flex flex-col gap-2 rounded-xl border-2 border-input px-4 py-3 has-checked:border-accent"
+          className="flex flex-col gap-2 rounded-xl border-2 border-input px-4 py-3 has-checked:border-primary"
         >
           <label className="flex min-h-11 cursor-pointer items-center gap-3 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring">
             <input
@@ -211,7 +211,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
               name={`${ids}-day`}
               checked={otherDay}
               onChange={pickOtherDay}
-              className="size-5 shrink-0 accent-accent"
+              className="size-5 shrink-0 accent-primary"
             />
             {t('otherDay')}
           </label>
@@ -242,8 +242,8 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
         </div>
       </fieldset>
       {/* przycisk przyklejony do dolu przewijanego panelu; ujemny margines = odstep panelu (ParcelCheck: px-5/md:px-7) */}
-      <div className="sticky bottom-0 z-10 -mx-5 flex flex-col gap-1.5 bg-panel px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:-mx-7 md:px-7">
-        <Button type="submit" variant="accent" size="xl" className="w-full">
+      <div className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-1.5 border-t bg-card px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:-mx-5 sm:px-5 lg:-mx-4 lg:px-4">
+        <Button type="submit" size="xl" className="w-full">
           {t('submit')}
           <ArrowRight aria-hidden="true" />
         </Button>

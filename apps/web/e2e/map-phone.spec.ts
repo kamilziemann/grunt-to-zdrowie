@@ -70,7 +70,7 @@ test.describe('mapa na telefonie', () => {
         await expectTouchTargets(page.getByTestId('map-controls-row').getByRole('button'));
         await expectTouchTargets(pill);
 
-        // pod ikona krotki podpis (odbiorca ma tez 75 lat), pelna nazwa dla czytnikow i w dymku
+        // sama ikona (podpisy zaslanialy mape); krotka nazwa zostaje dla czytnikow, pelna w dymku
         await expect(layers).toContainText('Warstwy');
         await expect(imagery).toContainText('Satelita');
         await expect(page.getByRole('button', { name: 'Gdzie jestem' })).toHaveAttribute(
@@ -215,7 +215,7 @@ test.describe('mapa na telefonie', () => {
 
       const alert = page.getByRole('alert');
 
-      await expect(alert).toHaveText('Wpisz co najmniej 3 znaki, np. Dąbrowa 12.');
+      await expect(alert).toHaveText('Wpisz co najmniej 3 znaki, np. Chwalim 349/1.');
       await expect(alert).toBeInViewport({ ratio: 1 });
       expect((await boxOf(alert)).y).toBeLessThan((await boxOf(search)).y + 80);
       // zly format nie podnosi arkusza - komunikat jest przy polu

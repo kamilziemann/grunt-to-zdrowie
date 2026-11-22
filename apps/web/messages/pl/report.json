@@ -931,7 +931,7 @@
     },
     "limits": {
       "title": "Czego ta ocena nie wie",
-      "advice": "To porada z ogólnodostępnych danych, nie ekspertyza. Przed inwestycją porozmawiaj z doradcą ODR.",
+      "advice": "Przed inwestycją (zastawka, nawadnianie) porozmawiaj z doradcą ODR.",
       "method": "Jak liczymy"
     },
     "offSeason": {
@@ -959,6 +959,7 @@
     },
     "countdown": {
       "title": "Ile dni zostało, zanim uprawa przestanie rosnąć?",
+      "stressedTitle": "Od ilu dni roślinom brakuje wody?",
       "lead": "dni bez deszczu, zanim rośliny zaczną cierpieć z braku wody",
       "unit": "{days, plural, one {dzień zapasu} other {dni zapasu}}",
       "answer": "Bez deszczu zapas spadnie poniżej progu za {days, plural, one {# dzień} other {# dni}}.",
@@ -966,8 +967,7 @@
       "beyond": "{days}+",
       "beyondAnswer": "Zapasu wody wystarczy na ponad {days} dni nawet bez deszczu.",
       "stressedUnit": "{days, plural, one {dzień z rzędu} other {dni z rzędu}}",
-      "stressedLead": "roślinom brakuje wody w glebie – rosną wolniej",
-      "stressedAnswer": "Zapas wody jest poniżej progu od {days, plural, one {# dnia} other {# dni}} – rośliny już cierpią, a plon może spaść.",
+      "stressedAnswer": "Zapas wody w glebie jest poniżej progu – rośliny rosną wolniej, a plon może spaść.",
       "noRain": "Jeśli nie spadnie deszcz",
       "withRain": "Z deszczem z prognozy",
       "source": "Zużycie wody przez uprawę ze średniego parowania z ostatnich 7 dni (FAO-56); wariant z prognozą bierze deszcz z prognozy."
@@ -1002,10 +1002,10 @@
     "seasons": {
       "title": "Jak było przez 10 lat?",
       "headline": "{dry} z {total}",
-      "headlineNote": "sezonów z niedoborem wody",
-      "answer": "Wody brakowało w {dry} z {total} poprzednich sezonów.",
-      "answerMonths": "Wody brakowało w {dry} z {total} poprzednich sezonów – najczęściej: {months}.",
-      "source": "Dni z niedoborem wody wg bilansu w strefie korzeni; susza rolnicza wg progów IUNG.",
+      "headlineNote": "poprzednich sezonów, w których uprawie wyraźnie zabrakło wody",
+      "answer": "Wody wyraźnie brakowało w {dry} z {total} poprzednich sezonów.",
+      "answerMonths": "Wody wyraźnie brakowało w {dry} z {total} poprzednich sezonów – najczęściej: {months}.",
+      "source": "Słupki: dni z niedoborem wody wg bilansu w strefie korzeni – kilka takich dni zdarza się co roku. Sezon liczymy jako suchy, gdy uprawie zabrakło co najmniej 50 l/m² wody albo był okres suszy rolniczej wg progów IUNG.",
       "barDescription": "{year}: {days} dni z niedoborem wody{drought, select, yes {, susza rolnicza} other {}}",
       "barMissing": "{year}: brak danych",
       "legendDays": "dni z niedoborem wody",

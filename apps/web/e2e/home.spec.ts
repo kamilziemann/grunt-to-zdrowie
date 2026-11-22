@@ -150,17 +150,13 @@ test.describe('strona główna', () => {
     expect(requests).toEqual([]);
   });
 
-  test(
-    'pełny numer prowadzi prosto do kroku „Czy to Twoja działka?”',
-    { tag: '@smoke' },
-    async ({ page }) => {
-      await page.route('**/api/parcels/by-id**', (route) => route.fulfill({ status: 404, json: {} }));
-      await page.goto('/');
-      await searchFor(page, '080904_5.0001.349/1');
+  test('pełny numer prowadzi prosto na mapę z działką na liście', { tag: '@smoke' }, async ({ page }) => {
+    await page.route('**/api/parcels/by-id**', (route) => route.fulfill({ status: 404, json: {} }));
+    await page.goto('/');
+    await searchFor(page, '080904_5.0001.349/1');
 
-      await expect(page).toHaveURL(/\/analiza\?dzialki=080904_5\.0001\.349%2F1$/);
-    },
-  );
+    await expect(page).toHaveURL(/\/mapa\?dzialki=080904_5\.0001\.349%2F1$/);
+  });
 
   test('kilka trafień: lista z gminą i powiatem, wybór prowadzi do działki', async ({ page }) => {
     await mockSearch(page, { parcels: CANDIDATES });
@@ -172,7 +168,7 @@ test.describe('strona główna', () => {
 
     await expect(list.getByRole('button')).toHaveCount(2);
     await list.getByRole('button', { name: /Kłodawa/ }).click();
-    await expect(page).toHaveURL(/\/analiza\?dzialki=300902_2\.0004\.12$/);
+    await expect(page).toHaveURL(/\/mapa\?dzialki=300902_2\.0004\.12$/);
   });
 
   test('brak działki: komunikat z poprawą numeru i mapą', async ({ page }) => {

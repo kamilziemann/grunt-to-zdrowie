@@ -20,9 +20,9 @@ const QUESTIONS = ['cost', 'account', 'number', 'aid', 'accuracy', 'privacy'] as
  * Strona glowna wg makiety "Propozycja A" (`Main.dc.html`, telefon `K2-telefon.dc.html`): na pierwszym ekranie pole
  * na numer dzialki, "Nie znam numeru - wskaze na mapie", trzy zapewnienia i gdzie jest numer; pod spodem karta
  * "Przyklad wyniku" z prawdziwymi liczbami, inne przyklady, trzy kroki, co dostaniesz, zrodla danych i pytania.
- * Jedno glowne dzialanie: sprawdzic dzialke. Kotwice `#jak`, `#wynik`, `#pytania`, `#szukaj` zna naglowek.
+ * Jedno glowne dzialanie: sprawdzic dzialke. `initialQuery` to tekst z adresu (`/?q=...`) - szukamy go od razu. Kotwice `#jak`, `#wynik`, `#pytania`, `#szukaj` zna naglowek.
  */
-export function HomeScreen() {
+export function HomeScreen({ initialQuery }: { initialQuery?: string | undefined }) {
   const t = useTranslations('parcels.home');
 
   return (
@@ -42,7 +42,7 @@ export function HomeScreen() {
           {t('lead')}
         </p>
         <div className="mt-5 flex w-full max-w-3xl flex-col items-center md:mt-7">
-          <HomeSearch />
+          <HomeSearch initialQuery={initialQuery} />
         </div>
         <div className="mt-3 flex w-full max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2">
           <Link

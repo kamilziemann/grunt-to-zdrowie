@@ -23,7 +23,7 @@ export function StepsHeader({ current, className }: { current: ParcelStep; class
             key={step}
             aria-current={active ? 'step' : undefined}
             className={cn(
-              'flex items-center gap-1.5 font-medium',
+              'flex items-center gap-1.5 font-medium whitespace-nowrap',
               active ? 'text-foreground' : 'text-muted-foreground',
             )}
           >

@@ -4,19 +4,20 @@
   "title": "Find a parcel",
   "steps": {
     "label": "Steps",
-    "find": "Find",
-    "check": "Check",
-    "analyze": "Analyse"
+    "find": "Parcel",
+    "check": "Crop and day",
+    "analyze": "Result"
   },
   "search": {
     "label": "Parcel number, district with number or address",
-    "placeholder": "e.g. 141201_1.0001.6509, Dąbrowa 12 or an address",
+    "placeholder": "e.g. Chwalim 349/1",
     "placeholderShort": "Parcel no. or address",
     "submit": "Search",
     "hint": "Enter a parcel number, a district with a number or an address. You can also click a parcel on the map.",
-    "tooShort": "Enter at least 3 characters, e.g. Dąbrowa 12.",
+    "tooShort": "Enter at least 3 characters, e.g. Chwalim 349/1.",
     "tooLong": "That text is too long. Enter a parcel number or a district and number.",
     "failed": "Could not search for the parcel",
+    "searching": "Searching…",
     "slow": "Also searching for parcels with this number across Poland. This can take several seconds."
   },
   "candidates": {
@@ -374,10 +375,10 @@
     "lead": "Enter the parcel number. In a few seconds you will see how dry it is now and over the last 10 years, and what to do so rainwater does not run off the field.",
     "search": {
       "label": "Parcel number or village name and number",
-      "placeholder": "e.g. Dąbrowa 12",
+      "placeholder": "e.g. Chwalim 349/1",
       "submit": "Check parcel",
       "searching": "Looking for the parcel…",
-      "hint": "Full number (e.g. 141201_1.0001.6509), village name and parcel number, or an address."
+      "hint": "Full number (e.g. 080904_5.0001.349/1), village name and parcel number, or an address."
     },
     "noNumber": "I don't know the number – I'll point on the map",
     "noNumberShort": "I don't know the number – show the map",
@@ -408,7 +409,7 @@
     },
     "states": {
       "notFoundTitle": "We could not find a parcel with this number",
-      "notFoundText": "Check that the number is copied exactly: digits, dots and slash. You can also type the village name and number, e.g. “Dąbrowa 12”, or point to the parcel on the map.",
+      "notFoundText": "Check that the number is copied exactly: digits, dots and slash. You can also type the village name and number, e.g. “Chwalim 349/1”, or point to the parcel on the map.",
       "fixNumber": "Correct the number",
       "showMap": "Point to the parcel on the map",
       "serviceTitle": "We cannot fetch parcels right now",
@@ -504,7 +505,7 @@
       },
       "number": {
         "q": "Where do I get the parcel number?",
-        "a": "From the land register extract or the agricultural tax decision. The village name and number are enough, e.g. “Dąbrowa 12”. You can also point to the parcel on the map."
+        "a": "From the land register extract or the agricultural tax decision. The village name and number are enough, e.g. “Chwalim 349/1”. You can also point to the parcel on the map."
       },
       "aid": {
         "q": "Is this a drought aid application?",
@@ -516,7 +517,7 @@
       },
       "privacy": {
         "q": "What about my data?",
-        "a": "We do not collect personal data: we do not ask for your name, address or phone. We only store the result for the parcel (number, crop and day) so the report link works."
+        "a": "We do not collect personal data: we do not ask for your name, address or phone, and there are no accounts, cookies or visit statistics. We only store the result for the parcel (number, crop and day) so the report link works. Your browser remembers the last map view locally. When the page breaks, we receive a technical error description. Your browser downloads the base map from OpenFreeMap, and a typed address is looked up in OpenStreetMap."
       }
     },
     "cta": {
@@ -534,9 +535,9 @@
     }
   },
   "check": {
-    "title": "Is this your parcel?",
-    "titleMany": "Are these your parcels?",
-    "titleArea": "Your field",
+    "title": "What grows and for which day?",
+    "titleMany": "What grows and for which day?",
+    "titleArea": "What grows and for which day?",
     "parcel": "Parcel {number}",
     "idLabel": "no. {id}",
     "region": "Cadastral district",
@@ -549,7 +550,7 @@
     "areaNote": "We calculate the area from the boundaries on the map; it may differ from the register.",
     "source": "Boundaries: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (land register)}}.",
     "total": "Total {area} ha",
-    "notThis": "Not this parcel",
+    "notThis": "Change parcel",
     "loading": "Loading parcel {id}…",
     "missingTitle": "We could not find this parcel",
     "missingText": "Check that the number is copied exactly: digits, dots and slash. The full number is on the land register extract or in the subsidy application.",

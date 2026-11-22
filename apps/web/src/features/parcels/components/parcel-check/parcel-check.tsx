@@ -1,6 +1,6 @@
 import { serializeParcelSelection, type Parcel, type ParcelGeometry } from '@app/contracts';
 import { Map as MapIcon, PencilRuler, RotateCw, Scissors, TriangleAlert } from 'lucide-react';
-import { useCallback, useMemo, type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { EmptyState } from '@/components/shared/empty-state';
@@ -15,7 +15,8 @@ import { useMapLabels } from '../../hooks/use-map-labels';
 import { useMapLayers } from '../../hooks/use-map-layers';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
 import { nonFarmKinds } from '../../utils/land-use';
-import { ParcelMap, type Basemap, type MapFocus, type MapParcel } from '../parcel-map';
+import { BasemapSwitch } from '../basemap-switch';
+import { ParcelMap, type Basemap, type MapFocus, type MapPadding, type MapParcel } from '../parcel-map';
 import { ParcelOutline } from '../parcel-outline';
 import { useAreaFormatter } from '../parcel-preview';
 import { StepsHeader } from '../steps-header';
@@ -31,7 +32,23 @@ export interface ParcelCheckProps {
   renderForm?: (summary: ReactNode) => ReactNode;
 }
 
-const BASEMAPS: readonly Basemap[] = ['ortho', 'map'];
+/** Te same miary co na mapie dzialek: panel 25 rem od `lg`, margines dojazdu 56 px. */
+const DESKTOP_QUERY = '(min-width: 64rem)';
+const PANEL_WIDTH_REM = 25;
+const MAP_MARGIN_PX = 56;
+
+/** Dojazd do dzialki: na komputerze lewa strona mapy jest pod panelem, wiec dzialka staje w odslonietej czesci. */
+function checkMapPadding(): MapPadding {
+  const base = { top: MAP_MARGIN_PX + 24, right: MAP_MARGIN_PX, bottom: MAP_MARGIN_PX, left: MAP_MARGIN_PX };
+
+  if (typeof window === 'undefined' || !window.matchMedia(DESKTOP_QUERY).matches) {
+    return { top: 64, right: 24, bottom: 24, left: 24 };
+  }
+
+  const rem = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+
+  return { ...base, left: PANEL_WIDTH_REM * rem + MAP_MARGIN_PX };
+}
 
 function unionBbox(parcels: readonly Parcel[]): MapFocus['bbox'] | null {
   const [first, ...rest] = parcels;
@@ -56,7 +73,8 @@ function ParcelFacts({ parcel }: { parcel: Parcel }) {
   const rows = [
     [t('region'), parcel.region],
     [t('commune'), parcel.commune],
-    [t('county'), parcel.county],
+    // etykieta juz mowi "Powiat" - zrodlo oddaje "powiat mogilenski"
+    [t('county'), parcel.county.replace(/^powiat\s+/i, '')],
     [t('area'), t('areaValue', { area: formatArea(parcel.areaHa) })],
     [
       t('registryArea'),
@@ -166,7 +184,6 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
   }, [area, ids, selected.parcels, selected.settled]);
   const outlineGeometries = useMemo(() => mapSelected.map((parcel) => parcel.geometry), [mapSelected]);
   const outline = useMemo(() => <ParcelOutline geometries={outlineGeometries} />, [outlineGeometries]);
-  const chooseBasemap = useCallback((next: Basemap) => updateLayers({ basemap: next }), [updateLayers]);
   const nonFarm = single?.parcel && !area ? nonFarmKinds(single.parcel.landUse) : [];
   const ready = area !== null || selected.parcels.length > 0;
   const splitHref = useMemo(() => routes.map({ dzialki, rysuj: 'podziel' }), [dzialki]);
@@ -244,8 +261,9 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
       )}
 
       {ready && !area && (
+        // wroc na mape z ta sama lista - tam zmienisz, dodasz albo usuniesz dzialke
         <Button asChild variant="outline" size="lg">
-          <Link href={routes.home()}>{t('notThis')}</Link>
+          <Link href={routes.parcels(dzialki)}>{t('notThis')}</Link>
         </Button>
       )}
 
@@ -257,7 +275,7 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
           <div className="grid grid-cols-2 gap-2">
             <span
               aria-current="true"
-              className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-accent bg-accent px-4 text-center font-semibold text-accent-foreground"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-primary bg-accent px-4 text-center font-semibold text-accent-foreground"
             >
               {t('whole.yes')}
             </span>
@@ -299,9 +317,11 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
     );
   }
 
+  // Uklad jak na mapie dzialek (decyzja wlasciciela 2026-11-22: jeden styl obu krokow): komputer - mapa na calym
+  // ekranie i bialy plywajacy panel po lewej; telefon - pasek mapy u gory i panel pod nim.
   return (
-    <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[minmax(0,31rem)_1fr]">
-      <div className="relative h-[32dvh] shrink-0 md:order-2 md:h-full" data-testid="check-map">
+    <div className="relative flex min-h-0 flex-1 flex-col lg:block">
+      <div className="relative h-[32dvh] shrink-0 lg:absolute lg:inset-0 lg:h-auto" data-testid="check-map">
         <ParcelMap
           selected={mapSelected}
           preview={areaParcel ? (selected.parcels[0] ?? null) : null}
@@ -310,54 +330,27 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
           interactive={false}
           labels={mapLabels}
           placeholder={outline}
+          getPadding={checkMapPadding}
+          awaitFocus={!area && !selected.settled}
         />
-        <fieldset className="absolute top-3 left-3 z-10 flex gap-1 rounded-full border border-input bg-card p-1 shadow-md">
-          <legend className="sr-only">{t('basemap.label')}</legend>
-          {BASEMAPS.map((option) => (
-            <BasemapOption key={option} option={option} current={basemap} onChoose={chooseBasemap} />
-          ))}
-        </fieldset>
-        <p className="absolute right-3 bottom-8 z-10 max-w-80 rounded-xl border bg-card px-3 py-2 text-sm max-md:hidden">
+        <BasemapSwitch
+          value={basemap}
+          onChange={updateLayers}
+          className="absolute top-3 left-3 z-10 lg:left-106"
+        />
+        <p className="absolute bottom-3 left-106 z-10 max-w-80 rounded-lg border bg-card px-3 py-2 text-sm shadow-md max-lg:hidden">
           {t('mapNote')}
         </p>
       </div>
 
       <div
-        className="surface-panel relative min-h-0 flex-1 overflow-y-auto overscroll-contain md:order-1"
+        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-card text-card-foreground max-lg:border-t lg:absolute lg:top-3 lg:bottom-3 lg:left-3 lg:z-10 lg:w-100 lg:rounded-xl lg:border lg:shadow-lg"
         data-testid="check-panel"
         // nowy adres = panel od gory (router.tsx), a nie przewiniecie z poprzedniej wizyty
         data-scroll-reset
       >
-        <div className="px-5 pt-5 md:px-7 md:pt-7">{ready && renderForm ? renderForm(summary) : summary}</div>
+        <div className="px-4 pt-4 sm:px-5 lg:px-4">{ready && renderForm ? renderForm(summary) : summary}</div>
       </div>
     </div>
-  );
-}
-
-function BasemapOption({
-  option,
-  current,
-  onChoose,
-}: {
-  option: Basemap;
-  current: Basemap;
-  onChoose: (option: Basemap) => void;
-}) {
-  const t = useTranslations('parcels.check.basemap');
-  const choose = useCallback(() => onChoose(option), [onChoose, option]);
-  const active = option === current;
-
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={choose}
-      className={cn(
-        'h-11 rounded-full px-4 text-base transition-colors max-md:px-3 max-md:text-sm',
-        active ? 'bg-primary font-medium text-primary-foreground' : 'hover:bg-muted',
-      )}
-    >
-      {t(option)}
-    </button>
   );
 }

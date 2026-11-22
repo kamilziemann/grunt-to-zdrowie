@@ -85,7 +85,7 @@ export function CropPicker({
               className={cn(
                 'relative inline-flex min-h-12 cursor-pointer items-center gap-1.5 rounded-full border-2 px-4 py-1.5 text-base transition-colors select-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
                 checked
-                  ? 'border-accent bg-accent font-semibold text-accent-foreground'
+                  ? 'border-primary bg-accent font-semibold text-accent-foreground'
                   : 'border-input hover:border-foreground',
                 invalid && !value && 'border-destructive',
               )}

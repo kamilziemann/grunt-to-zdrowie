@@ -694,7 +694,7 @@ describe('ReportView', () => {
       expect(screen.getByTestId('verdict-number')).toHaveTextContent('Brakuje ok. 114 l/m² wody');
       expect(screen.getByTestId('tank-percent')).toHaveTextContent('4%');
       expect(screen.getByTestId('chart-tank')).toHaveTextContent('Zwykle tego dnia: 24%.');
-      expect(screen.getByTestId('chart-countdown')).toHaveTextContent('od 39 dni');
+      expect(screen.getByTestId('chart-countdown')).toHaveTextContent('39dni z rzędu');
       expect(screen.getByTestId('chart-ledger')).toHaveTextContent('1,8 razy więcej wody');
       expect(screen.getByTestId('chart-ledger')).toHaveTextContent('126');
       expect(screen.getByTestId('chart-seasons')).toHaveTextContent('9 z 10');

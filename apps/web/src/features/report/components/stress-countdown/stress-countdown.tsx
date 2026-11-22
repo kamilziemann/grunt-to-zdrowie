@@ -62,8 +62,8 @@ export function StressCountdown({ report }: { report: WaterReport }) {
 
     return (
       <ChartCard
-        title={t('title')}
-        answer={t('stressedAnswer', { days: since })}
+        title={t('stressedTitle')}
+        answer={t('stressedAnswer')}
         source={t('source')}
         data-testid="chart-countdown"
       >
@@ -71,7 +71,6 @@ export function StressCountdown({ report }: { report: WaterReport }) {
           <span className="text-6xl leading-none font-bold text-warning tabular-nums">{since}</span>
           <span className="text-xl font-semibold">{t('stressedUnit', { days: since })}</span>
         </p>
-        <p className="text-lg">{t('stressedLead')}</p>
       </ChartCard>
     );
   }

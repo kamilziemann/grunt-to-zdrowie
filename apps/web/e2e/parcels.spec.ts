@@ -180,7 +180,9 @@ test.describe('działki', () => {
       await page.getByRole('link', { name: 'Analizuj działkę' }).click();
       await expect(page).toHaveURL(/\/analiza\?/);
 
-      await expect(page.getByRole('heading', { level: 1, name: 'Czy to Twoja działka?' })).toBeInViewport();
+      await expect(
+        page.getByRole('heading', { level: 1, name: 'Co rośnie i na jaki dzień?' }),
+      ).toBeInViewport();
       expect(await page.getByTestId('check-panel').evaluate((panel) => panel.scrollTop)).toBe(0);
     });
   });

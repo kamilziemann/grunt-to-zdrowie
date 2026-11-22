@@ -1,7 +1,8 @@
 {
   "pageTitle": "Nie udało się wyświetlić strony",
-  "backHome": "Wróć na stronę główną",
+  "backHome": "Sprawdź działkę",
+  "openMap": "Wskaż działkę na mapie",
   "globalTitle": "Aplikacja napotkała nieoczekiwany błąd",
   "notFoundTitle": "Nie ma takiej strony",
-  "notFoundDescription": "Adres jest błędny albo strona została usunięta."
+  "notFoundDescription": "Adres jest błędny albo strona została usunięta. Jeśli to był link do raportu, sprawdź działkę jeszcze raz – policzymy wynik od nowa."
 }

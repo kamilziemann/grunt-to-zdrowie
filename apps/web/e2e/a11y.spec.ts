@@ -26,11 +26,11 @@ const PAGES = [
   ['strona główna', '/', 'Ocena suszy dla działki rolnej'],
   ['mapa działek', '/mapa', 'Znajdź działkę'],
   ['działki do analizy (pusta lista)', '/analiza', 'Nie wybrano żadnej działki'],
-  ['formularz analizy (uprawa i dzień)', `/analiza?dzialki=${PARCEL_ID}`, 'Czy to Twoja działka?'],
+  ['formularz analizy (uprawa i dzień)', `/analiza?dzialki=${PARCEL_ID}`, 'Co rośnie i na jaki dzień?'],
   [
     'formularz analizy własnego obszaru',
     `/analiza?dzialki=${PARCEL_ID}&obszar=g54jEo5t-JmDsDREpBBvBA&rodzaj=part`,
-    'Twoje pole',
+    'Co rośnie i na jaki dzień?',
   ],
   ['raport wodny', REPORT_URL, 'Raport wodny pola'],
   ['raport wodny – szczegóły rozwinięte', `${REPORT_URL}&widok=szczegoly`, 'Raport wodny pola'],
