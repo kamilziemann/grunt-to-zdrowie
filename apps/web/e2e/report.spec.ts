@@ -25,45 +25,49 @@ const SECTIONS = [
 ];
 
 test.describe('analiza i raport', () => {
-  test('od działki do raportu: uprawa, dziś, Analizuj; raport przeżywa odświeżenie', async ({ page }) => {
-    await mockAnalysisApi(page);
-    await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
+  test(
+    'od działki do raportu: uprawa, dziś, Analizuj; raport przeżywa odświeżenie',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await mockAnalysisApi(page);
+      await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
 
-    await expect(page.getByText('Działka 6509')).toBeVisible();
-    await page.getByRole('button', { name: 'Analizuj' }).click();
-    await expect(page.getByText('Wybierz uprawę, żeby przejść dalej.')).toBeVisible();
+      await expect(page.getByText('Działka 6509')).toBeVisible();
+      await page.getByRole('button', { name: 'Analizuj' }).click();
+      await expect(page.getByText('Wybierz uprawę, żeby przejść dalej.')).toBeVisible();
 
-    // rolnik klika cala karte uprawy (natywne radio jest ukryte wizualnie)
-    await page.locator('label[data-crop="winter_wheat"]').click();
-    await expect(page.getByRole('radio', { name: /Zboża ozime/ })).toBeChecked();
-    await page.getByRole('button', { name: 'Analizuj' }).click();
+      // rolnik klika cala karte uprawy (natywne radio jest ukryte wizualnie)
+      await page.locator('label[data-crop="winter_wheat"]').click();
+      await expect(page.getByRole('radio', { name: /Zboża ozime/ })).toBeChecked();
+      await page.getByRole('button', { name: 'Analizuj' }).click();
 
-    await expect(page).toHaveURL(
-      new RegExp(
-        `/raport\\?dzialki=${PARCEL_ID.replace('.', '\\.')}&uprawa=winter_wheat&data=\\d{4}-\\d{2}-\\d{2}$`,
-      ),
-    );
-    await expect(page.getByRole('heading', { level: 1, name: 'Raport wodny pola' })).toBeVisible();
-    // widok prosty: jedno slowo na skali, pelna analiza ukryta
-    await expect(page.getByTestId('verdict-word')).toHaveText('Sucho');
-    await expect(page.getByTestId('sample-banner')).toContainText('nie podejmuj na ich podstawie decyzji');
-    await expect(page.getByTestId('report-details')).toBeHidden();
+      await expect(page).toHaveURL(
+        new RegExp(
+          `/raport\\?dzialki=${PARCEL_ID.replace('.', '\\.')}&uprawa=winter_wheat&data=\\d{4}-\\d{2}-\\d{2}$`,
+        ),
+      );
+      await expect(page.getByRole('heading', { level: 1, name: 'Raport wodny pola' })).toBeVisible();
+      // widok prosty: jedno slowo na skali, pelna analiza ukryta
+      await expect(page.getByTestId('verdict-word')).toHaveText('Sucho');
+      await expect(page.getByTestId('sample-banner')).toContainText('nie podejmuj na ich podstawie decyzji');
+      await expect(page.getByTestId('report-details')).toBeHidden();
 
-    // "Szczegolowo": parametr w adresie (link dla doradcy), sekcje w kolejnosci z zadania
-    await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
-    await expect(page).toHaveURL(/widok=szczegoly/);
-    await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
-    await expect(page.locator('[data-report-section] h2')).toHaveText(SECTIONS);
+      // "Szczegolowo": parametr w adresie (link dla doradcy), sekcje w kolejnosci z zadania
+      await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+      await expect(page).toHaveURL(/widok=szczegoly/);
+      await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
+      await expect(page.locator('[data-report-section] h2')).toHaveText(SECTIONS);
 
-    await page.reload();
-    await expect(page.getByTestId('verdict')).toBeVisible();
+      await page.reload();
+      await expect(page.getByTestId('verdict')).toBeVisible();
 
-    // wybor zapamietany w przegladarce: ten sam raport bez parametru wraca do szczegolow
-    await page.goto(REPORT_URL.replace('2026-06-15', new URL(page.url()).searchParams.get('data') ?? ''));
-    await expect(page).toHaveURL(/widok=szczegoly/);
-    await page.getByTestId('view-switch').getByRole('link', { name: 'Prosto' }).click();
-    await expect(page.getByTestId('report-details')).toBeHidden();
-  });
+      // wybor zapamietany w przegladarce: ten sam raport bez parametru wraca do szczegolow
+      await page.goto(REPORT_URL.replace('2026-06-15', new URL(page.url()).searchParams.get('data') ?? ''));
+      await expect(page).toHaveURL(/widok=szczegoly/);
+      await page.getByTestId('view-switch').getByRole('link', { name: 'Prosto' }).click();
+      await expect(page.getByTestId('report-details')).toBeHidden();
+    },
+  );
 
   test('brak danych źródła i ograniczenia są nazwane wprost', async ({ page }) => {
     await mockAnalysisApi(page);
@@ -112,41 +116,47 @@ test.describe('analiza i raport', () => {
     );
   });
 
-  test('wydruk: bez nawigacji i przycisków, szczegóły dla doradcy rozwinięte', async ({ page }) => {
-    await mockAnalysisApi(page);
-    // widok prosty na ekranie - wydruk i tak ma pelna analize po stronie pierwszej
-    await page.goto(REPORT_URL);
-    await expect(page.getByTestId('short-analysis')).toBeVisible();
-    await page.emulateMedia({ media: 'print' });
+  test(
+    'wydruk: bez nawigacji i przycisków, szczegóły dla doradcy rozwinięte',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await mockAnalysisApi(page);
+      // widok prosty na ekranie - wydruk i tak ma pelna analize po stronie pierwszej
+      await page.goto(REPORT_URL);
+      await expect(page.getByTestId('short-analysis')).toBeVisible();
+      await page.emulateMedia({ media: 'print' });
 
-    await expect(page.getByRole('button', { name: 'Drukuj / zapisz PDF' })).toBeHidden();
-    await expect(page.locator('header').filter({ has: page.getByRole('navigation') })).toBeHidden();
-    await expect(page.getByTestId('view-switch')).toBeHidden();
-    await expect(page.getByTestId('share-bar')).toBeHidden();
-    await expect(page.getByTestId('report-details')).toBeVisible();
-    await expect(page.getByText(/Klimatyczny bilans wodny/)).toBeVisible();
-    await expect(page.getByTestId('advisor-notes')).toBeVisible();
-  });
+      await expect(page.getByRole('button', { name: 'Drukuj / zapisz PDF' })).toBeHidden();
+      await expect(page.locator('header').filter({ has: page.getByRole('navigation') })).toBeHidden();
+      await expect(page.getByTestId('view-switch')).toBeHidden();
+      await expect(page.getByTestId('share-bar')).toBeHidden();
+      await expect(page.getByTestId('report-details')).toBeVisible();
+      await expect(page.getByText(/Klimatyczny bilans wodny/)).toBeVisible();
+      await expect(page.getByTestId('advisor-notes')).toBeVisible();
+    },
+  );
 
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('formularz: przycisk zawsze widoczny, duże cele dotykowe, pole daty 16 px, bez poziomego przewijania', async ({
-      page,
-    }) => {
-      await mockAnalysisApi(page);
-      await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
+    test(
+      'formularz: przycisk zawsze widoczny, duże cele dotykowe, pole daty 16 px, bez poziomego przewijania',
+      { tag: '@smoke' },
+      async ({ page }) => {
+        await mockAnalysisApi(page);
+        await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
 
-      const submit = page.getByRole('button', { name: 'Analizuj' });
+        const submit = page.getByRole('button', { name: 'Analizuj' });
 
-      await expect(submit).toBeInViewport();
-      await page.getByRole('radio', { name: /Łąka lub pastwisko/ }).scrollIntoViewIfNeeded();
-      await expect(submit).toBeInViewport();
-      await expectNoZoomFont(page.getByLabel('Dzień analizy'));
-      await expectTouchTargets(page.getByTestId('analysis-form').locator('label:has(input[type="radio"])'));
-      await expectTouchTargets(page.getByTestId('analysis-form').getByRole('button'));
-      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
-    });
+        await expect(submit).toBeInViewport();
+        await page.getByRole('radio', { name: /Łąka lub pastwisko/ }).scrollIntoViewIfNeeded();
+        await expect(submit).toBeInViewport();
+        await expectNoZoomFont(page.getByLabel('Dzień analizy'));
+        await expectTouchTargets(page.getByTestId('analysis-form').locator('label:has(input[type="radio"])'));
+        await expectTouchTargets(page.getByTestId('analysis-form').getByRole('button'));
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
+      },
+    );
 
     test('raport mieści się na szerokość telefonu', async ({ page }) => {
       await mockAnalysisApi(page);

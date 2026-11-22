@@ -19,8 +19,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:browsers": "E2E_BROWSERS=smoke playwright test --project=firefox --project=webkit",
     "check:js-budget": "bun scripts/check-js-budget.ts",
-    "samples:pdf": "bun scripts/sample-reports.ts"
+    "samples:pdf": "bun scripts/sample-reports.ts",
+    "walkthrough": "bun scripts/jury-walkthrough.ts"
   },
   "dependencies": {
     "@app/cache": "workspace:*",

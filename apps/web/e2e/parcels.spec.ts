@@ -12,24 +12,26 @@ test.describe('działki', () => {
     await mockMapServices(page);
   });
 
-  test('mapa: pierwsze wejście pokazuje jak wskazać działkę i zablokowany następny krok', async ({
-    page,
-  }) => {
-    await page.goto('/mapa');
-    await waitForMap(page);
+  test(
+    'mapa: pierwsze wejście pokazuje jak wskazać działkę i zablokowany następny krok',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await page.goto('/mapa');
+      await waitForMap(page);
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
-    // pierwsze wejscie: trzy kroki "jak wskazac dzialke" zamiast paska etapow
-    await expect(page.getByTestId('map-intro').locator('ol > li')).toHaveText([
-      /Przybliż mapę/,
-      /Kliknij swoją działkę/,
-      /Sprawdź, czy to ta działka/,
-    ]);
-    await expect(page.getByRole('list', { name: 'Etapy' })).toBeHidden();
-    await expect(page.getByRole('application', { name: /Mapa/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeDisabled();
-    await expect(page.getByText('Nie masz jeszcze żadnej działki')).toBeVisible();
-  });
+      await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
+      // pierwsze wejscie: trzy kroki "jak wskazac dzialke" zamiast paska etapow
+      await expect(page.getByTestId('map-intro').locator('ol > li')).toHaveText([
+        /Przybliż mapę/,
+        /Kliknij swoją działkę/,
+        /Sprawdź, czy to ta działka/,
+      ]);
+      await expect(page.getByRole('list', { name: 'Etapy' })).toBeHidden();
+      await expect(page.getByRole('application', { name: /Mapa/ })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeDisabled();
+      await expect(page.getByText('Nie masz jeszcze żadnej działki')).toBeVisible();
+    },
+  );
 
   test('stary adres z listą działek przekierowuje na mapę', async ({ page }) => {
     await page.goto('/?dzialki=080904_5.0001.349%2F1');
@@ -88,7 +90,7 @@ test.describe('działki', () => {
     expect(requests).toEqual([]);
   });
 
-  test('podkład przy mapie: zdjęcie lotnicze zamiast mapy', async ({ page }) => {
+  test('podkład przy mapie: zdjęcie lotnicze zamiast mapy', { tag: '@smoke' }, async ({ page }) => {
     await page.goto('/mapa');
     await waitForMap(page);
 

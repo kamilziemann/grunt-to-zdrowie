@@ -33,37 +33,39 @@ test.describe('własne pole', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
   });
 
-  test('„Tylko część” z kroku działki: mapa od razu w podziale, podpowiedzi prowadzą krok po kroku', async ({
-    page,
-  }) => {
-    await mockAnalysisApi(page);
-    await mockMapServices(page);
-    await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
-    await page.getByRole('link', { name: 'Tylko część' }).click();
+  test(
+    '„Tylko część” z kroku działki: mapa od razu w podziale, podpowiedzi prowadzą krok po kroku',
+    { tag: '@smoke' },
+    async ({ page }) => {
+      await mockAnalysisApi(page);
+      await mockMapServices(page);
+      await page.goto(`/analiza?dzialki=${PARCEL_ID}`);
+      await page.getByRole('link', { name: 'Tylko część' }).click();
 
-    await expect(page).toHaveURL(/\/mapa\?dzialki=.*&rysuj=podziel/);
+      await expect(page).toHaveURL(/\/mapa\?dzialki=.*&rysuj=podziel/);
 
-    const hint = page.getByTestId('field-draw-hint');
+      const hint = page.getByTestId('field-draw-hint');
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Pokaż swoją część działki' })).toBeVisible();
-    await expect(hint).toHaveText(/Stuknij na mapie początek linii/);
-    await waitForMap(page);
+      await expect(page.getByRole('heading', { level: 1, name: 'Pokaż swoją część działki' })).toBeVisible();
+      await expect(hint).toHaveText(/Stuknij na mapie początek linii/);
+      await waitForMap(page);
 
-    // linia przez srodek mapy (dzialka jest wysrodkowana): poczatek nad nia, koniec pod nia
-    const box = await page.getByTestId('parcel-map').boundingBox();
+      // linia przez srodek mapy (dzialka jest wysrodkowana): poczatek nad nia, koniec pod nia
+      const box = await page.getByTestId('parcel-map').boundingBox();
 
-    if (!box) throw new Error('brak mapy');
+      if (!box) throw new Error('brak mapy');
 
-    // srodek widocznej czesci mapy (na komputerze panel zaslania lewe 25 rem), ponizej podpowiedzi
-    const x = box.x + 400 + (box.width - 400) / 2;
+      // srodek widocznej czesci mapy (na komputerze panel zaslania lewe 25 rem), ponizej podpowiedzi
+      const x = box.x + 400 + (box.width - 400) / 2;
 
-    // mapa najpierw dojezdza do dzialki (animacja) - stukniecie w trakcie ruchu MapLibre bierze za przeciagniecie
-    await page.waitForTimeout(1500);
-    await page.mouse.click(x, box.y + box.height * 0.35);
-    await expect(hint).toHaveText(/Teraz stuknij koniec linii/);
-    await page.getByRole('button', { name: 'Cofnij' }).click();
-    await expect(hint).toHaveText(/Stuknij na mapie początek linii/);
-  });
+      // mapa najpierw dojezdza do dzialki (animacja) - stukniecie w trakcie ruchu MapLibre bierze za przeciagniecie
+      await page.waitForTimeout(1500);
+      await page.mouse.click(x, box.y + box.height * 0.35);
+      await expect(hint).toHaveText(/Teraz stuknij koniec linii/);
+      await page.getByRole('button', { name: 'Cofnij' }).click();
+      await expect(hint).toHaveText(/Stuknij na mapie początek linii/);
+    },
+  );
 
   test('obszar z adresu: podsumowanie, formularz i zapytanie z geometrią zamiast całej działki', async ({
     page,

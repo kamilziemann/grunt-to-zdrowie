@@ -18,6 +18,27 @@ const HAS_BASELINES = existsSync(
 );
 const SKIP_VISUAL = process.env.E2E_VISUAL !== '1' && (Boolean(process.env.CI) || !HAS_BASELINES);
 
+// Firefox i WebKit (silnik Safari) tylko na zadanie, zeby domyslny przebieg zostal szybki: `E2E_BROWSERS=smoke`
+// = testy z tagiem @smoke (strona glowna, dzialka, mapa, raport, wydruk), `E2E_BROWSERS=all` = caly zestaw.
+// Skrypt `test:e2e:browsers` uruchamia zestaw dymny w samych tych projektach. Testy telefonu (`describe('telefon')`)
+// same ustawiaja waskie okno, wiec biegna w obu silnikach.
+const BROWSERS = process.env.E2E_BROWSERS;
+const browserGrep = BROWSERS === 'all' ? undefined : /@smoke/;
+const browserProjects = BROWSERS
+  ? [
+      {
+        name: 'firefox',
+        use: { ...devices['Desktop Firefox'], viewport: desktop.viewport },
+        grep: browserGrep,
+      },
+      {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'], viewport: desktop.viewport },
+        grep: browserGrep,
+      },
+    ]
+  : [];
+
 // E2E biegnie na prawdziwym serwerze dev (`vite dev`: jedyny Worker - strony TanStack Start + API Hono, lokalna D1).
 // Zadnych mockow - testy sprawdzaja caly przeplyw przegladarka -> SSR -> Hono -> D1.
 
@@ -43,7 +64,7 @@ export default defineConfig({
     locale: 'pl-PL',
     timezoneId: 'Europe/Warsaw',
   },
-  projects: [{ name: 'chromium', use: desktop }],
+  projects: [{ name: 'chromium', use: desktop }, ...browserProjects],
   webServer: [
     {
       // Swieza lokalna D1 przy kazdym uruchomieniu (migracje), potem jeden serwer (strony + API) na tym stanie.

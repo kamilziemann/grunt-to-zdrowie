@@ -108,17 +108,19 @@ function PostPage() {
 
 ## Komendy (z `apps/web`)
 
-| Komenda                   | Co robi                                                                                                        |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `bun run dev`             | `vite dev` na :3000 w workerd: strony + API + D1 (lokalny stan `.wrangler/state`)                              |
-| `bun run build`           | build Workera i plików klienta (`dist/`)                                                                       |
-| `bun run check:js-budget` | budżet JS stron publicznych na buildzie (gzip na stronę, limit w `scripts/check-js-budget.ts`); CI po buildzie |
-| `bun run preview`         | build produkcyjny w workerd                                                                                    |
-| `bun run db:migrate`      | migracje lokalnej D1 (z `packages/db/migrations`)                                                              |
-| `bun run check:types`     | dwa projekty TS: przeglądarka/SSR (`tsconfig.json`) i Worker (`tsconfig.worker.json`)                          |
-| `bun run test`            | Vitest (jsdom) — komponenty, logika, narzędzia                                                                 |
-| `bun run test:e2e`        | Playwright na `vite dev`                                                                                       |
-| `bun run deploy`          | `tools/scripts/deploy.ts`: migracje D1 i deploy jedynego Workera                                               |
+| Komenda                     | Co robi                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `bun run dev`               | `vite dev` na :3000 w workerd: strony + API + D1 (lokalny stan `.wrangler/state`)                              |
+| `bun run build`             | build Workera i plików klienta (`dist/`)                                                                       |
+| `bun run check:js-budget`   | budżet JS stron publicznych na buildzie (gzip na stronę, limit w `scripts/check-js-budget.ts`); CI po buildzie |
+| `bun run preview`           | build produkcyjny w workerd                                                                                    |
+| `bun run db:migrate`        | migracje lokalnej D1 (z `packages/db/migrations`)                                                              |
+| `bun run check:types`       | dwa projekty TS: przeglądarka/SSR (`tsconfig.json`) i Worker (`tsconfig.worker.json`)                          |
+| `bun run test`              | Vitest (jsdom) — komponenty, logika, narzędzia                                                                 |
+| `bun run test:e2e`          | Playwright na `vite dev`                                                                                       |
+| `bun run test:e2e:browsers` | zestaw dymny `@smoke` w Firefoksie i WebKit (`E2E_BROWSERS=all` = cały zestaw we wszystkich silnikach)         |
+| `bun run walkthrough`       | ścieżka jury w trzech silnikach na wdrożeniu (zrzuty kroków; prawdziwe usługi, nie jest częścią e2e)           |
+| `bun run deploy`            | `tools/scripts/deploy.ts`: migracje D1 i deploy jedynego Workera                                               |
 
 ## Testy komponentów
 
