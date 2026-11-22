@@ -2,7 +2,7 @@
   "form": {
     "title": "What grows on the field?",
     "description": "Choose the crop and the day for which we check water on the field.",
-    "cropLegend": "Crop",
+    "cropLegend": "What grows on the parcel?",
     "cropMissing": "Choose a crop to continue.",
     "dateLabel": "Analysis day",
     "dateHint": "Today by default. You can choose any day from {min}.",
@@ -12,15 +12,19 @@
       "future": "We cannot check a future day. Choose today or an earlier day.",
       "tooOld": "We look back at most 10 years. Choose a day from {min}."
     },
-    "submit": "Analyse",
-    "submitHint": "The analysis usually takes up to 30 seconds.",
+    "submit": "Analyse parcel",
+    "submitHint": "The result usually takes a few seconds.",
     "mode": {
       "legend": "How should the {count} parcels be analysed?",
       "together": "Together, as one field",
       "togetherHint": "One assessment for the whole area – when the parcels form one field with the same crop.",
       "separate": "Each separately",
       "separateHint": "An assessment for each parcel and the order in which to start. Takes longer – we compute two at a time."
-    }
+    },
+    "cropExamples": "For example: {examples}",
+    "dayLegend": "Which day should we calculate for?",
+    "todayOption": "Today, {date}",
+    "otherDay": "Another day (up to 10 years back)"
   },
   "crops": {
     "winter_wheat": {

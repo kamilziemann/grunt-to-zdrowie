@@ -6,8 +6,11 @@ import { expect, test } from './support/test';
 import { detailed } from './support/report-view';
 
 test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z licencją', async ({ page }) => {
-  await page.goto('/analiza');
-  await page.getByRole('contentinfo').getByRole('link', { name: 'Jak liczymy' }).click();
+  await page.goto('/');
+  await page
+    .getByRole('contentinfo')
+    .getByRole('link', { name: /Jak liczymy/ })
+    .click();
 
   await expect(page).toHaveURL(/\/jak-liczymy$/);
   await expect(page).toHaveTitle(/Jak liczymy/);

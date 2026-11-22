@@ -442,5 +442,62 @@
       "click": "Kliknij swoją działkę. Granice i numery działek widać po przybliżeniu.",
       "confirm": "Sprawdź, czy to ta działka, i dodaj ją. Kilka działek możesz policzyć jako jedno pole."
     }
+  },
+  "check": {
+    "title": "Czy to Twoja działka?",
+    "titleMany": "Czy to Twoje działki?",
+    "titleArea": "Twoje pole",
+    "parcel": "Działka {number}",
+    "idLabel": "nr {id}",
+    "region": "Obręb",
+    "commune": "Gmina",
+    "county": "Powiat",
+    "area": "Powierzchnia",
+    "registryArea": "W ewidencji",
+    "landUse": "Użytek w ewidencji",
+    "areaValue": "{area} ha",
+    "areaNote": "Powierzchnię liczymy z granic na mapie, może się różnić od ewidencji.",
+    "source": "Granice: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (ewidencja gruntów)}}.",
+    "total": "Razem {area} ha",
+    "notThis": "To nie ta działka",
+    "loading": "Wczytuję działkę {id}…",
+    "missingTitle": "Nie znaleźliśmy takiej działki",
+    "missingText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Pełny numer jest na wypisie z rejestru gruntów albo we wniosku o dopłaty.",
+    "failedTitle": "Nie możemy teraz pobrać granic działki",
+    "failedText": "Państwowa usługa z mapą działek (GUGiK) chwilowo nie odpowiada. Spróbuj za minutę albo wskaż działkę na mapie.",
+    "fixNumber": "Popraw numer",
+    "showMap": "Wskaż działkę na mapie",
+    "nonFarmTitle": "Według ewidencji to nie jest grunt rolny",
+    "nonFarmText": "Ewidencja opisuje tę działkę jako: {kinds}. Ocena suszy dla upraw ma tu mniejszy sens. Jeśli na działce jest jednak pole, wybierz uprawę – policzymy wynik, a raport powie o tym wprost.",
+    "landKinds": {
+      "forest": "las",
+      "built": "zabudowa albo droga",
+      "water": "woda"
+    },
+    "whole": {
+      "question": "Uprawiasz całą działkę?",
+      "yes": "Tak, całą",
+      "part": "Tylko część",
+      "partHint": "Na mapie pokażesz, którą część działki uprawiasz – podzielisz ją linią albo obrysujesz pole.",
+      "many": "Moje pole to kilka działek"
+    },
+    "areaCard": {
+      "title": "Twoje pole: {area} ha",
+      "part": "Część działki {numbers}.",
+      "drawn": "Pole obrysowane na mapie.",
+      "change": "Zmień na mapie",
+      "whole": "Licz całą działkę"
+    },
+    "manyEdit": "Dodaj albo usuń działki na mapie",
+    "basemap": {
+      "label": "Widok mapy",
+      "map": "Mapa",
+      "ortho": "Zdjęcie lotnicze"
+    },
+    "mapNote": "Granice działki: GUGiK. Powierzchnia z mapy może się różnić od ewidencji.",
+    "mapLabel": "Mapa z obrysem działki",
+    "emptyTitle": "Nie wybrano żadnej działki",
+    "emptyText": "Wpisz numer działki na stronie głównej albo wskaż ją na mapie.",
+    "emptyHome": "Wpisz numer działki"
   }
 }

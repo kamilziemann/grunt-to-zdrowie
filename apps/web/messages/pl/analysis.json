@@ -2,7 +2,7 @@
   "form": {
     "title": "Co rośnie na polu?",
     "description": "Wybierz uprawę i dzień, dla którego sprawdzimy wodę na polu.",
-    "cropLegend": "Uprawa",
+    "cropLegend": "Co rośnie na działce?",
     "cropMissing": "Wybierz uprawę, żeby przejść dalej.",
     "dateLabel": "Dzień analizy",
     "dateHint": "Domyślnie dziś. Możesz wybrać dowolny dzień od {min}.",
@@ -12,15 +12,19 @@
       "future": "Nie sprawdzimy dnia z przyszłości. Wybierz dziś albo wcześniejszy dzień.",
       "tooOld": "Sięgamy najwyżej 10 lat wstecz. Wybierz dzień od {min}."
     },
-    "submit": "Analizuj",
-    "submitHint": "Analiza trwa zwykle do 30 sekund.",
+    "submit": "Analizuj działkę",
+    "submitHint": "Wynik zwykle w kilkanaście sekund.",
     "mode": {
       "legend": "Jak analizować {count} działki?",
       "together": "Razem, jako jedno pole",
       "togetherHint": "Jedna ocena dla całego obszaru – gdy działki tworzą jedno pole z tą samą uprawą.",
       "separate": "Każdą osobno",
       "separateHint": "Ocena każdej działki i kolejność, od której zacząć. Trwa dłużej – liczymy po dwie naraz."
-    }
+    },
+    "cropExamples": "Na przykład: {examples}",
+    "dayLegend": "Na jaki dzień liczyć?",
+    "todayOption": "Dziś, {date}",
+    "otherDay": "Inny dzień (do 10 lat wstecz)"
   },
   "crops": {
     "winter_wheat": {

@@ -1,6 +1,6 @@
 import { CROP_IDS, cropIdSchema, type CropId } from '@app/contracts';
 import { Check } from 'lucide-react';
-import { useCallback, type ChangeEvent } from 'react';
+import { useCallback, useId, type ChangeEvent } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
@@ -15,12 +15,35 @@ export interface CropPickerProps {
   invalid?: boolean;
 }
 
+/** Najczestsze uprawy w Polsce najpierw (zboza, kukurydza, rzepak, laki), potem rzadsze. */
+const COMMON_FIRST: readonly CropId[] = [
+  'winter_wheat',
+  'spring_barley',
+  'maize_grain',
+  'maize_silage',
+  'winter_rapeseed',
+  'grassland',
+  'potato',
+  'sugar_beet',
+  'pulses',
+  'field_vegetables',
+  'strawberry',
+  'fruit_trees',
+  'berry_shrubs',
+  'hops',
+  'tobacco',
+];
+
+// kazda uprawa z katalogu musi byc na liscie (nowa uprawa w kontrakcie trafia na koniec)
+const ORDER: readonly CropId[] = [...COMMON_FIRST, ...CROP_IDS.filter((id) => !COMMON_FIRST.includes(id))];
+
 /**
- * Wybor uprawy: 15 pozycji z katalogu jako duze pola wyboru (cel dotykowy >= 56 px) z nazwa dla rolnika i
- * przykladami. Natywne radio - klawiatura i czytnik ekranu dzialaja bez dodatkowego kodu.
+ * "Co rosnie na dzialce?": wszystkie uprawy z katalogu jako pigulki 48 px (najczestsze pierwsze), pod spodem
+ * przyklady wybranej uprawy. Natywne radio - klawiatura (strzalki) i czytnik ekranu dzialaja bez dodatkowego kodu.
  */
 export function CropPicker({ value, onChange, name, errorId, invalid = false }: CropPickerProps) {
   const t = useTranslations('analysis');
+  const examplesId = useId();
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const parsed = cropIdSchema.safeParse(event.currentTarget.value);
@@ -33,12 +56,12 @@ export function CropPicker({ value, onChange, name, errorId, invalid = false }: 
   return (
     <fieldset
       className="flex min-w-0 flex-col gap-3"
-      aria-describedby={invalid ? errorId : undefined}
+      aria-describedby={cn(invalid && errorId, value && examplesId) || undefined}
       aria-invalid={invalid || undefined}
     >
-      <legend className="mb-3 text-lg font-semibold">{t('form.cropLegend')}</legend>
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
-        {CROP_IDS.map((cropId) => {
+      <legend className="mb-3 text-lg font-medium">{t('form.cropLegend')}</legend>
+      <div className="flex flex-wrap gap-2">
+        {ORDER.map((cropId) => {
           const checked = value === cropId;
 
           return (
@@ -46,8 +69,10 @@ export function CropPicker({ value, onChange, name, errorId, invalid = false }: 
               key={cropId}
               data-crop={cropId}
               className={cn(
-                'relative flex min-h-14 cursor-pointer flex-col justify-center gap-0.5 rounded-lg border bg-card py-2 pr-8 pl-3 transition-colors select-none hover:bg-secondary/60 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/60',
-                checked ? 'border-primary bg-primary/10 hover:bg-primary/10' : 'border-input',
+                'inline-flex min-h-12 cursor-pointer items-center gap-1.5 rounded-full border-2 px-4 py-1.5 text-base transition-colors select-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
+                checked
+                  ? 'border-accent bg-accent font-semibold text-accent-foreground'
+                  : 'border-input hover:border-foreground',
                 invalid && !value && 'border-destructive',
               )}
             >
@@ -59,23 +84,17 @@ export function CropPicker({ value, onChange, name, errorId, invalid = false }: 
                 onChange={handleChange}
                 className="sr-only"
               />
-              <span className="text-base leading-snug font-medium">{t(`crops.${cropId}.name`)}</span>
-              <span className="text-xs leading-snug text-muted-foreground">
-                {t(`crops.${cropId}.examples`)}
-              </span>
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'absolute top-2 right-2 flex size-5 items-center justify-center rounded-full border',
-                  checked ? 'border-primary bg-primary text-primary-foreground' : 'border-input',
-                )}
-              >
-                {checked ? <Check className="size-3.5" /> : null}
-              </span>
+              {checked && <Check aria-hidden="true" className="size-4" strokeWidth={3} />}
+              {t(`crops.${cropId}.name`)}
             </label>
           );
         })}
       </div>
+      {value && (
+        <p id={examplesId} className="text-sm text-muted-foreground">
+          {t('form.cropExamples', { examples: t(`crops.${value}.examples`) })}
+        </p>
+      )}
     </fieldset>
   );
 }

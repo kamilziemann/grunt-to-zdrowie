@@ -10,8 +10,8 @@ export {
   type ParcelTarget,
 } from './api/parcels.queries';
 export { HYDRO_TILES } from './fixtures/hydro-tiles';
-export { AnalysisSummary, type AnalysisSummaryProps } from './components/analysis-summary';
 export { HomeScreen } from './components/home-screen';
+export { ParcelCheck, type ParcelCheckProps } from './components/parcel-check';
 export { ParcelsScreen, type ParcelsScreenProps } from './components/parcels-screen';
 export { useSelectedParcels, type SelectedParcel, type SelectedParcels } from './hooks/use-selected-parcels';
 export {

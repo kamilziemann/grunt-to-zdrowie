@@ -104,7 +104,9 @@ test.describe('działki', () => {
 
   test('pusta lista na ekranie analizy odsyła do mapy', async ({ page }) => {
     await page.goto('/analiza');
-    await page.getByRole('link', { name: 'Wróć do mapy' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Nie wybrano żadnej działki' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Wpisz numer działki' })).toHaveAttribute('href', '/');
+    await page.getByRole('link', { name: 'Wskaż działkę na mapie' }).click();
 
     await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
   });

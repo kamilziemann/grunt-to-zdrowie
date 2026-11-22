@@ -322,3 +322,8 @@
     display: contents;
   }
 }
+
+/* Atrybucje MapLibre: linki w tekscie podkreslone (axe link-in-text-block - kolor nie moze byc jedynym wyroznikiem). */
+.maplibregl-map .maplibregl-ctrl-attrib a {
+  text-decoration: underline;
+}

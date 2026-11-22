@@ -442,5 +442,62 @@
       "click": "Click your parcel. Parcel boundaries and numbers appear when you zoom in.",
       "confirm": "Check that it is the right parcel and add it. Several parcels can be calculated as one field."
     }
+  },
+  "check": {
+    "title": "Is this your parcel?",
+    "titleMany": "Are these your parcels?",
+    "titleArea": "Your field",
+    "parcel": "Parcel {number}",
+    "idLabel": "no. {id}",
+    "region": "Cadastral district",
+    "commune": "Municipality",
+    "county": "County",
+    "area": "Area",
+    "registryArea": "In the register",
+    "landUse": "Land use in the register",
+    "areaValue": "{area} ha",
+    "areaNote": "We calculate the area from the boundaries on the map; it may differ from the register.",
+    "source": "Boundaries: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (land register)}}.",
+    "total": "Total {area} ha",
+    "notThis": "Not this parcel",
+    "loading": "Loading parcel {id}…",
+    "missingTitle": "We could not find this parcel",
+    "missingText": "Check that the number is copied exactly: digits, dots and slash. The full number is on the land register extract or in the subsidy application.",
+    "failedTitle": "We cannot fetch the parcel boundaries right now",
+    "failedText": "The state parcel map service (GUGiK) is not responding at the moment. Try again in a minute or point to the parcel on the map.",
+    "fixNumber": "Correct the number",
+    "showMap": "Point to the parcel on the map",
+    "nonFarmTitle": "According to the register this is not farmland",
+    "nonFarmText": "The register describes this parcel as: {kinds}. A crop drought check makes less sense here. If there is a field after all, pick a crop – we will calculate and the report will say so plainly.",
+    "landKinds": {
+      "forest": "forest",
+      "built": "buildings or road",
+      "water": "water"
+    },
+    "whole": {
+      "question": "Do you farm the whole parcel?",
+      "yes": "Yes, all of it",
+      "part": "Only part",
+      "partHint": "On the map you will show which part you farm – split the parcel with a line or outline the field.",
+      "many": "My field is several parcels"
+    },
+    "areaCard": {
+      "title": "Your field: {area} ha",
+      "part": "Part of parcel {numbers}.",
+      "drawn": "Field outlined on the map.",
+      "change": "Change on the map",
+      "whole": "Use the whole parcel"
+    },
+    "manyEdit": "Add or remove parcels on the map",
+    "basemap": {
+      "label": "Map view",
+      "map": "Map",
+      "ortho": "Aerial photo"
+    },
+    "mapNote": "Parcel boundaries: GUGiK. Area from the map may differ from the register.",
+    "mapLabel": "Map with the parcel outline",
+    "emptyTitle": "No parcel selected",
+    "emptyText": "Enter the parcel number on the home page or point to it on the map.",
+    "emptyHome": "Enter the parcel number"
   }
 }
