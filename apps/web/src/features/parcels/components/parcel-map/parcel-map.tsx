@@ -193,6 +193,7 @@ const NO_IMAGERY: readonly ImageryOverlay[] = [];
 const truncatedCoarseTiles = new Set<string>();
 const NO_CONTEXT: ContextVisibility = { cover: false, waterworks: false, protected: false };
 const NO_LABELS: ContextKindLabels = {};
+const noop = (): void => undefined;
 
 function viewOf(map: MapLibre.Map): TileView {
   const bounds = map.getBounds();
@@ -436,6 +437,7 @@ export function ParcelMap({
   const [tilesLoading, setTilesLoading] = useState<ReadonlySet<string>>(() => new Set());
   // Najnowsze wartosci dla zdarzen mapy, ktora powstaje raz - bez przepinania sluchaczy przy kazdym renderze.
   const latest = useRef({
+    drawing,
     onPick,
     onZoomTooLow,
     getPadding,
@@ -456,9 +458,12 @@ export function ParcelMap({
   // ostatnio zgloszony stan kazdej warstwy z kafli - zglaszamy tylko zmiany
   const reportedRef = useRef(new Map<string, string>());
   const tileLayersRef = useRef<TileLayers | null>(null);
+  // zdejmuje podswietlenie "pod kursorem" (ustawiane w zdarzeniach mapy) - przy wejsciu w tryb rysowania
+  const clearHoverRef = useRef<() => void>(noop);
 
   useEffect(() => {
     latest.current = {
+      drawing,
       onPick,
       onZoomTooLow,
       getPadding,
@@ -727,6 +732,13 @@ export function ParcelMap({
             return;
           }
 
+          // w trybie rysowania stukniecie to tylko punkt obrysu - dzialka pod nim nie ma znaczenia
+          if (latest.current.drawing) {
+            latest.current.onPick?.(event.lngLat.lng, event.lngLat.lat);
+
+            return;
+          }
+
           // Dzialka z warstwy granic jest znana od razu - zaznaczenie nie czeka na odpowiedz API.
           const [hit] = created.getLayer(BOUNDARY_HIT_LAYER)
             ? created.queryRenderedFeatures(event.point, { layers: [BOUNDARY_HIT_LAYER] })
@@ -742,7 +754,8 @@ export function ParcelMap({
           latest.current.onPick?.(event.lngLat.lng, event.lngLat.lat, outline);
         });
 
-        // Pod kursorem myszy dzialka lekko sie podswietla - widac, co zostanie wskazane.
+        // Pod kursorem myszy dzialka lekko sie podswietla - widac, co zostanie wskazane. W trybie rysowania nie:
+        // stukniecie dodaje punkt, a podswietlona dzialka wygladalaby na wybrana (na dotyku zostaje po stuknieciu).
         let hovered: string | null = null;
         const setHover = (id: string | null) => {
           if (hovered === id) return;
@@ -754,13 +767,17 @@ export function ParcelMap({
           if (id !== null) created.setFeatureState({ source: BOUNDARIES_SOURCE, id }, { hover: true });
 
           hovered = id;
-          created.getCanvas().style.cursor = id === null ? '' : 'pointer';
+          // atrybut diagnostyczny dla testow e2e: ktora dzialka jest podswietlona
+          target.dataset.mapHover = id ?? '';
+
+          if (!latest.current.drawing) created.getCanvas().style.cursor = id === null ? '' : 'pointer';
         };
 
+        clearHoverRef.current = () => setHover(null);
         created.on('mousemove', BOUNDARY_HIT_LAYER, (event) => {
           const id: unknown = event.features?.[0]?.properties.id;
 
-          setHover(typeof id === 'string' ? id : null);
+          setHover(typeof id === 'string' && !latest.current.drawing ? id : null);
         });
         created.on('mouseleave', BOUNDARY_HIT_LAYER, () => setHover(null));
       }
@@ -793,6 +810,7 @@ export function ParcelMap({
     return () => {
       cancelled = true;
       mapRef.current = null;
+      clearHoverRef.current = noop;
       focusedKeyRef.current = null;
       imageryCountRef.current = 0;
       boundaryCache.clear();
@@ -830,6 +848,8 @@ export function ParcelMap({
       ?.setData(drawingCollection(drawing ?? { areas: [], line: null, points: [] }));
 
     // w trybie rysowania kursor celownika - stukniecie dodaje punkt, nie wybiera dzialki
+    if (drawing) clearHoverRef.current();
+
     if (map) map.getCanvas().style.cursor = drawing ? 'crosshair' : '';
   }, [state, drawing]);
 

@@ -1,5 +1,5 @@
 import { expect, test } from './support/test';
-import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
+import { mockAnalysisApi, PARCEL, PARCEL_ID } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { mockMapServices, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
@@ -8,6 +8,7 @@ import { expectTouchTargets } from './support/touch-targets';
 // stukanie w mape (punkty, podzial linia) sprawdzaja testy jednostkowe geometrii i trybu oraz przeglad reczny;
 // tu: panel trybu, przejscie obszaru z adresu przez formularz do zadania analizy (geometria w POST).
 const SQUARE = 'g54jEo5t-JmDsDREpBBvBA';
+const OUTLINE = { id: PARCEL.id, number: PARCEL.number, geometry: PARCEL.geometry, center: PARCEL.centroid };
 
 test.describe('własne pole', () => {
   test('tryb rysowania: panel, podział wymaga jednej działki, analiza zablokowana do zamknięcia obszaru', async ({
@@ -66,6 +67,72 @@ test.describe('własne pole', () => {
       await expect(hint).toHaveText(/Stuknij na mapie początek linii/);
     },
   );
+
+  test('obrys pola: stuknięcia dodają punkty, działka pod nimi się nie podświetla ani nie wybiera', async ({
+    page,
+  }) => {
+    await mockAnalysisApi(page);
+    await mockMapServices(page);
+    // granice z jedna dzialka pod srodkiem mapy - klikniecie poza trybem rysowania by ja zaznaczylo
+    await page.route('**/api/parcels/boundaries**', (route) =>
+      route.fulfill({ json: { items: [OUTLINE], truncated: false } }),
+    );
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
+    await waitForMap(page);
+
+    const map = page.getByTestId('parcel-map');
+    const box = await map.boundingBox();
+
+    if (!box) throw new Error('brak mapy');
+
+    // dzialka stoi na srodku czesci mapy obok panelu (lewe 25 rem); czekamy na koniec dojazdu
+    const x = box.x + 400 + (box.width - 400) / 2;
+    const y = box.y + box.height / 2;
+    // narozniki w srodku trojkatnej dzialki - kazde stukniecie trafia w nia
+    const corners = [
+      [x + 5, y - 40],
+      [x + 45, y - 40],
+      [x + 15, y + 10],
+    ] as const;
+
+    await expect(map).toHaveAttribute('data-map-zoom', /\d/);
+    await page.waitForTimeout(1500);
+    // poza trybem rysowania dzialka pod kursorem sie podswietla (atrybut diagnostyczny mapy)
+    // (granice dociagaja sie po dojezdzie, wiec ruszamy kursorem, az warstwa trafi pod niego)
+    await expect
+      .poll(async () => {
+        await page.mouse.move(corners[0][0] - 10, corners[0][1], { steps: 2 });
+        await page.mouse.move(corners[0][0], corners[0][1], { steps: 2 });
+
+        return map.getAttribute('data-map-hover');
+      })
+      .toBe(PARCEL_ID);
+
+    await page.getByRole('button', { name: 'Obrysuj pole na mapie' }).click();
+    await expect(map).toHaveAttribute('data-map-hover', '');
+
+    const parcelRequests: string[] = [];
+
+    page.on('request', (request) => {
+      if (/\/api\/parcels\/(at|by-id)/.test(request.url())) parcelRequests.push(request.url());
+    });
+
+    for (const [cornerX, cornerY] of corners) {
+      await page.mouse.click(cornerX, cornerY);
+      await expect(map).toHaveAttribute('data-map-hover', '');
+    }
+
+    await expect(page.getByTestId('field-area')).toContainText('ha');
+    expect(parcelRequests).toEqual([]);
+
+    // Cofnij zdejmuje ostatni punkt, Anuluj wraca do listy z wybrana dzialka
+    await page.getByRole('button', { name: 'Cofnij' }).click();
+    await expect(page.getByTestId('field-area')).not.toContainText('ha');
+    await page.getByTestId('field-draw').getByRole('button', { name: 'Anuluj' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
+    await expect(page.getByText('Działka 6509').first()).toBeVisible();
+    expect(parcelRequests).toEqual([]);
+  });
 
   test('obszar z adresu: podsumowanie, formularz i zapytanie z geometrią zamiast całej działki', async ({
     page,
