@@ -883,6 +883,7 @@
     "historyTitle": "10 lat na tym polu i dlaczego",
     "todoTitle": "Co robić",
     "asOf": "Stan na {date}",
+    "weatherTo": "Pogoda zmierzona do {date}, dalsze dni liczymy bez deszczu.",
     "scale": {
       "label": "Na skali od mokro do bardzo sucho: {step}.",
       "wet": "Mokro",
@@ -895,7 +896,7 @@
       "excess": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle ok. {median} l/m².",
       "resting": "W glebie jest {percent}% wody, którą mogą wziąć rośliny.",
       "ok": "Zbiornik wody w glebie jest pełny w {percent}%.",
-      "missing": "Brakuje ok. {mm} l/m² wody – zbiornik w glebie jest pełny tylko w {percent}%."
+      "missing": "Do pełnego zapasu brakuje ok. {mm} l/m² wody – zbiornik w glebie jest pełny tylko w {percent}%."
     },
     "lines": {
       "now": "Teraz",
@@ -911,6 +912,7 @@
     "causes": {
       "title": "Dlaczego brakuje wody",
       "titleExcess": "Skąd ten wynik",
+      "titleRisk": "Co na tym polu sprzyja suszy",
       "main": "główna",
       "share": "ok. {percent}%"
     },

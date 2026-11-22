@@ -21,6 +21,13 @@ const DOT = [
  * "Dlaczego" na gorze raportu: 2-4 przyczyny, kazda tytulem i jednym zdaniem, pierwsza oznaczona jako glowna; przy
  * udziale - "ok. N%". Przy nadmiarze wody bez przyczyn sekcja znika (fakty sa w szczegolach).
  */
+/** Bez niedoboru (w normie, poza sezonem) przyczyny to czynniki ryzyka pola, a nie "dlaczego brakuje wody". */
+function causesTitleKey(level: string): 'title' | 'titleExcess' | 'titleRisk' {
+  if (level === 'excess') return 'titleExcess';
+
+  return level === 'drought' || level === 'risk' ? 'title' : 'titleRisk';
+}
+
 export function SimpleCauses({ report }: { report: WaterReport }) {
   const t = useTranslations('report.simple.causes');
   const tItems = useTranslations('report.causes.items');
@@ -35,7 +42,7 @@ export function SimpleCauses({ report }: { report: WaterReport }) {
       data-testid="simple-causes"
     >
       <h3 id="dlaczego-title" className="text-xl font-semibold">
-        {t(report.assessment.level === 'excess' ? 'titleExcess' : 'title')}
+        {t(causesTitleKey(report.assessment.level))}
       </h3>
       <ol className="flex flex-col gap-4">
         {causes.map((cause, index) => {

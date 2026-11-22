@@ -188,6 +188,9 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
     },
   ];
 
+  const meteoTo = report.sources.find((source) => source.id === 'meteo')?.dataTo;
+  const weatherTo = meteoTo && meteoTo < report.meta.analysisDate ? meteoTo : null;
+
   return (
     <section
       aria-labelledby="ocena-skrot-title"
@@ -251,6 +254,14 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
             date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
           })}
         </p>
+        {/* ostatnie dni czekaja na publikacje NASA POWER - mowimy wprost, od kiedy bilans to szacunek bez deszczu */}
+        {weatherTo && (
+          <p className="text-sm text-muted-foreground" data-testid="weather-to">
+            {t('weatherTo', {
+              date: format.dateTime(isoDay(weatherTo), { day: 'numeric', month: 'long', timeZone: 'UTC' }),
+            })}
+          </p>
+        )}
       </div>
       <dl
         className="flex flex-col gap-3 border-t border-current/15 pt-4 max-lg:hidden lg:border-t-0 lg:border-l lg:pt-1 lg:pl-8 print:flex print:border-t-0 print:border-l print:pt-0 print:pl-4"

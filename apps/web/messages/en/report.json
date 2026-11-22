@@ -883,6 +883,7 @@
     "historyTitle": "10 years on this field and why",
     "todoTitle": "What to do",
     "asOf": "As of {date}",
+    "weatherTo": "Weather measured up to {date}, later days calculated without rain.",
     "scale": {
       "label": "On the scale from wet to very dry: {step}.",
       "wet": "Wet",
@@ -911,6 +912,7 @@
     "causes": {
       "title": "Why water is short",
       "titleExcess": "Where this result comes from",
+      "titleRisk": "What makes this field prone to drought",
       "main": "main",
       "share": "about {percent}%"
     },
