@@ -7,6 +7,7 @@ import type { SourceRef } from '@app/contracts';
 
 import type { DailyWeather, MeteoSeries, MeteoSource, Sourced } from '../../domain/analysis-ports';
 import { addDays, daysBetween } from '../../domain/iso-date';
+import { hasMeaningfulGaps, isCompleteDay, meteoGaps } from '../../domain/meteo-gaps';
 import { OUTBOUND_USER_AGENT } from '../../lib/user-agent';
 import { failureNote, httpFailureNote } from '../../lib/source-note';
 import { sourceCacheTtl } from '../../domain/source-cache-policy';
@@ -80,11 +81,6 @@ export function nasaPowerCacheTtl(today: () => string) {
   };
 }
 
-/** Dni, ktore maja opad i obie temperatury - bez nich nie ma bilansu. */
-function isComplete(day: DailyWeather): boolean {
-  return day.precipMm !== null && day.tMinC !== null && day.tMaxC !== null;
-}
-
 /**
  * Zamienia odpowiedz POWER na ciagla serie od `from` do `to`. Dni bez danych zostaja w serii z wartosciami null,
  * zeby obliczenia widzialy luke; status mowi, czy luki sa (`partial`) albo czy danych nie ma wcale (`missing`).
@@ -129,7 +125,7 @@ export function parsePower(
       };
     },
   );
-  const complete = days.filter(isComplete);
+  const complete = days.filter(isCompleteDay);
   const first = complete.at(0)?.date;
   const last = complete.at(-1)?.date;
 
@@ -137,12 +133,14 @@ export function parsePower(
     return { data: null, status: 'missing', note: `brak danych dobowych pogody od ${from} do ${to}` };
   }
 
-  const gaps = days.length - complete.length;
+  // ostatnie dni, ktorych NASA POWER jeszcze nie wydala, to opoznienie publikacji - zrodlo jest wtedy "ok"
+  const gaps = meteoGaps(days);
   const noSolar = complete.filter((day) => day.solarMjM2 === null).length;
   const notes = [
-    gaps > 0
-      ? `${gaps} z ${days.length} dni bez opadu albo temperatury (NASA POWER uzupełnia ostatnie dni z kilkudniowym opóźnieniem)`
+    gaps.lagDays > 0
+      ? `ostatnie ${gaps.lagDays} dni NASA POWER jeszcze nie opublikowała (dane pojawiają się z kilkudniowym opóźnieniem) – w bilansie liczymy je bez deszczu`
       : null,
+    gaps.gapDays > 0 ? `${gaps.gapDays} z ${days.length} dni bez opadu albo temperatury` : null,
     noSolar > 0
       ? `${noSolar} dni bez promieniowania słonecznego (parowanie policzone prostszym wzorem Hargreavesa)`
       : null,
@@ -156,7 +154,7 @@ export function parsePower(
       gridKm: GRID_KM,
       ...(typeof elevation === 'number' && Number.isFinite(elevation) ? { elevationM: elevation } : {}),
     },
-    status: gaps > 0 ? 'partial' : 'ok',
+    status: hasMeaningfulGaps(gaps) ? 'partial' : 'ok',
     ...(notes.length > 0 ? { note: notes.join('; ') } : {}),
     dataFrom: first,
     dataTo: last,

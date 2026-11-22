@@ -24,7 +24,7 @@ const FARMER_LIMITS: readonly LimitationId[] = [
 const MAX_ITEMS = 3;
 
 /**
- * "Czego ta ocena nie wie": do trzech ograniczen z raportu jezykiem rolnika i stale zdanie, ze to porada, nie
+ * "Na co uważać przy tej ocenie": do trzech ograniczen z raportu jezykiem rolnika i stale zdanie, ze to porada, nie
  * ekspertyza, i link do "Jak liczymy". Pelna lista - w sekcji zrodel (szczegoly).
  */
 export function KnownLimits({ report }: { report: WaterReport }) {

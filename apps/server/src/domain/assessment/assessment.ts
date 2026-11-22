@@ -18,6 +18,7 @@ import { backgroundYears } from '../history';
 import { hasFarmland } from '../land-use';
 import { addDays, isoDate, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
+import { hasMeaningfulGaps, meteoGaps } from '../meteo-gaps';
 import { seasonStress, type RootZoneDay } from '../root-zone-balance';
 import { precipitationContext, vegetationSignal } from '../sample-stages';
 import {
@@ -39,6 +40,11 @@ const WATCH_SHARE_OF_RAW = 0.8;
 /** niedobor ewapotranspiracji uprawy w 60 dniach, od ktorego plon spada o ok. 20% (Ky ~ 1) - jak kryterium IUNG */
 const RISK_ET_DEFICIT_SHARE = 0.2;
 const COARSE_GRID_KM = 20;
+/**
+ * Pokrycie okresu bilansu, ponizej ktorego luka jest istotna: kilka ostatnich dni czeka na publikacje i zawsze
+ * obniza pokrycie okresu konczacego sie na dniu analizy - liczy sie dopiero brak ponad 10% okresu.
+ */
+const MIN_TRUSTED_COVERAGE = 0.9;
 
 const round = (value: number, digits = 1): number => Number(value.toFixed(digits));
 
@@ -280,7 +286,12 @@ export function assess(input: StageInput): Assessment {
   // pogoda z atrapy to nie pomiar - taka ocena nie moze miec zadnej pewnosci
   if (sample.has('meteo')) uncertainties.push('no_balance');
 
-  if (balance?.coverage !== undefined && balance.coverage < 1) uncertainties.push('meteo_gaps');
+  // luki w pogodzie oslabiaja ocene, gdy sa prawdziwe (ponad 1% serii) albo okres bilansu jest wyraznie niepelny;
+  // opoznienie publikacji ostatnich dni (NASA POWER) jest przewidywalne i nie obniza pewnosci
+  const balanceGaps = balance?.coverage !== undefined && balance.coverage < MIN_TRUSTED_COVERAGE;
+
+  if (balanceGaps || (input.meteo && hasMeaningfulGaps(meteoGaps(input.meteo.days))))
+    uncertainties.push('meteo_gaps');
 
   if (conflicting(signals)) uncertainties.push('conflicting_signals');
 

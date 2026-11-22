@@ -34,7 +34,7 @@ test('raport linkuje do metodyki w sekcji źródeł', async ({ page }) => {
   await page.getByTestId('method-link').click();
   await expect(page.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeVisible();
 
-  // szczegoly zwiniete: link w "Czego ta ocena nie wie"
+  // szczegoly zwiniete: link w "Na co uważać przy tej ocenie"
   await page.goto(LOW_CONFIDENCE_REPORT_URL);
   await page.getByTestId('known-limits').getByRole('link', { name: 'Jak liczymy' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeVisible();

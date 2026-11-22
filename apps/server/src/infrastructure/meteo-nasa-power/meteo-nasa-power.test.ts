@@ -20,7 +20,7 @@ const respond =
     Promise.resolve(new Response(JSON.stringify(body), { status }));
 
 describe('parsePower', () => {
-  it('zamienia -999 na brak, zostawia dni z luka w ciaglej serii i mowi, ze dane sa czesciowe', () => {
+  it('zamienia -999 na brak, zostawia dni bez danych w serii; ostatnie dni to opoznienie publikacji, nie luka', () => {
     const parsed = parsePower(BODY, '2026-11-10', '2026-11-21');
 
     expect(parsed.data?.days).toHaveLength(12);
@@ -38,8 +38,9 @@ describe('parsePower', () => {
     expect(parsed.data?.days[6]?.solarMjM2).toBeNull();
     expect(parsed.data?.days[11]).toMatchObject({ date: '2026-11-21', precipMm: null, tMaxC: null });
     expect(parsed.data?.elevationM).toBeCloseTo(125.44, 2);
-    expect(parsed).toMatchObject({ status: 'partial', dataFrom: '2026-11-10', dataTo: '2026-11-18' });
-    expect(parsed.note).toContain('3 z 12 dni bez opadu');
+    // 3 ostatnie dni czekaja na publikacje NASA POWER - zrodlo jest "ok", a notka mowi o opoznieniu
+    expect(parsed).toMatchObject({ status: 'ok', dataFrom: '2026-11-10', dataTo: '2026-11-18' });
+    expect(parsed.note).toContain('ostatnie 3 dni NASA POWER jeszcze nie opublikowała');
     expect(parsed.note).toContain('Hargreaves');
   });
 
@@ -69,7 +70,7 @@ describe('createNasaPowerMeteoSource', () => {
     expect(urls[0]).toContain('start=20261110');
     expect(result.source).toMatchObject({
       id: 'meteo',
-      status: 'partial',
+      status: 'ok',
       sample: false,
       licence: expect.stringContaining('CC BY 4.0'),
       dataFrom: '2026-11-10',

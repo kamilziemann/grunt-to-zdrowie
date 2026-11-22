@@ -373,7 +373,7 @@ describe('ReportView', () => {
         t('sources.limitationItems.vegetation_missing'),
       ),
     ).toBeInTheDocument();
-    // to samo ograniczenie rolnik widzi w "Czego ta ocena nie wie"
+    // to samo ograniczenie rolnik widzi w "Na co uważać przy tej ocenie"
     expect(screen.getByTestId('known-limits')).toHaveTextContent(
       t('sources.limitationItems.vegetation_missing'),
     );
