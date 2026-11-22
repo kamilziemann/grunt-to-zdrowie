@@ -20,7 +20,7 @@ const HOME_ANCHORS = [
 ] as const;
 
 const LINK_CLASS =
-  'flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors hover:bg-muted';
+  'flex min-h-11 items-center rounded-full px-3 text-base font-medium whitespace-nowrap transition-colors hover:bg-muted lg:px-4';
 
 /**
  * Naglowek aplikacji: znak i nazwa (powrot na strone glowna), "Sprawdz inna dzialke" poza strona glowna, pozycje
@@ -78,13 +78,13 @@ export function AppNav({ appName }: { appName: string }) {
     : { href: routes.home(), label: t('otherParcel'), variant: 'outline' as const };
 
   return (
-    <nav aria-label={t('main')} className="flex flex-1 items-center gap-3 md:gap-6">
-      <Link href={routes.home()} className="flex items-center gap-2.5 rounded-full pr-2 text-foreground">
+    <nav aria-label={t('main')} className="flex min-w-0 flex-1 items-center gap-3 md:gap-4 lg:gap-6">
+      <Link
+        href={routes.home()}
+        className="flex shrink-0 items-center gap-2.5 rounded-full pr-2 text-foreground"
+      >
         <BrandMark />
-        <span className="flex flex-col leading-tight">
-          <span className="text-lg font-medium tracking-tight md:text-xl">{appName}</span>
-          <span className="text-sm text-muted-foreground max-lg:hidden">{t('tagline')}</span>
-        </span>
+        <span className="text-lg font-medium tracking-tight whitespace-nowrap md:text-xl">{appName}</span>
       </Link>
       <ul className="flex items-center gap-1 max-md:hidden">{links}</ul>
       <div className="ml-auto flex items-center gap-1 max-md:hidden">
@@ -92,7 +92,7 @@ export function AppNav({ appName }: { appName: string }) {
           href={action.href}
           className={cn(
             buttonVariants({ variant: action.variant, size: onHome ? 'default' : 'sm' }),
-            'mr-2 text-base',
+            'mr-2 text-base whitespace-nowrap',
           )}
         >
           {action.label}
