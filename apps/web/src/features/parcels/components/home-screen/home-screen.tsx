@@ -29,11 +29,12 @@ export function HomeScreen() {
     <div className="flex flex-col">
       <section
         aria-labelledby="home-title"
-        className="flex flex-col items-center px-gutter pt-7 text-center md:pt-14"
+        // niski ekran (telefon poziomo): mniejszy tytul, zeby pole numeru bylo blizej gory
+        className="flex flex-col items-center px-gutter pt-7 text-center md:pt-14 [@media(height<30rem)]:pt-5"
       >
         <h1
           id="home-title"
-          className="max-w-4xl text-4xl font-medium tracking-tighter text-balance md:text-6xl"
+          className="max-w-4xl text-4xl font-medium tracking-tighter text-balance md:text-6xl [@media(height<30rem)]:text-4xl"
         >
           {t('title')}
         </h1>
