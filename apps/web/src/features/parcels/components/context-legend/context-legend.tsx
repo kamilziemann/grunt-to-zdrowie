@@ -70,6 +70,8 @@ export interface ContextLegendProps {
   enabled: ContextVisibility;
   statuses: Readonly<Record<ContextLayer, LayerStatus>>;
   className?: string;
+  /** wspolna nazwa grupy legend (atrybut `name`): naraz rozwinieta jest tylko jedna legenda z grupy */
+  group?: string;
 }
 
 /** Najwazniejszy stan wlaczonych warstw: niedostepna > ladowanie > za male przyblizenie > gotowa. */
@@ -90,7 +92,7 @@ function overallNote(layers: readonly ContextLayer[], statuses: ContextLegendPro
  * zrodlo BDOT10k z data danych, stan (wczytywanie, baza nie odpowiada, przybliz) widoczny takze po zwinieciu.
  * Domyslnie zwinieta - zajmuje jeden wiersz.
  */
-export function ContextLegend({ enabled, statuses, className }: ContextLegendProps) {
+export function ContextLegend({ enabled, statuses, className, group }: ContextLegendProps) {
   const t = useTranslations('parcels.map.contextLegend');
   const format = useFormatter();
   const layers = CONTEXT_LAYERS.filter((layer) => enabled[layer]);
@@ -105,6 +107,7 @@ export function ContextLegend({ enabled, statuses, className }: ContextLegendPro
 
   return (
     <details
+      name={group}
       className={cn(
         'group w-64 max-w-full rounded-lg border bg-card text-card-foreground shadow-md',
         className,

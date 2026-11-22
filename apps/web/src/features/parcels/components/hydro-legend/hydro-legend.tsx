@@ -26,6 +26,8 @@ const SWATCHES = [
 export interface HydroLegendProps {
   status: HydroStatus;
   className?: string;
+  /** wspolna nazwa grupy legend (atrybut `name`): naraz rozwinieta jest tylko jedna legenda z grupy */
+  group?: string;
   /** otwarta od poczatku; domyslnie zwinieta (jeden wiersz), zeby nie zaslaniala mapy */
   defaultOpen?: boolean;
 }
@@ -34,7 +36,7 @@ export interface HydroLegendProps {
  * Legenda warstwy "Rowy i cieki": probki stylu, zrodlo "BDOT10k, GUGiK" z data danych i stan warstwy (przybliz
  * mape, chwilowo niedostepna - widoczny takze po zwinieciu). Domyslnie zwinieta - zajmuje jeden wiersz.
  */
-export function HydroLegend({ status, className, defaultOpen = false }: HydroLegendProps) {
+export function HydroLegend({ status, className, group, defaultOpen = false }: HydroLegendProps) {
   const t = useTranslations('parcels.map.hydroLegend');
   const format = useFormatter();
   const date = status.importedAt
@@ -45,6 +47,7 @@ export function HydroLegend({ status, className, defaultOpen = false }: HydroLeg
   return (
     <details
       open={defaultOpen}
+      name={group}
       className={cn(
         'group w-64 max-w-full rounded-lg border bg-card text-card-foreground shadow-md',
         className,

@@ -32,6 +32,8 @@ export interface ImageryLegendProps {
   /** otwarta od poczatku; domyslnie zwinieta (jeden wiersz), zeby nie zaslaniala mapy */
   defaultOpen?: boolean;
   className?: string;
+  /** wspolna nazwa grupy legend (atrybut `name`): naraz rozwinieta jest tylko jedna legenda z grupy */
+  group?: string;
 }
 
 /**
@@ -47,6 +49,7 @@ export function ImageryLegend({
   onRetry,
   defaultOpen = false,
   className,
+  group,
 }: ImageryLegendProps) {
   const t = useTranslations('parcels.imagery');
   const tCommon = useTranslations('common');
@@ -70,7 +73,7 @@ export function ImageryLegend({
       data-testid="imagery-legend"
       data-imagery-state={state}
     >
-      <details open={defaultOpen} className="group">
+      <details open={defaultOpen} name={group} className="group">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 py-1.5 text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
           <span className="min-w-0 truncate">{t(`legend.${layer}`)}</span>
           <span className="flex shrink-0 items-center gap-2">

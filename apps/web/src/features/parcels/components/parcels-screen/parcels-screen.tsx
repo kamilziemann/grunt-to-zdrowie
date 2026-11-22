@@ -55,15 +55,13 @@ import {
   SHEET_PEEK_REM,
   type SheetSnap,
 } from '../bottom-sheet';
-import { ContextLegend } from '../context-legend';
 import { FieldDrawEntry, FieldDrawHint, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { MapIntro } from '../map-intro';
-import { HydroLegend } from '../hydro-legend';
 import { BasemapSwitch } from '../basemap-switch';
-import { ImageryLegend } from '../imagery-legend';
 import { ImageryPanel } from '../imagery-panel';
 import { ImagerySwitch } from '../imagery-switch';
 import { LayersPanel } from '../layers-panel';
+import { MapLegends } from '../map-legends';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
 import {
@@ -531,7 +529,7 @@ export function ParcelsScreen({
         </div>
       </div>
 
-      {/* legendy stoja osobno od przyciskow, w przewijanej kolumnie: rozwiniete wszystkie naraz dalej widac w calosci */}
+      {/* legendy stoja osobno od przyciskow, w przewijanej kolumnie; rozwinieta jest najwyzej jedna (harmonijka) */}
       {legendsShown && !drawing && (
         <aside
           aria-label={t('map.legends')}
@@ -539,17 +537,16 @@ export function ParcelsScreen({
           data-testid="map-legends"
         >
           {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
-          {hydroLegendShown && <HydroLegend status={hydroStatus} />}
-          {contextShown && <ContextLegend enabled={context} statuses={contextStatuses} />}
-          {imageryLegendShown && (
-            <ImageryLegend
-              layer={imageryChoice}
-              state={imagery.state}
-              data={imagery.data}
-              requestedDate={imagery.requestedDate}
-              onRetry={imagery.retry}
-            />
-          )}
+          <MapLegends
+            hydroStatus={hydroLegendShown ? hydroStatus : null}
+            contextEnabled={contextShown ? context : null}
+            contextStatuses={contextStatuses}
+            imageryLayer={imageryLegendShown ? imageryChoice : null}
+            imageryState={imagery.state}
+            imageryData={imagery.data}
+            imageryRequestedDate={imagery.requestedDate}
+            onImageryRetry={imagery.retry}
+          />
         </aside>
       )}
 

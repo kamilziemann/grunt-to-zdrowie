@@ -68,6 +68,17 @@ test.describe('warstwy otoczenia pola', () => {
     );
     await expect(legend.getByRole('region', { name: 'Budowle wodne i wały' })).toHaveCount(0);
     await expect(legend).toContainText('Źródło: BDOT10k, GUGiK · dane z 21 lis 2026');
+
+    // harmonijka: rozwiniecie legendy rowow zwija legende otoczenia - naraz otwarta jest jedna
+    const hydroLegend = page.getByTestId('hydro-legend');
+
+    await expect(legend).toHaveAttribute('open', '');
+    await hydroLegend.getByText('Legenda: rowy i cieki').click();
+    await expect(hydroLegend).toHaveAttribute('open', '');
+    await expect(legend).not.toHaveAttribute('open');
+    await legend.getByText('Legenda: otoczenie pola').click();
+    await expect(legend).toHaveAttribute('open', '');
+    await expect(hydroLegend).not.toHaveAttribute('open');
   });
 
   test('baza nie odpowiada (503): komunikat w legendzie, mapa i rowy działają dalej', async ({ page }) => {
