@@ -21,6 +21,7 @@ import {
   shortHash,
 } from '../../domain/field-area';
 import { drainedLowland } from '../../domain/drained-lowland';
+import { withHotDays } from '../../domain/hot-days';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import { summarizeLandUse } from '../../domain/land-use';
 import type {
@@ -37,7 +38,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.6.0';
+export const ANALYSIS_ENGINE_VERSION = '0.7.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -360,9 +361,16 @@ export function createAnalysisService({
         surroundings: surroundings?.data ?? null,
         sampleSources: fetched.filter((source) => source.sample).map((source) => source.id),
       };
-      const assessment = stages.assess(input);
+      const assessed = stages.assess(input);
       const history = stages.history(input);
-      const causes = stages.causes(input, assessment, history);
+      // dni upalne tylko objasniaja (upal jest juz w ET0): dowody przy przyczynie albo w ocenie, poziom bez zmian;
+      // pogoda z atrapy nie jest dowodem
+      const { assessment, causes } = withHotDays(
+        input.sampleSources?.includes('meteo') ? undefined : input.meteo?.days,
+        date,
+        assessed,
+        stages.causes(input, assessed, history),
+      );
       const zones = stages.zones(input);
       const reportSources = [parcelSource, ...fetched, ...(surroundings ? [surroundings.source] : [])];
       const missing = fetched.filter((source) => source.status === 'missing');

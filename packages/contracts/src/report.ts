@@ -153,6 +153,20 @@ export const SOIL_BASES = ['field', 'nearby', 'assumed_medium'] as const;
  */
 export const VERDICT_BASES = ['soil_category', 'scenarios_agree', 'scenarios_disagree'] as const;
 
+export const evidenceSchema = z.object({
+  /** identyfikator miary (tlumaczony w apps/web), np. "precip_60d", "slope_mean" */
+  metric: z.string(),
+  value: z.number(),
+  unit: z.string(),
+  /** wartosc odniesienia: prog, mediana, norma */
+  reference: z.number().optional(),
+  source: sourceIdSchema,
+  /** gotowe zdanie po polsku z zastrzezeniem albo kontekstem miary (np. "temperatura z siatki ok. 50 km") */
+  note: z.string().optional(),
+});
+
+export type Evidence = z.infer<typeof evidenceSchema>;
+
 export const assessmentSchema = z.object({
   level: assessmentLevelSchema,
   confidence: confidenceSchema,
@@ -166,6 +180,11 @@ export const assessmentSchema = z.object({
   verdictBasis: z.enum(VERDICT_BASES).optional(),
   /** zakres prawdopodobnych kategorii gleby (z uziarnienia i z wody w profilu), gdy gleba jest z modelu */
   soilCategoryRange: z.tuple([soilCategorySchema, soilCategorySchema]).optional(),
+  /**
+   * dowody objasniajace ocene, ktore nie zmieniaja jej poziomu - dzis dni upalne, gdy jest ich wyraznie wiecej niz
+   * zwykle, a przyczyny "duze parowanie" nie ma (przy niej dowody ida do przyczyny)
+   */
+  evidence: z.array(evidenceSchema).optional(),
 });
 
 export type Assessment = z.infer<typeof assessmentSchema>;
@@ -225,18 +244,6 @@ export const reportPartSchema = z.enum(REPORT_PARTS);
 export type ReportPart = z.infer<typeof reportPartSchema>;
 
 /** Liczba, na ktorej opiera sie wniosek: co zmierzono, ile, z jakiego zrodla i wzgledem czego. */
-export const evidenceSchema = z.object({
-  /** identyfikator miary (tlumaczony w apps/web), np. "precip_60d", "slope_mean" */
-  metric: z.string(),
-  value: z.number(),
-  unit: z.string(),
-  /** wartosc odniesienia: prog, mediana, norma */
-  reference: z.number().optional(),
-  source: sourceIdSchema,
-});
-
-export type Evidence = z.infer<typeof evidenceSchema>;
-
 export const CAUSE_IDS = [
   'precipitation_deficit',
   'high_evaporative_demand',
