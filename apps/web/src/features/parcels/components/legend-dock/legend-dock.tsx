@@ -96,8 +96,8 @@ export function LegendDock({
         aria-controls={panelId}
         aria-label={t('legendButtonLabel', { layer: layerName ?? 'none', status })}
         onClick={toggleOpen}
-        // telefon: lewy dolny rog widocznej mapy, tuz nad zwinietym arkuszem (`--sheet-peek` z ekranu)
-        className="absolute bottom-[calc(var(--sheet-peek,7.75rem)+0.75rem)] left-3 z-10 flex h-11 max-w-[calc(100%-5rem)] items-center gap-2 rounded-full border bg-card px-3.5 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary lg:hidden"
+        // telefon: lewy dolny rog widocznej mapy, tuz nad arkuszem (`--sheet-visible` z ekranu: zwiniety albo do polowy)
+        className="absolute bottom-[calc(var(--sheet-visible,var(--sheet-peek,7.75rem))+0.75rem)] left-3 z-10 flex h-11 max-w-[calc(100%-5rem)] items-center gap-2 rounded-full border bg-card px-3.5 text-sm font-semibold text-card-foreground shadow-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 aria-expanded:bg-secondary lg:hidden"
         data-testid="legend-button"
         data-legend-status={status}
       >

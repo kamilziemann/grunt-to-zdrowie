@@ -100,13 +100,9 @@ const WEAK_REGISTRY_CLASS = 5;
  * Gleba bardzo slaba: kategoria I (piasek), mniej niz 90 mm wody na metr albo najlepsza klasa gruntu ornego z
  * ewidencji to V-VI. Tu zwykly miedzyplon to za malo - potrzebny nawoz zielony przyorywany co roku.
  */
-export function veryWeakSoil({ soil, field }: StageInput): boolean {
-  const classes = soilClassesOf(field.landUse ?? []).flatMap((soilClass) => {
-    const value = soilClassNumber(soilClass);
-
-    return value === null ? [] : [value];
-  });
-  const weakByRegistry = classes.length > 0 && Math.min(...classes) >= WEAK_REGISTRY_CLASS;
+export function veryWeakSoil({ soil, field }: Pick<StageInput, 'soil' | 'field'>): boolean {
+  const best = bestRegistryClass({ field });
+  const weakByRegistry = best !== null && best >= WEAK_REGISTRY_CLASS;
 
   return (
     weakByRegistry ||
@@ -114,6 +110,20 @@ export function veryWeakSoil({ soil, field }: StageInput): boolean {
     (soil !== null && soil.availableWaterMmPerM < LIGHT_SOIL_MM_PER_M)
   );
 }
+
+/** najlepsza klasa gruntu ornego z ewidencji (1-6); null = ewidencja nie zna klas */
+function bestRegistryClass({ field }: Pick<StageInput, 'field'>): number | null {
+  const classes = soilClassesOf(field.landUse ?? []).flatMap((soilClass) => {
+    const value = soilClassNumber(soilClass);
+
+    return value === null ? [] : [value];
+  });
+
+  return classes.length > 0 ? Math.min(...classes) : null;
+}
+
+/** grunt wylacznie klasy VI (VI, VIz) - najslabszy; uprawa polowa w suche lata rzadko sie tam zwraca */
+const POOREST_CLASS = 6;
 
 /** przy takiej zawartosci materii organicznej (%) gleba jest juz prochniczna - "wiecej prochnicy" nic nie doda */
 const HUMUS_RICH_PCT = 3.5;
@@ -428,6 +438,35 @@ const RULES: readonly Rule[] = [
     answers: ['low_soil_retention', 'crop_sensitivity'],
     fits: isArable,
     when: veryWeakSoil,
+  },
+  {
+    // lekkie gleby sa czesto kwasne, a w kwasnej glebie korzenie sa plytsze i biora mniej wody; pH nie mamy w danych,
+    // wiec zalecenie to badanie odczynu (stacja chemiczno-rolnicza) i wapnowanie wg wyniku, nie dawka na slepo
+    measure: {
+      measure: 'soil_liming',
+      category: 'agrotech',
+      priority: 2,
+      effect: null,
+      effort: 'low',
+      legal: 'none',
+    },
+    answers: ['low_soil_retention'],
+    fits: (cropId) => !PERENNIAL_CROPS.has(cropId),
+    when: veryWeakSoil,
+  },
+  {
+    // grunt orny wylacznie klasy VI z nawracajacym niedoborem: rozwazenie trwalej laki albo zalesienia
+    measure: {
+      measure: 'permanent_cover',
+      category: 'agrotech',
+      priority: 3,
+      effect: null,
+      effort: 'high',
+      legal: 'none',
+    },
+    answers: ['crop_sensitivity'],
+    fits: isArable,
+    when: (input) => bestRegistryClass(input) === POOREST_CLASS,
   },
   {
     measure: {

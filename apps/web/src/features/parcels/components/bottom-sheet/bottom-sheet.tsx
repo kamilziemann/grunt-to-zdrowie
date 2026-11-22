@@ -23,13 +23,24 @@ export type SheetSnap = 'peek' | 'half' | 'full';
 
 /** Wysokosc zwinietego arkusza (uchwyt + pasek z jednym przyciskiem), zanim przegladarka ja zmierzy. */
 export const SHEET_PEEK_FALLBACK_REM = 7.75;
-/** Jaka czesc arkusza widac w polozeniu posrednim. */
+/** Jaka czesc ekranu mapy zajmuje arkusz w polozeniu posrednim. */
 export const SHEET_HALF_FRACTION = 0.55;
+/** Telefon poziomo (niski ekran): w polozeniu posrednim wiecej arkusza - inaczej widac tylko pasek krokow. */
+export const SHEET_HALF_FRACTION_SHORT = 0.75;
+/** Niski ekran - ten sam prog co klasy `[@media(height<30rem)]`. */
+const SHORT_SCREEN_QUERY = '(max-height: 30rem)';
+
+/** Udzial ekranu mapy pod arkuszem w polozeniu posrednim (po stronie klienta zalezy od wysokosci ekranu). */
+export function sheetHalfFraction(): number {
+  return typeof window !== 'undefined' && window.matchMedia(SHORT_SCREEN_QUERY).matches
+    ? SHEET_HALF_FRACTION_SHORT
+    : SHEET_HALF_FRACTION;
+}
 
 const OFFSETS: Record<SheetSnap, string> = {
   peek: 'calc(var(--sheet-h) - var(--sheet-peek))',
   // widoczna czesc w polozeniu posrednim to ulamek wysokosci rodzica (tak liczy ja mapa), nie arkusza
-  half: `calc(var(--sheet-h) - ${Math.round(SHEET_HALF_FRACTION * 100)}cqh)`,
+  half: 'calc(var(--sheet-h) - var(--sheet-half, 55cqh))',
   full: '0px',
 };
 
@@ -50,7 +61,7 @@ function snapOffsets(sheet: HTMLElement, peek: number): Record<SheetSnap, number
   const height = sheet.offsetHeight;
   const container = sheet.parentElement?.clientHeight ?? height;
 
-  return { peek: height - peek, half: Math.max(0, height - container * SHEET_HALF_FRACTION), full: 0 };
+  return { peek: height - peek, half: Math.max(0, height - container * sheetHalfFraction()), full: 0 };
 }
 
 function fallbackPeek(): number {

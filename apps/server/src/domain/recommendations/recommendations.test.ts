@@ -153,6 +153,7 @@ describe('recommend', () => {
       'green_manure',
       'organic_matter',
       'reduced_tillage',
+      'soil_liming',
       'crop_choice',
     ]);
     expect(all.every((item) => item.causes.every((id) => ALL.some((found) => found.id === id)))).toBe(true);
@@ -444,6 +445,21 @@ describe('recommend: uprawa i rodzaj gruntu', () => {
     expect(measuresOf({})).not.toContain('cover_crop');
     // laka nie dostaje przyorywania
     expect(measuresOf({ cropId: 'grassland' })).not.toContain('green_manure');
+  });
+
+  it('gleba bardzo slaba: badanie odczynu i wapnowanie (takze na lace); klasa VI z nawracajacym niedoborem: laka albo las', () => {
+    const measuresOf = (extra: Partial<StageInput>) =>
+      recommend(input(extra), assessment('drought'), ALL).agrotech.map((item) => item.measure);
+    const medium = { ...SOIL, category: 3 as const, availableWaterMmPerM: 140 };
+
+    expect(measuresOf({})).toContain('soil_liming');
+    expect(measuresOf({ cropId: 'grassland' })).toContain('soil_liming');
+    expect(measuresOf({ soil: medium })).not.toContain('soil_liming');
+    expect(measuresOf({ field: { ...FIELD, landUse: ['RVI', 'RVIz'] } })).toContain('permanent_cover');
+    expect(measuresOf({ field: { ...FIELD, landUse: ['RVI', 'RV'] } })).not.toContain('permanent_cover');
+    expect(measuresOf({ field: { ...FIELD, landUse: ['RVI'] }, cropId: 'grassland' })).not.toContain(
+      'permanent_cover',
+    );
   });
 
   it('gleba juz prochniczna (>= 3,5% materii organicznej) nie dostaje "wiecej prochnicy"', () => {

@@ -457,6 +457,14 @@
         "name": "Nawóz zielony na przyoranie",
         "description": "Po zbiorze wysiej łubin, seradelę albo gorczycę i przyoraj je przed następnym siewem. Na lekkiej, słabej glebie to najszybszy sposób, żeby przybyło próchnicy i gleba w kolejnym roku trzymała więcej wody. Łubin i seradela dodają też azotu."
       },
+      "soil_liming": {
+        "name": "Badanie odczynu i wapnowanie",
+        "description": "Lekkie gleby są często kwaśne, a w kwaśnej glebie korzenie są płytsze i biorą mniej wody. Zbadaj pH w stacji chemiczno-rolniczej (OSChR) i wapnuj według wyniku – najlepiej po zbiorze, jesienią."
+      },
+      "permanent_cover": {
+        "name": "Trwała łąka albo zalesienie",
+        "description": "Na glebie klasy VI uprawa polowa w suche lata rzadko się zwraca. Rozważ trwałą łąkę albo zalesienie – zapytaj w ODR o wsparcie i sprawdź w gminie plan miejscowy."
+      },
       "mulch_residue": {
         "name": "Mulcz ze słomy",
         "description": "Słoma zostawiona na polu ogranicza parowanie z gleby."

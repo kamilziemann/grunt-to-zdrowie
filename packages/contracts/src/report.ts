@@ -360,6 +360,8 @@ export const MEASURE_IDS = [
   'contour_farming',
   'cover_crop',
   'green_manure',
+  'soil_liming',
+  'permanent_cover',
   'mulch_residue',
   'reduced_tillage',
   'organic_matter',

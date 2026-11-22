@@ -457,6 +457,14 @@
         "name": "Green manure to plough in",
         "description": "After harvest sow lupin, serradella or white mustard and plough it in before the next sowing. On light, poor soil this is the fastest way to build humus so the soil holds more water next year. Lupin and serradella also add nitrogen."
       },
+      "soil_liming": {
+        "name": "Soil pH test and liming",
+        "description": "Light soils are often acidic, and in acidic soil roots stay shallow and take up less water. Have the pH tested at a regional agro-chemical station and lime according to the result – best after harvest, in autumn."
+      },
+      "permanent_cover": {
+        "name": "Permanent grassland or afforestation",
+        "description": "On class VI soil field crops rarely pay off in dry years. Consider permanent grassland or afforestation – ask the agricultural advisory centre about support and check the local zoning plan."
+      },
       "mulch_residue": {
         "name": "Straw mulch",
         "description": "Straw left on the field reduces evaporation from the soil."

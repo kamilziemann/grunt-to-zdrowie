@@ -138,10 +138,13 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
       }
 
       if (error) {
-        if (dateAreaRef.current) {
-          revealField(dateAreaRef.current, dateAreaRef.current.querySelector('input[type="date"]'), {
-            block: 'center',
-          });
+        // po narysowaniu komunikatu - inaczej jego druga linijka zostawala pod przyklejonym przyciskiem
+        const dateArea = dateAreaRef.current;
+
+        if (dateArea) {
+          requestAnimationFrame(() =>
+            revealField(dateArea, dateArea.querySelector('input[type="date"]'), { block: 'center' }),
+          );
         }
 
         toast({ title: t('dateErrorToast'), variant: 'error' });

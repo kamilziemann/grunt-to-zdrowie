@@ -65,7 +65,7 @@ export const routes = {
 } as const;
 
 /** Klucze etykiet nawigacji: przestrzen `nav` w messages/*.json (AppNav tlumaczy je typowanym `t`). */
-export type NavLabelKey = 'method';
+export type NavLabelKey = 'map' | 'method';
 
 export interface NavItem {
   href: AppHref;
@@ -75,7 +75,11 @@ export interface NavItem {
 }
 
 /** Pozycje nawigacji glownej (strona glowna = logo). Nowa funkcja = nowa pozycja tutaj + klucz w `nav`. */
-export const NAV_ITEMS: readonly NavItem[] = [{ href: routes.method(), labelKey: 'method' }];
+export const NAV_ITEMS: readonly NavItem[] = [
+  // mapa dzialek z menu (przeglad telefonu: bez niej mape otwieral tylko przycisk na stronie glownej)
+  { href: routes.map(), labelKey: 'map' },
+  { href: routes.method(), labelKey: 'method' },
+];
 
 /** Sekcja jest aktywna na swojej stronie i na podstronach (`/jak-liczymy/x` = Jak liczymy). */
 export function isNavItemActive(item: NavItem, pathname: string): boolean {

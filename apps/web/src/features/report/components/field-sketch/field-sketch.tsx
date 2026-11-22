@@ -666,7 +666,8 @@ function badgeRect(at: SketchPoint, unit: number): Rect {
 }
 
 const BADGE_CLASS =
-  'absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-card text-xs font-bold tabular-nums text-card shadow-sm transition-colors duration-150 print:size-5 print:shadow-none';
+  // kolko 28 px, ale cel dotyku 44 px (niewidoczny pierscien `before`)
+  'absolute flex size-7 -translate-x-1/2 before:absolute before:-inset-2 before:rounded-full before:content-[""] -translate-y-1/2 items-center justify-center rounded-full border-2 border-card text-xs font-bold tabular-nums text-card shadow-sm transition-colors duration-150 print:size-5 print:shadow-none';
 
 /**
  * Numer miejsca w kolku nad rysunkiem (przycisk HTML, nie SVG): da sie go wybrac klawiatura, a czytnik ekranu slyszy

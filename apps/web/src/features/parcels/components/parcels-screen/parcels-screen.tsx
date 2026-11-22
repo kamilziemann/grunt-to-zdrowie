@@ -55,7 +55,7 @@ import {
   BottomSheet,
   BottomSheetBody,
   BottomSheetFooter,
-  SHEET_HALF_FRACTION,
+  sheetHalfFraction,
   SHEET_PEEK_FALLBACK_REM,
   type SheetSnap,
 } from '../bottom-sheet';
@@ -241,7 +241,7 @@ export function ParcelsScreen({
 
     const height = rootRef.current?.clientHeight ?? window.innerHeight;
     const peek = sheetPeek ?? SHEET_PEEK_FALLBACK_REM * rem;
-    const visible = snap === 'peek' ? peek : height * SHEET_HALF_FRACTION;
+    const visible = snap === 'peek' ? peek : height * sheetHalfFraction();
 
     // mapa konczy sie nad zwinietym arkuszem, wiec doliczamy tylko to, co arkusz zaslania ponad nim
     const bottom = Math.max(0, visible - peek) + MAP_MARGIN_PX;
@@ -422,7 +422,7 @@ export function ParcelsScreen({
   const rootStyle = useMemo((): CSSProperties | undefined => {
     if (sheetPeek === null) return undefined;
 
-    const visible = snap === 'peek' ? `${sheetPeek}px` : `${SHEET_HALF_FRACTION * 100}cqh`;
+    const visible = snap === 'peek' ? `${sheetPeek}px` : 'var(--sheet-half, 55cqh)';
 
     return { '--sheet-peek': `${sheetPeek}px`, '--sheet-visible': visible } as CSSProperties;
   }, [sheetPeek, snap]);
@@ -567,7 +567,11 @@ export function ParcelsScreen({
   const previewMissing = target !== null && previewQuery.isSuccess && previewQuery.data === null;
 
   return (
-    <div ref={rootRef} style={rootStyle} className="@container-[size] relative min-h-0 flex-1 overflow-clip">
+    <div
+      ref={rootRef}
+      style={rootStyle}
+      className="@container-[size] relative min-h-0 flex-1 overflow-clip [--sheet-half:55cqh] max-lg:[@media(height<30rem)]:[--sheet-half:75cqh]"
+    >
       {/* telefon i waski tablet: wyszukiwarka na gorze mapy (klawiatura jej nie zaslania); od `lg` stoi w panelu bocznym;
           w trybie "wlasne pole" ustepuje miejsca podpowiedzi (rysowane miejsce ma byc odsloniete) */}
       <div
