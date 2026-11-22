@@ -136,6 +136,11 @@ export function volumeM3(depthMm: number, areaHa: number): number {
   return Math.round(depthMm * areaHa * 10);
 }
 
+/** Powierzchnia, dla ktorej liczymy wode do podlewania: bez wody w granicach dzialki (jezioro, staw). */
+export function landAreaHa(report: Pick<WaterReport, 'field' | 'waterInField'>): number {
+  return report.waterInField?.landAreaHa ?? report.field.areaHa;
+}
+
 /** Udzial 0-1 jako liczba procent (zaokraglona). */
 export function percentOf(share: number): number {
   return Math.round(share * 100);

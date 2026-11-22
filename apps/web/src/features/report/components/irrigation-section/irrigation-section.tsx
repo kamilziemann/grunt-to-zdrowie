@@ -4,7 +4,7 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
 
-import { isPastAnalysis, volumeM3 } from '../../utils/report-data';
+import { isPastAnalysis, landAreaHa, volumeM3 } from '../../utils/report-data';
 
 const ADVICE_STYLES: Record<IrrigationAdvice['advisable'], string> = {
   no: 'border-border',
@@ -27,6 +27,7 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
   // grunt nierolny (wg ewidencji albo domyslu z innych danych): nawadnianie wstrzymane celowo, nie z braku danych
   const notFarmland =
     report.landUse?.mismatch === 'non_agricultural' ||
+    report.limitations.includes('likely_water') ||
     report.limitations.includes('likely_forest') ||
     report.limitations.includes('likely_not_farmland');
 
@@ -75,8 +76,8 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
             </p>
             <p className="text-base">
               {t('planVolume', {
-                dose: format.number(volumeM3(plan.doseMm, report.field.areaHa)),
-                total: format.number(volumeM3(plan.doseMm * plan.doses, report.field.areaHa)),
+                dose: format.number(volumeM3(plan.doseMm, landAreaHa(report))),
+                total: format.number(volumeM3(plan.doseMm * plan.doses, landAreaHa(report))),
               })}
             </p>
             <p className="text-sm text-muted-foreground">{t('planNote')}</p>
@@ -87,7 +88,7 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
             <p className="text-base" data-testid="irrigation-deficit">
               {t('deficit', {
                 mm: number(irrigation.netDepthMm),
-                volume: format.number(volumeM3(irrigation.netDepthMm, report.field.areaHa)),
+                volume: format.number(volumeM3(irrigation.netDepthMm, landAreaHa(report))),
               })}
               {/* termin startu: dla dnia analizy "zacznij", dla daty z przeszlosci "trzeba bylo zaczac" */}
               {irrigation.withinDays === null

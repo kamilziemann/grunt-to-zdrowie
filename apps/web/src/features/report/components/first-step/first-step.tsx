@@ -6,7 +6,7 @@ import { Link } from '@/lib/navigation';
 import type { AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-import { isPastAnalysis, volumeM3 } from '../../utils/report-data';
+import { isPastAnalysis, landAreaHa, volumeM3 } from '../../utils/report-data';
 import { orderedRecommendations, stepBadge, type StepBadge } from '../../utils/report-summary';
 
 /** Plakietka mozliwosci: "mozesz od razu" jasna, "najpierw sprawdz / uzgodnij" piaskowa z ramka. */
@@ -140,15 +140,15 @@ function IrrigationDetails({ report }: { report: WaterReport }) {
   const lines = [
     plan
       ? tIrrigation('planVolume', {
-          dose: format.number(volumeM3(plan.doseMm, report.field.areaHa)),
-          total: format.number(volumeM3(plan.doseMm * plan.doses, report.field.areaHa)),
+          dose: format.number(volumeM3(plan.doseMm, landAreaHa(report))),
+          total: format.number(volumeM3(plan.doseMm * plan.doses, landAreaHa(report))),
         })
       : null,
     irrigation.netDepthMm === null
       ? null
       : tIrrigation('deficit', {
           mm: number(irrigation.netDepthMm),
-          volume: format.number(volumeM3(irrigation.netDepthMm, report.field.areaHa)),
+          volume: format.number(volumeM3(irrigation.netDepthMm, landAreaHa(report))),
         }),
     plan ? tIrrigation('planNote') : tIrrigation('deficitNote'),
     irrigation.forecastPrecipMm === null

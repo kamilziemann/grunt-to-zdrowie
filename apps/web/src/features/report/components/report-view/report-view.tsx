@@ -11,6 +11,7 @@ import { AnalysisNav } from '../analysis-nav';
 import { CauseShares } from '../cause-shares';
 import { CausesSection } from '../causes-section';
 import { ExcessCauses } from '../excess-causes';
+import { WaterInFieldNotice } from '../water-in-field-notice';
 import { FullAnalysis, type DetailsState } from '../full-analysis';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
@@ -148,13 +149,16 @@ export function ReportView({
             mapHref={mapHref}
             unknown={report.limitations.includes('land_use_unknown')}
             guess={
-              report.limitations.includes('likely_forest')
-                ? 'forest'
-                : report.limitations.includes('likely_not_farmland')
-                  ? 'no_soil'
-                  : null
+              report.limitations.includes('likely_water')
+                ? 'water'
+                : report.limitations.includes('likely_forest')
+                  ? 'forest'
+                  : report.limitations.includes('likely_not_farmland')
+                    ? 'no_soil'
+                    : null
             }
           />
+          <WaterInFieldNotice report={report} />
           <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
           <SampleBanner report={report} />
           {report.meta.status !== 'complete' && (

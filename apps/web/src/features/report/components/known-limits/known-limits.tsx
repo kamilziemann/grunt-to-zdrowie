@@ -8,6 +8,7 @@ import { routes } from '@/lib/routes';
 /** Ograniczenia waznie dla rolnika (kolejnosc = waga); techniczne zostaja w sekcji zrodel. */
 const FARMER_LIMITS: readonly LimitationId[] = [
   'sample_data',
+  'likely_water',
   'likely_forest',
   'likely_not_farmland',
   'land_use_unknown',
@@ -37,7 +38,9 @@ export function KnownLimits({ report }: { report: WaterReport }) {
   const tItems = useTranslations('report.sources.limitationItems');
   // domysl "to raczej las / teren bez gleby" zastepuje ogolne "ewidencja nie podala uzytku" - razem sobie przeczyly
   const guessed =
-    report.limitations.includes('likely_forest') || report.limitations.includes('likely_not_farmland');
+    report.limitations.includes('likely_water') ||
+    report.limitations.includes('likely_forest') ||
+    report.limitations.includes('likely_not_farmland');
   const items = FARMER_LIMITS.filter(
     (id) => report.limitations.includes(id) && !(guessed && id === 'land_use_unknown'),
   ).slice(0, MAX_ITEMS);

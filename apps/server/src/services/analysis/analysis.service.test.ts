@@ -102,7 +102,7 @@ describe('analysis service', () => {
     const summer = await service().analyze(request('2026-07-20'));
 
     expect(waterReportSchema.safeParse(summer).error).toBeUndefined();
-    expect(summer.meta.engineVersion).toBe('0.8.6');
+    expect(summer.meta.engineVersion).toBe('0.8.7');
     expect(summer.sources.map((source) => [source.id, source.mode])).toEqual([
       ['parcel', 'live'],
       ['meteo', 'live'],

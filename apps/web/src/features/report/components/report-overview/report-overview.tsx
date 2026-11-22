@@ -1,4 +1,4 @@
-import type { WaterReport } from '@app/contracts';
+import type { LimitationId, WaterReport } from '@app/contracts';
 import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
@@ -21,6 +21,9 @@ import { WaterLedgerChart } from '../water-ledger-chart';
 import { WaterTankChart } from '../water-tank-chart';
 import { imageryRequest } from '../satellite-section';
 import { ZoneBasis, ZoneList } from '../zone-list';
+
+/** Domysly "to nie pole" z danych, gdy ewidencja milczy. */
+const NOT_FARMLAND_LIMITS: readonly LimitationId[] = ['likely_water', 'likely_forest', 'likely_not_farmland'];
 
 /** Dwie kolumny 3:2 (wykres albo pierwszy krok obok krotszego klocka). */
 const TWO_COLUMNS =
@@ -56,11 +59,25 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
   // klocek bez danych znika - wtedy jedna kolumna zamiast pustej polowy rzedu (np. nadmiar wody bez zalecen)
   const hasCauses = report.causes.length > 0;
   const hasFirstStep = orderedRecommendations(report).length > 0;
+  // nie grunt rolny (woda, las, zabudowa): bez zalecen mowimy wprost dlaczego, zamiast pustego miejsca
+  const notFarmland =
+    report.landUse?.mismatch === 'non_agricultural' ||
+    NOT_FARMLAND_LIMITS.some((id) => report.limitations.includes(id));
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
       {/* zalecenia jako pierwsza sekcja raportu i pierwszej strony wydruku: rolnik od razu wie, co robic (decyzja
           wlasciciela 2026-11-22); werdykt, pole, woda i historia ponizej tlumacza dlaczego */}
+      {!hasFirstStep && notFarmland && (
+        <section aria-labelledby="co-robic-title" className="flex flex-col gap-2" data-testid="todo-section">
+          <h2 id="co-robic-title" className="text-2xl font-semibold print:text-xl">
+            {t('todoTitle')}
+          </h2>
+          <p className="text-lg" data-testid="todo-none">
+            {t('todoNone')}
+          </p>
+        </section>
+      )}
       {hasFirstStep && (
         <section
           aria-labelledby="co-robic-title"

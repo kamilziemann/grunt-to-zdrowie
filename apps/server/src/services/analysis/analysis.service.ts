@@ -24,7 +24,7 @@ import { withCauseShares } from '../../domain/causes';
 import { drainedLowland } from '../../domain/drained-lowland';
 import { withHotDays } from '../../domain/hot-days';
 import { addDays, addYears, isoDate, isoDateInPoland, yearOf } from '../../domain/iso-date';
-import { landCoverGuess, summarizeLandUse } from '../../domain/land-use';
+import { landCoverGuess, landCoverHints, summarizeLandUse } from '../../domain/land-use';
 import { reconcileSoilWithRegistry } from '../../domain/soil-registry';
 import { FIRST_SENTINEL_YEAR } from '../../domain/vegetation-signal';
 import { waterOutlook } from '../../domain/water-outlook';
@@ -42,7 +42,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.8.6';
+export const ANALYSIS_ENGINE_VERSION = '0.8.7';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -88,6 +88,31 @@ const MISSING_LIMITATION: Partial<Record<SourceId, LimitationId>> = {
   hydro: 'hydro_missing',
   vegetation: 'vegetation_missing',
 };
+
+/** od tej czesci pola pod woda (BDOT10k) raport mowi o niej wprost i liczy wode do podlewania dla ladu */
+const WATER_IN_FIELD_SHARE = 0.1;
+
+/** Woda w granicach dzialki do raportu: udzial, powierzchnia wody i czesci ladowej (ha). */
+function waterInField(areaHa: number, share: number | undefined): Pick<WaterReport, 'waterInField'> {
+  if (share === undefined || share < WATER_IN_FIELD_SHARE) return {};
+
+  const water = Math.min(share, 1);
+
+  return {
+    waterInField: {
+      areaShare: water,
+      areaHa: Number((areaHa * water).toFixed(2)),
+      landAreaHa: Number((areaHa * (1 - water)).toFixed(2)),
+    },
+  };
+}
+
+/** Domysl, czym jest dzialka bez uzytku w ewidencji, jako ograniczenie raportu. */
+const GUESS_LIMITATION = {
+  water: 'likely_water',
+  forest: 'likely_forest',
+  no_soil: 'likely_not_farmland',
+} as const satisfies Record<NonNullable<ReturnType<typeof landCoverGuess>>, LimitationId>;
 
 const PARCEL_PROVIDERS: Record<Parcel['source'], string> = {
   uldk: 'GUGiK ULDK',
@@ -427,8 +452,9 @@ export function createAnalysisService({
         if (limitation) limitations.add(limitation);
       }
 
-      // jest zdjecie, ale nie ma z czym go porownac (pierwszy rok archiwum)
-      if (assessment.vegetation?.baselineYears === 0) limitations.add('vegetation_before_archive');
+      // jest zdjecie, ale nie ma z czym go porownac, bo to pierwszy rok archiwum (pozniej brak porownania = chmury)
+      if (assessment.vegetation?.baselineYears === 0 && yearOf(date) <= FIRST_SENTINEL_YEAR)
+        limitations.add('vegetation_before_archive');
 
       if (reportSources.some((source) => source.sample)) limitations.add('sample_data');
 
@@ -445,12 +471,9 @@ export function createAnalysisService({
       if (field.parcelIds.length > 0 && (!field.landUse || field.landUse.length === 0)) {
         limitations.add('land_use_unknown');
 
-        const guess = landCoverGuess(field.landUse, {
-          woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
-          soilSubstituted: input.soil?.substituteDistanceM !== undefined,
-        });
+        const guess = landCoverGuess(field.landUse, landCoverHints(input));
 
-        if (guess) limitations.add(guess === 'forest' ? 'likely_forest' : 'likely_not_farmland');
+        if (guess) limitations.add(GUESS_LIMITATION[guess]);
       }
 
       if (reconciled?.conflict) {
@@ -483,6 +506,7 @@ export function createAnalysisService({
         },
         field,
         ...(landUse ? { landUse } : {}),
+        ...waterInField(field.areaHa, input.hydro?.waterAreaShare),
         ...(input.surroundings
           ? { surroundings: { ...input.surroundings, drainedLowland: drainedLowland(input).detected } }
           : {}),

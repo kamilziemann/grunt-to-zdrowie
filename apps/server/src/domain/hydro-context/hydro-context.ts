@@ -24,6 +24,8 @@ export interface HydroKindRow {
   nearestName: string | null;
   /** dlugosc linii wewnatrz pola (m); dla poligonow 0 */
   lengthInFieldM: number;
+  /** czesc pola pod poligonami tego rodzaju, 0-1 (brak = nie liczono) */
+  areaShareInField?: number;
 }
 
 /** Obiekt do mapy: geometria GeoJSON w WGS84 przycieta do promienia. */
@@ -93,6 +95,15 @@ export function hydroContextFromRows(
         .reduce((sum, row) => sum + row.lengthInFieldM, 0),
     ),
     nearestWatercourseName: watercourse?.nearestName ?? null,
+    // woda stojaca i szerokie koryta w granicach pola (jezioro, staw, rzeka) - jak udzial lasu przy braku uzytku
+    waterAreaShare: Number(
+      Math.min(
+        1,
+        rows
+          .filter((row) => BDOT_KINDS[row.kind] === 'water_body' || BDOT_KINDS[row.kind] === 'watercourse')
+          .reduce((sum, row) => sum + (row.areaShareInField ?? 0), 0),
+      ).toFixed(2),
+    ),
     features: features.flatMap((feature) => {
       const kind = BDOT_KINDS[feature.kind];
 

@@ -8,7 +8,7 @@ import type { Assessment, Cause, Evidence, History, SourceId } from '@app/contra
 import type { StageInput } from '../analysis-stages';
 import { backgroundYears, deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
-import { isNotFarmland, soilClassNumber, soilClassesOf } from '../land-use';
+import { isNotFarmland, landCoverGuess, landCoverHints, soilClassNumber, soilClassesOf } from '../land-use';
 import { terrainTooCoarse } from '../terrain';
 import { assessPeriod } from '../water-indicators';
 
@@ -369,10 +369,10 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
 
   const sample = new Set(input.sampleSources ?? []);
   const real = (id: SourceId) => !sample.has(id);
-  const notFarmland = isNotFarmland(input.field.landUse, {
-    woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
-    soilSubstituted: input.soil?.substituteDistanceM !== undefined,
-  });
+  const notFarmland = isNotFarmland(input.field.landUse, landCoverHints(input));
+
+  // dzialka to woda (jezioro, staw): gleba, splyw i rowy niczego tu nie tlumacza
+  if (landCoverGuess(input.field.landUse, landCoverHints(input)) === 'water') return [];
 
   // Bez niedoboru teraz i w historii (zwykly rok, listopad) zostaja przyczyny trwale - gleba, rowy, teren: to one
   // mowia, co na tym polu sprzyja suszy, i z nich wynikaja zalecenia "na kolejny sezon". Bez tego raport "na dzis"

@@ -45,7 +45,10 @@ select h.kind,
        count(*)::int as features,
        min(ST_Distance(h.geom, field.geom))::float8 as nearest_m,
        (array_agg(h.name order by ST_Distance(h.geom, field.geom)) filter (where h.name is not null))[1] as nearest_name,
-       coalesce(sum(ST_Length(ST_Intersection(h.geom, field.geom))) filter (where ST_Dimension(h.geom) = 1), 0)::float8 as length_in_field_m
+       coalesce(sum(ST_Length(ST_Intersection(h.geom, field.geom))) filter (where ST_Dimension(h.geom) = 1), 0)::float8 as length_in_field_m,
+       -- jaka czesc pola zajmuja poligony tego rodzaju (jezioro, staw, szeroka rzeka) - gdy ewidencja nie zna uzytku
+       (coalesce(sum(ST_Area(ST_Intersection(h.geom, field.geom))) filter (where ST_Dimension(h.geom) = 2), 0)
+         / nullif(min(ST_Area(field.geom)), 0))::float8 as area_share_in_field
 from bdot_hydro h, field
 where ST_DWithin(h.geom, field.geom, $2)
 group by h.kind`,
@@ -78,6 +81,7 @@ function kindRows(rows: Record<string, unknown>[]): HydroKindRow[] {
     nearestM: numberOf(row.nearest_m),
     nearestName: typeof row.nearest_name === 'string' ? row.nearest_name : null,
     lengthInFieldM: numberOf(row.length_in_field_m),
+    areaShareInField: numberOf(row.area_share_in_field),
   }));
 }
 

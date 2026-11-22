@@ -130,6 +130,8 @@ export interface HydroContext {
   ditchLengthInFieldM?: number;
   /** nazwa najblizszego cieku, gdy BDOT10k ja podaje */
   nearestWatercourseName?: string | null;
+  /** czesc pola pod woda stojaca albo szerokim korytem wg BDOT10k, 0-1 */
+  waterAreaShare?: number;
 }
 
 export interface VegetationObservation {

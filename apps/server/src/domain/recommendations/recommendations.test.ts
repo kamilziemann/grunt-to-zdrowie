@@ -467,6 +467,27 @@ describe('recommend: uprawa i rodzaj gruntu', () => {
     expect(forest.irrigation).toBeNull();
   });
 
+  it('jezioro wg BDOT10k bez uzytku w ewidencji: zadnych zabiegow, oczek ani nawadniania; staw w polu - bez oczka', () => {
+    const lake = recommend(
+      input({ hydro: { ...HYDRO, waterAreaShare: 0.87, wetlands: 0, nearestWetlandM: null } }),
+      assessment('drought'),
+      ALL,
+    );
+    const pond = recommend(
+      input({
+        soil: { ...SOIL, availableWaterMmPerM: 140, category: 3 },
+        hydro: { ...HYDRO, waterAreaShare: 0.3, waterBodies: 0, wetlands: 0 },
+      }),
+      assessment('drought'),
+      [cause('no_landscape_retention', 0.3)],
+    );
+
+    expect(lake.retention).toEqual([]);
+    expect(lake.agrotech).toEqual([]);
+    expect(lake.irrigation).toBeNull();
+    expect(pond.retention.map((item) => item.measure)).not.toContain('small_pond');
+  });
+
   it('rozlegla "niecka" z modelu terenu (ponad 1 ha) nie staje sie oczkiem z pojemnoscia', () => {
     const result = recommend(
       input({

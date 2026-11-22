@@ -565,6 +565,7 @@
       "vegetation_rotation_unknown": "We compare satellite images with the same time of year in previous years, but we do not know what grew on the field then (crop rotation).",
       "soil_lighter_by_registry": "The soil map shows heavier soil here, while the land register gives a weak class (V–VI). We assumed light soil, following the register – check in the field, e.g. with a spade.",
       "soil_heavier_by_registry": "The soil map shows very light soil here, while the land register gives a good class (I–II). We assumed medium soil, following the register – check in the field.",
+      "likely_water": "According to the topographic map (BDOT10k) more than half of this parcel is a lake, a pond or a river bed. We give no field measures, ponds or irrigation.",
       "likely_forest": "According to the topographic map (BDOT10k) more than half of this parcel is forest or woodland. We give no field measures or irrigation advice.",
       "likely_not_farmland": "The soil map has no soil here (usually buildings or water). We give no field measures or irrigation advice.",
       "land_use_unknown": "The land register did not say what this parcel is. We treat it as a field – check the aerial photo to make sure it is not forest or buildings."
@@ -775,6 +776,8 @@
     "withClasses": "{kind}, classes {from}–{to}",
     "nonAgriculturalTitle": "According to the land register this parcel is {kinds}, not a cultivated field.",
     "unknownTitle": "We do not know if this is a cultivated field",
+    "likelyWaterTitle": "This looks like a lake or a pond, not a field",
+    "likelyWaterText": "The land register gave no land use for this parcel, but according to the topographic map (BDOT10k) more than half of it is water – a lake, a pond or a river bed. The numbers describe the weather at this place; we give no field measures or ponds.",
     "likelyForestTitle": "This looks like forest, not a cultivated field",
     "likelyForestText": "The land register did not give the land use, but according to the topographic map (BDOT10k) more than half of the parcel is forest or woodland. The numbers describe the weather and soil here; we give no field measures.",
     "likelyNotFarmlandTitle": "This may not be a cultivated field",
@@ -976,7 +979,8 @@
       "now": "Agricultural drought is assessed from 21 March to 30 September, and we do not calculate crop water use outside that period. We show how much water the soil has for spring, how often drought returned in 10 years and what to do before the season.",
       "summer": "See how it was in summer ({date})"
     },
-    "waterTitlePast": "Water on the analysis day"
+    "waterTitlePast": "Water on the analysis day",
+    "todoNone": "We recommend no crops or field measures here – according to the data this is not farmland. The weather and water in the area are described below."
   },
   "viz": {
     "tank": {
@@ -1164,5 +1168,9 @@
       "colour": "Colours need colour printing – in black and white both ends of the scale look alike."
     },
     "howToRead": "How to read this image"
+  },
+  "waterInField": {
+    "title": "Water covers about {percent}% of this parcel ({water} ha)",
+    "text": "According to the topographic map (BDOT10k) it is a lake, a pond or a river bed. Recommendations and irrigation amounts apply only to the land part (about {land} ha) – do not cultivate or drain the water."
   }
 }

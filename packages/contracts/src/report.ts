@@ -583,6 +583,7 @@ export const LIMITATION_IDS = [
   'soil_lighter_by_registry',
   'soil_heavier_by_registry',
   // ewidencja nie zna uzytku, a inne dane wskazuja, ze to nie pole: las wg BDOT10k albo brak gleby na mapie glebowej
+  'likely_water',
   'likely_forest',
   'likely_not_farmland',
 ] as const;
@@ -736,6 +737,13 @@ export const waterReportSchema = z.object({
   landUse: landUseSchema.optional(),
   /** otoczenie pola z BDOT10k (drzewa, budowle i waly, obszary chronione); brak = baza nie odpowiedziala */
   surroundings: surroundingsSchema.optional(),
+  /**
+   * Woda w granicach dzialki wg BDOT10k (jezioro, staw, koryto rzeki), gdy zajmuje co najmniej 10% pola (od silnika
+   * 0.8.7). Zalecenia i ilosci wody do podlewania dotycza wtedy tylko czesci ladowej.
+   */
+  waterInField: z
+    .object({ areaShare: z.number().min(0).max(1), areaHa: z.number().min(0), landAreaHa: z.number().min(0) })
+    .optional(),
   crop: cropAtDateSchema,
   assessment: assessmentSchema,
   history: historySchema,

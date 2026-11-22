@@ -21,7 +21,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
-import { isNotFarmland, soilClassesOf, soilClassNumber } from '../land-use';
+import { isNotFarmland, landCoverHints, soilClassesOf, soilClassNumber } from '../land-use';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
@@ -146,8 +146,17 @@ const POND: Measure = {
 const pondHolds = ({ soil }: StageInput): boolean =>
   soil?.category !== 1 && (soil?.availableWaterMmPerM ?? 0) >= LIGHT_SOIL_MM_PER_M;
 
-/** oczko ma sens poza polderem - tam obnizenie odwadnia przepompownia, a wode zatrzymuje sie w rowach */
-const pondFits = (input: StageInput): boolean => pondHolds(input) && !drainedLowland(input).detected;
+/** w granicach pola jest juz woda stojaca (staw, jezioro) od tej czesci pola - nowe oczko niczego nie doda */
+const WATER_ALREADY_SHARE = 0.1;
+
+/**
+ * Oczko ma sens poza polderem (tam obnizenie odwadnia przepompownia, a wode zatrzymuje sie w rowach) i gdy w polu nie
+ * ma juz wody - zaglebienie z modelu terenu bywa wtedy samym stawem.
+ */
+const pondFits = (input: StageInput): boolean =>
+  pondHolds(input) &&
+  !drainedLowland(input).detected &&
+  (input.hydro?.waterAreaShare ?? 0) < WATER_ALREADY_SHARE;
 
 /** granica pola z drzewami w co najmniej polowie - pas zadrzewien niczego nie doda */
 const SHELTERED_SHARE = 0.5;
@@ -643,10 +652,7 @@ export function recommend(
   // To nie grunt rolny (wg ewidencji albo - gdy milczy - las wg BDOT10k czy brak gleby na mapie glebowej): zabiegi
   // polowe, nawadnianie i budowa urzadzen wodnych (oczko, zastawka, pas trawiasty, zadrzewienia) nie maja sensu.
   // Zostaje ochrona mokradla w sasiedztwie; raport i tak mowi wprost, ze ocena dotyczy warunkow w okolicy.
-  const notFarmland = isNotFarmland(input.field.landUse, {
-    woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
-    soilSubstituted: input.soil?.substituteDistanceM !== undefined,
-  });
+  const notFarmland = isNotFarmland(input.field.landUse, landCoverHints(input));
   const retention = all.filter((item) => item.category === 'retention');
 
   return {

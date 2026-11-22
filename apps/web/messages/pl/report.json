@@ -565,6 +565,7 @@
       "vegetation_rotation_unknown": "Zdjęcia satelitarne porównujemy z tą samą porą roku w poprzednich latach, ale nie wiemy, co wtedy rosło na polu (płodozmian).",
       "soil_lighter_by_registry": "Mapa glebowa pokazuje tu glebę cięższą, a ewidencja gruntów słabą klasę (V–VI). Przyjęliśmy glebę lekką, zgodnie z ewidencją – sprawdź na polu, np. łopatą.",
       "soil_heavier_by_registry": "Mapa glebowa pokazuje tu glebę bardzo lekką, a ewidencja gruntów dobrą klasę (I–II). Przyjęliśmy glebę średnią, zgodnie z ewidencją – sprawdź na polu.",
+      "likely_water": "Według mapy topograficznej (BDOT10k) ponad połowa tej działki to jezioro, staw albo koryto rzeki. Zabiegów polowych, oczek i nawadniania nie podajemy.",
       "likely_forest": "Według mapy topograficznej (BDOT10k) ponad połowa tej działki to las albo zadrzewienie. Zabiegów polowych i nawadniania nie podajemy.",
       "likely_not_farmland": "Mapa glebowa nie ma gleby w tym miejscu (zwykle zabudowa albo woda). Zabiegów polowych i nawadniania nie podajemy.",
       "land_use_unknown": "Ewidencja gruntów nie podała, czym jest ta działka. Liczymy ją jak pole uprawne – sprawdź na zdjęciu lotniczym, czy to nie las albo zabudowa."
@@ -775,6 +776,8 @@
     "withClasses": "{kind} klasy {from}–{to}",
     "nonAgriculturalTitle": "Według ewidencji ta działka to {kinds}, nie pole uprawne.",
     "unknownTitle": "Nie wiemy, czy to pole uprawne",
+    "likelyWaterTitle": "To wygląda na jezioro albo staw, nie pole uprawne",
+    "likelyWaterText": "Ewidencja gruntów nie podała użytku tej działki, ale według mapy topograficznej (BDOT10k) ponad połowę zajmuje woda – jezioro, staw albo koryto rzeki. Liczby opisują pogodę w tym miejscu; zabiegów polowych ani budowy oczek nie podajemy.",
     "likelyForestTitle": "To wygląda na las, nie pole uprawne",
     "likelyForestText": "Ewidencja gruntów nie podała użytku tej działki, ale według mapy topograficznej (BDOT10k) ponad połowa to las albo zadrzewienie. Liczby opisują pogodę i glebę w tym miejscu; zabiegów polowych nie podajemy.",
     "likelyNotFarmlandTitle": "To może nie być pole uprawne",
@@ -976,7 +979,8 @@
       "now": "Suszę rolniczą liczy się od 21 marca do 30 września, a zużycia wody przez uprawę poza tym okresem nie liczymy. Pokazujemy, ile wody gleba ma na wiosnę, jak często susza wracała w 10 latach i co zrobić przed sezonem.",
       "summer": "Zobacz, jak było latem ({date})"
     },
-    "waterTitlePast": "Woda w dniu analizy"
+    "waterTitlePast": "Woda w dniu analizy",
+    "todoNone": "Nie zalecamy tu żadnych upraw ani zabiegów – według danych to nie jest grunt rolny. Pogodę i wodę w okolicy opisujemy niżej."
   },
   "viz": {
     "tank": {
@@ -1164,5 +1168,9 @@
       "colour": "Kolory wymagają druku kolorowego – w czerni i bieli oba końce skali wyglądają podobnie."
     },
     "howToRead": "Jak czytać to zdjęcie"
+  },
+  "waterInField": {
+    "title": "Woda zajmuje ok. {percent}% tej działki ({water} ha)",
+    "text": "Według mapy topograficznej (BDOT10k) to jezioro, staw albo koryto rzeki. Zalecenia i ilości wody do podlewania dotyczą tylko części lądowej (ok. {land} ha) – na wodzie niczego nie uprawiaj i niczego nie osuszaj."
   }
 }

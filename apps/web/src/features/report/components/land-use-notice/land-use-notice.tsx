@@ -1,5 +1,5 @@
 import type { LandUse } from '@app/contracts';
-import { Info, MapPinned, Sprout, TreePine } from 'lucide-react';
+import { Info, MapPinned, Sprout, TreePine, Waves } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -38,7 +38,7 @@ export interface LandUseNoticeProps {
   /** ewidencja nie podala uzytku (ograniczenie `land_use_unknown`) */
   unknown?: boolean;
   /** co wskazuja inne dane, gdy ewidencja milczy: las wg BDOT10k albo brak gleby na mapie glebowej */
-  guess?: 'forest' | 'no_soil' | null;
+  guess?: 'water' | 'forest' | 'no_soil' | null;
 }
 
 /**
@@ -59,7 +59,14 @@ export function LandUseNotice({
   // ewidencja nie podala uzytku: spokojna ramka - raport liczymy jak dla pola, ale mowimy, ze tego nie wiemy;
   // gdy inne dane wskazuja las albo teren bez gleby, mowimy to wprost
   if (!landUse && unknown) {
-    const key = guess === 'forest' ? 'likelyForest' : guess === 'no_soil' ? 'likelyNotFarmland' : 'unknown';
+    const key =
+      guess === 'water'
+        ? 'likelyWater'
+        : guess === 'forest'
+          ? 'likelyForest'
+          : guess === 'no_soil'
+            ? 'likelyNotFarmland'
+            : 'unknown';
 
     return (
       <Alert
@@ -68,7 +75,7 @@ export function LandUseNotice({
         data-testid="land-use-unknown"
         data-guess={guess ?? 'none'}
       >
-        <TreePine aria-hidden="true" />
+        {guess === 'water' ? <Waves aria-hidden="true" /> : <TreePine aria-hidden="true" />}
         <AlertTitle className="line-clamp-none text-lg leading-snug font-semibold">
           {t(`${key}Title`)}
         </AlertTitle>

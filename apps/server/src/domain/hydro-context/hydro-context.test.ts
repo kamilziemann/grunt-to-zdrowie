@@ -39,9 +39,25 @@ describe('hydroContextFromRows', () => {
       ditchesInRadius: 0,
       ditchLengthInFieldM: 0,
       nearestWatercourseName: null,
+      waterAreaShare: 0,
       features: [],
       treeCoverShare: null,
     });
+  });
+
+  it('woda w granicach pola: jezioro i szerokie koryto sumuja sie (najwyzej 1), mokradlo i row nie', () => {
+    const row = (kind: number, areaShareInField: number) => ({
+      kind,
+      features: 1,
+      nearestM: 0,
+      nearestName: null,
+      lengthInFieldM: 0,
+      areaShareInField,
+    });
+
+    expect(hydroContextFromRows([row(5, 0.87)], [], 500).waterAreaShare).toBe(0.87);
+    expect(hydroContextFromRows([row(5, 0.2), row(6, 0.15), row(7, 0.4)], [], 500).waterAreaShare).toBe(0.35);
+    expect(hydroContextFromRows([row(5, 0.7), row(6, 0.6)], [], 500).waterAreaShare).toBe(1);
   });
 
   it('rozbija geometrie Multi* na linie, z poligonow bierze obrys, pomija nieznane kody', () => {
