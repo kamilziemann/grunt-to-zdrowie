@@ -380,7 +380,7 @@ describe('ReportView', () => {
   });
 
   describe('miejsca na polu', () => {
-    it('szkic ma miejsca z numerami, lista pod nim ma zdania z serwera i skad sa miejsca', () => {
+    it('szkic ma miejsca z numerami, lista obok ma zdania z serwera, co zrobic i skad sa miejsca', () => {
       renderReport(FIELD_REPORT);
 
       const list = screen.getByTestId('zone-list');
@@ -390,6 +390,11 @@ describe('ReportView', () => {
       expect(items).toHaveLength(4);
       expect(items[0]).toHaveTextContent(
         'Miejsce 1: Suchsze miejsce, w zachodniej części pola, przy rowie, ok. 0,5 ha',
+      );
+      // co z tym zrobic: zalecenia przypiete do miejsca, a bez nich - obejrzec na polu
+      expect(within(items[0] as HTMLElement).getByTestId('zone-action')).toHaveTextContent(/^Co zrobić: /);
+      expect(within(items[3] as HTMLElement).getByTestId('zone-action')).toHaveTextContent(
+        'Osobnego zalecenia',
       );
       expect(within(list).getByTestId('zone-list-basis')).toHaveTextContent(
         'jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu 17 maja 2018 – 15 czerwca 2018)',

@@ -218,7 +218,7 @@ export function SketchLegend({
   return (
     <ul
       aria-label={t('title')}
-      className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-2"
+      className="grid grid-cols-1 gap-x-4 gap-y-1.5 text-base sm:grid-cols-2 lg:grid-cols-1 print:grid-cols-2 print:text-sm"
       data-testid="field-sketch-legend"
     >
       {items.map((item) => (
@@ -245,7 +245,7 @@ export function ZoneKindLegend({ kinds }: { kinds: readonly Zone['kind'][] }) {
   return (
     <ul
       aria-label={t('zonesTitle')}
-      className="grid grid-cols-1 gap-x-4 gap-y-1 text-sm sm:grid-cols-2"
+      className="grid grid-cols-1 gap-x-4 gap-y-1.5 text-base sm:grid-cols-2 lg:grid-cols-1 print:grid-cols-2 print:text-sm"
       data-testid="field-map-zone-legend"
     >
       {shown.map((kind) => (

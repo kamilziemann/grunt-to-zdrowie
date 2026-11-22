@@ -1,7 +1,7 @@
 import type { ImageryLayer, ParcelGeometry, VegetationImagery, WaterReport } from '@app/contracts';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type CSSProperties, type SyntheticEvent } from 'react';
+import { LoaderCircle } from 'lucide-react';
+import { useCallback, useMemo, type CSSProperties } from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
@@ -9,68 +9,48 @@ import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
 import { imageryProblem, reportImageryQuery, type ImageryProblem } from '../../api/imagery.queries';
+import { ZoneBadge } from '../field-sketch';
+import { useZoneFocus } from '../zone-focus';
 import { imageryRequest, useSatellitePrint } from './satellite-print';
 
 /** Paski skali tymi samymi tokenami co kolory PNG z API (`--vegetation-*`, `--moisture-*`). */
-const GRADIENTS: Record<ImageryLayer, string> = {
+export const SATELLITE_GRADIENTS: Record<ImageryLayer, string> = {
   condition: 'from-(--vegetation-low) via-(--vegetation-mid) to-(--vegetation-high)',
   moisture: 'from-(--moisture-low) via-(--moisture-mid) to-(--moisture-high)',
 };
 
 /** Ponizej tej czesci pola bez chmur mowimy, ze czesc pola nie ma koloru. */
-const CLEAR_ENOUGH = 0.9;
+export const CLEAR_ENOUGH = 0.9;
 
 const LAYERS: readonly ImageryLayer[] = ['condition', 'moisture'];
 
-type ImageState = { kind: 'loading' } | { kind: 'ready'; data: VegetationImagery } | { kind: ImageryProblem };
-
-/** Kotwica bloku (`#satelita` otwiera go od razu). */
-const ANCHOR = 'satelita';
+export type ImageState =
+  | { kind: 'loading' }
+  | { kind: 'ready'; data: VegetationImagery }
+  | { kind: ImageryProblem };
 
 /**
- * "Pole z satelity" (w sekcji "Ocena" pelnej analizy): dwa obrazy dzialki z dnia analizy - "Kondycja roslin"
- * i "Woda w roslinach" - z obrysem pola, skala opisana slowami, data zdjecia i zastrzezeniami (kwadrat 10-20 m,
- * jedno zdjecie, wilgotnosc roslin a nie gleby, skala porownuje miejsca w polu). Blok jest zwiniety; obrazy
- * pobieramy dopiero po rozwinieciu albo przed wydrukiem (`useSatellitePrint`). Pole bez dzialek, brak czystego
- * zdjecia albo kluczy = jedno zdanie zamiast pustych ramek.
+ * "Pole z satelity" na wydruku (w sekcji "Ocena" pelnej analizy): dwa obrazy dzialki z dnia analizy - "Kondycja
+ * roslin" i "Woda w roslinach" - z obrysem pola, skala opisana slowami, data zdjecia i zastrzezeniami (kwadrat
+ * 10-20 m, jedno zdjecie, wilgotnosc roslin a nie gleby, skala porownuje miejsca w polu). Na ekranie te obrazy sa
+ * trybami karty "Twoje pole", wiec tu blok jest tylko na papierze; obrazy pobiera "Zapisz PDF"
+ * (`useSatellitePrint`). Pole bez dzialek, brak czystego zdjecia albo kluczy = jedno zdanie zamiast pustych ramek.
  */
 export function SatelliteSection({ report }: { report: WaterReport }) {
   const t = useTranslations('report.satellite');
-  const { requested, request } = useSatellitePrint();
+  const { requested } = useSatellitePrint();
   const target = imageryRequest(report);
-  // raport rysuje sie w przegladarce (analiza liczy sie po stronie klienta); kotwica w adresie otwiera blok
-  const [open] = useState(() => typeof window !== 'undefined' && window.location.hash === `#${ANCHOR}`);
-
-  useEffect(() => {
-    if (open) request();
-  }, [open, request]);
-
-  const onToggle = useCallback(
-    (event: SyntheticEvent<HTMLDetailsElement>) => {
-      if (event.currentTarget.open) request();
-    },
-    [request],
-  );
 
   return (
-    <details
-      id={ANCHOR}
-      open={open}
-      onToggle={onToggle}
-      className="group scroll-mt-28 rounded-2xl border print:border-0"
+    <section
+      aria-labelledby="satelita-title"
+      className="hidden flex-col gap-3 print:flex"
       data-testid="satellite-section"
     >
-      <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 select-none hover:bg-muted/50 [&::-webkit-details-marker]:hidden print:min-h-0 print:px-0 print:py-1">
-        <span className="flex flex-col gap-0.5">
-          <h3 className="text-xl font-semibold print:break-after-avoid">{t('title')}</h3>
-          <span className="text-base text-muted-foreground print:hidden">{t('summary')}</span>
-        </span>
-        <ChevronDown
-          aria-hidden="true"
-          className="size-6 shrink-0 transition-transform duration-200 group-open:rotate-180 print:hidden"
-        />
-      </summary>
-      <div className="flex flex-col gap-4 px-4 pb-4 print:px-0 print:pb-0">
+      <h3 id="satelita-title" className="text-xl font-semibold print:break-after-avoid">
+        {t('title')}
+      </h3>
+      <div className="flex flex-col gap-4">
         {!target ? (
           <p className="text-base" data-testid="satellite-none">
             {t('noParcels')}
@@ -84,7 +64,7 @@ export function SatelliteSection({ report }: { report: WaterReport }) {
           </p>
         )}
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -139,7 +119,12 @@ function SatelliteImages({ report, dzialki, date }: { report: WaterReport; dzial
   );
 }
 
-function stateOf(query: { isPending: boolean; isError: boolean; error: unknown; data?: VegetationImagery }) {
+export function stateOf(query: {
+  isPending: boolean;
+  isError: boolean;
+  error: unknown;
+  data?: VegetationImagery;
+}) {
   if (query.data) return { kind: 'ready', data: query.data } as const;
 
   if (query.isError) return { kind: imageryProblem(query.error) } as const;
@@ -147,7 +132,7 @@ function stateOf(query: { isPending: boolean; isError: boolean; error: unknown; 
   return { kind: 'loading' } as const;
 }
 
-function ProblemNote({
+export function ProblemNote({
   problem,
   day,
   onRetry,
@@ -222,16 +207,6 @@ function SatelliteFigure({
   const t = useTranslations('report.satellite');
   const format = useFormatter();
   const data = state.kind === 'ready' ? state.data : null;
-  const frameStyle = useMemo((): CSSProperties | undefined => {
-    if (!data) return undefined;
-    const [west, south, east, north] = data.bbox;
-    const middle = (((south + north) / 2) * Math.PI) / 180;
-    // proporcje kadru w metrach (stopien dlugosci jest krotszy niz szerokosci)
-    const ratio = ((east - west) * Math.cos(middle)) / (north - south || 1);
-
-    return { aspectRatio: String(Math.min(2.2, Math.max(0.6, ratio))) };
-  }, [data]);
-  const path = useMemo(() => (data ? outline(field, data.bbox) : ''), [data, field]);
   const sceneDay = data
     ? format.dateTime(new Date(`${data.sceneDate}T12:00:00Z`), { dateStyle: 'long', timeZone: APP_TIME_ZONE })
     : null;
@@ -253,42 +228,8 @@ function SatelliteFigure({
       ) : state.kind === 'ready' ? (
         data && (
           <>
-            <div className="relative w-full overflow-hidden rounded-lg bg-muted" style={frameStyle}>
-              {data.images.map((image, index) => (
-                <PlacedImage
-                  key={image.image.slice(-32)}
-                  image={image}
-                  frame={data.bbox}
-                  label={index === 0 ? t(`layers.${layer}.alt`) : ''}
-                />
-              ))}
-              <svg
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-                className="absolute inset-0 size-full"
-              >
-                <path
-                  d={path}
-                  fill="none"
-                  stroke="var(--card)"
-                  strokeWidth="5"
-                  vectorEffect="non-scaling-stroke"
-                />
-                <path
-                  d={path}
-                  fill="none"
-                  stroke="var(--foreground)"
-                  strokeWidth="2"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-            </div>
-            <div aria-hidden="true" className={cn('h-3 rounded-full bg-linear-to-r', GRADIENTS[layer])} />
-            <p className="flex justify-between text-sm font-medium">
-              <span>{t(`layers.${layer}.low`)}</span>
-              <span>{t(`layers.${layer}.high`)}</span>
-            </p>
+            <SatelliteFrame data={data} field={field} label={t(`layers.${layer}.alt`)} />
+            <SatelliteScale layer={layer} />
             <figcaption className="flex flex-col gap-1 text-sm">
               <span>{t('scene', { date: sceneDay ?? '' })}</span>
               {data.clearShare < CLEAR_ENOUGH && <span className="text-muted-foreground">{t('clouds')}</span>}
@@ -302,6 +243,103 @@ function SatelliteFigure({
         <ProblemNote problem={state.kind} day={day} onRetry={onRetry} />
       )}
     </figure>
+  );
+}
+
+export interface SatelliteZoneMark {
+  id: string;
+  number: number;
+  /** punkt na numer (dlugosc, szerokosc) */
+  at: readonly [number, number];
+}
+
+const NO_MARKS: readonly SatelliteZoneMark[] = [];
+
+/**
+ * Obraz z satelity w kadrze o proporcjach terenu, z obrysem pola i - gdy podane - numerami miejsc na polu (te same
+ * przyciski co na szkicu: klikniecie wybiera miejsce, drugie odznacza). Kafel PNG z API rysujemy w pikselach.
+ */
+export function SatelliteFrame({
+  data,
+  field,
+  label,
+  zones = NO_MARKS,
+  className,
+}: {
+  data: VegetationImagery;
+  field: ParcelGeometry;
+  label: string;
+  zones?: readonly SatelliteZoneMark[];
+  className?: string;
+}) {
+  const t = useTranslations('report.fieldMap.sketch');
+  const { active, selected, toggle } = useZoneFocus();
+  const frameStyle = useMemo((): CSSProperties => {
+    const [west, south, east, north] = data.bbox;
+    const middle = (((south + north) / 2) * Math.PI) / 180;
+    // proporcje kadru w metrach (stopien dlugosci jest krotszy niz szerokosci)
+    const ratio = ((east - west) * Math.cos(middle)) / (north - south || 1);
+
+    return { aspectRatio: String(Math.min(2.2, Math.max(0.6, ratio))) };
+  }, [data]);
+  const path = useMemo(() => outline(field, data.bbox), [data, field]);
+  const [fw, fs, fe, fn] = data.bbox;
+
+  return (
+    <div className={cn('relative w-full overflow-hidden rounded-lg bg-muted', className)} style={frameStyle}>
+      {data.images.map((image, index) => (
+        <PlacedImage
+          key={image.image.slice(-32)}
+          image={image}
+          frame={data.bbox}
+          label={index === 0 ? label : ''}
+        />
+      ))}
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        className="absolute inset-0 size-full"
+      >
+        <path d={path} fill="none" stroke="var(--card)" strokeWidth="5" vectorEffect="non-scaling-stroke" />
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--foreground)"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      {zones.map((zone) => (
+        <ZoneBadge
+          key={zone.id}
+          zoneId={zone.id}
+          left={((zone.at[0] - fw) / (fe - fw || 1)) * 100}
+          top={((fn - zone.at[1]) / (fn - fs || 1)) * 100}
+          number={zone.number}
+          active={zone.id === active}
+          pressed={zone.id === selected}
+          label={t('zoneButton', { number: zone.number })}
+          onSelect={toggle}
+          testId="satellite-zone-number"
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Skala obrazu slowami (np. "slabiej - lepiej") z paskiem kolorow jak na obrazie. */
+export function SatelliteScale({ layer }: { layer: ImageryLayer }) {
+  const t = useTranslations('report.satellite');
+
+  return (
+    <div className="flex flex-col gap-1" data-testid="satellite-scale">
+      <div aria-hidden="true" className={cn('h-3 rounded-full bg-linear-to-r', SATELLITE_GRADIENTS[layer])} />
+      <p className="flex justify-between text-base font-medium">
+        <span>{t(`layers.${layer}.low`)}</span>
+        <span>{t(`layers.${layer}.high`)}</span>
+      </p>
+    </div>
   );
 }
 

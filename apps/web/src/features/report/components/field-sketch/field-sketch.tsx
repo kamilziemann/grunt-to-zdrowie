@@ -672,7 +672,7 @@ const BADGE_CLASS =
  * Numer miejsca w kolku nad rysunkiem (przycisk HTML, nie SVG): da sie go wybrac klawiatura, a czytnik ekranu slyszy
  * stan `aria-pressed`. Staly rozmiar na ekranie, czytelny na kazdym wzorze i w czerni i bieli.
  */
-function ZoneBadge({
+export function ZoneBadge({
   zoneId,
   left,
   top,
@@ -681,6 +681,7 @@ function ZoneBadge({
   pressed,
   label,
   onSelect,
+  testId = 'field-sketch-zone-number',
 }: {
   zoneId: string;
   /** polozenie srodka w procentach szerokosci i wysokosci rysunku */
@@ -691,6 +692,8 @@ function ZoneBadge({
   pressed: boolean;
   label: string;
   onSelect?: (zoneId: string) => void;
+  /** szkic i obraz z satelity maja osobne znaczniki w testach */
+  testId?: string;
 }) {
   const select = useCallback(() => onSelect?.(zoneId), [onSelect, zoneId]);
   const style = useMemo(() => ({ left: `${String(left)}%`, top: `${String(top)}%` }), [left, top]);
@@ -703,7 +706,7 @@ function ZoneBadge({
         className={cn(BADGE_CLASS, color)}
         style={style}
         data-zone={zoneId}
-        data-testid="field-sketch-zone-number"
+        data-testid={testId}
       >
         {number}
       </span>
@@ -719,7 +722,7 @@ function ZoneBadge({
       style={style}
       onClick={select}
       data-zone={zoneId}
-      data-testid="field-sketch-zone-number"
+      data-testid={testId}
     >
       {number}
     </button>

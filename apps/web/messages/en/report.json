@@ -619,8 +619,6 @@
     "sources": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK.",
     "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
     "highlight": "Orange – nearest ditch and watercourse.",
-    "showAerial": "Aerial photo",
-    "showSketch": "Sketch",
     "sketch": {
       "label": "Sketch: {field} and water within {radius} m of the field.",
       "loading": "Loading ditches and streams…",
@@ -669,17 +667,36 @@
       "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK.",
       "zoneButton": "Spot {number} in the field"
     },
-    "above": "The field sketch with ditches and spots on the field is at the top of the report, next to the assessment.",
-    "modeLabel": "Field view: sketch or aerial photo",
+    "above": "Numbered spots in the field are in the “Your field” card at the top of the report – click a number to see the spot on the sketch.",
+    "modeLabel": "What to show on the field image",
     "layers": {
       "label": "Layers on the aerial photo",
       "photo": "Aerial photo",
       "water": "Ditches and streams",
-      "zones": "Spots in the field",
-      "zonesHint": "Tap a spot on the map to highlight its recommendations; tap it again or next to it to clear the highlight."
+      "zones": "Spots in the field"
     },
     "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out"
+    "zoomOut": "Zoom out",
+    "modes": {
+      "sketch": {
+        "label": "Sketch",
+        "subtitle": "Water on and around the field – scale sketch, north up"
+      },
+      "aerial": {
+        "label": "Aerial photo",
+        "subtitle": "The field on an aerial photo, with ditches, streams and spots in the field"
+      },
+      "condition": {
+        "label": "Crop condition",
+        "subtitle": "Where plants grow better and where worse – satellite image"
+      },
+      "moisture": {
+        "label": "Water in plants",
+        "subtitle": "Where plants hold more water – satellite image"
+      }
+    },
+    "signsTitle": "What is on the sketch",
+    "backToSketch": "Back to the sketch"
   },
   "print": {
     "header": "{app} · field water report",
@@ -763,7 +780,11 @@
       "segment": "section {from}–{to} m",
       "none": "no figures",
       "note": "NDMI and NDVI come from one scene – a big difference may also mean another land use or sowing date, not only moisture."
-    }
+    },
+    "hint": "Click a spot to show it on the image. Click again to clear it.",
+    "action": "What to do: {action}.",
+    "noAction": "There is no separate recommendation here – take a look at this spot next time you are in the field.",
+    "measuresTitle": "Spots in the field – numbers for the adviser"
   },
   "stored": {
     "computed": "Computed on {date}, {time}",
@@ -1012,7 +1033,6 @@
   },
   "satellite": {
     "title": "Field from satellite",
-    "summary": "Crop condition and water in plants on a satellite image – expand to fetch the images.",
     "noParcels": "We do not show satellite images for a field drawn without cadastral parcels – images are fetched for whole parcels.",
     "notLoaded": "Satellite images of the field were not loaded. To include them in the PDF, use the “Save PDF” button in the report.",
     "intro": "Two images of the parcel from one satellite picture taken before the analysis day. They show where plants do better or worse – and where they hold more water.",

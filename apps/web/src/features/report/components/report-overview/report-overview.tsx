@@ -17,6 +17,8 @@ import { SimpleCauses } from '../simple-causes';
 import { StressCountdown } from '../stress-countdown';
 import { WaterLedgerChart } from '../water-ledger-chart';
 import { WaterTankChart } from '../water-tank-chart';
+import { imageryRequest } from '../satellite-section';
+import { ZoneList } from '../zone-list';
 
 export interface ReportOverviewProps {
   report: WaterReport;
@@ -25,14 +27,15 @@ export interface ReportOverviewProps {
 }
 
 /**
- * Widok prosty ("Pogodynka wody"): werdykt ze skala i mapa pola na gorze (komputer: ciemny panel z krotka analiza
- * obok duzego szkicu), potem woda teraz i w tym tygodniu, 10 lat i "dlaczego", "zrob najpierw" i "czego ocena nie
- * wie". Klocek bez danych znika; gdy w sekcji wody nie ma zadnego - jedno zdanie dlaczego. To samo jest pierwsza
+ * Pierwsza czesc raportu ("Pogodynka wody"): werdykt ze skala i krotka analiza, karta "Twoje pole" na cala szerokosc
+ * (obraz pola w czterech trybach, miejsca na polu i objasnienia), potem woda teraz i w tym tygodniu, 10 lat
+ * i "dlaczego", "zrob najpierw" i "czego ocena nie wie". Klocek bez danych znika; gdy w sekcji wody nie ma zadnego - jedno zdanie dlaczego. To samo jest pierwsza
  * strona wydruku.
  */
 export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
   const t = useTranslations('report.simple');
   const zones = useMemo(() => fieldZones(report), [report]);
+  const imagery = imageryRequest(report);
   const extras = reportExtras(report);
   // ile kart wody sie pokaze (pozostale znikaja same) - przy trzech jeden rzad na komputerze, bez sieroty
   const waterCards = [
@@ -45,18 +48,16 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start print:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] print:gap-3">
-        <ShortAnalysis report={report} />
-        <section
-          aria-labelledby="pole-title"
-          className="flex flex-col gap-3 rounded-3xl border bg-card p-4 shadow-card sm:p-5 print:break-inside-avoid print:rounded-lg print:p-3 print:shadow-none"
-        >
-          <h2 id="pole-title" className="text-xl font-semibold">
-            {t('field')}
-          </h2>
-          <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} zones={zones} wide />
-        </section>
-      </div>
+      <ShortAnalysis report={report} />
+      <FieldMap
+        field={report.field}
+        ditchInFieldM={ditchInFieldM(report)}
+        zones={zones}
+        imageryParcels={imagery?.dzialki ?? null}
+        imageryDate={report.meta.analysisDate}
+      >
+        <ZoneList report={report} />
+      </FieldMap>
 
       <section aria-labelledby="woda-title" className="flex flex-col gap-4 print:space-y-3">
         <h2 id="woda-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">

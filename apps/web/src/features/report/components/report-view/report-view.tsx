@@ -33,7 +33,7 @@ import { SurroundingsCard } from '../surroundings-card';
 import { VegetationChart } from '../vegetation-chart';
 import { VerdictSection } from '../verdict-section';
 import { ZoneFocusProvider } from '../zone-focus';
-import { ZoneList } from '../zone-list';
+import { ZoneMeasuresDetails } from '../zone-list';
 
 export interface ReportViewProps {
   report: WaterReport;
@@ -179,7 +179,7 @@ export function ReportView({
             <ReportSection id="retencja" number={4} title={title(3)} sample={sampleRecommendations}>
               <p className="text-base text-muted-foreground print:hidden">{t('fieldMap.above')}</p>
               <SurroundingsCard surroundings={report.surroundings} />
-              <ZoneList report={report} />
+              <ZoneMeasuresDetails report={report} />
               <RecommendationList
                 category="retention"
                 recommendations={report.recommendations.retention}

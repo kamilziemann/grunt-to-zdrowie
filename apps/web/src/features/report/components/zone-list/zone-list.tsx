@@ -6,6 +6,7 @@ import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
 import { fieldZones, type NumberedZone } from '../../utils/report-data';
+import { orderedRecommendations } from '../../utils/report-summary';
 import { ReportDetails } from '../report-section';
 import { useZoneFocus } from '../zone-focus';
 
@@ -26,12 +27,22 @@ export function useZoneDescription(): (zone: Zone) => string {
 }
 
 /** Numer miejsca w kolku - jak na szkicu. */
-export function ZoneNumber({ number, active = false }: { number: number; active?: boolean }) {
+export function ZoneNumber({
+  number,
+  active = false,
+  large = false,
+}: {
+  number: number;
+  active?: boolean;
+  /** w kolumnie objasnien - wiekszy, jak na obrazie */
+  large?: boolean;
+}) {
   return (
     <span
       aria-hidden="true"
       className={cn(
-        'inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums',
+        'inline-flex shrink-0 items-center justify-center rounded-full font-bold tabular-nums',
+        large ? 'mt-0.5 size-7 text-sm' : 'size-6 text-xs',
         active ? 'bg-(--sketch-highlight) text-card' : 'bg-foreground text-card',
       )}
     >
@@ -75,23 +86,43 @@ export function ZoneButton({
   );
 }
 
+/** Co zrobic w miejscu: nazwy zalecen, ktore go dotycza (w kolejnosci raportu), albo null. */
+function useZoneActions(report: WaterReport): (zoneId: string) => string | null {
+  const tMeasures = useTranslations('report.recommendations.measures');
+  const format = useFormatter();
+  const recommendations = orderedRecommendations(report);
+
+  return (zoneId) => {
+    const names = [
+      ...new Set(
+        recommendations
+          .filter((recommendation) => recommendation.zoneId === zoneId)
+          .map((recommendation) => tMeasures(`${recommendation.measure}.name`)),
+      ),
+    ];
+
+    return names.length > 0 ? format.list(names.slice(0, 2), { type: 'conjunction' }) : null;
+  };
+}
+
 /**
- * Lista miejsc na polu pod szkicem: numer jak na rysunku, zdanie o miejscu i udzial w polu; fokus albo najechanie
- * wyroznia miejsce na szkicu. Pod lista - skad sa miejsca (jedno zdjecie satelitarne i model terenu ok. 30 m, wiec
- * warto je obejrzec na polu). Bez miejsc - jedno zdanie z powodem, bez pustej ramki.
+ * Miejsca na polu w kolumnie objasnien karty "Twoje pole": numer jak na obrazie, co tu jest, co z tym zrobic
+ * (zalecenia, ktore dotycza miejsca) i udzial w polu; klikniecie wybiera miejsce na obrazie, drugie odznacza, fokus
+ * albo najechanie podglada. Pod lista - skad sa miejsca i ze trzeba je obejrzec na polu. Bez miejsc - jedno zdanie
+ * z powodem, bez pustej ramki.
  */
 export function ZoneList({ report }: { report: WaterReport }) {
   const t = useTranslations('report.zones');
   const format = useFormatter();
-  const tReport = useTranslations('report');
   const describe = useZoneDescription();
+  const actions = useZoneActions(report);
   const { active } = useZoneFocus();
   const zones = fieldZones(report);
   const map = report.zones;
 
   if (zones.length === 0) {
     return (
-      <div className="flex max-w-xl flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <h3 className="text-lg font-semibold">{t('title')}</h3>
         <p className="text-base text-muted-foreground" data-testid="zone-list-empty">
           {t(`reason.${map?.reason ?? 'no_spatial_data'}`)}
@@ -109,46 +140,63 @@ export function ZoneList({ report }: { report: WaterReport }) {
   const vegetation = map?.basis?.includes('vegetation') ?? false;
 
   return (
-    <div className="flex max-w-xl flex-col gap-2 print:break-inside-avoid" data-testid="zone-list">
+    <div className="flex flex-col gap-2" data-testid="zone-list">
       <h3 className="text-lg font-semibold">{t('title')}</h3>
+      <p className="text-base text-muted-foreground print:hidden">{t('hint')}</p>
       <ol className="flex flex-col gap-1" aria-label={t('title')}>
-        {zones.map(({ zone, number }: NumberedZone) => (
-          <li key={zone.id}>
-            <ZoneButton
-              zoneId={zone.id}
-              className={cn(
-                'flex min-h-11 w-full items-start gap-3 rounded-md px-2 py-2 text-left text-base transition-colors hover:bg-muted focus-visible:bg-muted print:min-h-0 print:px-0 print:py-0.5',
-                active === zone.id && 'bg-muted',
-              )}
-            >
-              <ZoneNumber number={number} active={active === zone.id} />
-              <span className="flex flex-col">
-                <span>
-                  <span className="sr-only">{t('number', { number })} </span>
-                  {describe(zone)}
-                </span>
-                {zone.share !== undefined && (
-                  <span className="text-sm text-muted-foreground">
-                    {t('share', {
-                      percent: format.number(zone.share, {
-                        style: 'percent',
-                        maximumFractionDigits: zone.share < 0.1 ? 1 : 0,
-                      }),
-                    })}
-                  </span>
+        {zones.map(({ zone, number }: NumberedZone) => {
+          const action = actions(zone.id);
+
+          return (
+            <li key={zone.id}>
+              <ZoneButton
+                zoneId={zone.id}
+                className={cn(
+                  'flex min-h-12 w-full items-start gap-3 rounded-xl px-2 py-2 text-left text-base transition-colors duration-150 hover:bg-muted focus-visible:bg-muted aria-pressed:bg-muted aria-pressed:ring-2 aria-pressed:ring-(--sketch-highlight) print:min-h-0 print:px-0 print:py-0.5',
+                  active === zone.id && 'bg-muted',
                 )}
-              </span>
-            </ZoneButton>
-          </li>
-        ))}
+              >
+                <ZoneNumber number={number} active={active === zone.id} large />
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="font-medium">
+                    <span className="sr-only">{t('number', { number })} </span>
+                    {describe(zone)}
+                  </span>
+                  <span data-testid="zone-action">{action ? t('action', { action }) : t('noAction')}</span>
+                  {zone.share !== undefined && (
+                    <span className="text-sm text-muted-foreground">
+                      {t('share', {
+                        percent: format.number(zone.share, {
+                          style: 'percent',
+                          maximumFractionDigits: zone.share < 0.1 ? 1 : 0,
+                        }),
+                      })}
+                    </span>
+                  )}
+                </span>
+              </ZoneButton>
+            </li>
+          );
+        })}
       </ol>
       <p className="text-sm text-muted-foreground" data-testid="zone-list-basis">
         {vegetation ? imageText : t('terrainOnly')} {t('verify')}
       </p>
-      <ReportDetails summary={tReport('details')}>
-        <ZoneMeasures zones={zones} report={report} />
-      </ReportDetails>
     </div>
+  );
+}
+
+/** Liczby miejsc dla doradcy w szczegolach (sekcja 4) - lista miejsc jest w karcie "Twoje pole" na gorze. */
+export function ZoneMeasuresDetails({ report }: { report: WaterReport }) {
+  const t = useTranslations('report.zones');
+  const zones = fieldZones(report);
+
+  if (zones.length === 0) return null;
+
+  return (
+    <ReportDetails summary={t('measuresTitle')}>
+      <ZoneMeasures zones={zones} report={report} />
+    </ReportDetails>
   );
 }
 

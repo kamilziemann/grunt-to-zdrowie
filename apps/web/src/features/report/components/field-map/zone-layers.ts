@@ -149,7 +149,7 @@ export function zoneCollection(
 }
 
 /** Punkt na numer miejsca (w srodku obszaru, jak na szkicu; na linii splywu - wierzcholek w polowie). */
-function labelPosition(geometry: Zone['geometry']): [number, number] {
+export function zoneLabelPosition(geometry: Zone['geometry']): [number, number] {
   if (geometry.type === 'LineString') {
     const middle = geometry.coordinates[Math.floor(geometry.coordinates.length / 2)];
 
@@ -181,7 +181,7 @@ export function zoneLabelCollection(
             {
               type: 'Feature',
               properties: { id: mark.id, number: String(mark.number) },
-              geometry: { type: 'Point', coordinates: labelPosition(shape.geometry) },
+              geometry: { type: 'Point', coordinates: zoneLabelPosition(shape.geometry) },
             },
           ]
         : [];

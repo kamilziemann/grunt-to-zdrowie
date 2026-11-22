@@ -619,8 +619,6 @@
     "sources": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK.",
     "sourcesDated": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}).",
     "highlight": "Pomarańczowy kolor – najbliższy rów i ciek.",
-    "showAerial": "Zdjęcie lotnicze",
-    "showSketch": "Szkic",
     "sketch": {
       "label": "Szkic: {field} i woda w promieniu {radius} m od pola.",
       "loading": "Wczytuję rowy i cieki…",
@@ -669,17 +667,36 @@
       "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK.",
       "zoneButton": "Miejsce {number} na polu"
     },
-    "above": "Szkic pola z rowami i miejscami na polu jest na górze raportu, obok oceny.",
-    "modeLabel": "Widok pola: szkic albo zdjęcie lotnicze",
+    "above": "Miejsca na polu z numerami są w karcie „Twoje pole” na górze raportu – kliknij numer, żeby zobaczyć miejsce na szkicu.",
+    "modeLabel": "Co pokazać na obrazie pola",
     "layers": {
       "label": "Warstwy na zdjęciu lotniczym",
       "photo": "Zdjęcie lotnicze",
       "water": "Rowy i cieki",
-      "zones": "Miejsca na polu",
-      "zonesHint": "Stuknij miejsce na mapie, żeby wyróżnić jego zalecenia; stuknij jeszcze raz albo obok, żeby zdjąć wyróżnienie."
+      "zones": "Miejsca na polu"
     },
     "zoomIn": "Przybliż",
-    "zoomOut": "Oddal"
+    "zoomOut": "Oddal",
+    "modes": {
+      "sketch": {
+        "label": "Szkic",
+        "subtitle": "Woda na polu i wokół niego – szkic w skali, północ u góry"
+      },
+      "aerial": {
+        "label": "Zdjęcie lotnicze",
+        "subtitle": "Pole na zdjęciu lotniczym, z rowami, ciekami i miejscami na polu"
+      },
+      "condition": {
+        "label": "Kondycja roślin",
+        "subtitle": "Gdzie rośliny rosną lepiej, a gdzie słabiej – zdjęcie z satelity"
+      },
+      "moisture": {
+        "label": "Woda w roślinach",
+        "subtitle": "Gdzie rośliny mają w sobie więcej wody – zdjęcie z satelity"
+      }
+    },
+    "signsTitle": "Co jest na szkicu",
+    "backToSketch": "Wróć do szkicu"
   },
   "print": {
     "header": "{app} · raport wodny pola",
@@ -763,7 +780,11 @@
       "segment": "odcinek {from}–{to} m",
       "none": "brak liczb",
       "note": "NDMI i NDVI z jednej sceny – duża różnica może też oznaczać inny użytek albo inny termin siewu, nie tylko wilgotność."
-    }
+    },
+    "hint": "Kliknij miejsce, żeby pokazać je na obrazie. Drugie kliknięcie zdejmuje wyróżnienie.",
+    "action": "Co zrobić: {action}.",
+    "noAction": "Osobnego zalecenia tu nie ma – obejrzyj to miejsce, gdy będziesz na polu.",
+    "measuresTitle": "Miejsca na polu – liczby dla doradcy"
   },
   "stored": {
     "computed": "Policzono {date}, {time}",
@@ -1012,7 +1033,6 @@
   },
   "satellite": {
     "title": "Pole z satelity",
-    "summary": "Kondycja roślin i woda w roślinach na zdjęciu z satelity – rozwiń, żeby pobrać obrazy.",
     "noParcels": "Zdjęć z satelity nie pokazujemy dla pola narysowanego bez działek ewidencyjnych – obraz pobieramy dla całych działek.",
     "notLoaded": "Obrazy pola z satelity nie zostały pobrane. Żeby były w PDF, użyj przycisku „Zapisz PDF” w raporcie.",
     "intro": "Dwa obrazy działki z jednego zdjęcia satelitarnego sprzed dnia analizy. Pokazują, gdzie rośliny mają się lepiej, a gdzie gorzej – i gdzie mają w sobie więcej wody.",

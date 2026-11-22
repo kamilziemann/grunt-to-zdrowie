@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { HYDRO_TILES } from '@/features/parcels';
@@ -117,5 +117,58 @@ describe('FieldMap', () => {
     expect(screen.getByTestId('field-sketch-field')).toBeInTheDocument();
     expect(screen.queryByTestId('field-sketch-fact')).toBeNull();
     expect(screen.getByTestId('field-map')).toHaveTextContent('Wczytuję rowy i cieki');
+  });
+
+  it('cztery tryby obrazu; kondycja roslin z satelity: obraz z numerami miejsc, skala slowami i data zdjecia', () => {
+    const client = clientWithTiles();
+    const [west, south, east, north] = FIELD_REPORT.field.bbox;
+
+    client.setQueryData(['imagery', 'vegetation', 'a', '2018-06-15', 'condition'], {
+      layer: 'condition',
+      images: [{ image: 'data:image/png;base64,AAAA', bbox: [west, south, east, north] }],
+      bbox: [west, south, east, north],
+      requestedDate: '2018-06-15',
+      sceneDate: '2018-05-29',
+      sceneCloudCover: 3,
+      clearShare: 1,
+      scale: { low: 0.41, high: 0.83, mean: 0.66 },
+    });
+    renderWithIntl(
+      <QueryClientProvider client={client}>
+        <FieldMap field={FIELD_REPORT.field} zones={ZONES} imageryParcels="a" imageryDate="2018-06-15" />
+      </QueryClientProvider>,
+    );
+
+    const modes = within(screen.getByTestId('field-map-mode')).getAllByRole('button');
+
+    expect(modes.map((button) => button.textContent)).toEqual([
+      'Szkic',
+      'Zdjęcie lotnicze',
+      'Kondycja roślin',
+      'Woda w roślinach',
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: 'Kondycja roślin' }));
+
+    expect(screen.getByTestId('field-map')).toHaveAttribute('data-mode', 'condition');
+    expect(screen.getAllByTestId('satellite-zone-number')).toHaveLength(ZONES.length);
+    expect(screen.getByTestId('field-satellite-notes')).toHaveTextContent('słabiej');
+    expect(screen.getByTestId('field-satellite-notes')).toHaveTextContent(
+      'Zdjęcie satelitarne z 29 maja 2018.',
+    );
+    window.localStorage.removeItem('gtz-field-map-mode');
+  });
+
+  it('wlasny obrys bez dzialek: jedno zdanie i powrot do szkicu jednym kliknieciem', () => {
+    window.localStorage.setItem('gtz-field-map-mode', 'moisture');
+    renderWithIntl(
+      <QueryClientProvider client={clientWithTiles()}>
+        <FieldMap field={FIELD} imageryParcels={null} imageryDate="2018-06-15" />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByTestId('field-satellite-state')).toHaveAttribute('data-state', 'noParcels');
+    fireEvent.click(screen.getByTestId('field-satellite-back'));
+    expect(screen.getByTestId('field-map')).toHaveAttribute('data-mode', 'sketch');
+    window.localStorage.removeItem('gtz-field-map-mode');
   });
 });

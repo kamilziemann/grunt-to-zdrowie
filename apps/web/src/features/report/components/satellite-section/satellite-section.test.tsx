@@ -1,5 +1,5 @@
-// Sekcja "Pole z satelity" bez sieci: pole bez dzialek = jedno zdanie, a zanim ktos rozwinie blok albo kliknie
-// "Zapisz PDF" - zdanie dla wydruku zamiast pustych ramek (obrazy pobiera dopiero rozwiniecie).
+// Blok "Pole z satelity" (tylko wydruk) bez sieci: pole bez dzialek = jedno zdanie, a zanim ktos kliknie "Zapisz PDF"
+// - zdanie dla wydruku zamiast pustych ramek (na ekranie obrazy sa trybami karty "Twoje pole").
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
@@ -19,10 +19,10 @@ function renderSection(report = FIELD_REPORT) {
 }
 
 describe('SatelliteSection', () => {
-  it('zwinieta; bez rozwiniecia nic nie pobiera, wydruk dostaje zdanie, jak dolaczyc zdjecia', () => {
+  it('tylko na wydruku; bez "Zapisz PDF" nic nie pobiera, wydruk dostaje zdanie, jak dolaczyc zdjecia', () => {
     renderSection();
 
-    expect(screen.getByTestId('satellite-section')).not.toHaveAttribute('open');
+    expect(screen.getByTestId('satellite-section')).toHaveClass('hidden', 'print:flex');
     expect(screen.getByTestId('satellite-not-loaded')).toHaveTextContent('Zapisz PDF');
     expect(screen.queryByTestId('satellite-images')).toBeNull();
   });

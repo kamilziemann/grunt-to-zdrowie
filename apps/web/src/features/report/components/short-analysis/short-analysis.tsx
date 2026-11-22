@@ -112,8 +112,8 @@ function useNumberSentence(report: WaterReport): string | null {
 
 /**
  * Werdykt widoku prostego: jedno slowo z ikona, skala od mokro do bardzo sucho, zdanie z liczba i zdanie oceny.
- * Na komputerze ciemny panel z krotka analiza w pieciu zdaniach (teraz, 10 lat, dlaczego, co najpierw, pewnosc);
- * na telefonie jasna karta - te same tresci sa w klockach ponizej. Na wydruku jasny panel z ramka i piecioma zdaniami.
+ * Na komputerze ciemny panel na cala szerokosc: werdykt po lewej, krotka analiza w pieciu zdaniach po prawej (teraz,
+ * 10 lat, dlaczego, co najpierw, pewnosc); na telefonie jasna karta - te same tresci sa w klockach ponizej. Na wydruku jasny panel z ramka i piecioma zdaniami.
  */
 export function ShortAnalysis({ report }: { report: WaterReport }) {
   const t = useTranslations('report.simple');
@@ -191,46 +191,69 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
   return (
     <section
       aria-labelledby="ocena-skrot-title"
-      className="flex flex-col gap-5 rounded-3xl border bg-card p-5 text-card-foreground shadow-card sm:p-7 lg:border-transparent lg:surface-panel print:rounded-lg print:[color-scheme:light] print:border-2 print:border-foreground/70 print:bg-card print:p-4 print:text-foreground print:shadow-none"
+      className="flex flex-col gap-5 rounded-3xl border bg-card p-5 text-card-foreground shadow-card sm:p-7 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8 lg:border-transparent lg:surface-panel print:grid print:grid-cols-2 print:gap-x-4 print:rounded-lg print:[color-scheme:light] print:border-2 print:border-foreground/70 print:bg-card print:p-4 print:text-foreground print:shadow-none"
       data-testid="short-analysis"
       data-level={level}
     >
       <h2 id="ocena-skrot-title" className="sr-only">
         {t('title')}
       </h2>
-      <div className="flex items-start gap-4">
-        <Icon
-          aria-hidden="true"
-          className={cn(
-            'size-14 shrink-0 stroke-[1.6] sm:size-16',
-            step ? STEP_STYLES[step].text : 'text-muted-foreground',
-          )}
-        />
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-5xl leading-none font-bold tracking-tight" data-testid="verdict-word">
-            {step ? t(`scale.${step}`) : tVerdict(`levels.${level}`)}
-          </p>
-          {numberSentence && (
-            <p className="text-lg leading-snug font-medium" data-testid="verdict-number">
-              {numberSentence}
+      <div className="flex flex-col gap-5">
+        <div className="flex items-start gap-4">
+          <Icon
+            aria-hidden="true"
+            className={cn(
+              'size-14 shrink-0 stroke-[1.6] sm:size-16',
+              step ? STEP_STYLES[step].text : 'text-muted-foreground',
+            )}
+          />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-5xl leading-none font-bold tracking-tight" data-testid="verdict-word">
+              {step ? t(`scale.${step}`) : tVerdict(`levels.${level}`)}
             </p>
-          )}
+            {numberSentence && (
+              <p className="text-lg leading-snug font-medium" data-testid="verdict-number">
+                {numberSentence}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-      {step && <Scale step={step} />}
-      <p className="text-lg leading-snug lg:hidden print:hidden">
-        {offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`)}
-      </p>
-      {caveat && (
-        <p
-          className="rounded-xl border-2 border-warning bg-warning/10 px-3 py-2 text-base font-medium lg:border-data-sand lg:bg-transparent print:border-warning"
-          data-testid="verdict-caveat-short"
-        >
-          {tVerdict('caveat.title')}
+        {step && <Scale step={step} />}
+        <p className="text-lg leading-snug lg:hidden print:hidden">
+          {offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`)}
         </p>
-      )}
+        {caveat && (
+          <p
+            className="rounded-xl border-2 border-warning bg-warning/10 px-3 py-2 text-base font-medium lg:border-data-sand lg:bg-transparent print:border-warning"
+            data-testid="verdict-caveat-short"
+          >
+            {tVerdict('caveat.title')}
+          </p>
+        )}
+        {summer && (
+          <Link
+            href={routes.report({ ...reportSearch(report), data: summer })}
+            className="flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground hover:bg-primary/90 print:hidden"
+            data-testid="summer-link"
+          >
+            {t('offSeason.summer', {
+              date: format.dateTime(isoDay(summer), {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'UTC',
+              }),
+            })}
+          </Link>
+        )}
+        <p className="text-base text-muted-foreground">
+          {t('asOf', {
+            date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
+          })}
+        </p>
+      </div>
       <dl
-        className="flex flex-col gap-3 border-t border-current/15 pt-4 max-lg:hidden print:flex"
+        className="flex flex-col gap-3 border-t border-current/15 pt-4 max-lg:hidden lg:border-t-0 lg:border-l lg:pt-1 lg:pl-8 print:flex print:border-t-0 print:border-l print:pt-0 print:pl-4"
         data-testid="short-analysis-lines"
       >
         {lines.map((line) => (
@@ -240,27 +263,6 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           </div>
         ))}
       </dl>
-      {summer && (
-        <Link
-          href={routes.report({ ...reportSearch(report), data: summer })}
-          className="flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground hover:bg-primary/90 print:hidden"
-          data-testid="summer-link"
-        >
-          {t('offSeason.summer', {
-            date: format.dateTime(isoDay(summer), {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              timeZone: 'UTC',
-            }),
-          })}
-        </Link>
-      )}
-      <p className="text-base text-muted-foreground">
-        {t('asOf', {
-          date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
-        })}
-      </p>
     </section>
   );
 }

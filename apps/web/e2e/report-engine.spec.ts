@@ -226,67 +226,113 @@ test.describe('miejsca na polu', () => {
 });
 
 test.describe('pole z satelity', () => {
-  test('zwinięte do rozwinięcia: dopiero wtedy pobiera oba obrazy z dniem analizy; skala słowami i data zdjęcia', async ({
+  test('karta „Twoje pole”: obraz z satelity dopiero po wybraniu trybu, z numerami miejsc, skalą słowami i datą', async ({
     page,
   }) => {
     const imagery = await mockImageryApi(page);
 
     await mockReport(page, FIELD_REPORT);
-    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+    await page.goto(reportUrl(FIELD_REPORT));
 
-    const section = page.getByTestId('satellite-section');
+    const card = page.getByTestId('field-map');
 
-    await expect(section).not.toHaveAttribute('open');
+    await expect(card).toHaveAttribute('data-mode', 'sketch');
+    // na ekranie obrazy sa w karcie - blok "Pole z satelity" jest tylko na wydruku
+    await expect(page.getByTestId('satellite-section')).toBeHidden();
     expect(imagery.requests).toHaveLength(0);
 
-    await section.locator('summary').click();
-    await expect(page.getByTestId('satellite-condition')).toHaveAttribute('data-state', 'ready');
-    await expect(page.getByTestId('satellite-moisture')).toHaveAttribute('data-state', 'ready');
-    expect(imagery.requests.every((url) => url.includes('data=2018-06-15'))).toBe(true);
-    await expect(page.getByTestId('satellite-condition')).toContainText('słabiej');
-    await expect(page.getByTestId('satellite-moisture')).toContainText('wilgotno');
-    await expect(page.getByTestId('satellite-moisture')).toContainText('Zdjęcie satelitarne z 29 maja 2018.');
-    await expect(section).toContainText('wilgotność roślin, nie gleby');
-    await expect(section).toContainText('Kolory wymagają druku kolorowego');
+    await card.getByRole('button', { name: 'Kondycja roślin' }).click();
+    const notes = page.getByTestId('field-satellite-notes');
+
+    await expect(notes).toHaveAttribute('data-state', 'ready');
+    await expect(notes).toContainText('słabiej');
+    await expect(notes).toContainText('Zdjęcie satelitarne z 29 maja 2018.');
+    await expect(page.getByTestId('satellite-zone-number')).toHaveCount(4);
+    expect(imagery.requests).toHaveLength(1);
+    expect(imagery.requests[0]).toContain('warstwa=condition');
+    expect(imagery.requests[0]).toContain('data=2018-06-15');
+
+    // miejsce z listy wyroznia numer na obrazie, a numer (klawiatura - obraz testowy ma inny zasieg niz pole)
+    // zdejmuje wybor
+    const badge = page.getByTestId('satellite-zone-number').first();
+
+    await page.getByTestId('zone-list').getByRole('button').first().click();
+    await expect(badge).toHaveAttribute('aria-pressed', 'true');
+    await badge.press('Enter');
+    await expect(badge).toHaveAttribute('aria-pressed', 'false');
+
+    await card.getByRole('button', { name: 'Woda w roślinach' }).click();
+    await expect(notes).toHaveAttribute('data-state', 'ready');
+    await expect(notes).toContainText('wilgotno');
+    await expect(notes).toContainText('wilgotność roślin, nie gleby');
     await expectNoViolations(page);
+
+    // wybor zapamietany w przegladarce
+    await page.reload();
+    await expect(page.getByTestId('field-map')).toHaveAttribute('data-mode', 'moisture');
   });
 
-  test('„Zapisz PDF” czeka na zdjęcia, potem otwiera wydruk', async ({ page }) => {
-    await page.addInitScript(() => {
-      (window as unknown as { printed: number }).printed = 0;
-      window.print = () => {
-        (window as unknown as { printed: number }).printed += 1;
-      };
-    });
-    await mockImageryApi(page);
-    // pierwsze pobranie trwa - przycisk mowi, ze laduje (trasa dodana pozniej dziala pierwsza)
-    await page.route('**/api/imagery/vegetation**', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 4000));
-      await route.fallback();
-    });
-    await mockReport(page, FIELD_REPORT);
-    await page.goto(reportUrl(FIELD_REPORT));
-    // raport liczy sie po hydratacji i podmienia adres na zapisany - klikamy w gotowy raport
-    await expect(page.getByTestId('short-analysis')).toBeVisible();
-    await page.waitForLoadState('networkidle');
+  for (const mode of [null, 'moisture'] as const) {
+    test(`„Zapisz PDF” czeka na zdjęcia, potem otwiera wydruk${mode ? ' (tryb satelitarny już wybrany w karcie)' : ''}`, async ({
+      page,
+    }) => {
+      await page.addInitScript((chosen) => {
+        const target = window as unknown as { printed: number; printedImages: number };
 
-    await page.getByRole('button', { name: 'Drukuj / zapisz PDF' }).click();
-    await expect(page.getByRole('button', { name: 'Ładuję zdjęcia z satelity…' })).toBeVisible();
-    await expect.poll(() => page.evaluate(() => (window as unknown as { printed: number }).printed)).toBe(1);
-    await expect(page.getByTestId('satellite-condition')).toHaveAttribute('data-state', 'ready');
-    await page.emulateMedia({ media: 'print' });
-    await expect(page.getByTestId('satellite-moisture').locator('img')).toBeVisible();
-  });
+        target.printed = 0;
+        target.printedImages = 0;
+        window.print = () => {
+          target.printed += 1;
+          target.printedImages = document.querySelectorAll(
+            '[data-testid="satellite-section"] img[data-satellite-image]',
+          ).length;
+        };
 
-  test('brak czystego zdjęcia: jedno zdanie zamiast dwóch pustych ramek', async ({ page }) => {
+        if (chosen) window.localStorage.setItem('gtz-field-map-mode', chosen);
+      }, mode);
+      await mockImageryApi(page);
+      // pierwsze pobranie trwa - przycisk mowi, ze laduje (trasa dodana pozniej dziala pierwsza)
+      await page.route('**/api/imagery/vegetation**', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await route.fallback();
+      });
+      await mockReport(page, FIELD_REPORT);
+      await page.goto(reportUrl(FIELD_REPORT));
+      // raport liczy sie po hydratacji i podmienia adres na zapisany - klikamy w gotowy raport
+      await expect(page.getByTestId('short-analysis')).toBeVisible();
+      await page.waitForLoadState('networkidle');
+
+      await page.getByRole('button', { name: 'Drukuj / zapisz PDF' }).click();
+      await expect(page.getByRole('button', { name: 'Ładuję zdjęcia z satelity…' })).toBeVisible();
+      await expect(page.getByText('Przygotowuję PDF')).toBeVisible();
+      await expect
+        .poll(() => page.evaluate(() => (window as unknown as { printed: number }).printed))
+        .toBe(1);
+      // okno wydruku otworzylo sie dopiero z oboma obrazami w bloku "Pole z satelity"
+      expect(await page.evaluate(() => (window as unknown as { printedImages: number }).printedImages)).toBe(
+        2,
+      );
+      await expect(page.getByTestId('satellite-condition')).toHaveAttribute('data-state', 'ready');
+      await page.emulateMedia({ media: 'print' });
+      await expect(page.getByTestId('satellite-moisture').locator('img')).toBeVisible();
+      // na wydruku w karcie zawsze szkic
+      await expect(page.getByTestId('field-sketch')).toBeVisible();
+    });
+  }
+
+  test('brak czystego zdjęcia: jedno zdanie i powrót do szkicu jednym kliknięciem', async ({ page }) => {
     await mockImageryApi(page, { kind: 'problem', status: 404, code: 'not_found', reason: 'no_clear_scene' });
     await mockReport(page, FIELD_REPORT);
-    await page.goto(`${detailed(reportUrl(FIELD_REPORT))}#satelita`);
+    await page.goto(reportUrl(FIELD_REPORT));
 
+    await page.getByTestId('field-map').getByRole('button', { name: 'Kondycja roślin' }).click();
+    await expect(page.getByTestId('field-satellite-state')).toHaveAttribute('data-state', 'noClearScene');
     await expect(page.getByTestId('satellite-problem')).toContainText(
       'Brak czystego zdjęcia z satelity: przez 30 dni przed 15 czerwca 2018',
     );
-    await expect(page.getByTestId('satellite-condition')).toHaveCount(0);
+    await page.getByTestId('field-satellite-back').click();
+    await expect(page.getByTestId('field-map')).toHaveAttribute('data-mode', 'sketch');
+    await expect(page.getByTestId('field-sketch')).toBeVisible();
   });
 });
 
