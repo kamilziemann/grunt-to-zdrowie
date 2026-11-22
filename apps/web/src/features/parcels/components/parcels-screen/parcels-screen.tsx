@@ -7,6 +7,7 @@ import {
   POLAND_BOUNDS,
   type Parcel,
   type ParcelCandidate,
+  type ParcelBoundaryTileZoom,
   type ParcelOutline,
   type Place,
 } from '@app/contracts';
@@ -291,7 +292,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   );
 
   const loadBoundaries = useCallback(
-    async (x: number, y: number) => (await queryClient.query(parcelBoundariesQuery(x, y))).items,
+    (x: number, y: number, z: ParcelBoundaryTileZoom) => queryClient.query(parcelBoundariesQuery(x, y, z)),
     [queryClient],
   );
 

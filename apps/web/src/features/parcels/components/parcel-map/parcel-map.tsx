@@ -3,7 +3,7 @@
 // przelaczana widocznoscia, a nie `setStyle` - dzieki temu zaznaczone dzialki nie znikaja przy zmianie podkladu.
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import type { HydroTile, ParcelOutline } from '@app/contracts';
+import type { HydroTile, ParcelBoundaries, ParcelBoundaryTileZoom, ParcelOutline } from '@app/contracts';
 import { LoaderCircle } from 'lucide-react';
 import type * as MapLibre from 'maplibre-gl';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -34,7 +34,10 @@ import {
   BOUNDARY_LABELS_SOURCE,
   BOUNDARY_LAYER_IDS,
   BOUNDARY_TILE_CACHE,
+  boundaryTileKey,
   boundaryTiles,
+  boundaryTileZoom,
+  coarseParent,
   DRAW_SOURCE,
   drawingCollection,
   IMAGERY_PAINT,
@@ -85,6 +88,8 @@ export interface ParcelMapLabels {
   loadingBoundaries: string;
   /** wskaznik, gdy dociagaja sie rowy i cieki */
   loadingHydro: string;
+  /** podpowiedz, gdy kafel granic byl obciety przez usluge (miasto, gesta szachownica) */
+  zoomForBoundaries: string;
 }
 
 /**
@@ -109,8 +114,8 @@ export interface ParcelMapProps {
   basemap?: Basemap;
   /** granice i numery wszystkich dzialek (widoczne i pobierane dopiero w duzym przyblizeniu) */
   boundaries?: boolean;
-  /** obrysy dzialek w kaflu siatki granic; brak = mapa bez warstwy granic */
-  loadBoundaries?: (x: number, y: number) => Promise<readonly ParcelOutline[]>;
+  /** obrysy dzialek w kaflu siatki granic (poziom 14 albo 16); brak = mapa bez warstwy granic */
+  loadBoundaries?: (x: number, y: number, z: ParcelBoundaryTileZoom) => Promise<ParcelBoundaries>;
   /** rowy, cieki, wody i mokradla z BDOT10k (pobierane od przyblizenia HYDRO_MIN_ZOOM) */
   hydro?: boolean;
   /** kafel hydrografii; brak = mapa bez tej warstwy */
@@ -203,7 +208,12 @@ function addAppLayers(map: MapLibre.Map, container: HTMLElement): void {
     type: 'line',
     source: BOUNDARIES_SOURCE,
     minzoom: BOUNDARIES_MIN_ZOOM,
-    paint: { 'line-color': casing, 'line-width': 3.5, 'line-opacity': 0.7 },
+    // przy przyblizeniu 14-16 linii jest duzo - ciensze i bledsze, zeby nie zalaly zdjecia
+    paint: {
+      'line-color': casing,
+      'line-width': ['interpolate', ['linear'], ['zoom'], BOUNDARIES_MIN_ZOOM, 2, 16, 3.5],
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], BOUNDARIES_MIN_ZOOM, 0.5, 16, 0.7],
+    },
   });
   map.addLayer({
     id: 'parcel-boundaries-line',
@@ -213,7 +223,7 @@ function addAppLayers(map: MapLibre.Map, container: HTMLElement): void {
     layout: { 'line-join': 'round' },
     paint: {
       'line-color': token(container, '--map-boundary'),
-      'line-width': ['interpolate', ['linear'], ['zoom'], BOUNDARIES_MIN_ZOOM, 1, 19, 2],
+      'line-width': ['interpolate', ['linear'], ['zoom'], BOUNDARIES_MIN_ZOOM, 0.6, 16, 1, 19, 2],
     },
   });
   map.addLayer({
@@ -335,6 +345,8 @@ export function ParcelMap({
   const imageryCountRef = useRef(0);
   const [state, setState] = useState<MapState>('loading');
   const [boundariesLoading, setBoundariesLoading] = useState(false);
+  // w widoku jest kafel z14 obciety przez usluge - granic tam nie rysujemy, prosimy o przyblizenie
+  const [boundariesTruncated, setBoundariesTruncated] = useState(false);
   const [hydroLoading, setHydroLoading] = useState(false);
   // Najnowsze wartosci dla zdarzen mapy, ktora powstaje raz - bez przepinania sluchaczy przy kazdym renderze.
   const latest = useRef({
@@ -348,8 +360,8 @@ export function ParcelMap({
     loadHydro,
     onHydroStatus,
   });
-  // Obrysy pobrane kaflami siatki granic: klucz "x/y" -> dzialki; kolejnosc wpisow = kolejnosc pobrania.
-  const boundaryTilesRef = useRef(new Map<string, readonly ParcelOutline[]>());
+  // Obrysy pobrane kaflami siatki granic: klucz "z/x/y" -> kafel; kolejnosc wpisow = kolejnosc pobrania.
+  const boundaryTilesRef = useRef(new Map<string, ParcelBoundaries>());
   const pendingTilesRef = useRef(new Set<string>());
   // Kafle hydrografii: klucz "x/y" -> kafel; `unavailable` = ostatnia odpowiedz 404/503 (ponowimy przy ruchu mapy).
   const hydroRef = useRef({
@@ -466,32 +478,57 @@ export function ParcelMap({
     }
   }, [reportHydro]);
 
-  /** Dociaga granice dla widoku - tylko gdy warstwa jest wlaczona i przyblizenie pokazuje pojedyncze pola. */
+  /**
+   * Dociaga granice dla widoku - tylko gdy warstwa jest wlaczona i od przyblizenia 14. Ponizej 16 grube kafle z14;
+   * od 16 drobne kafle z16, ale tylko tam, gdzie pelnego kafla z14 nie ma w pamieci (obciety albo niepobrany).
+   */
   const refreshBoundaries = useCallback(() => {
     const map = mapRef.current;
     const { boundaries: enabled, loadBoundaries: load } = latest.current;
-
-    if (!map || !enabled || !load || map.getZoom() < BOUNDARIES_MIN_ZOOM) return;
-
-    const view = map.getBounds();
-    const tiles = boundaryTiles(view.getWest(), view.getSouth(), view.getEast(), view.getNorth());
-
-    if (tiles.length > MAX_BOUNDARY_TILES) return;
-
     const cache = boundaryTilesRef.current;
     const pending = pendingTilesRef.current;
-    const visible = new Set(tiles.map((tile) => `${tile.x}/${tile.y}`));
+
+    if (!map || !enabled || !load || map.getZoom() < BOUNDARIES_MIN_ZOOM) {
+      setBoundariesTruncated(false);
+
+      return;
+    }
+
+    const zoom = boundaryTileZoom(map.getZoom());
+    const view = map.getBounds();
+    const inView = boundaryTiles(view.getWest(), view.getSouth(), view.getEast(), view.getNorth(), zoom);
+
+    if (inView.length > MAX_BOUNDARY_TILES[zoom]) {
+      setBoundariesTruncated(false);
+
+      return;
+    }
+
+    const tiles = inView.filter((tile) => {
+      if (tile.z === BOUNDARIES_MIN_ZOOM) return true;
+
+      const parent = cache.get(boundaryTileKey(coarseParent(tile)));
+
+      return !parent || parent.truncated;
+    });
+    const visible = new Set(
+      inView.flatMap((tile) => [boundaryTileKey(tile), boundaryTileKey(coarseParent(tile))]),
+    );
+    const truncatedInView = () =>
+      zoom === BOUNDARIES_MIN_ZOOM && tiles.some((tile) => cache.get(boundaryTileKey(tile))?.truncated);
+
+    setBoundariesTruncated(truncatedInView());
 
     for (const tile of tiles) {
-      const key = `${tile.x}/${tile.y}`;
+      const key = boundaryTileKey(tile);
 
       if (cache.has(key) || pending.has(key)) continue;
 
       pending.add(key);
       setBoundariesLoading(true);
-      load(tile.x, tile.y)
-        .then((outlines) => {
-          cache.set(key, outlines);
+      load(tile.x, tile.y, tile.z)
+        .then((data) => {
+          cache.set(key, data);
 
           for (const old of cache.keys()) {
             if (cache.size <= BOUNDARY_TILE_CACHE) break;
@@ -505,7 +542,11 @@ export function ParcelMap({
           void current?.getSource<MapLibre.GeoJSONSource>(BOUNDARIES_SOURCE)?.setData(lines);
           void current?.getSource<MapLibre.GeoJSONSource>(BOUNDARY_LABELS_SOURCE)?.setData(points);
 
-          return outlines.length;
+          // podpowiedz tylko, jesli mapa stoi tam, gdzie byla (przy ruchu przeliczy ja nastepne odswiezenie)
+          if (current && boundaryTileZoom(current.getZoom()) === zoom)
+            setBoundariesTruncated(truncatedInView());
+
+          return data.items.length;
         })
         // brak granic nie blokuje pracy z mapa; kafel sprobuje sie pobrac przy nastepnym ruchu
         .catch(() => 0)
@@ -576,7 +617,9 @@ export function ParcelMap({
           const hitId: unknown = hit?.properties.id;
           const outline =
             typeof hitId === 'string'
-              ? [...boundaryCache.values()].flat().find((candidate) => candidate.id === hitId)
+              ? [...boundaryCache.values()]
+                  .flatMap((tile) => tile.items)
+                  .find((candidate) => candidate.id === hitId)
               : undefined;
 
           latest.current.onPick?.(event.lngLat.lng, event.lngLat.lat, outline);
@@ -711,6 +754,16 @@ export function ParcelMap({
     refreshHydro();
   }, [state, hydro, refreshHydro]);
 
+  const loadingAny = status !== null || boundariesLoading || (hydro && hydroLoading);
+  const message =
+    status ??
+    (boundariesLoading
+      ? labels.loadingBoundaries
+      : hydro && hydroLoading
+        ? labels.loadingHydro
+        : boundaries && boundariesTruncated
+          ? labels.zoomForBoundaries
+          : null);
   const focusKey = focus?.key ?? null;
   const [west, south, east, north] = focus?.bbox ?? [0, 0, 0, 0];
 
@@ -738,15 +791,16 @@ export function ParcelMap({
         // wymiary z rodzica, nie `absolute`: arkusz stylow MapLibre ustawia kontenerowi `position: relative`
         className="size-full"
       />
-      {state === 'ready' && (status !== null || boundariesLoading || (hydro && hydroLoading)) && (
+      {state === 'ready' && message !== null && (
         <output
           className={cn(
             'pointer-events-none absolute bottom-3 left-1/2 z-10 flex w-max max-w-[calc(100%-6rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-3 py-1.5 text-sm font-medium text-card-foreground shadow-md',
             statusClassName,
           )}
+          data-testid="map-status"
         >
-          <LoaderCircle className="size-4 animate-spin text-primary" aria-hidden="true" />
-          {status ?? (boundariesLoading ? labels.loadingBoundaries : labels.loadingHydro)}
+          {loadingAny && <LoaderCircle className="size-4 animate-spin text-primary" aria-hidden="true" />}
+          {message}
         </output>
       )}
       {state !== 'ready' && (

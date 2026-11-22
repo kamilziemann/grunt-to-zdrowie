@@ -5,6 +5,7 @@ import type {
   HydroTile,
   Parcel,
   ParcelBoundaries,
+  ParcelBoundaryTileZoom,
   ParcelSearchResult,
   PlaceSearchResult,
 } from '@app/contracts';
@@ -27,7 +28,8 @@ export const parcelsKeys = {
   at: (lng: number, lat: number) => ['parcels', 'at', lng, lat] as const,
   search: (query: string) => ['parcels', 'search', query] as const,
   places: (query: string) => ['parcels', 'places', query] as const,
-  boundaries: (x: number, y: number) => ['parcels', 'boundaries', x, y] as const,
+  boundaries: (x: number, y: number, z: ParcelBoundaryTileZoom) =>
+    ['parcels', 'boundaries', z, x, y] as const,
   hydro: (x: number, y: number) => ['parcels', 'hydro', x, y] as const,
 };
 
@@ -90,12 +92,17 @@ export const parcelSearchQuery = (query: string) =>
     retry: false,
   });
 
-/** GET /parcels/boundaries - obrysy i numery dzialek w kaflu siatki granic (warstwa granic na mapie). */
-export const parcelBoundariesQuery = (x: number, y: number) =>
+/**
+ * GET /parcels/boundaries - obrysy i numery dzialek w kaflu siatki granic na poziomie 14 albo 16 (warstwa granic na
+ * mapie) i flaga kafla obcietego przez usluge.
+ */
+export const parcelBoundariesQuery = (x: number, y: number, z: ParcelBoundaryTileZoom) =>
   queryOptions({
-    queryKey: parcelsKeys.boundaries(x, y),
+    queryKey: parcelsKeys.boundaries(x, y, z),
     queryFn: (): Promise<ParcelBoundaries> =>
-      unwrap<ParcelBoundaries>(getApi().parcels.boundaries.$get({ query: { x: String(x), y: String(y) } })),
+      unwrap<ParcelBoundaries>(
+        getApi().parcels.boundaries.$get({ query: { x: String(x), y: String(y), z: String(z) } }),
+      ),
     // granice zmieniaja sie rzadko, a kafel bywa ciezki - trzymamy go dlugo
     staleTime: 6 * STALE_MS,
     retry: false,

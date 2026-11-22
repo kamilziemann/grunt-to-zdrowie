@@ -19,6 +19,7 @@ export function useMapLabels(variant: 'interactive' | 'static' = 'interactive'):
       attribution: t('attribution'),
       loadingBoundaries: t('loadingBoundaries'),
       loadingHydro: t('loadingHydro'),
+      zoomForBoundaries: t('zoomForBoundaries'),
     }),
     [t, variant],
   );

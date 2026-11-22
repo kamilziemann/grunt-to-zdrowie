@@ -103,7 +103,8 @@
       "zoom": "Przybliż mapę, żeby zobaczyć rowy i cieki.",
       "unavailable": "Warstwa rowów i cieków jest chwilowo niedostępna. Reszta mapy działa normalnie."
     },
-    "boundariesShort": "Granice"
+    "boundariesShort": "Granice",
+    "zoomForBoundaries": "Przybliż, żeby zobaczyć granice działek."
   },
   "sheet": {
     "expand": "Rozwiń panel",

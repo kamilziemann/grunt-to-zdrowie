@@ -103,7 +103,8 @@
       "zoom": "Zoom in to see ditches and streams.",
       "unavailable": "The ditches and streams layer is temporarily unavailable. The rest of the map works normally."
     },
-    "boundariesShort": "Boundaries"
+    "boundariesShort": "Boundaries",
+    "zoomForBoundaries": "Zoom in to see parcel boundaries."
   },
   "sheet": {
     "expand": "Expand panel",

@@ -1,22 +1,30 @@
 // Stale mapy dzialek: zasieg, nazwy zrodel warstw dzialek i kafle granic. Podklady (mapa OpenFreeMap, ortofotomapa
 // GUGiK) sa w `@/lib/map-base` - wspolne z mapa w raporcie.
-import { PARCEL_BOUNDARY_TILE_ZOOM, POLAND_BOUNDS, type Parcel, type ParcelOutline } from '@app/contracts';
+import {
+  PARCEL_BOUNDARY_COARSE_ZOOM,
+  PARCEL_BOUNDARY_TILE_ZOOM,
+  POLAND_BOUNDS,
+  type Parcel,
+  type ParcelBoundaries,
+  type ParcelBoundaryTileZoom,
+} from '@app/contracts';
 import type { FeatureCollection } from 'geojson';
 import type { ExpressionSpecification, LngLatBoundsLike } from 'maplibre-gl';
 
 // Granice i numery wszystkich dzialek rysujemy sami z danych wektorowych (/api/parcels/boundaries nad WFS ewidencji
 // gruntow GUGiK): linie i podpisy sa ostre przy kazdym przyblizeniu i w kolorach aplikacji. Dane pobieramy kaflami
-// siatki XYZ i dopiero od duzego przyblizenia - przy widoku gminy czy kraju warstwa nic nie laduje.
+// siatki XYZ i dopiero od przyblizenia 14 - przy widoku gminy czy kraju warstwa nic nie laduje. Ponizej 16 kafle z14
+// (kilka zapytan na widok), od 16 drobne kafle z16 tam, gdzie kafel z14 byl obciety albo go nie ma.
 export const BOUNDARIES_SOURCE = 'parcel-boundaries';
 export const BOUNDARY_LABELS_SOURCE = 'parcel-boundary-labels';
 export const BOUNDARIES_ATTRIBUTION = 'Granice działek © GUGiK (EGiB)';
-export const BOUNDARIES_MIN_ZOOM = PARCEL_BOUNDARY_TILE_ZOOM;
+export const BOUNDARIES_MIN_ZOOM = PARCEL_BOUNDARY_COARSE_ZOOM;
 /** Numery pojawiaja sie chwile pozniej niz linie - przy mniejszym przyblizeniu zlewalyby sie ze soba. */
 export const BOUNDARY_LABELS_MIN_ZOOM = 16.6;
-/** Wiecej kafli w widoku = za male przyblizenie albo ogromny ekran; nie zasypujemy uslugi zapytaniami. */
-export const MAX_BOUNDARY_TILES = 24;
+/** Wiecej kafli w widoku = ogromny ekran; nie zasypujemy uslugi zapytaniami (limit dla kafli z16 i z14). */
+export const MAX_BOUNDARY_TILES: Record<ParcelBoundaryTileZoom, number> = { 14: 12, 16: 24 };
 /** Ile kafli trzymamy w pamieci mapy (starsze spoza widoku wypadaja). */
-export const BOUNDARY_TILE_CACHE = 80;
+export const BOUNDARY_TILE_CACHE = 60;
 /** Niewidoczne wypelnienie dzialek z warstwy granic: cel klikniecia i podswietlenie pod kursorem. */
 export const BOUNDARY_HIT_LAYER = 'parcel-boundaries-hit';
 
@@ -33,33 +41,56 @@ export const BOUNDARY_LAYER_IDS = [
 export interface BoundaryTile {
   x: number;
   y: number;
+  z: ParcelBoundaryTileZoom;
 }
 
-function tileX(lng: number): number {
-  return Math.floor(((lng + 180) / 360) * 2 ** PARCEL_BOUNDARY_TILE_ZOOM);
+/** Klucz kafla w pamieci mapy ("z/x/y"). */
+export const boundaryTileKey = (tile: BoundaryTile): string => `${tile.z}/${tile.x}/${tile.y}`;
+
+/** Poziom kafli dla przyblizenia mapy: ponizej 16 grube kafle z14, od 16 drobne z16. */
+export function boundaryTileZoom(mapZoom: number): ParcelBoundaryTileZoom {
+  return mapZoom < PARCEL_BOUNDARY_TILE_ZOOM ? PARCEL_BOUNDARY_COARSE_ZOOM : PARCEL_BOUNDARY_TILE_ZOOM;
 }
 
-function tileY(lat: number): number {
+/** Kafel z14 zawierajacy kafel z16 (cztery razy dluzszy bok). */
+export function coarseParent(tile: BoundaryTile): BoundaryTile {
+  const shift = 2 ** (tile.z - PARCEL_BOUNDARY_COARSE_ZOOM);
+
+  return { x: Math.floor(tile.x / shift), y: Math.floor(tile.y / shift), z: PARCEL_BOUNDARY_COARSE_ZOOM };
+}
+
+function tileX(lng: number, zoom: number): number {
+  return Math.floor(((lng + 180) / 360) * 2 ** zoom);
+}
+
+function tileY(lat: number, zoom: number): number {
   const rad = (lat * Math.PI) / 180;
 
-  return Math.floor(
-    ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * 2 ** PARCEL_BOUNDARY_TILE_ZOOM,
-  );
+  return Math.floor(((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * 2 ** zoom);
 }
 
-/** Kafle siatki granic pokrywajace prostokat widoku. */
-export function boundaryTiles(west: number, south: number, east: number, north: number): BoundaryTile[] {
+/** Kafle siatki granic na poziomie `zoom` pokrywajace prostokat widoku. */
+export function boundaryTiles(
+  west: number,
+  south: number,
+  east: number,
+  north: number,
+  zoom: ParcelBoundaryTileZoom = PARCEL_BOUNDARY_TILE_ZOOM,
+): BoundaryTile[] {
   const tiles: BoundaryTile[] = [];
 
-  for (let x = tileX(west); x <= tileX(east); x += 1) {
-    for (let y = tileY(north); y <= tileY(south); y += 1) tiles.push({ x, y });
+  for (let x = tileX(west, zoom); x <= tileX(east, zoom); x += 1) {
+    for (let y = tileY(north, zoom); y <= tileY(south, zoom); y += 1) tiles.push({ x, y, z: zoom });
   }
 
   return tiles;
 }
 
-/** Linie granic (poligony) i punkty podpisow z obrysow wielu kafli; dzialka z dwoch kafli wchodzi raz. */
-export function outlineCollections(tiles: Iterable<readonly ParcelOutline[]>): {
+/**
+ * Linie granic (poligony) i punkty podpisow z obrysow wielu kafli; dzialka z dwoch kafli wchodzi raz. Kafel obciety
+ * przez usluge nie jest rysowany - dziurawa szachownica mylilaby bardziej niz jej brak.
+ */
+export function outlineCollections(tiles: Iterable<ParcelBoundaries>): {
   lines: FeatureCollection;
   labels: FeatureCollection;
 } {
@@ -67,8 +98,10 @@ export function outlineCollections(tiles: Iterable<readonly ParcelOutline[]>): {
   const lines: FeatureCollection = { type: 'FeatureCollection', features: [] };
   const labels: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
-  for (const outlines of tiles) {
-    for (const outline of outlines) {
+  for (const tile of tiles) {
+    if (tile.truncated) continue;
+
+    for (const outline of tile.items) {
       if (seen.has(outline.id)) continue;
 
       seen.add(outline.id);
