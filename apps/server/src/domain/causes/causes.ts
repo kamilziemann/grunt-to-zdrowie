@@ -6,14 +6,12 @@
 import type { Assessment, Cause, Evidence, History, SourceId } from '@app/contracts';
 
 import type { StageInput } from '../analysis-stages';
-import { yearOf } from '../iso-date';
-import { deficitSeasons } from '../history';
+import { backgroundYears, deficitSeasons } from '../history';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
 import { soilClassNumber, soilClassesOf } from '../land-use';
 import { terrainTooCoarse } from '../terrain';
 import { assessPeriod } from '../water-indicators';
 
-const HISTORY_YEARS = 10;
 /** opad okresu ponizej 80% mediany z lat poprzednich = niedobor opadu */
 const LOW_PRECIP_SHARE = 0.8;
 /** parowanie okresu powyzej 110% mediany = duze zapotrzebowanie atmosfery */
@@ -53,7 +51,7 @@ function median(values: readonly number[]): number | null {
 
 /** Mediana opadu i parowania tego samego okresu IUNG w 10 latach przed data analizy. */
 function periodNorms(input: StageInput, periodNo: number): { precipMm: number | null; etpMm: number | null } {
-  const past = Array.from({ length: HISTORY_YEARS }, (_unused, index) => yearOf(input.date) - 1 - index)
+  const past = backgroundYears(input.date)
     .flatMap((year) => {
       const period = iungPeriods(year)[periodNo - 1];
 

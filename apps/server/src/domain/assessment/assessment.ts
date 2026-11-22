@@ -14,6 +14,7 @@ import type { Assessment, AssessmentLevel, ClimaticBalance, RootZone } from '@ap
 import type { SoilProfile } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { confidenceOf, type UncertaintyId } from '../confidence';
+import { backgroundYears } from '../history';
 import { hasFarmland } from '../land-use';
 import { addDays, isoDate, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods } from '../iung-periods';
@@ -29,7 +30,6 @@ import {
   FALLBACK_SOIL_CATEGORY,
 } from '../water-indicators';
 
-const HISTORY_YEARS = 10;
 const WINDOW_DAYS = 60;
 const STRESS_WINDOW_DAYS = 30;
 /** KBW blizej progu niz o 25% jego wartosci = "obserwuj" */
@@ -105,13 +105,16 @@ function climaticBalance(input: StageInput): ClimaticBalance | null {
   };
 }
 
-/** Miejsce KBW tego okresu wsrod tych samych okresow z 10 lat poprzednich (1 = najsuchszy). */
+/**
+ * Miejsce KBW tego okresu wsrod tych samych okresow: biezacy rok i lata tla z danymi (1 = najsuchszy). `years` to
+ * biezacy + tlo, czyli najwyzej 11 - "najsuchszy z 11 lat" = suchszy niz kazdy z 10 poprzednich sezonow.
+ */
 function rankInHistory(
   input: StageInput,
   period: { no: number },
   balanceMm: number,
 ): { rank: number; years: number } | null {
-  const earlier = Array.from({ length: HISTORY_YEARS }, (_unused, index) => yearOf(input.date) - 1 - index)
+  const earlier = backgroundYears(input.date)
     .map((year) => iungPeriods(year)[period.no - 1])
     .flatMap((past) => (past ? [assessPeriod(input, past, null, 1).balance.balanceMm] : []))
     .filter((value): value is number => value !== null);

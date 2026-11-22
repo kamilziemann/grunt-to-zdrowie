@@ -5,12 +5,12 @@
 import type { Assessment, Cause, Evidence } from '@app/contracts';
 
 import type { DailyWeather } from '../analysis-ports';
+import { BACKGROUND_YEARS } from '../history';
 import { addDays, addYears, yearOf } from '../iso-date';
 
 /** IMGW-PIB: dzien upalny = temperatura maksymalna powyzej 30°C. */
 export const HOT_DAY_TMAX_C = 30;
 
-const BACKGROUND_YEARS = 10;
 /** norma z mniej niz tylu lat to nie norma - wtedy jej nie podajemy */
 const MIN_BACKGROUND_YEARS = 5;
 /** okno liczymy, gdy dane ma co najmniej polowa dni (NASA POWER spoznia sie o kilka dni) */

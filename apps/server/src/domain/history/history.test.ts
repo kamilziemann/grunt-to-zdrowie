@@ -5,7 +5,8 @@ import type { DailyWeather, MeteoSeries } from '../analysis-ports';
 import type { StageInput } from '../analysis-stages';
 import { cropAtDate } from '../crop-calendar';
 import { addDays, addYears, daysBetween, yearOf } from '../iso-date';
-import { history } from './history';
+import { assess } from '../assessment';
+import { backgroundYears, deficitSeasons, history } from './history';
 
 const FIELD: FieldArea = {
   id: 'area:test',
@@ -132,5 +133,31 @@ describe('history', () => {
     expect(result.seasonsWithData).toBe(0);
     expect(new Set(result.calendar.map((item) => item.status))).toEqual(new Set(['missing']));
     expect(result.seasons[0]).toMatchObject({ stressDays: null, minBalanceMm: null });
+  });
+
+  it('te same lata tla wszedzie: sezony, kalendarz, sezony z niedoborem i miejsce okresu w historii', () => {
+    const stage = input('winter_wheat', alternatingYears('2026-07-15'));
+    const result = history(stage);
+    const background = backgroundYears(stage.date);
+    const rank = assess(stage).climaticBalance?.rankInHistory;
+
+    expect(background).toEqual([2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]);
+    expect(result.seasons.map((season) => season.year)).toEqual(background);
+    expect([...new Set(result.calendar.map((item) => item.year))]).toEqual(background);
+    expect(deficitSeasons(result).withData).toBe(result.seasonsWithData);
+    expect(new Set(result.currentCalendar?.map((item) => item.year))).toEqual(new Set([2026]));
+    // biezacy rok na tle 10 lat tla z danymi: najwyzej 11 pozycji, tlo = sezony z danymi
+    expect(rank?.years).toBe(result.seasonsWithData + 1);
+  });
+
+  it('przy niepelnym tle (pogoda tylko z 6 lat) wszystkie liczniki widza te same 6 lat', () => {
+    const full = alternatingYears('2026-07-15');
+    const short = { ...full, days: full.days.filter((day) => day.date >= '2019-09-01') };
+    const stage = input('winter_wheat', short);
+    const result = history(stage);
+
+    expect(result.seasonsWithData).toBe(6);
+    expect(deficitSeasons(result).withData).toBe(6);
+    expect(assess(stage).climaticBalance?.rankInHistory?.years).toBe(7);
   });
 });

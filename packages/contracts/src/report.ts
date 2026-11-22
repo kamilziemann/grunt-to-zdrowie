@@ -81,7 +81,10 @@ export const climaticBalanceSchema = z.object({
       }),
     )
     .optional(),
-  /** miejsce KBW tego okresu wsrod tych samych okresow z lat poprzednich: 1 = najsuchszy */
+  /**
+   * miejsce KBW tego okresu wsrod tych samych okresow: rok analizy ("biezacy") i 10 lat tla, te same co w `history`
+   * (1 = najsuchszy); `years` = biezacy + lata tla z danymi, czyli najwyzej 11
+   */
   rankInHistory: z
     .object({ rank: z.number().int().positive(), years: z.number().int().positive() })
     .optional(),
@@ -255,7 +258,10 @@ export const calendarCellSchema = z.object({
 });
 
 export const historySchema = z.object({
-  /** ile sezonow mialo dane - "prog przekroczony w 4 z 9 sezonow z danymi" */
+  /**
+   * ile sezonow tla mialo dane - "prog przekroczony w 4 z 9 sezonow z danymi". Tlo to 10 sezonow przed rokiem
+   * analizy (np. 2008-2017 dla 2018); te same lata maja `seasons` i `calendar`, a rok analizy jest w `currentCalendar`
+   */
   seasonsWithData: z.number().int().min(0),
   /** sezony z przekroczonym progiem suszy IUNG (dla kategorii gleby pola albo kategorii II, gdy gleba nieznana) */
   droughtSeasons: z.number().int().min(0),
@@ -277,7 +283,7 @@ export const historySchema = z.object({
       etDeficitMm: z.number().min(0).nullable().optional(),
     }),
   ),
-  /** kalendarz ryzyka: rok x okres */
+  /** kalendarz ryzyka: rok x okres, tylko lata tla (10 sezonow przed rokiem analizy) */
   calendar: z.array(calendarCellSchema),
   /**
    * okresy biezacego roku (roku analizy), ktore skonczyly sie najpozniej w dniu analizy - osobno od `calendar`, zeby

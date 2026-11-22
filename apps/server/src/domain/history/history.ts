@@ -16,7 +16,8 @@ import {
   type PeriodAssessment,
 } from '../water-indicators';
 
-const HISTORY_YEARS = 10;
+/** tlo historii: tyle sezonow przed rokiem analizy (rok analizy to "biezacy", liczony osobno) */
+export const BACKGROUND_YEARS = 10;
 /** miesiac ryzyka: niedobor wracal w nim prawie tak czesto jak w najgorszym miesiacu */
 const RISK_MONTH_SHARE = 0.7;
 /** miesiac ze stresem w strefie korzeni: co najmniej tyle dni z Ks < 1 */
@@ -45,6 +46,17 @@ export function deficitSeasons(record: Pick<History, 'seasons'> | undefined): {
     ).length,
     withData: seasons.length,
   };
+}
+
+/**
+ * Lata tla dla daty analizy: 10 sezonow przed rokiem analizy, od najstarszego (2018-06-15 -> 2008..2017). Te same
+ * lata licza `seasons`/`seasonsWithData`/`deficitSeasons`, `calendar`, miejsce okresu w historii (`rankInHistory`)
+ * i normy przyczyn pogodowych; rok analizy jest tylko w `currentCalendar` i jako "biezacy" w `rankInHistory`.
+ */
+export function backgroundYears(date: string): number[] {
+  const year = yearOf(date);
+
+  return Array.from({ length: BACKGROUND_YEARS }, (_unused, index) => year - BACKGROUND_YEARS + index);
 }
 
 function riskMonths(counts: Map<number, number>): number[] {
@@ -112,10 +124,7 @@ function currentCalendar(
 export function history(input: StageInput): History {
   const group = input.crop.iungGroup;
   const category = input.soil?.category ?? FALLBACK_SOIL_CATEGORY;
-  const years = Array.from(
-    { length: HISTORY_YEARS },
-    (_unused, index) => yearOf(input.date) - HISTORY_YEARS + index,
-  );
+  const years = backgroundYears(input.date);
   const simulation = rootZoneSimulation(input);
   const calendar: History['calendar'] = [];
   const seasons: History['seasons'] = [];
