@@ -40,3 +40,25 @@ describe('AnalysisProgress', () => {
     expect(screen.getByText(t('progress.slow', { seconds: SLOW_AFTER_SECONDS }))).toBeInTheDocument();
   });
 });
+
+describe('AnalysisProgress - stoper i zrodla', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('stoper liczy sekundy, przy kazdym zrodle jest jego prawdziwa nazwa', () => {
+    renderWithIntl(<AnalysisProgress />);
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByTestId('analysis-stopwatch')).toHaveTextContent('3 s');
+    expect(screen.getByRole('list', { name: t('progress.listLabel') })).toHaveTextContent(
+      'NASA POWER, MET Norway',
+    );
+  });
+});

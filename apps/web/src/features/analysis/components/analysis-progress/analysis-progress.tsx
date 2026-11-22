@@ -20,9 +20,11 @@ export const ANALYSIS_SOURCES: readonly AnalysisSource[] = [
 export const SLOW_AFTER_SECONDS = 15;
 
 /**
- * Czekanie na analize: API nie ma strumienia postepu, a zrodla pobiera rownoczesnie - pokazujemy uczciwie, co jest
- * pobierane (bez udawanych procentow i krokow odhaczanych zegarem), ile sekund minelo i kiedy zrodla sa wolniejsze.
- * Przekroczony czas konczy zapytanie bledem (`ANALYSIS_TIMEOUT_MS`), wtedy ekran pokazuje "Sprobuj ponownie".
+ * Czekanie na analize (makieta "liczenie"): ciemny panel ze stoperem w sekundach i lista zrodel, ktore serwer
+ * naprawde pobiera. API nie ma strumienia postepu, a zrodla ida rownoczesnie - kazde ma ten sam stan "pobieram"
+ * (bez udawanych procentow i krokow odhaczanych zegarem). Po kilkunastu sekundach mowimy wprost, ze ktores zrodlo
+ * jest wolniejsze; przekroczony czas konczy zapytanie bledem (`ANALYSIS_TIMEOUT_MS`) z "Sprobuj ponownie". Wynik
+ * pokazuje sie sam, gdy przyjdzie.
  */
 export function AnalysisProgress({ className }: { className?: string }) {
   const t = useTranslations('analysis.progress');
@@ -33,32 +35,42 @@ export function AnalysisProgress({ className }: { className?: string }) {
     <section
       aria-labelledby="analysis-progress-title"
       aria-busy="true"
-      className={cn('flex flex-col gap-5 rounded-xl border bg-card p-5 sm:p-6', className)}
+      className={cn('surface-panel flex flex-col gap-6 rounded-2xl p-5 sm:p-7', className)}
       data-testid="analysis-progress"
     >
-      <div className="flex flex-col gap-1">
-        <h2 id="analysis-progress-title" className="flex items-center gap-2 text-2xl font-semibold">
-          <LoaderCircle
-            aria-hidden="true"
-            className="size-6 shrink-0 text-primary motion-safe:animate-spin"
-          />
-          {t('title')}
-        </h2>
-        <p className="text-base text-muted-foreground">{t('hint')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex max-w-xl flex-col gap-2">
+          <h2 id="analysis-progress-title" className="text-2xl font-medium tracking-tight sm:text-3xl">
+            {t('title')}
+          </h2>
+          <p className="text-muted-foreground">{t('hint')}</p>
+        </div>
+        <p className="flex flex-col items-start sm:items-end">
+          <span className="text-sm text-muted-foreground">{t('stopwatch')}</span>
+          <span className="text-4xl font-semibold text-accent tabular-nums" data-testid="analysis-stopwatch">
+            {t('seconds', { seconds })}
+          </span>
+        </p>
       </div>
-      <ul aria-label={t('listLabel')} className="flex flex-col gap-2.5">
+      <ul aria-label={t('listLabel')} className="flex flex-col gap-3">
         {ANALYSIS_SOURCES.map((source) => (
-          <li key={source} className="flex items-start gap-3 text-base">
-            <span aria-hidden="true" className="mt-2 size-2 shrink-0 rounded-full bg-primary/60" />
-            {t(`sources.${source}`)}
+          <li key={source} className="flex items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-accent"
+            >
+              <LoaderCircle className="size-4 text-accent motion-safe:animate-spin" />
+            </span>
+            <span className="flex flex-col">
+              <span className="text-lg first-letter:uppercase">{t(`sources.${source}`)}</span>
+              <span className="text-sm text-muted-foreground">
+                {t(`origins.${source}`)} · {t('fetching')}
+              </span>
+            </span>
           </li>
         ))}
       </ul>
-      <p
-        aria-live="polite"
-        className="text-sm text-muted-foreground tabular-nums"
-        data-slow={slow || undefined}
-      >
+      <p aria-live="polite" className="text-muted-foreground tabular-nums" data-slow={slow || undefined}>
         {slow ? t('slow', { seconds }) : t('elapsed', { seconds })}
       </p>
     </section>
