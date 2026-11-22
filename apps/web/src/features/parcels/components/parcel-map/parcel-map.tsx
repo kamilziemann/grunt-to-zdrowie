@@ -547,6 +547,9 @@ export function ParcelMap({
   // pierwszy dojazd swiezej mapy bez animacji: mapa nie przelatuje z widoku kraju ani z poprzedniego kadru
   const firstFocusRef = useRef(true);
   const startFromCountryRef = useRef(startFromCountry);
+  // miekkie cele dojazdu (lista dzialek), ktore mapa juz obsluzyla - powrot do takiego celu po dojezdzie gdzie
+  // indziej (adres, klikniecie dzialki w innej wsi) nie cofa mapy
+  const softSeenRef = useRef(new Set<string>());
   // mapa powstala w widoku calej Polski (bez kadru i bez dzialki) - do pierwszego dojazdu zaslaniamy ja
   const [countryStart, setCountryStart] = useState(false);
   // mapa stoi w startowym widoku calej Polski (nikt go nie wybral) - wtedy nawet miekki dojazd jedzie do dzialki
@@ -832,6 +835,8 @@ export function ParcelMap({
       if (initialFocus) {
         focusedKeyRef.current = initialFocus.key;
         firstFocusRef.current = false;
+
+        if (initialFocus.soft) softSeenRef.current.add(initialFocus.key);
       }
 
       created.touchZoomRotate.disableRotation();
@@ -1084,6 +1089,13 @@ export function ParcelMap({
     focusedKeyRef.current = focusKey;
     firstFocusRef.current = false;
     countryViewRef.current = false;
+
+    // ten sam miekki cel drugi raz (np. lista dzialek po wyborze adresu): mapa zostaje tam, gdzie jest
+    if (focusSoft) {
+      if (softSeenRef.current.has(focusKey)) return;
+
+      softSeenRef.current.add(focusKey);
+    }
 
     // miekki dojazd nie rusza mapy, jesli obszar juz widac - kadr wybrany przez uzytkownika zostaje. Widok calej
     // Polski to nie wybor: dzialka doczytana po utworzeniu mapy (wejscie z linku, wolna siec) "widac" w nim zawsze,

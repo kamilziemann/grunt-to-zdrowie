@@ -76,6 +76,8 @@ const FORECAST_DAYS = 7;
 const BOUNDARIES_STALE_DAYS = 365;
 /** raport policzony w dniu analizy liczymy od nowa po dobie (nowa pogoda, prognoza, zdjecia) */
 const TODAY_REPORT_TTL_MS = 24 * 60 * 60 * 1000;
+/** raport czesciowy (ktores zrodlo nie odpowiedzialo) wraca z zapisu najwyzej tyle - potem liczymy od nowa */
+const PARTIAL_REPORT_TTL_MS = 60 * 60 * 1000;
 
 const MISSING_LIMITATION: Partial<Record<SourceId, LimitationId>> = {
   meteo: 'meteo_missing',
@@ -303,10 +305,15 @@ export function createAnalysisService({
     const computedOnTheDay = isoDateInPoland(found.createdAt) <= key.analysisDate;
     const age = Date.parse(now()) - Date.parse(found.createdAt);
 
-    // raport czesciowy (zrodlo chwilowo milczalo) nie zostaje na zawsze - po dobie liczymy od nowa
-    const incomplete = found.report.meta.status !== 'complete';
+    const { status } = found.report.meta;
 
-    return (computedOnTheDay || incomplete) && age > TODAY_REPORT_TTL_MS ? null : found.report;
+    // zrodlo chwilowo milczalo: raport bez oceny (brak pogody) liczymy od nowa przy kazdym wejsciu, czesciowy -
+    // po godzinie; inaczej chwilowa awaria dostawcy zostawalaby w zapisie jako "brak oceny" na dobe
+    if (status === 'insufficient') return null;
+
+    if (status === 'partial' && age > PARTIAL_REPORT_TTL_MS) return null;
+
+    return computedOnTheDay && age > TODAY_REPORT_TTL_MS ? null : found.report;
   }
 
   return {

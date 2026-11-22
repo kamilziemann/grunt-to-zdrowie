@@ -224,9 +224,11 @@ export function ParcelsScreen({
 
     const box = selected.settled ? unionBbox(selected.parcels) : null;
 
-    // lista dzialek tylko wtedy, gdy jej nie widac - po powrocie z kroku dzialki mapa stoi tam, gdzie stala
-    return box ? { bbox: box, key: `selection:${ids.join(',')}`, soft: true } : null;
-  }, [shown, preview, focusPreview, selected.settled, selected.parcels, ids]);
+    // lista dzialek tylko wtedy, gdy jej nie widac - po powrocie z kroku dzialki mapa stoi tam, gdzie stala.
+    // Klucz jest staly: do dzialek z listy mapa dojezdza raz, przy otwarciu ekranu; dodanie kolejnej dzialki
+    // (takze w innej wsi) ani powrot z adresu nie przenosza mapy - do dzialki z listy prowadzi przycisk celownika
+    return box ? { bbox: box, key: 'selection', soft: true } : null;
+  }, [shown, preview, focusPreview, selected.settled, selected.parcels]);
 
   // Margines dojazdu liczony w chwili dojazdu: na komputerze panel zaslania lewa strone, na telefonie arkusz dol.
   const getPadding = useCallback((): MapPadding => {
