@@ -1,12 +1,19 @@
 import { mockAnalysisApi } from './support/analysis-api';
+import { mockMapServices, openLayers, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
 
-// Ekran wyboru dzialek. Testy nie wolaja ULDK (zewnetrzna usluga GUGiK): sprawdzaja uklad, walidacje pola i przejscia,
-// ktore nie potrzebuja danych dzialki. Przeplyw z prawdziwa dzialka jest sprawdzany recznie (docs/plans).
+// Ekran wyboru dzialek. Testy nie wolaja ULDK ani podkladu (zewnetrzne uslugi): podklad i kafle mapy sa podstawione
+// (`mockMapServices`), a testy sprawdzaja uklad, walidacje pola i przejscia, ktore nie potrzebuja danych dzialki.
+// Przeplyw z prawdziwa dzialka jest sprawdzany recznie (docs/plans).
 test.describe('działki', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockMapServices(page);
+  });
+
   test('pokazuje wyszukiwarkę, kroki i zablokowany następny krok', async ({ page }) => {
     await page.goto('/');
+    await waitForMap(page);
 
     await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
     // pierwsze wejscie: trzy kroki i przyklad zamiast paska etapow
@@ -29,6 +36,7 @@ test.describe('działki', () => {
   }) => {
     await mockAnalysisApi(page);
     await page.goto('/');
+    await waitForMap(page);
 
     const examples = page.getByTestId('examples');
 
@@ -68,6 +76,7 @@ test.describe('działki', () => {
     });
 
     await page.goto('/');
+    await waitForMap(page);
     await page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' }).fill('12');
     await page.getByRole('button', { name: 'Szukaj' }).click();
 
@@ -75,18 +84,18 @@ test.describe('działki', () => {
     expect(requests).toEqual([]);
   });
 
-  test('przełącznik podkładu zmienia mapę na zdjęcie', async ({ page }) => {
+  test('podkład w panelu warstw: zdjęcie lotnicze zamiast mapy', async ({ page }) => {
     await page.goto('/');
+    await waitForMap(page);
+    await openLayers(page);
 
-    const photo = page.getByRole('button', { name: 'Zdjęcie' });
+    const base = page.getByRole('group', { name: 'Podkład' });
+    const photo = base.getByRole('radio', { name: 'Zdjęcie lotnicze' });
 
-    await expect(photo).toHaveAttribute('aria-pressed', 'false');
-    await photo.click();
-    await expect(photo).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: 'Mapa', exact: true })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    );
+    await expect(base.getByRole('radio', { name: 'Mapa' })).toBeChecked();
+    await photo.check();
+    await expect(photo).toBeChecked();
+    await expect(base.getByRole('radio', { name: 'Mapa' })).not.toBeChecked();
   });
 
   test('pusta lista na ekranie analizy odsyła do mapy', async ({ page }) => {
@@ -103,6 +112,7 @@ test.describe('działki', () => {
       page,
     }) => {
       await page.goto('/');
+      await waitForMap(page);
 
       const panel = page.getByTestId('parcels-panel');
       const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
@@ -121,7 +131,7 @@ test.describe('działki', () => {
       await expect(search).toHaveCSS('font-size', '16px');
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
       await expectTouchTargets(panel.getByRole('button'));
-      await expectTouchTargets(page.getByRole('group', { name: 'Podkład mapy' }).getByRole('button'));
+      await expectTouchTargets(page.getByTestId('layers-button'));
     });
   });
 });

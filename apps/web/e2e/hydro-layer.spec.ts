@@ -1,5 +1,6 @@
 import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
+import { setLayer } from './support/map-services';
 import { expect, test } from './support/test';
 
 // Warstwa "Rowy i cieki" na mapie dzialek. Podklad, dzialka i kafle hydrografii sa podstawione (bez uslug
@@ -11,14 +12,12 @@ test.describe('rowy i cieki na mapie', () => {
     await page.route('**/api/parcels/boundaries**', (route) => route.fulfill({ json: { items: [] } }));
   });
 
-  test('przełącznik obok granic, kafle wokół działki, legenda ze źródłem i datą danych', async ({ page }) => {
+  test('włączona domyślnie w panelu warstw, kafle wokół działki, legenda ze źródłem i datą danych', async ({
+    page,
+  }) => {
     const requested = await mockHydroApi(page);
 
     await page.goto(`/?dzialki=${PARCEL_ID}`);
-
-    const toggle = page.getByRole('button', { name: 'Rowy i cieki' });
-
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
 
     const legend = page.getByTestId('hydro-legend');
 
@@ -33,8 +32,7 @@ test.describe('rowy i cieki na mapie', () => {
     await expect(legend).toContainText('Mokradło, bagno');
     await expect(legend).toContainText('Źródło: BDOT10k, GUGiK · dane z 21 lis 2026');
 
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await setLayer(page, 'Rowy i cieki', false);
     await expect(legend).toBeHidden();
   });
 
@@ -54,7 +52,7 @@ test.describe('rowy i cieki na mapie', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('trzy przełączniki w dwóch rzędach, legenda zwinięta, bez poziomego przewijania', async ({
+    test('jeden przycisk „Warstwy” nad legendą, legenda zwinięta, bez poziomego przewijania', async ({
       page,
     }) => {
       await mockHydroApi(page);
@@ -65,10 +63,10 @@ test.describe('rowy i cieki na mapie', () => {
       await expect(legend).toHaveAttribute('data-hydro-state', 'ready', { timeout: 20_000 });
       await expect(legend).not.toHaveAttribute('open');
 
-      const boundaries = await page.getByRole('button', { name: 'Granice działek' }).boundingBox();
-      const hydro = await page.getByRole('button', { name: 'Rowy i cieki' }).boundingBox();
+      const button = await page.getByTestId('layers-button').boundingBox();
+      const legendBox = await legend.boundingBox();
 
-      expect(boundaries?.y).toBe(hydro?.y);
+      expect((button?.y ?? 0) + (button?.height ?? 0)).toBeLessThanOrEqual(legendBox?.y ?? 0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     });
   });
