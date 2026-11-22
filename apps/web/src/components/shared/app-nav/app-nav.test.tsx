@@ -29,18 +29,20 @@ describe('AppNav', () => {
     expect(screen.getByRole('navigation', { name: 'Nawigacja główna' })).toBeInTheDocument();
 
     // pozycje sa dwa razy: w pasku (komputer) i w menu telefonu (popover)
-    for (const link of screen.getAllByRole('link', { name: 'Design system' })) {
-      expect(link).toHaveAttribute('href', '/design');
+    for (const link of screen.getAllByRole('link', { name: 'Jak liczymy' })) {
+      expect(link).toHaveAttribute('href', '/jak-liczymy');
     }
+
+    expect(screen.queryByRole('link', { name: 'Design system' })).toBeNull();
 
     expect(screen.getByRole('link', { name: /^Grunt to Zdrowie/ })).toHaveAttribute('href', '/');
   });
 
-  it.each(['/design', '/design/kolory'])('dla %s aktywna jest pozycja Design system', (pathname) => {
-    nav.pathname.mockReturnValue(pathname);
+  it('na stronie „Jak liczymy” aktywna jest jej pozycja', () => {
+    nav.pathname.mockReturnValue('/jak-liczymy');
     renderNav();
 
-    for (const link of screen.getAllByRole('link', { name: 'Design system' })) {
+    for (const link of screen.getAllByRole('link', { name: 'Jak liczymy' })) {
       expect(link).toHaveAttribute('aria-current', 'page');
     }
   });

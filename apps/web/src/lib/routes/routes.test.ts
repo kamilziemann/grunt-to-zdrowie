@@ -14,11 +14,11 @@ describe('routes', () => {
   });
 
   it('sekcja nawigacji jest aktywna na swojej stronie i podstronach, strona główna nie aktywuje żadnej', () => {
-    const design = NAV_ITEMS.find((item) => item.labelKey === 'design');
+    const method = NAV_ITEMS.find((item) => item.labelKey === 'method');
 
-    expect(design && isNavItemActive(design, '/design')).toBe(true);
-    expect(design && isNavItemActive(design, '/design/kolory')).toBe(true);
-    expect(design && isNavItemActive(design, '/designer')).toBe(false);
+    expect(method && isNavItemActive(method, '/jak-liczymy')).toBe(true);
+    expect(method && isNavItemActive(method, '/jak-liczymy/zrodla')).toBe(true);
+    expect(method && isNavItemActive(method, '/jak-liczymy-2')).toBe(false);
     expect(NAV_ITEMS.some((item) => isNavItemActive(item, '/'))).toBe(false);
   });
 });

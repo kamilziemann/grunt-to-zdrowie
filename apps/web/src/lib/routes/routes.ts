@@ -62,12 +62,10 @@ export const routes = {
     withQuery(routePath('/mapa'), { dzialki: search?.dzialki, widok: search?.widok, rysuj: search?.rysuj }),
   /** "Jak liczymy": zrodla danych, metody, ograniczenia (dla jury, doradcy i rolnika). */
   method: () => routePath('/jak-liczymy'),
-  /** Katalog systemu designu (tylko development). */
-  design: () => routePath('/design'),
 } as const;
 
 /** Klucze etykiet nawigacji: przestrzen `nav` w messages/*.json (AppNav tlumaczy je typowanym `t`). */
-export type NavLabelKey = 'method' | 'design';
+export type NavLabelKey = 'method';
 
 export interface NavItem {
   href: AppHref;
@@ -77,12 +75,9 @@ export interface NavItem {
 }
 
 /** Pozycje nawigacji glownej (strona glowna = logo). Nowa funkcja = nowa pozycja tutaj + klucz w `nav`. */
-export const NAV_ITEMS: readonly NavItem[] = [
-  { href: routes.method(), labelKey: 'method' },
-  { href: routes.design(), labelKey: 'design', devOnly: true },
-];
+export const NAV_ITEMS: readonly NavItem[] = [{ href: routes.method(), labelKey: 'method' }];
 
-/** Sekcja jest aktywna na swojej stronie i na podstronach (`/design/x` = Design system). */
+/** Sekcja jest aktywna na swojej stronie i na podstronach (`/jak-liczymy/x` = Jak liczymy). */
 export function isNavItemActive(item: NavItem, pathname: string): boolean {
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }

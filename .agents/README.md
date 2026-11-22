@@ -21,7 +21,7 @@ przeczyć. Znalazłeś sprzeczność? Popraw skill (albo, jeśli to reguła, kon
 | `write-adr`          | decyzja architektoniczna w `docs/architecture/decisions`                            |
 | `verify-change`      | lista kontrolna "gotowe": format, check, e2e, db:check                              |
 | `architecture-rules` | ściąga po regułach `bun architecture:check` i naprawach naruszeń                    |
-| `design-system`      | tokeny designu, komponenty ui, motyw, wybór kierunku stylu, strona `/design`        |
+| `design-system`      | tokeny designu, komponenty ui, motyw, wybór kierunku stylu                          |
 
 ## Skille TanStack (oficjalne, z paczek npm)
 

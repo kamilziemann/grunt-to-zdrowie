@@ -1,5 +1,5 @@
 // Prymityw UI (shadcn): karta z naglowkiem (`CardTitle` = h3), trescia i stopka na tokenach semantycznych
-// (`bg-card`, `shadow-card`); pokazuje ja katalog `/design`.
+// (`bg-card`, `shadow-card`).
 import type { ComponentProps } from 'react';
 
 import { cn } from '@/lib/utils/cn';

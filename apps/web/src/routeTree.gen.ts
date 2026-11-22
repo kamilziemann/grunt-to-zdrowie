@@ -14,13 +14,11 @@ import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$local
 import { Route as Char123LocaleChar125AppRouteRouteImport } from './routes/{-$locale}/_app/route'
 import { Route as Char123LocaleChar125AppIndexRouteImport } from './routes/{-$locale}/_app/index'
 import { Route as Char123LocaleChar125AppSplatRouteImport } from './routes/{-$locale}/_app/$'
-import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-$locale}/_app/_dev/route'
 import { Route as Char123LocaleChar125AppMethodRouteRouteImport } from './routes/{-$locale}/_app/_method/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
 import { Route as Char123LocaleChar125AppGospodarstwoRouteImport } from './routes/{-$locale}/_app/gospodarstwo'
 import { Route as Char123LocaleChar125AppMapaRouteImport } from './routes/{-$locale}/_app/mapa'
 import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$locale}/_app/raport'
-import { Route as Char123LocaleChar125AppDevDesignRouteImport } from './routes/{-$locale}/_app/_dev/design'
 import { Route as Char123LocaleChar125AppMethodJakLiczymyRouteImport } from './routes/{-$locale}/_app/_method/jak-liczymy'
 
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -49,11 +47,6 @@ const Char123LocaleChar125AppSplatRoute =
   Char123LocaleChar125AppSplatRouteImport.update({
     id: '/$',
     path: '/$',
-    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
-  } as any)
-const Char123LocaleChar125AppDevRouteRoute =
-  Char123LocaleChar125AppDevRouteRouteImport.update({
-    id: '/_dev',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
 const Char123LocaleChar125AppMethodRouteRoute =
@@ -85,12 +78,6 @@ const Char123LocaleChar125AppRaportRoute =
     path: '/raport',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
-const Char123LocaleChar125AppDevDesignRoute =
-  Char123LocaleChar125AppDevDesignRouteImport.update({
-    id: '/design',
-    path: '/design',
-    getParentRoute: () => Char123LocaleChar125AppDevRouteRoute,
-  } as any)
 const Char123LocaleChar125AppMethodJakLiczymyRoute =
   Char123LocaleChar125AppMethodJakLiczymyRouteImport.update({
     id: '/jak-liczymy',
@@ -107,7 +94,6 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/': typeof Char123LocaleChar125AppIndexRoute
-  '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
 }
 export interface FileRoutesByTo {
@@ -118,7 +104,6 @@ export interface FileRoutesByTo {
   '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
   '/{-$locale}/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
-  '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
 }
 export interface FileRoutesById {
@@ -126,7 +111,6 @@ export interface FileRoutesById {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/{-$locale}/_app': typeof Char123LocaleChar125AppRouteRouteWithChildren
-  '/{-$locale}/_app/_dev': typeof Char123LocaleChar125AppDevRouteRouteWithChildren
   '/{-$locale}/_app/_method': typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
@@ -134,7 +118,6 @@ export interface FileRoutesById {
   '/{-$locale}/_app/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/_app/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/_app/': typeof Char123LocaleChar125AppIndexRoute
-  '/{-$locale}/_app/_dev/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/_app/_method/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
 }
 export interface FileRouteTypes {
@@ -148,7 +131,6 @@ export interface FileRouteTypes {
     | '/{-$locale}/mapa'
     | '/{-$locale}/raport'
     | '/{-$locale}/'
-    | '/{-$locale}/design'
     | '/{-$locale}/jak-liczymy'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -159,14 +141,12 @@ export interface FileRouteTypes {
     | '/{-$locale}/gospodarstwo'
     | '/{-$locale}/mapa'
     | '/{-$locale}/raport'
-    | '/{-$locale}/design'
     | '/{-$locale}/jak-liczymy'
   id:
     | '__root__'
     | '/{-$locale}'
     | '/robots.txt'
     | '/{-$locale}/_app'
-    | '/{-$locale}/_app/_dev'
     | '/{-$locale}/_app/_method'
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
@@ -174,7 +154,6 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app/mapa'
     | '/{-$locale}/_app/raport'
     | '/{-$locale}/_app/'
-    | '/{-$locale}/_app/_dev/design'
     | '/{-$locale}/_app/_method/jak-liczymy'
   fileRoutesById: FileRoutesById
 }
@@ -220,13 +199,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppSplatRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
-    '/{-$locale}/_app/_dev': {
-      id: '/{-$locale}/_app/_dev'
-      path: ''
-      fullPath: '/{-$locale}'
-      preLoaderRoute: typeof Char123LocaleChar125AppDevRouteRouteImport
-      parentRoute: typeof Char123LocaleChar125AppRouteRoute
-    }
     '/{-$locale}/_app/_method': {
       id: '/{-$locale}/_app/_method'
       path: ''
@@ -262,13 +234,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppRaportRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
-    '/{-$locale}/_app/_dev/design': {
-      id: '/{-$locale}/_app/_dev/design'
-      path: '/design'
-      fullPath: '/{-$locale}/design'
-      preLoaderRoute: typeof Char123LocaleChar125AppDevDesignRouteImport
-      parentRoute: typeof Char123LocaleChar125AppDevRouteRoute
-    }
     '/{-$locale}/_app/_method/jak-liczymy': {
       id: '/{-$locale}/_app/_method/jak-liczymy'
       path: '/jak-liczymy'
@@ -278,21 +243,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface Char123LocaleChar125AppDevRouteRouteChildren {
-  Char123LocaleChar125AppDevDesignRoute: typeof Char123LocaleChar125AppDevDesignRoute
-}
-
-const Char123LocaleChar125AppDevRouteRouteChildren: Char123LocaleChar125AppDevRouteRouteChildren =
-  {
-    Char123LocaleChar125AppDevDesignRoute:
-      Char123LocaleChar125AppDevDesignRoute,
-  }
-
-const Char123LocaleChar125AppDevRouteRouteWithChildren =
-  Char123LocaleChar125AppDevRouteRoute._addFileChildren(
-    Char123LocaleChar125AppDevRouteRouteChildren,
-  )
 
 interface Char123LocaleChar125AppMethodRouteRouteChildren {
   Char123LocaleChar125AppMethodJakLiczymyRoute: typeof Char123LocaleChar125AppMethodJakLiczymyRoute
@@ -310,7 +260,6 @@ const Char123LocaleChar125AppMethodRouteRouteWithChildren =
   )
 
 interface Char123LocaleChar125AppRouteRouteChildren {
-  Char123LocaleChar125AppDevRouteRoute: typeof Char123LocaleChar125AppDevRouteRouteWithChildren
   Char123LocaleChar125AppMethodRouteRoute: typeof Char123LocaleChar125AppMethodRouteRouteWithChildren
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
@@ -322,8 +271,6 @@ interface Char123LocaleChar125AppRouteRouteChildren {
 
 const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRouteChildren =
   {
-    Char123LocaleChar125AppDevRouteRoute:
-      Char123LocaleChar125AppDevRouteRouteWithChildren,
     Char123LocaleChar125AppMethodRouteRoute:
       Char123LocaleChar125AppMethodRouteRouteWithChildren,
     Char123LocaleChar125AppSplatRoute: Char123LocaleChar125AppSplatRoute,

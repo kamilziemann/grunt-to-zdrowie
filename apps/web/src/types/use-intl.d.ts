@@ -2,7 +2,6 @@
 // literowka) nie przejdzie `bun check:types`. Zgodnosc `messages/en` z `messages/pl` pilnuje src/i18n/messages.test.ts.
 import type analysis from '../../messages/pl/analysis.json';
 import type common from '../../messages/pl/common.json';
-import type design from '../../messages/pl/design.json';
 import type errors from '../../messages/pl/errors.json';
 import type method from '../../messages/pl/method.json';
 import type nav from '../../messages/pl/nav.json';
@@ -17,7 +16,6 @@ declare module 'use-intl' {
     Messages: {
       analysis: typeof analysis;
       common: typeof common;
-      design: typeof design;
       errors: typeof errors;
       method: typeof method;
       nav: typeof nav;

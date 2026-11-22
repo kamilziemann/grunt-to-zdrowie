@@ -43,7 +43,6 @@ const PAGES = [
   ['raport bez parametrów', '/raport', 'Brakuje danych do raportu'],
   ['gospodarstwo bez parametrów', '/gospodarstwo', 'Brakuje danych do raportu'],
   ['jak liczymy (metodyka i źródła)', '/jak-liczymy', 'Jak liczymy'],
-  ['katalog /design', '/design', 'Design system'],
   ['404 (nieznany adres)', '/nie-ma-takiej-strony', 'Nie ma takiej strony'],
 ] as const;
 

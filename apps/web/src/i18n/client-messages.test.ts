@@ -10,7 +10,6 @@ const SRC = join(import.meta.dirname, '..');
 
 /** Gdzie zyja komponenty pod dostawca danej sekcji (jej layout). */
 const SECTION_DIRS: Record<ClientSection, readonly string[]> = {
-  dev: ['routes/{-$locale}/_app/_dev/'],
   method: ['routes/{-$locale}/_app/_method/'],
 };
 
@@ -41,7 +40,7 @@ describe('komunikaty w przegladarce', () => {
     expect([...PUBLIC_NAMESPACES].toSorted()).toEqual(
       NAMESPACES.filter((namespace) => !sectionOnly.includes(namespace)).toSorted(),
     );
-    expect(SECTION_NAMESPACES.dev).toEqual(expect.arrayContaining(['design']));
+    expect(SECTION_NAMESPACES.method).toEqual(expect.arrayContaining(['method']));
   });
 
   it('przestrzenie sekcji uzywaja hookiem tylko pliki pod dostawca tej sekcji', () => {

@@ -1,10 +1,9 @@
 // Przestrzenie komunikatow: kazda to osobny plik `messages/<jezyk>/<przestrzen>.json` i osobny chunk JS - strona
-// laduje tylko przestrzenie, ktorych uzywa (sekcja deweloperska doklada swoje w layoucie `_dev`).
+// laduje tylko przestrzenie, ktorych uzywa (sekcja "Jak liczymy" doklada swoje w layoucie `_method`).
 // Lista musi zgadzac sie z plikami w messages/pl (pilnuje messages.test.ts).
 export const NAMESPACES = [
   'analysis',
   'common',
-  'design',
   'errors',
   'method',
   'nav',

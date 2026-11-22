@@ -17,7 +17,6 @@ src/
     __root.tsx          dokument HTML (shellComponent), <head> (tylko jasny motyw), raportowanie błędów
     {-$locale}/         jezyk w adresie: `/` = pl, `/en/...` = en; loader komunikatów, IntlProvider
       _app/             powłoka aplikacji (nawigacja, 404): strona główna, analiza, raport, gospodarstwo
-        _dev/           sekcja deweloperska (katalog /design) - tylko development, własne komunikaty `dev`
   features/<x>/         api/ (*.queries.ts, *.mutations.ts, *.actions.ts), components/, hooks/, schemas/, utils/, index.ts
                         api/ obejmujące kilka obszarów → podfoldery obszarów (`api/<obszar>/<obszar>.queries.ts`,
                         testy, `index.ts`) + `api/shared`. Małe featury (wzór: `features/parcels`) zostają płaskie.

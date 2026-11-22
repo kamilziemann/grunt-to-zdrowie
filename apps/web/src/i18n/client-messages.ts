@@ -1,10 +1,9 @@
 // Ktore przestrzenie komunikatow trafiaja do strony (stan routera w HTML i chunki JS). Zwykle strony nie potrzebuja
-// przestrzeni sekcji deweloperskiej; doklada je jej layout (trasa `{-$locale}/_app/_dev`). Ze komponenty spoza sekcji
+// przestrzeni wydzielonych sekcji; doklada je ich layout (np. `{-$locale}/_app/_method`). Ze komponenty spoza sekcji
 // nie siegaja po te przestrzenie, pilnuje client-messages.test.ts. Nowa sekcja (np. panel admina) = wpis tutaj.
 import { NAMESPACES, type Namespace } from './namespaces';
 
 export const SECTION_NAMESPACES = {
-  dev: ['design'],
   method: ['method'],
 } as const satisfies Record<string, readonly Namespace[]>;
 
