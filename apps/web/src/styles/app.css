@@ -16,6 +16,17 @@
 :root {
   color-scheme: light;
 
+  /* Ciemny panel ("Czy to Twoja dzialka?", liczenie, przyklad wyniku). */
+  --panel: #121814;
+}
+
+/*
+ * Tokeny deklarowane tez na `.surface-panel`: build produkcyjny (Lightning CSS) zamienia light-dark() na zmienne
+ * `--lightningcss-light/dark`, a zmienna wlasna rozwiazuje var() tam, gdzie jest zadeklarowana. Bez ponownej
+ * deklaracji panel dziedziczylby wartosci jasne z :root (ciemny tekst na ciemnym panelu - tylko po buildzie).
+ */
+:root,
+.surface-panel {
   /* Powierzchnie i tekst. Kazda para (token / token-foreground) ma kontrast WCAG AA (min. 4.5:1). */
   /* Kierunek "jasny z ciemnym panelem" (ADR 0012): biel i grafit, ciemny zielono-czarny panel, mietowy akcent.
      Drugie wartosci light-dark() to paleta panelu (#121814): panel to "wyspa" ciemnych wartosci (`surface-panel`). */
@@ -52,9 +63,6 @@
   --border: light-dark(#e3e3e3, #2b3530);
   --input: light-dark(#7a7a7a, #7f8d84);
   --ring: light-dark(#1f7a4a, #a1ffcb);
-
-  /* Ciemny panel ("Czy to Twoja dzialka?", liczenie, przyklad wyniku). */
-  --panel: #121814;
 
   /* Kolory danych (wykresy, skala suszy, mapy) z "Pogodynki wody": paleta sprawdzona pod daltonizm. Stale w obu
      motywach - na ciemnym tle stawiaj je na karcie z obwodka, a tekst obok w `foreground`. */

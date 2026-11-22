@@ -81,6 +81,14 @@ describe('tokeny designu', () => {
     expect(css).toContain('@utility surface-panel');
     expect(css).toContain("'Geist Variable'");
 
+    // build zamienia light-dark() na zmienne rozwiazywane przy deklaracji - panel musi deklarowac tokeny sam
+    for (const match of css.matchAll(/--[\w-]+: light-dark\(/g)) {
+      const block = css.slice(0, match.index);
+      const selector = block.slice(block.lastIndexOf('}') + 1, block.lastIndexOf('{'));
+
+      expect(`${match[0]} w ${selector.trim()}`).toContain('.surface-panel');
+    }
+
     expect(css).toContain('prefers-reduced-motion');
 
     // tylko jasny motyw (ADR 0012): korzen jasny, bez reagowania na ustawienie systemu i bez data-theme
