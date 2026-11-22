@@ -165,8 +165,11 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   };
 }
 
-/** Dluzej na uzytki z ewidencji krok "Czy to Twoja dzialka?" nie czeka - dzialka wraca wtedy bez nich. */
-const LAND_USE_TIMEOUT_MS = 2500;
+/**
+ * Dluzej na uzytki z ewidencji krok dzialki nie czeka - dzialka wraca wtedy bez nich, a spozniona odpowiedz trafia
+ * do pamieci w tle. WFS EGiB odpowiada zwykle w ok. 2,2 s (pomiar 22.11.2026), wiec 2,5 s bylo za ciasne.
+ */
+const LAND_USE_TIMEOUT_MS = 4500;
 
 /**
  * ULDK jest zrodlem podstawowym (pelny opis, cala Polska); gdy zawiedzie albo przytnie limit, dzialke oddaje WFS.
@@ -196,6 +199,7 @@ function rememberedParcels(
     plain,
     described: withRegistryLandUse(plain, registry, {
       timeoutMs: LAND_USE_TIMEOUT_MS,
+      ...(deps.waitUntil ? { defer: deps.waitUntil } : {}),
       onEnriched: (record) => {
         const write = store
           .put(record.id, { ...record, fetchedAt: record.fetchedAt ?? now() })

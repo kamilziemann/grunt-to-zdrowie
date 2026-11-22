@@ -24,7 +24,8 @@ import { withCauseShares } from '../../domain/causes';
 import { drainedLowland } from '../../domain/drained-lowland';
 import { withHotDays } from '../../domain/hot-days';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
-import { summarizeLandUse } from '../../domain/land-use';
+import { landCoverGuess, summarizeLandUse } from '../../domain/land-use';
+import { reconcileSoilWithRegistry } from '../../domain/soil-registry';
 import { waterOutlook } from '../../domain/water-outlook';
 import type {
   AnalysisStages,
@@ -40,7 +41,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.8.4';
+export const ANALYSIS_ENGINE_VERSION = '0.8.5';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -371,6 +372,8 @@ export function createAnalysisService({
       const fetched = [meteo, forecast, soil, terrain, hydro, vegetation].flatMap((item) =>
         item ? [item.source] : [],
       );
+      // gleba z modelu uzgodniona z klasa bonitacyjna z ewidencji (wyrazna sprzecznosc = gleba wg ewidencji)
+      const reconciled = soil.data ? reconcileSoilWithRegistry(soil.data, field.landUse) : null;
       const input: StageInput = {
         field,
         cropId,
@@ -378,7 +381,7 @@ export function createAnalysisService({
         crop,
         meteo: meteo.data,
         forecast: forecast?.data ?? null,
-        soil: soil.data,
+        soil: reconciled?.soil ?? null,
         terrain: terrain.data,
         hydro: hydro.data,
         vegetation: vegetation.data,
@@ -422,8 +425,24 @@ export function createAnalysisService({
       if (date < addDays(today, -BOUNDARIES_STALE_DAYS)) limitations.add('current_boundaries');
 
       // dzialka bez uzytku z ewidencji (WFS EGiB nie odpowiedzial albo go nie zna): nie wiemy, czy to pole uprawne
-      if (field.parcelIds.length > 0 && (!field.landUse || field.landUse.length === 0))
+      if (field.parcelIds.length > 0 && (!field.landUse || field.landUse.length === 0)) {
         limitations.add('land_use_unknown');
+
+        const guess = landCoverGuess(field.landUse, {
+          woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
+          soilSubstituted: input.soil?.substituteDistanceM !== undefined,
+        });
+
+        if (guess) limitations.add(guess === 'forest' ? 'likely_forest' : 'likely_not_farmland');
+      }
+
+      if (reconciled?.conflict) {
+        limitations.add(
+          reconciled.conflict.direction === 'lighter'
+            ? 'soil_lighter_by_registry'
+            : 'soil_heavier_by_registry',
+        );
+      }
 
       // satelita porownany z poprzednimi latami - nie wiemy, co wtedy roslo na polu
       if ((assessment.vegetation?.baselineYears ?? 0) > 0) limitations.add('vegetation_rotation_unknown');

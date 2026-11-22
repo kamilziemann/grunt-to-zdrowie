@@ -59,7 +59,7 @@ export interface KindSummaryRow {
 export interface SurroundingsRows {
   cover: readonly KindSummaryRow[];
   /** dlugosc granicy pola i jej czesci w pasie drzew (m) */
-  edge: { edgeM: number; woodedEdgeM: number };
+  edge: { edgeM: number; woodedEdgeM: number; woodedAreaShare?: number };
   waterworks: readonly KindSummaryRow[];
   /** najblizszy styk otwartego rowu z rura; null = brak w promieniu */
   junction: { distanceM: number; point: LngLat } | null;
@@ -92,6 +92,9 @@ export function treesFromRows(cover: readonly KindSummaryRow[], edge: Surroundin
     edgeM: round(edge.edgeM),
     woodedEdgeM: round(woodedEdgeM),
     woodedEdgeShare: Number(share.toFixed(2)),
+    ...(edge.woodedAreaShare === undefined
+      ? {}
+      : { woodedAreaShare: Number(Math.min(Math.max(edge.woodedAreaShare, 0), 1).toFixed(2)) }),
     nearestForestM: forest ? round(forest.nearestM) : null,
     nearestTreeRowM: treeRow ? round(treeRow.nearestM) : null,
     searchRadiusM: SURROUNDINGS_RADII.treesM,

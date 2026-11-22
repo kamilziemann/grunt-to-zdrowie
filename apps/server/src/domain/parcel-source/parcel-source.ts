@@ -84,31 +84,29 @@ export interface RegistryLandUseOptions {
   timeoutMs: number;
   /** rekord uzupelniony o uzytki (do zapamietania, zeby nastepny odczyt nie pytal ewidencji) */
   onEnriched?: (record: ParcelRecord) => void;
+  /**
+   * utrzymanie pracy w tle po odpowiedzi (Workers: `waitUntil`): gdy ewidencja odpowie po limicie, uzytki i tak
+   * trafiaja do pamieci i nastepne wejscie na dzialke ma je od razu
+   */
+  defer?: (task: Promise<unknown>) => void;
 }
 
 /**
  * Dzialka po identyfikatorze z uzytkami z ewidencji: ULDK ich nie podaje, wiec rekord bez `landUse` dopytujemy
- * w rejestrze (WFS EGiB). Dzieki temu krok "Czy to Twoja dzialka?" od razu mowi, ze dzialka to np. las. Rejestr
- * jest dodatkiem: jego brak, blad albo powolnosc oddaja rekord bez zmian. Odczyt pod punktem (klik na mapie)
- * zostaje szybki - bez dopytywania.
+ * w rejestrze (WFS EGiB). Dzieki temu krok dzialki od razu mowi, ze dzialka to np. las. Rejestr jest dodatkiem:
+ * jego brak, blad albo powolnosc oddaja rekord bez zmian (spozniona odpowiedz jest zapamietywana w tle). Odczyt pod
+ * punktem (klik na mapie) zostaje szybki - bez dopytywania.
  */
 export function withRegistryLandUse(
   source: ParcelSource,
   registry: ParcelRegistry,
-  { timeoutMs, onEnriched }: RegistryLandUseOptions,
+  { timeoutMs, onEnriched, defer }: RegistryLandUseOptions,
 ): ParcelSource {
-  async function lookup(id: string): Promise<ParcelRegistryEntry | null> {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeout = new Promise<null>((resolve) => {
-      timer = setTimeout(() => resolve(null), timeoutMs);
-    });
-
-    try {
-      return await Promise.race([registry.byId(id).catch(() => null), timeout]);
-    } finally {
-      if (timer !== undefined) clearTimeout(timer);
-    }
-  }
+  const enrich = (record: ParcelRecord, entry: ParcelRegistryEntry): ParcelRecord => ({
+    ...record,
+    landUse: entry.landUse,
+    ...(entry.registryAreaHa === undefined ? {} : { registryAreaHa: entry.registryAreaHa }),
+  });
 
   return {
     async byId(id) {
@@ -116,20 +114,39 @@ export function withRegistryLandUse(
 
       if (!record || record.landUse) return record;
 
-      const entry = await lookup(record.id);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let late = false;
+      const lookup = registry.byId(record.id).catch(() => null);
+      const timeout = new Promise<null>((resolve) => {
+        timer = setTimeout(() => {
+          late = true;
+          resolve(null);
+        }, timeoutMs);
+      });
+
+      // przeterminowany wpis (GUGiK nie odpowiadal) nie wraca do pamieci jako swiezy
+      const remember = (entry: ParcelRegistryEntry | null) => {
+        if (entry && !record.stale) onEnriched?.(enrich(record, entry));
+      };
+
+      // odpowiedz po limicie: ekran juz dostal dzialke bez uzytkow, ale pamiec dostanie je w tle
+      defer?.(
+        lookup.then((entry) => {
+          if (late) remember(entry);
+
+          return entry;
+        }),
+      );
+
+      const entry = await Promise.race([lookup, timeout]);
+
+      if (timer !== undefined) clearTimeout(timer);
 
       if (!entry) return record;
 
-      const enriched: ParcelRecord = {
-        ...record,
-        landUse: entry.landUse,
-        ...(entry.registryAreaHa === undefined ? {} : { registryAreaHa: entry.registryAreaHa }),
-      };
+      remember(entry);
 
-      // przeterminowany wpis (GUGiK nie odpowiadal) nie wraca do pamieci jako swiezy
-      if (!record.stale) onEnriched?.(enriched);
-
-      return enriched;
+      return enrich(record, entry);
     },
     byPoint: (lng, lat) => source.byPoint(lng, lat),
     byName: (query, limit) => source.byName(query, limit),

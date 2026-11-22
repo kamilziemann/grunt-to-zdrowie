@@ -48,7 +48,13 @@ select ST_Length(ST_Boundary(field.geom))::float8 as edge_m,
          select ST_Length(ST_Intersection(ST_Boundary(field.geom), ST_Buffer(ST_Union(c.geom), $2)))
          from bdot_cover c
          where ST_DWithin(c.geom, field.geom, $2)
-       ), 0)::float8 as wooded_edge_m
+       ), 0)::float8 as wooded_edge_m,
+       -- jaka czesc pola lezy pod lasem albo zadrzewieniem (poligony BDOT10k) - zapas, gdy ewidencja nie zna uzytku
+       coalesce((
+         select ST_Area(ST_Intersection(field.geom, ST_Union(c.geom)))
+         from bdot_cover c
+         where ST_Intersects(c.geom, field.geom) and GeometryType(c.geom) in ('POLYGON', 'MULTIPOLYGON')
+       ), 0)::float8 / nullif(ST_Area(field.geom), 0) as wooded_area_share
 from field`,
       params: [geometry, treeBandM],
     },
@@ -190,7 +196,11 @@ export function createPostgisSurroundingsSource({
       return {
         data: surroundingsFromRows({
           cover: summaryRows(cover),
-          edge: { edgeM: numberOf(edge[0]?.edge_m), woodedEdgeM: numberOf(edge[0]?.wooded_edge_m) },
+          edge: {
+            edgeM: numberOf(edge[0]?.edge_m),
+            woodedEdgeM: numberOf(edge[0]?.wooded_edge_m),
+            woodedAreaShare: numberOf(edge[0]?.wooded_area_share),
+          },
           waterworks: summaryRows(waterworks),
           junction: junctionOf(junction),
           protectedAreas: protectedRows.map((row) => ({ kind: numberOf(row.kind), name: textOf(row.name) })),

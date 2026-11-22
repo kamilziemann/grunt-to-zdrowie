@@ -105,3 +105,28 @@ describe('withRegistryLandUse', () => {
     expect(onEnriched).not.toHaveBeenCalled();
   });
 });
+
+describe('withRegistryLandUse - spozniona ewidencja', () => {
+  it('po limicie oddaje dzialke bez uzytkow, a spozniona odpowiedz zapamietuje w tle', async () => {
+    const onEnriched = vi.fn<(record: ParcelRecord) => void>();
+    const tasks: Promise<unknown>[] = [];
+    const slow = {
+      byId: () =>
+        new Promise<ParcelRegistryEntry | null>((resolve) => {
+          setTimeout(() => resolve({ landUse: ['RV'] }), 30);
+        }),
+    };
+    const found = await withRegistryLandUse(source('uldk', 'ok'), slow, {
+      timeoutMs: 5,
+      onEnriched,
+      defer: (task) => tasks.push(task),
+    }).byId('x');
+
+    expect(found).toEqual(record('uldk'));
+    expect(onEnriched).not.toHaveBeenCalled();
+
+    await Promise.all(tasks);
+
+    expect(onEnriched).toHaveBeenCalledWith(expect.objectContaining({ landUse: ['RV'] }));
+  });
+});

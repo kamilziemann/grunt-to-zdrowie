@@ -24,6 +24,7 @@ import { addDays, daysBetween, monthOf, withYear, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods, type IungPeriod } from '../iung-periods';
 import { terrainTooCoarse } from '../terrain';
 import { vegetationSignal } from '../vegetation-signal';
+import { meteoGaps } from '../meteo-gaps';
 
 /** Uproszczone progi suszy dla kategorii gleby (mm); wlasciwa tabela IUNG zalezy tez od uprawy i okresu (P2). */
 const SAMPLE_THRESHOLD_MM: Record<SoilCategory, number> = { 1: -150, 2: -170, 3: -205, 4: -230 };
@@ -150,9 +151,13 @@ export function precipitationContext(input: StageInput): Assessment['precipitati
   if (!meteo) return null;
 
   const sumFor = (end: string) => sumBetween(meteo, addDays(end, -(PRECIP_DAYS - 1)), end, 'precipMm');
-  const current = sumFor(date);
+  // ostatnie dni czekaja na publikacje (NASA POWER): okno konczy sie na ostatnim zmierzonym dniu, zeby "30 dni"
+  // bylo 30 dniami opadu, a nie 27 - lata poprzednie liczymy do tego samego dnia roku
+  const lagDays = meteoGaps(meteo.days.filter((day) => day.date <= date)).lagDays;
+  const end = lagDays > 0 ? addDays(date, -lagDays) : date;
+  const current = sumFor(end);
   const earlier = Array.from({ length: HISTORY_YEARS }, (_unused, index) =>
-    sumFor(withYear(date, yearOf(date) - 1 - index)),
+    sumFor(withYear(end, yearOf(end) - 1 - index)),
   ).filter((value): value is number => value !== null);
 
   if (current === null || earlier.length === 0) return null;
@@ -168,6 +173,7 @@ export function precipitationContext(input: StageInput): Assessment['precipitati
     medianMm: round(median),
     rank: earlier.filter((value) => value < current).length + 1,
     years: earlier.length + 1,
+    ...(end === date ? {} : { to: end }),
   };
 }
 

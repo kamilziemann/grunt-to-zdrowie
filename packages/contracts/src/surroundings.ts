@@ -35,6 +35,8 @@ export const fieldTreesSchema = z.object({
   woodedEdgeM: z.number().min(0),
   /** udzial granicy z drzewami, 0-1 */
   woodedEdgeShare: z.number().min(0).max(1),
+  /** jaka czesc powierzchni pola lezy pod lasem albo zadrzewieniem z BDOT10k, 0-1 (od silnika 0.8.5) */
+  woodedAreaShare: z.number().min(0).max(1).optional(),
   /** najblizszy las i najblizszy rzad drzew albo zywoplot (m od granicy); null = brak w `searchRadiusM` */
   nearestForestM: z.number().min(0).nullable(),
   nearestTreeRowM: z.number().min(0).nullable(),

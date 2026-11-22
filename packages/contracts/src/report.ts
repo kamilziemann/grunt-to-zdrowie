@@ -155,6 +155,11 @@ export const precipitationContextSchema = z.object({
   /** miejsce od najsuchszego: 1 = najsuchszy */
   rank: z.number().int().positive(),
   years: z.number().int().positive(),
+  /**
+   * ostatni dzien okna, gdy konczy sie przed dniem analizy (ostatnie dni czekaja na publikacje pogody) - okno ma
+   * wtedy pelne `days` dni zmierzonego opadu, a lata poprzednie sa liczone do tego samego dnia roku
+   */
+  to: isoDateSchema.optional(),
 });
 
 /**
@@ -573,6 +578,12 @@ export const LIMITATION_IDS = [
   'land_use_unknown',
   // porownanie satelity z ta sama pora roku nie zna upraw z lat poprzednich (plodozmian)
   'vegetation_rotation_unknown',
+  // model gleby i klasa bonitacyjna z ewidencji wyraznie sie roznia - przyjeto glebe wg ewidencji
+  'soil_lighter_by_registry',
+  'soil_heavier_by_registry',
+  // ewidencja nie zna uzytku, a inne dane wskazuja, ze to nie pole: las wg BDOT10k albo brak gleby na mapie glebowej
+  'likely_forest',
+  'likely_not_farmland',
 ] as const;
 
 export const limitationIdSchema = z.enum(LIMITATION_IDS);

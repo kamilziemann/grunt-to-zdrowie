@@ -87,6 +87,25 @@ export function hasFarmland(codes: readonly string[]): boolean {
   return codes.some((code) => FARMLAND.has(landUseKind(code)));
 }
 
+/** od tego udzialu lasu w powierzchni pola (BDOT10k) uznajemy, ze dzialka to raczej las niz pole */
+export const LIKELY_FOREST_SHARE = 0.5;
+
+/**
+ * Czym dzialka moze byc, gdy ewidencja nie podala uzytku (np. powiaty Lubelszczyzny i Podkarpacia): `forest` - ponad
+ * polowa pola lezy pod lasem wg BDOT10k; `no_soil` - mapa glebowa nie ma gleby w polu (zabudowa, woda), wzieto ja z
+ * poblizu. Null = ewidencja zna uzytek albo nic nie wskazuje, ze to nie pole.
+ */
+export function landCoverGuess(
+  landUse: readonly string[] | undefined,
+  hints: { woodedAreaShare?: number | undefined; soilSubstituted: boolean },
+): 'forest' | 'no_soil' | null {
+  if (landUse && landUse.length > 0) return null;
+
+  if ((hints.woodedAreaShare ?? 0) >= LIKELY_FOREST_SHARE) return 'forest';
+
+  return hints.soilSubstituted ? 'no_soil' : null;
+}
+
 /** Klasouzytki z ewidencji jako lista oznaczen ("RIVb,RV, ŁV" -> ["RIVb", "RV", "ŁV"]). */
 export function parseLandUseCodes(value: string): string[] {
   return [

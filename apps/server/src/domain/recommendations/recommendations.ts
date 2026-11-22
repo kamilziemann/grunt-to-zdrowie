@@ -11,6 +11,7 @@ import type {
   IrrigationAdvice,
   Recommendation,
   RecommendationNote,
+  Zone,
   ZoneMap,
 } from '@app/contracts';
 
@@ -19,7 +20,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
-import { hasFarmland } from '../land-use';
+import { hasFarmland, landCoverGuess } from '../land-use';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
@@ -401,16 +402,53 @@ function fromRule(
   if (!first) return null;
 
   const notes = rule.notes?.(input) ?? [];
-
-  return {
+  // miejsce na polu: oczko w zaglebieniu, zastawka przy rowie, pas trawiasty na stoku; bez stref - cale pole
+  const zoneId = zoneForMeasure(rule.measure.measure, zones);
+  const recommendation: Recommendation = {
     ...rule.measure,
     ...(rule.effect ? { effect: rule.effect(input) } : {}),
     ...(rule.legal ? { legal: rule.legal(input) } : {}),
     causes: matched.map((cause) => cause.id),
     evidence: [first, ...rest],
-    // miejsce na polu: oczko w zaglebieniu, zastawka przy rowie, pas trawiasty na stoku; bez stref - cale pole
-    zoneId: zoneForMeasure(rule.measure.measure, zones),
+    zoneId,
     ...(notes.length > 0 ? { notes } : {}),
+  };
+
+  return pondInZone(
+    recommendation,
+    zones?.zones.find((zone) => zone.id === zoneId),
+  );
+}
+
+/**
+ * Oczko wskazane w konkretnym miejscu na polu dostaje liczby tego miejsca (pojemnosc i powierzchnia zaglebienia z
+ * siatki 10 m w granicach pola), a nie najwiekszego zaglebienia z calego modelu terenu, ktore moze wychodzic poza
+ * pole - inaczej zalecenie i karta miejsca podawaly dwie rozne pojemnosci tego samego zaglebienia.
+ */
+function pondInZone(recommendation: Recommendation, zone: Zone | undefined): Recommendation {
+  if (
+    recommendation.measure !== 'small_pond' ||
+    zone?.kind !== 'depression' ||
+    zone.volumeM3 === undefined ||
+    zone.volumeM3 < POND_MIN_M3
+  ) {
+    return recommendation;
+  }
+
+  const areaM2 = Math.round(zone.areaHa * 10_000);
+  const [first, ...rest] = recommendation.evidence.map((item) =>
+    item.metric === 'depression_volume_m3'
+      ? { ...item, value: zone.volumeM3 ?? item.value }
+      : item.metric === 'depression_area_m2'
+        ? { ...item, value: areaM2 }
+        : item,
+  );
+
+  return {
+    ...recommendation,
+    effect: { kind: 'volume_m3', value: zone.volumeM3 },
+    legal: areaM2 > POND_NOTIFICATION_MAX_M2 ? 'permit' : 'notification',
+    evidence: first ? [first, ...rest] : recommendation.evidence,
   };
 }
 
@@ -533,7 +571,13 @@ export function recommend(
   // wg ewidencji to nie grunt rolny (las, zabudowa, woda): zabiegi agrotechniczne i nawadnianie nie maja sensu -
   // zostaje woda w krajobrazie (rowy, mokradla); raport i tak mowi wprost, ze ocena dotyczy warunkow w okolicy
   const landUse = input.field.landUse;
-  const notFarmland = landUse !== undefined && landUse.length > 0 && !hasFarmland(landUse);
+  // bez ewidencji: las wg BDOT10k albo brak gleby na mapie glebowej tez wstrzymuja zabiegi polowe
+  const guess = landCoverGuess(landUse, {
+    woodedAreaShare: input.surroundings?.trees.woodedAreaShare,
+    soilSubstituted: input.soil?.substituteDistanceM !== undefined,
+  });
+  const notFarmland =
+    guess !== null || (landUse !== undefined && landUse.length > 0 && !hasFarmland(landUse));
 
   return {
     retention: all.filter((item) => item.category === 'retention'),
