@@ -675,7 +675,8 @@
     "pageFooter": "Źródła danych: {sources}. Licencje – sekcja 7.",
     "pageNumber": "strona ",
     "notes": "Notatki doradcy",
-    "notesHint": "Miejsce na uwagi z wizyty na polu i ustalenia z rolnikiem."
+    "notesHint": "Miejsce na uwagi z wizyty na polu i ustalenia z rolnikiem.",
+    "pageFooterLink": "Raport: {url} · źródła: {sources}"
   },
   "landUse": {
     "label": "Użytki w ewidencji",

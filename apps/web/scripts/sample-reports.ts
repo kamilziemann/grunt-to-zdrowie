@@ -2,12 +2,17 @@
 // API (`bun run --cwd apps/web dev -- --port 3310`), czeka na pelny raport i szkic, drukuje A4 tak, jak przegladarka
 // ("Drukuj / zapisz PDF"). Nie jest czescia e2e: woła prawdziwe zrodla (GUGiK ma nocny limit), wiec uruchamiamy recznie,
 // jeden raport po drugim. Uzycie: `bun run --cwd apps/web samples:pdf` (SAMPLES_BASE_URL zmienia serwer).
+// Adres w naglowku i krotki link to adres wdrozenia (SAMPLES_PUBLIC_URL), nie `localhost`: przegladarka otwiera
+// adres wdrozenia, a skrypt podaje tresc z serwera lokalnego (SAMPLES_API_URL - osobny serwer API, np. z nowszym
+// silnikiem przed scaleniem).
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { chromium } from '@playwright/test';
 
 const BASE = process.env.SAMPLES_BASE_URL ?? 'http://localhost:3310';
+const PUBLIC = process.env.SAMPLES_PUBLIC_URL ?? 'https://grunt-to-zdrowie.hoxu.workers.dev';
+const API = process.env.SAMPLES_API_URL ?? BASE;
 const OUT_DIR = join(import.meta.dirname, '../../../docs/samples');
 
 /** Trzy przypadki z rozna diagnoza: susza z rowem przez pole, nadmiar wody na lace, susza na slabej glebie. */
@@ -36,10 +41,21 @@ try {
       timezoneId: 'Europe/Warsaw',
       colorScheme: 'light',
     });
-    const url = `${BASE}/raport?${new URLSearchParams(sample.search).toString()}`;
+    const url = `${PUBLIC}/raport?${new URLSearchParams(sample.search).toString()}`;
 
+    // wszystko z adresu wdrozenia idzie do serwera lokalnego (strony) albo serwera API (`/api/...`)
+    await page.route(`${PUBLIC}/**`, async (route) => {
+      const target = new URL(route.request().url());
+      const server = target.pathname.startsWith('/api/') ? API : BASE;
+      const response = await route.fetch({
+        url: `${server}${target.pathname}${target.search}`,
+        timeout: 90_000,
+      });
+
+      await route.fulfill({ response });
+    });
     await page.goto(url);
-    await page.getByTestId('verdict').waitFor({ timeout: 90_000 });
+    await page.getByTestId('short-analysis').waitFor({ timeout: 90_000 });
     await page.locator('[data-hydro="ready"], [data-hydro="unavailable"]').waitFor({ timeout: 30_000 });
     await page.emulateMedia({ media: 'print' });
     // otwiera szczegoly dla doradcy jak przed prawdziwym wydrukiem (`beforeprint`)

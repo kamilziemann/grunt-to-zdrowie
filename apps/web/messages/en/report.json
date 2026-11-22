@@ -675,7 +675,8 @@
     "pageFooter": "Data sources: {sources}. Licences – section 7.",
     "pageNumber": "page ",
     "notes": "Adviser notes",
-    "notesHint": "Space for remarks from the field visit and agreements with the farmer."
+    "notesHint": "Space for remarks from the field visit and agreements with the farmer.",
+    "pageFooterLink": "Report: {url} · sources: {sources}"
   },
   "landUse": {
     "label": "Land use in the register",

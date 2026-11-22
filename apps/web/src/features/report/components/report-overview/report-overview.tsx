@@ -61,19 +61,16 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
         </section>
       </div>
 
-      <section
-        aria-labelledby="woda-title"
-        className="flex flex-col gap-4 print:break-before-page print:space-y-3"
-      >
-        <h2 id="woda-title" className="text-2xl font-semibold print:text-xl">
+      <section aria-labelledby="woda-title" className="flex flex-col gap-4 print:space-y-3">
+        <h2 id="woda-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
           {t('waterTitle')}
         </h2>
         {hasWater ? (
           <div
             className={cn(
-              'grid gap-4 print:grid-cols-2 print:gap-3',
-              waterCards > 1 && 'md:grid-cols-2',
-              waterCards === 3 && 'lg:grid-cols-3',
+              'grid gap-4 print:gap-3',
+              waterCards > 1 && 'md:grid-cols-2 print:grid-cols-2',
+              waterCards >= 3 && 'lg:grid-cols-3 print:grid-cols-3',
             )}
           >
             <WaterTankChart report={report} />
@@ -88,8 +85,8 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
         )}
       </section>
 
-      <section aria-labelledby="lata-title" className="flex flex-col gap-4 print:space-y-3">
-        <h2 id="lata-title" className="text-2xl font-semibold print:text-xl">
+      <section aria-labelledby="lata-title" className="flex flex-col gap-4 print:block print:space-y-3">
+        <h2 id="lata-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
           {t('historyTitle')}
         </h2>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:gap-3">
@@ -98,8 +95,11 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
         </div>
       </section>
 
-      <section aria-labelledby="co-robic-title" className="flex flex-col gap-4 print:space-y-3">
-        <h2 id="co-robic-title" className="text-2xl font-semibold print:text-xl">
+      <section
+        aria-labelledby="co-robic-title"
+        className="flex flex-col gap-4 print:block print:space-y-3 print:break-inside-avoid"
+      >
+        <h2 id="co-robic-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
           {t('todoTitle')}
         </h2>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:gap-3">

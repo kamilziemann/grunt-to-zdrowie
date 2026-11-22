@@ -35,6 +35,11 @@
 
 /* Wydruk: papier jest jasny, wiec ciemny panel drukujemy jako jasny z ramka (oszczedza toner, czytelny w cz.-b.). */
 @media print {
+  /* raport na A4: cala skala (tekst i odstepy w rem) mniejsza, zeby strona 1 byla infografika, a nie plakatem */
+  html:has(.report) {
+    font-size: 10.5px;
+  }
+
   :root {
     --viz-panel: #ffffff;
     --viz-panel-foreground: #1b1d1a;

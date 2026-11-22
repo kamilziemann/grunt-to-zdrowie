@@ -91,7 +91,12 @@ export function StressCountdown({ report }: { report: WaterReport }) {
       data-testid="chart-countdown"
     >
       <p className="flex items-baseline gap-3">
-        <span className="text-6xl leading-none font-bold text-viz-orange-deep tabular-nums">
+        <span
+          className={cn(
+            'text-6xl leading-none font-bold tabular-nums',
+            noRain === undefined ? 'text-viz-water' : 'text-viz-orange-deep',
+          )}
+        >
           {noRain ?? t('beyond', { days: horizon })}
         </span>
         {noRain !== undefined && <span className="text-xl font-semibold">{t('unit', { days: noRain })}</span>}

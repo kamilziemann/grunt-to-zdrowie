@@ -146,7 +146,7 @@ export function ReportView({
         <div
           id="analiza"
           className={cn(
-            'flex scroll-mt-4 flex-col gap-4 print:block print:space-y-6 print:break-before-page',
+            'flex scroll-mt-4 flex-col gap-4 print:block print:space-y-6',
             !view.detailed && 'hidden print:block',
           )}
           data-testid="report-details"

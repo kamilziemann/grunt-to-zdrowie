@@ -80,13 +80,14 @@ function shortProvider(provider: string): string {
 }
 
 /**
- * Naglowek i stopka na KAZDEJ stronie wydruku: pola marginesu `@page` (Chrome 131+) z nazwa aplikacji, polem, dniem
- * analizy, identyfikatorem raportu, zrodlami i numerem strony. Przegladarki bez pol marginesu drukuja jak dotad -
+ * Naglowek i stopka na KAZDEJ stronie wydruku: pola marginesu `@page` (Chrome 131+) z nazwa aplikacji, pelnym
+ * numerem dzialki, dniem analizy, identyfikatorem raportu, krotkim linkiem, zrodlami i numerem strony. Przegladarki bez pol marginesu drukuja jak dotad -
  * pelny naglowek na pierwszej stronie i stopke na ostatniej (`PrintHeader`, `PrintFooter`).
  */
 export function PrintPageMargins({ report }: { report: WaterReport }) {
   const t = useTranslations('report.print');
   const format = useFormatter();
+  const url = useReportUrl(report.meta.reportId);
   const date = format.dateTime(new Date(`${report.meta.analysisDate}T12:00:00Z`), {
     dateStyle: 'long',
     timeZone: 'UTC',
@@ -94,10 +95,13 @@ export function PrintPageMargins({ report }: { report: WaterReport }) {
   const providers = [...new Set(report.sources.map((source) => shortProvider(source.provider)))];
   const top = t('pageHeader', {
     app: BRAND,
-    field: report.field.label || report.field.parcelIds.join(', '),
+    // pelny numer dzialki (doradca szuka go w ewidencji); wlasny obszar - jego nazwa
+    field: report.field.parcelIds.length > 0 ? report.field.parcelIds.join(', ') : (report.field.label ?? ''),
     date,
   });
-  const bottom = t('pageFooter', { sources: providers.join(', ') });
+  const bottom = url
+    ? t('pageFooterLink', { url, sources: providers.join(', ') })
+    : t('pageFooter', { sources: providers.join(', ') });
   const css = `@media print { @page {
     margin: 18mm 12mm 18mm;
     @top-left { content: ${cssString(top)}; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: bottom; padding-bottom: 3mm; }
