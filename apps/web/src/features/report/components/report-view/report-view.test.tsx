@@ -450,4 +450,44 @@ describe('ReportView', () => {
       expect(measures).toHaveTextContent('NDMI');
     });
   });
+
+  describe('upal (miary hot_days_*)', () => {
+    const heat: WaterReport = {
+      ...FIELD_REPORT,
+      causes: FIELD_REPORT.causes.map((cause) =>
+        cause.id === 'high_evaporative_demand'
+          ? {
+              ...cause,
+              evidence: [
+                ...cause.evidence,
+                { metric: 'hot_days_14d', value: 9, unit: 'days', source: 'meteo' },
+                { metric: 'hot_days_30d', value: 12, reference: 4, unit: 'days', source: 'meteo' },
+                { metric: 'hot_days_30d_normal', value: 4, unit: 'days', source: 'meteo' },
+              ],
+            }
+          : cause,
+      ),
+    };
+
+    it('zdanie o upale w karcie oceny, poziom bez zmian; miary nazwane slowami', () => {
+      const { container } = renderReport(heat);
+
+      expect(screen.getByTestId('verdict-heat')).toHaveTextContent(
+        'Od 14 dni było 9 dni upału (zwykle ok. 2) – rośliny tracą wodę szybciej niż zwykle.',
+      );
+      expect(screen.getByTestId('verdict')).toHaveAttribute('data-level', FIELD_REPORT.assessment.level);
+
+      const cause = container.querySelector('[data-cause="high_evaporative_demand"]');
+
+      expect(cause).toHaveTextContent('Dni z upałem powyżej 30°C w ostatnich 14 dniach: 9 dni');
+      expect(cause).toHaveTextContent('zwykle o tej porze: 4 dni');
+      expect(cause).not.toHaveTextContent(t('evidence.unknownMetric'));
+    });
+
+    it('bez miar upalu nie ma zdania', () => {
+      renderReport(FIELD_REPORT);
+
+      expect(screen.queryByTestId('verdict-heat')).not.toBeInTheDocument();
+    });
+  });
 });

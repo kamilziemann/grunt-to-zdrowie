@@ -1,3 +1,4 @@
+import type { Evidence, WaterReport } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import { DROUGHT_REPORT } from '../fixtures/drought-report';
@@ -10,6 +11,7 @@ import {
   calendarRows,
   currentPeriod,
   excessSeasons,
+  heatSpell,
   rankSide,
   IUNG_PERIODS,
   isPastAnalysis,
@@ -248,5 +250,45 @@ describe('parametry raportu z zapisu', () => {
 
     expect(search.rodzaj).toBe('drawn');
     expect(search.obszar).toMatch(/^[\w-]+$/);
+  });
+});
+
+describe('upal w ostatnich 14 dniach', () => {
+  const withHeat = (evidence: Evidence[]): WaterReport => ({
+    ...FIELD_REPORT,
+    causes: FIELD_REPORT.causes.map((cause) =>
+      cause.id === 'high_evaporative_demand'
+        ? { ...cause, evidence: [...cause.evidence, ...evidence] }
+        : cause,
+    ),
+  });
+
+  it('dzis (bez miar upalu) nic nie mowi', () => {
+    expect(heatSpell(FIELD_REPORT)).toBeNull();
+  });
+
+  it('9 dni przy normie 2 dni na 14 = upal ponad norme', () => {
+    expect(
+      heatSpell(
+        withHeat([
+          { metric: 'hot_days_14d', value: 9, unit: 'days', source: 'meteo' },
+          { metric: 'hot_days_30d', value: 12, unit: 'days', source: 'meteo' },
+          { metric: 'hot_days_30d_normal', value: 4.3, unit: 'days', source: 'meteo' },
+        ]),
+      ),
+    ).toEqual({ days: 9, normal: 2 });
+  });
+
+  it('upal w granicach normy albo kilka dni to nie jest wyjasnienie', () => {
+    expect(
+      heatSpell(
+        withHeat([{ metric: 'hot_days_14d', value: 6, reference: 4, unit: 'days', source: 'meteo' }]),
+      ),
+    ).toBeNull();
+    expect(
+      heatSpell(
+        withHeat([{ metric: 'hot_days_14d', value: 4, reference: 0, unit: 'days', source: 'meteo' }]),
+      ),
+    ).toBeNull();
   });
 });

@@ -38,7 +38,14 @@ export const REPORT_METRICS = [
   'slope_share_above_5_pct',
   'depression_volume_m3',
   'depression_area_m2',
+  // upal przy przyczynie `high_evaporative_demand` (serwer doda je w nastepnej rundzie)
+  'hot_days_14d',
+  'hot_days_30d',
+  'hot_days_30d_normal',
 ] as const;
+
+/** Miary dni z upalem - ich odniesienie to norma z 10 lat ("zwykle o tej porze"), nie prog. */
+export const HEAT_METRICS: readonly string[] = ['hot_days_14d', 'hot_days_30d', 'hot_days_30d_normal'];
 
 export type ReportMetric = (typeof REPORT_METRICS)[number];
 

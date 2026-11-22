@@ -202,7 +202,8 @@
     "etDeficitValue": "{percent}% in the last 60 days",
     "etDeficitNone": "none in the last 60 days",
     "etDeficitNote": "The plants got {percent}% less water than they needed in the last 60 days. At 20% or more the yield usually drops.",
-    "soilRange": "The soil model points to category {from} to {to}; for the drought threshold we take the lighter one ({from})."
+    "soilRange": "The soil model points to category {from} to {to}; for the drought threshold we take the lighter one ({from}).",
+    "heat": "There were {days} hot days in the last 14 (usually about {normal}) – plants lose water faster than usual."
   },
   "history": {
     "noData": "There is no historical data for this field.",
@@ -318,7 +319,10 @@
       "registry_soil_class": "Weakest soil class in the land register",
       "slope_share_above_5_pct": "Share of the field steeper than 5%",
       "depression_volume_m3": "Volume of the hollow in the field",
-      "depression_area_m2": "Area of the hollow in the field"
+      "depression_area_m2": "Area of the hollow in the field",
+      "hot_days_14d": "Hot days above 30°C in the last 14 days",
+      "hot_days_30d": "Hot days above 30°C in the last 30 days",
+      "hot_days_30d_normal": "Hot days in these 30 days usually (10-year average)"
     },
     "unknownMetric": "Other indicator",
     "units": {
@@ -337,7 +341,8 @@
       "index": "{value}",
       "m2": "{value} m²",
       "soilClass": "class {roman}"
-    }
+    },
+    "referenceNormal": "usually at this time of year: {reference}"
   },
   "recommendations": {
     "none": {

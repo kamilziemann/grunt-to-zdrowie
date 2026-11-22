@@ -434,3 +434,26 @@ export function reportSearch(report: WaterReport): {
     data: report.meta.analysisDate,
   };
 }
+
+/** Upal "wyraznie ponad norme": co najmniej tyle dni z 14 i co najmniej dwa razy wiecej niz zwykle. */
+const HEAT_MIN_DAYS = 5;
+
+/**
+ * Upal w ostatnich 14 dniach wyraznie ponad norme (miary `hot_days_*` przy przyczynach): liczba dni z temperatura
+ * maksymalna powyzej 30 C i norma dla 14 dni (odniesienie miary albo norma z 30 dni przeliczona na 14). To tylko
+ * wyjasnienie - poziomu oceny nie zmienia. null = brak miar albo upal w normie.
+ */
+export function heatSpell(report: WaterReport): { days: number; normal: number } | null {
+  const evidence = report.causes.flatMap((cause) => cause.evidence);
+  const find = (metric: string) => evidence.find((item) => item.metric === metric);
+  const days14 = find('hot_days_14d');
+
+  if (!days14) return null;
+  const normal30 = find('hot_days_30d_normal')?.value ?? find('hot_days_30d')?.reference;
+  const normal = days14.reference ?? (normal30 === undefined ? undefined : (normal30 * 14) / 30);
+
+  if (normal === undefined) return null;
+  const days = Math.round(days14.value);
+
+  return days >= HEAT_MIN_DAYS && days >= 2 * normal ? { days, normal: Math.round(normal) } : null;
+}

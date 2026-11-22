@@ -2,7 +2,13 @@ import type { Evidence } from '@app/contracts';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { romanCategory } from '../../utils/report-data';
-import { evidenceDisplay, isKnownMetric, referenceRole, romanSoilClass } from '../../utils/report-labels';
+import {
+  evidenceDisplay,
+  HEAT_METRICS,
+  isKnownMetric,
+  referenceRole,
+  romanSoilClass,
+} from '../../utils/report-labels';
 
 /** Promien szukania obiektow wokol pola, gdy dowod go nie podaje (tak liczy silnik). */
 const DEFAULT_RADIUS_M = 500;
@@ -59,7 +65,12 @@ export function EvidenceList({ evidence }: { evidence: readonly Evidence[] }) {
             <span className="text-muted-foreground">
               {item.reference === undefined || role !== 'reference'
                 ? null
-                : `${t('evidence.reference', { reference: withUnit(item, item.reference) })}; `}
+                : `${t(
+                    HEAT_METRICS.includes(item.metric) ? 'evidence.referenceNormal' : 'evidence.reference',
+                    {
+                      reference: withUnit(item, item.reference),
+                    },
+                  )}; `}
               {t('evidence.source', { source: t(`sources.categories.${item.source}`) })}
             </span>
           </li>

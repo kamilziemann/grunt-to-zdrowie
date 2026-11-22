@@ -202,7 +202,8 @@
     "etDeficitValue": "{percent}% w ostatnich 60 dniach",
     "etDeficitNone": "nie zabrakło w ostatnich 60 dniach",
     "etDeficitNote": "Rośliny dostały o {percent}% mniej wody, niż potrzebowały, w ostatnich 60 dniach. Przy 20% i więcej plon zwykle spada.",
-    "soilRange": "Model gleby wskazuje kategorię od {from} do {to}; do progu suszy bierzemy lżejszą ({from})."
+    "soilRange": "Model gleby wskazuje kategorię od {from} do {to}; do progu suszy bierzemy lżejszą ({from}).",
+    "heat": "Od 14 dni było {days} dni upału (zwykle ok. {normal}) – rośliny tracą wodę szybciej niż zwykle."
   },
   "history": {
     "noData": "Brak danych historycznych dla tego pola.",
@@ -318,7 +319,10 @@
       "registry_soil_class": "Najsłabsza klasa gleby w ewidencji",
       "slope_share_above_5_pct": "Część pola o nachyleniu ponad 5%",
       "depression_volume_m3": "Pojemność zagłębienia w polu",
-      "depression_area_m2": "Powierzchnia zagłębienia w polu"
+      "depression_area_m2": "Powierzchnia zagłębienia w polu",
+      "hot_days_14d": "Dni z upałem powyżej 30°C w ostatnich 14 dniach",
+      "hot_days_30d": "Dni z upałem powyżej 30°C w ostatnich 30 dniach",
+      "hot_days_30d_normal": "Dni z upałem w tych 30 dniach zwykle (średnia z 10 lat)"
     },
     "unknownMetric": "Inny wskaźnik",
     "units": {
@@ -337,7 +341,8 @@
       "index": "{value}",
       "m2": "{value} m²",
       "soilClass": "klasa {roman}"
-    }
+    },
+    "referenceNormal": "zwykle o tej porze: {reference}"
   },
   "recommendations": {
     "none": {

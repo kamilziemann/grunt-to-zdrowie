@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils/cn';
 
 import {
   fieldZones,
+  heatSpell,
   isoDay,
   percentOf,
   rankSide,
@@ -126,6 +127,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
   ].filter((text): text is string => text !== null);
   // miejsca na polu odrozniaja raport od mapy gminnej - zapowiedz ich juz w karcie oceny
   const zoneCount = fieldZones(report).length;
+  const heat = heatSpell(report);
 
   return (
     <div className="flex flex-col gap-4">
@@ -153,6 +155,11 @@ export function VerdictSection({ report }: { report: WaterReport }) {
         {basisInCard.length > 0 && (
           <p className="text-base" data-testid="verdict-basis">
             {basisInCard.join(' ')}
+          </p>
+        )}
+        {heat && (
+          <p className="text-base" data-testid="verdict-heat">
+            {t('heat', { days: heat.days, normal: heat.normal })}
           </p>
         )}
         {zoneCount > 0 && (
