@@ -50,7 +50,7 @@ const COLOR_TOKENS = [
   { name: 'panel', swatch: 'bg-panel', text: '' },
 ] as const;
 
-// Kolory danych ("Pogodynka wody"): wykresy, skala suszy, mapy - stale w obu motywach.
+// Kolory danych ("Pogodynka wody"): wykresy, skala suszy, mapy - stale na stronie i w ciemnym panelu.
 const DATA_TOKENS = [
   { name: 'data-blue', swatch: 'bg-data-blue' },
   { name: 'data-blue-light', swatch: 'bg-data-blue-light' },

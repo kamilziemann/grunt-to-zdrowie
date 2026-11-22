@@ -4,8 +4,8 @@ import { useTranslations } from 'use-intl';
 
 import { BrandMark } from '@/components/shared/brand-mark';
 import { LocaleSwitcher } from '@/components/shared/locale-switcher';
-import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { buttonVariants } from '@/components/ui/button';
+import { ENABLED_LOCALES } from '@/lib/locale';
 import { Link, usePathname } from '@/lib/navigation';
 import { isNavItemActive, NAV_ITEMS, routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
@@ -14,7 +14,7 @@ const HOME_PATHS = new Set(['/', '/en', '/en/']);
 
 /**
  * Naglowek aplikacji: znak i nazwa (powrot na strone glowna), "Sprawdz inna dzialke" poza strona glowna, pozycje
- * menu, jezyk i motyw. Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
+ * menu i jezyk. Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
  * i klikniecie obok zamykaja, fokus wraca na przycisk).
  */
 export function AppNav({ appName }: { appName: string }) {
@@ -76,7 +76,6 @@ export function AppNav({ appName }: { appName: string }) {
           </Link>
         )}
         <LocaleSwitcher />
-        <ThemeToggle />
       </div>
       <button
         type="button"
@@ -106,10 +105,11 @@ export function AppNav({ appName }: { appName: string }) {
           )}
           {links}
         </ul>
-        <div className="mt-2 flex items-center gap-1 border-t pt-2">
-          <LocaleSwitcher />
-          <ThemeToggle />
-        </div>
+        {ENABLED_LOCALES.length > 1 && (
+          <div className="mt-2 flex items-center gap-1 border-t pt-2">
+            <LocaleSwitcher />
+          </div>
+        )}
       </div>
     </nav>
   );

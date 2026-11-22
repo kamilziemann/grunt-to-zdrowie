@@ -2,12 +2,6 @@
   "main": "Main navigation",
   "breadcrumbs": "Breadcrumbs",
   "design": "Design system",
-  "themeToggle": "Theme: {theme}. Click to change.",
-  "themes": {
-    "system": "system",
-    "light": "light",
-    "dark": "dark"
-  },
   "switchLanguage": "{code} - switch language to {language}",
   "tagline": "drought check for farmers",
   "menu": "Menu",

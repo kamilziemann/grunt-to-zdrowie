@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 // Dokument HTML aplikacji (shellComponent renderuje sie zawsze po stronie serwera, takze dla tras z `ssr: false`),
 // wspolne <head> i dostawcy, ktorzy nie zaleza od jezyka. Jezyk, komunikaty i powloki sekcji dokladaja layouty
-// `{-$locale}`. HTML nie zalezy od ciasteczek (motyw ustawia skrypt w <head>), wiec strony moga isc z cache'u CDN.
+// `{-$locale}`. HTML nie zalezy od ciasteczek (motyw jest tylko jasny), wiec strony moga isc z cache'u CDN.
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, HeadContent, Scripts, useRouterState } from '@tanstack/react-router';
 import { useEffect, type ReactNode } from 'react';
@@ -9,8 +9,6 @@ import { useEffect, type ReactNode } from 'react';
 import { DocumentError, DocumentNotFound } from '@/components/shared/document-fallbacks';
 import { localeFromPath } from '@/lib/locale';
 import { installErrorReporting } from '@/lib/telemetry';
-import { THEME_SCRIPT } from '@/lib/theme';
-import { ThemeProvider } from '@/providers/theme-provider';
 import appCss from '@/styles/app.css?url';
 
 export interface RouterContext {
@@ -22,14 +20,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      // kolor paska przegladarki = --background jasnego motywu
+      // tylko jasny motyw (ADR 0012): przegladarka nie przyciemnia kontrolek, pasek = --background
+      { name: 'color-scheme', content: 'light' },
       { name: 'theme-color', content: '#ffffff' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/icon.svg', type: 'image/svg+xml' },
     ],
-    scripts: [{ children: THEME_SCRIPT }],
   }),
   shellComponent: RootDocument,
   errorComponent: DocumentError,
@@ -47,13 +45,12 @@ function RootDocument({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    // atrybut motywu ustawia skrypt przed hydracja - roznica na <html> jest zamierzona
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale}>
       <head>
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        {children}
         <Scripts />
       </body>
     </html>

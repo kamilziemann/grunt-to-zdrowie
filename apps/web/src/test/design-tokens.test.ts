@@ -73,7 +73,7 @@ describe('tokeny designu', () => {
       expect(css).toContain(`${token}:`);
     }
 
-    // mieta i ciemny panel sa stale (panel to wyspa ciemnego motywu), kolory danych wspolne z raportem
+    // mieta i ciemny panel sa stale (panel to wyspa ciemnych wartosci light-dark()), kolory danych wspolne z raportem
     for (const token of ['--accent', '--accent-foreground', '--panel', '--data-blue', '--data-orange-dark']) {
       expect(css).toContain(`${token}: #`);
     }
@@ -82,5 +82,10 @@ describe('tokeny designu', () => {
     expect(css).toContain("'Geist Variable'");
 
     expect(css).toContain('prefers-reduced-motion');
+
+    // tylko jasny motyw (ADR 0012): korzen jasny, bez reagowania na ustawienie systemu i bez data-theme
+    expect(css).toMatch(/:root \{\n {2}color-scheme: light;/);
+    expect(css).not.toContain('prefers-color-scheme');
+    expect(css).not.toContain('data-theme');
   });
 });

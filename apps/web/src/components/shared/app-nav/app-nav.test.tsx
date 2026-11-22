@@ -1,7 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ThemeProvider } from '@/providers/theme-provider';
 import { IntlTestProvider } from '@/test/render-intl';
 
 import { AppNav } from './app-nav';
@@ -17,9 +16,7 @@ vi.mock('@/lib/navigation', async () => ({
 function renderNav() {
   return render(
     <IntlTestProvider>
-      <ThemeProvider>
-        <AppNav appName="Grunt to Zdrowie" />
-      </ThemeProvider>
+      <AppNav appName="Grunt to Zdrowie" />
     </IntlTestProvider>,
   );
 }
@@ -48,16 +45,11 @@ describe('AppNav', () => {
     }
   });
 
-  it('przełącznik motywu cyklicznie zmienia ciasteczko i atrybut na <html>', () => {
+  it('nie ma przełącznika motywu (tylko jasny)', () => {
     nav.pathname.mockReturnValue('/');
     renderNav();
 
-    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: systemowy/ })[0] as HTMLElement);
-    expect(document.documentElement.dataset.theme).toBe('light');
-    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: jasny/ })[0] as HTMLElement);
-    expect(document.documentElement.dataset.theme).toBe('dark');
-    fireEvent.click(screen.getAllByRole('button', { name: /Motyw: ciemny/ })[0] as HTMLElement);
-    expect(document.documentElement.dataset.theme).toBeUndefined();
+    expect(screen.queryByRole('button', { name: /Motyw/ })).not.toBeInTheDocument();
   });
 
   it('na stronie głównej żadna sekcja nie jest aktywna', () => {

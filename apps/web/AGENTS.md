@@ -14,7 +14,7 @@ src/
   entry/                kod tylko dla wejścia Workera (granica /api, zapytanie o stronę: requestId, ślad, log `page`)
   router.tsx            fabryka routera: QueryClient PER ZAPYTANIE, SSR Query, preload `intent`, domyślne 404/błąd
   routes/               trasy plikowe TanStack Router (cienkie: loader + head + headers + kompozycja komponentów)
-    __root.tsx          dokument HTML (shellComponent), <head>, skrypt motywu, raportowanie błędów, dostawcy
+    __root.tsx          dokument HTML (shellComponent), <head> (tylko jasny motyw), raportowanie błędów
     {-$locale}/         jezyk w adresie: `/` = pl, `/en/...` = en; loader komunikatów, IntlProvider
       _app/             powłoka aplikacji (nawigacja, 404): strona główna, analiza, raport, gospodarstwo
         _dev/           sekcja deweloperska (katalog /design) - tylko development, własne komunikaty `dev`
@@ -22,7 +22,7 @@ src/
                         api/ obejmujące kilka obszarów → podfoldery obszarów (`api/<obszar>/<obszar>.queries.ts`,
                         testy, `index.ts`) + `api/shared`. Małe featury (wzór: `features/parcels`) zostają płaskie.
   components/ui|shared  prymitywy i komponenty wspólne (bez wiedzy o featurach), folder na komponent
-  lib/                  api (klient API), navigation (Link, hooki), locale, routes (adresy), seo, telemetry, theme,
+  lib/                  api (klient API), navigation (Link, hooki), locale, routes (adresy), seo, telemetry,
                         problems, query (klucze, health), rpc (typ AppType, parsowanie)
   i18n/                 ładowanie komunikatów (load-messages), przestrzenie sekcji (client-messages)
   styles/app.css        tokeny designu (ADR 0007), Tailwind 4
@@ -35,7 +35,7 @@ e2e/                    Playwright na `vite dev` (jeden serwer: strony + API)
 
 1. **Workers Cache** (`wrangler.jsonc` → `cache.enabled`): GET z ważnym wpisem wraca z brzegu bez uruchamiania Workera.
    Klucz = ścieżka + query, **bez ciasteczek** — dlatego HTML nie może zależeć od ciasteczek (język w adresie, motyw
-   ustawia skrypt w `<head>`; kont nie ma — ADR 0011).
+   tylko jasny — ADR 0012; kont nie ma — ADR 0011).
 2. `src/worker.ts`: `/api/*` → Hono (prefiks odcięty), reszta → `handlePageRequest` (requestId, ślad W3C, log `page`,
    domyślne `private, no-store`) → TanStack Start.
 3. Trasa: `loader` zapełnia cache TanStack Query przez **izomorficzny klient** `getApi()` (`@/lib/api`): na serwerze

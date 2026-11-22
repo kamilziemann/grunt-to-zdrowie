@@ -3,7 +3,7 @@ import { EN_DISABLED, EN_ENABLED } from './support/locale-path';
 import { expect, hydratingPage, test } from './support/test';
 
 // Preferencje uzytkownika: jezyk w adresie (`/` = polski, `/en/...` = angielski - ten sam HTML dla wszystkich, wiec
-// moze byc w cache brzegu) i motyw w ciasteczku (`theme`, atrybut ustawia skrypt w <head> przed pierwszym malowaniem).
+// moze byc w cache brzegu). Motywu nie wybiera sie - jest tylko jasny (ADR 0012, sprawdza go a11y.spec.ts).
 test.describe('preferencje', () => {
   test('przełącznik języka prowadzi na angielską wersję strony, która zostaje po przeładowaniu', async ({
     page,
@@ -52,23 +52,5 @@ test.describe('preferencje', () => {
     await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
     await expectNoViolations(page);
     await context.close();
-  });
-
-  test('przełącznik motywu wymusza ciemny motyw i zapisuje go w ciasteczku (bez migniecia po przeładowaniu)', async ({
-    page,
-  }) => {
-    await page.goto('/');
-    await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
-
-    // system -> jasny -> ciemny
-    await page.getByRole('button', { name: /Motyw/ }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.getByRole('button', { name: /Motyw/ }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-
-    await page.reload();
-    // Skrypt w <head> ustawia atrybut z ciasteczka przed pierwszym malowaniem (HTML z serwera go nie zna).
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    expect((await page.context().cookies()).find((cookie) => cookie.name === 'theme')?.value).toBe('dark');
   });
 });

@@ -4,7 +4,7 @@
   "description": "Tokens and components in all states. A developer page and the visual test target.",
   "colors": {
     "title": "Colors",
-    "description": "Semantic tokens from globals.css; light and dark theme in one place.",
+    "description": "Semantic tokens from styles/app.css. The app has a light theme only; the second values of the light-dark() pairs serve the dark panel.",
     "data": "Data colours (charts, drought scale, maps)"
   },
   "typography": {
@@ -123,7 +123,7 @@
   },
   "panel": {
     "title": "Dark panel",
-    "description": "The surface-panel class: an island of the dark theme on a light page. All tokens inside switch to dark values.",
+    "description": "The surface-panel class: a dark island on a light page (the only dark place in the app). All tokens inside switch to dark values.",
     "heading": "Is this your parcel?",
     "body": "Secondary text in the panel meets AA contrast.",
     "outline": "Not this parcel",

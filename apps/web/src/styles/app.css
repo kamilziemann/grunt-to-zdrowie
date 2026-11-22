@@ -5,20 +5,20 @@
 
 /*
  * Jedyne zrodlo tokenow designu (ADR 0007). Warstwy:
- *  1. :root            - tokeny koloru (jasny/ciemny w jednym miejscu przez light-dark()), promien bazowy
+ *  1. :root            - tokeny koloru (strona i ciemny panel w jednym miejscu przez light-dark()), promien bazowy
  *  2. @theme inline    - mapowanie tokenow koloru i promieni na utility Tailwinda (bg-primary, rounded-lg...)
  *  3. @theme static    - tokeny stale: typografia, cienie, odstepy, ruch (zawsze emitowane jako zmienne CSS)
  * Komponenty uzywaja wylacznie tych tokenow - zadnych surowych kolorow (hex/rgb/paleta Tailwinda) w komponentach.
  *
- * Motyw: bez atrybutu `data-theme` obowiazuje ustawienie systemu (prefers-color-scheme); `data-theme="light|dark"`
- * (albo klasa `.light`/`.dark`) wymusza motyw. Atrybut ustawia serwer z ciasteczka `theme` (bez migniecia).
+ * Motyw: tylko jasny (ADR 0012), bez reagowania na ciemny tryb systemu. Pary light-dark() zostaja, bo ciemny panel
+ * (`surface-panel`) przelacza w sobie `color-scheme` na ciemny i bierze z nich drugie wartosci.
  */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* Powierzchnie i tekst. Kazda para (token / token-foreground) ma kontrast WCAG AA (min. 4.5:1). */
   /* Kierunek "jasny z ciemnym panelem" (ADR 0012): biel i grafit, ciemny zielono-czarny panel, mietowy akcent.
-     Ciemny motyw = paleta panelu (#121814), wiec panel w jasnym motywie to "wyspa" ciemnego motywu (`surface-panel`). */
+     Drugie wartosci light-dark() to paleta panelu (#121814): panel to "wyspa" ciemnych wartosci (`surface-panel`). */
   --background: light-dark(#ffffff, #121814);
   --foreground: light-dark(#232323, #f4f7f5);
   --card: light-dark(#ffffff, #1a221d);
@@ -53,8 +53,7 @@
   --input: light-dark(#7a7a7a, #7f8d84);
   --ring: light-dark(#1f7a4a, #a1ffcb);
 
-  /* Ciemny panel ("Czy to Twoja dzialka?", liczenie, przyklad wyniku). W ciemnym motywie odrobine jasniejszy od tla
-     strony, zeby panel dalej sie od niej odcinal (wartosc ustawiaja selektory motywu nizej). */
+  /* Ciemny panel ("Czy to Twoja dzialka?", liczenie, przyklad wyniku). */
   --panel: #121814;
 
   /* Kolory danych (wykresy, skala suszy, mapy) z "Pogodynki wody": paleta sprawdzona pod daltonizm. Stale w obu
@@ -109,25 +108,8 @@
   --radius: 0.875rem;
 }
 
-:root[data-theme='light'],
-:root.light {
-  color-scheme: light;
-}
-
-:root[data-theme='dark'],
-:root.dark {
-  color-scheme: dark;
-  --panel: #1b231e;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light'], .light) {
-    --panel: #1b231e;
-  }
-}
-
 /*
- * Ciemny panel w jasnym motywie: wyspa ciemnego motywu. `color-scheme: dark` przelacza wszystkie tokeny light-dark()
+ * Ciemny panel na jasnej stronie: wyspa ciemnych wartosci. `color-scheme: dark` przelacza wszystkie tokeny light-dark()
  * wewnatrz (tekst, obwodki, focus, przyciski), wiec komponenty w panelu nie potrzebuja wlasnych kolorow.
  */
 @utility surface-panel {
@@ -135,9 +117,6 @@
   background-color: var(--panel);
   color: var(--foreground);
 }
-
-/* Wariant `dark:` dla wyjatkow; zwykle wystarczy token (zmienia sie sam). Dziala przy wymuszonym motywie. */
-@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *, .dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -295,7 +274,7 @@
 }
 
 /*
- * Wydruk A4 (raport wodny -> PDF dla doradcy): zawsze jasny motyw na bialym papierze, kolory ocen zachowane,
+ * Wydruk A4 (raport wodny -> PDF dla doradcy): jasny jak strona, na bialym papierze, kolory ocen zachowane,
  * rozwijane szczegoly otwarte (pierwsza linia dla rolnika, liczby dla doradcy - na papierze oba). Elementy tylko
  * ekranowe chowa klasa `print:hidden`.
  */
@@ -303,12 +282,6 @@
   @page {
     size: A4;
     margin: 14mm 12mm;
-  }
-
-  :root,
-  :root[data-theme='dark'],
-  :root.dark {
-    color-scheme: light;
   }
 
   body {
