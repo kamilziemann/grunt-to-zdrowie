@@ -453,6 +453,10 @@
         "name": "Międzyplon",
         "description": "Rośliny po zbiorze chronią glebę przed wysychaniem i dodają materii organicznej."
       },
+      "green_manure": {
+        "name": "Nawóz zielony na przyoranie",
+        "description": "Po zbiorze wysiej łubin, seradelę albo gorczycę i przyoraj je przed następnym siewem. Na lekkiej, słabej glebie to najszybszy sposób, żeby przybyło próchnicy i gleba w kolejnym roku trzymała więcej wody. Łubin i seradela dodają też azotu."
+      },
       "mulch_residue": {
         "name": "Mulcz ze słomy",
         "description": "Słoma zostawiona na polu ogranicza parowanie z gleby."
@@ -908,7 +912,7 @@
     "waterTitle": "Woda teraz i w tym tygodniu",
     "waterEmpty": "Nie mamy bilansu wody w glebie dla tego dnia, więc nie pokazujemy zapasu ani prognozy. Ocena i historia są niżej.",
     "historyTitle": "10 lat na tym polu i dlaczego",
-    "todoTitle": "Co robić",
+    "todoTitle": "Co zrobić na tym polu",
     "asOf": "Stan na {date}",
     "weatherTo": "Pogoda zmierzona do {date}, dalsze dni liczymy bez deszczu.",
     "scale": {
@@ -958,7 +962,10 @@
       "then": "Potem:",
       "irrigation": "Podlewanie:",
       "all": "{count, plural, one {Szczegóły zalecenia} other {Wszystkie zalecenia ({count})}}",
-      "titleOffSeason": "Zrób przed wiosną"
+      "titleOffSeason": "Zrób przed wiosną",
+      "irrigationMore": "Szczegóły podlewania",
+      "irrigationTiming": "Podlewaj wcześnie rano albo wieczorem. W dzień i przy wietrze sporo wody wyparuje, zanim dotrze do korzeni.",
+      "irrigationCheck": "Dzień po podlaniu sprawdź glebę szpadlem na głębokość korzeni (ok. 30 cm): jeśli jest sucha, kolejną dawkę daj wcześniej."
     },
     "limits": {
       "title": "Na co uważać przy tej ocenie",
@@ -1021,7 +1028,9 @@
         "sat": "soboty",
         "sun": "niedzieli"
       },
-      "source": "Zużycie wody przez uprawę ze średniego parowania z ostatnich 7 dni (FAO-56); wariant z prognozą bierze deszcz z prognozy."
+      "source": "Zużycie wody przez uprawę ze średniego parowania z ostatnich 7 dni (FAO-56); wariant z prognozą bierze deszcz z prognozy.",
+      "analysisDay": "analiza",
+      "untilPast": "Bez deszczu woda wystarczyłaby do {lastDay}, {lastDate}. Od {thresholdDay} rośliny zaczęłyby cierpieć."
     },
     "forecast": {
       "title": "Czy w tym tygodniu będzie lżej?",

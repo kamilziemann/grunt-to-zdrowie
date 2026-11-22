@@ -13,7 +13,7 @@ export function StepsHeader({ current, className }: { current: ParcelStep; class
   const currentIndex = STEPS.indexOf(current);
 
   return (
-    <ol aria-label={t('label')} className={cn('flex items-center gap-2 text-sm', className)}>
+    <ol aria-label={t('label')} className={cn('flex items-center gap-1.5 text-sm sm:gap-2', className)}>
       {STEPS.map((step, index) => {
         const done = index < currentIndex;
         const active = index === currentIndex;
@@ -39,7 +39,9 @@ export function StepsHeader({ current, className }: { current: ParcelStep; class
               {done ? <Check className="size-3.5" /> : index + 1}
             </span>
             {t(step)}
-            {index < STEPS.length - 1 && <span aria-hidden="true" className="ml-1 h-px w-4 bg-border" />}
+            {index < STEPS.length - 1 && (
+              <span aria-hidden="true" className="ml-0.5 h-px w-2 bg-border sm:ml-1 sm:w-4" />
+            )}
           </li>
         );
       })}

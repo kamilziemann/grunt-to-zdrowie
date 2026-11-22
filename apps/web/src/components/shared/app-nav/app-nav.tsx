@@ -81,10 +81,10 @@ export function AppNav({ appName }: { appName: string }) {
     <nav aria-label={t('main')} className="flex min-w-0 flex-1 items-center gap-3 md:gap-4 lg:gap-6">
       <Link
         href={routes.home()}
-        className="flex shrink-0 items-center gap-2.5 rounded-full pr-2 text-foreground"
+        className="flex min-w-0 items-center gap-2.5 rounded-full pr-2 text-foreground md:shrink-0"
       >
         <BrandMark />
-        <span className="text-lg font-medium tracking-tight whitespace-nowrap md:text-xl">{appName}</span>
+        <span className="truncate text-lg font-medium tracking-tight md:text-xl">{appName}</span>
       </Link>
       <ul className="flex items-center gap-1 max-md:hidden">{links}</ul>
       <div className="ml-auto flex items-center gap-1 max-md:hidden">
@@ -102,7 +102,10 @@ export function AppNav({ appName }: { appName: string }) {
       <button
         type="button"
         popoverTarget={menuId}
-        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto text-base md:hidden')}
+        className={cn(
+          buttonVariants({ variant: 'outline', size: 'sm' }),
+          'ml-auto shrink-0 text-base md:hidden',
+        )}
       >
         <Menu aria-hidden="true" />
         {t('menu')}

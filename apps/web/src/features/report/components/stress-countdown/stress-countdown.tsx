@@ -1,6 +1,7 @@
 import type { WaterReport } from '@app/contracts';
 import { useFormatter, useTranslations } from 'use-intl';
 
+import { isPastAnalysis } from '../../utils/report-data';
 import { reportExtras } from '../../utils/report-extras';
 import { ChartCard } from '../chart-card';
 import { CALENDAR_MAX_WEEKS, StressCalendar, stressCalendar } from './stress-calendar';
@@ -67,7 +68,8 @@ export function StressCountdown({ report }: { report: WaterReport }) {
   const dayMonth = (time: number) =>
     format.dateTime(new Date(time), { day: 'numeric', month: 'long', timeZone: 'UTC' });
   // "Bez deszczu woda wystarczy do srody, 24 czerwca. Od czwartku rosliny zaczna cierpiec."
-  const sentence = t('until', {
+  const past = isPastAnalysis(report);
+  const sentence = t(past ? 'untilPast' : 'until', {
     lastDay: weekday(calendar.lastGoodTime),
     lastDate: dayMonth(calendar.lastGoodTime),
     thresholdDay: weekday(calendar.thresholdTime),
@@ -91,7 +93,9 @@ export function StressCountdown({ report }: { report: WaterReport }) {
       </p>
       <p className="text-lg">{t('lead')}</p>
       {/* ponad 5 tygodni: samo zdanie z data, bez kalendarza */}
-      {calendar.weeks <= CALENDAR_MAX_WEEKS && <StressCalendar model={calendar} daysLeft={noRain} />}
+      {calendar.weeks <= CALENDAR_MAX_WEEKS && (
+        <StressCalendar model={calendar} daysLeft={noRain} past={past} />
+      )}
     </ChartCard>
   );
 }

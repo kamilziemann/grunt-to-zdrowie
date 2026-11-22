@@ -359,6 +359,7 @@ export const MEASURE_IDS = [
   'field_margin_trees',
   'contour_farming',
   'cover_crop',
+  'green_manure',
   'mulch_residue',
   'reduced_tillage',
   'organic_matter',

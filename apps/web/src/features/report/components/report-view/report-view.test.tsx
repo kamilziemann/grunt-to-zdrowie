@@ -150,12 +150,16 @@ describe('ReportView', () => {
     renderReport(DROUGHT_REPORT);
 
     expect(screen.getByTestId('irrigation-deficit')).toHaveTextContent('brakuje ok. 136 l/m²');
-    expect(screen.getByText(t('irrigation.deficitNote'))).toBeInTheDocument();
-    expect(
-      within(document.getElementById('nawadnianie') as HTMLElement).getByText(
-        t('irrigation.advisablePast.yes'),
-      ),
-    ).toBeInTheDocument();
+    const section = within(document.getElementById('nawadnianie') as HTMLElement);
+
+    expect(section.getByText(t('irrigation.deficitNote'))).toBeInTheDocument();
+    expect(section.getByText(t('irrigation.advisablePast.yes'))).toBeInTheDocument();
+    // karta zalecen na gorze: rozwijane szczegoly podlewania z niedoborem i wskazowkami
+    const details = screen.getByTestId('first-step-irrigation');
+
+    expect(details).toHaveTextContent(t('simple.first.irrigationMore'));
+    expect(details).toHaveTextContent('brakuje ok. 136 l/m²');
+    expect(details).toHaveTextContent(t('simple.first.irrigationTiming'));
   });
 
   it('jedna atrapa: ograniczenie nie mowi, ze wyniki nie opisuja pola; numer dzialki w pelnej szerokosci', () => {

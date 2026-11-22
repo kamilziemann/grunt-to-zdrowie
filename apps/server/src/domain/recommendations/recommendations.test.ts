@@ -149,8 +149,9 @@ describe('recommend', () => {
     ]);
     expect(result.agrotech.map((item) => item.measure)).toEqual([
       'mulch_residue',
+      // gleba testowa ma 80 mm/m - bardzo slaba, wiec zamiast miedzyplonu nawoz zielony na przyoranie
+      'green_manure',
       'organic_matter',
-      'cover_crop',
       'reduced_tillage',
       'crop_choice',
     ]);
@@ -425,6 +426,24 @@ describe('recommend: uprawa i rodzaj gruntu', () => {
     expect(orchard.filter((item) => ['reduced_tillage', 'cover_crop', 'crop_choice'].includes(item))).toEqual(
       [],
     );
+  });
+
+  it('gleba bardzo slaba (piasek, < 90 mm/m albo klasa V-VI w ewidencji): nawoz zielony zamiast miedzyplonu', () => {
+    const medium = { ...SOIL, category: 3 as const, availableWaterMmPerM: 140 };
+    const measuresOf = (extra: Partial<StageInput>) =>
+      recommend(input(extra), assessment('drought'), ALL).agrotech.map((item) => item.measure);
+
+    expect(measuresOf({ soil: medium })).toContain('cover_crop');
+    expect(measuresOf({ soil: medium })).not.toContain('green_manure');
+    expect(measuresOf({ soil: medium, field: { ...FIELD, landUse: ['RVI', 'RV'] } })).toContain(
+      'green_manure',
+    );
+    expect(measuresOf({ soil: medium, field: { ...FIELD, landUse: ['RVI', 'RIIIa'] } })).not.toContain(
+      'green_manure',
+    );
+    expect(measuresOf({})).not.toContain('cover_crop');
+    // laka nie dostaje przyorywania
+    expect(measuresOf({ cropId: 'grassland' })).not.toContain('green_manure');
   });
 
   it('gleba juz prochniczna (>= 3,5% materii organicznej) nie dostaje "wiecej prochnicy"', () => {

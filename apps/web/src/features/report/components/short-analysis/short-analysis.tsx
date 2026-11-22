@@ -11,7 +11,6 @@ import { waterTank } from '../../utils/report-extras';
 import {
   drySeasons,
   lastSummerDate,
-  orderedRecommendations,
   riskMonthRange,
   scaleStep,
   SCALE_STEPS,
@@ -119,7 +118,6 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
   const t = useTranslations('report.simple');
   const tVerdict = useTranslations('report.verdict');
   const tCauses = useTranslations('report.causes.items');
-  const tMeasures = useTranslations('report.recommendations.measures');
   const tSources = useTranslations('report.sources');
   const format = useFormatter();
   const { level, confidence } = report.assessment;
@@ -132,7 +130,6 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
   const month = (value: number) =>
     format.dateTime(new Date(Date.UTC(2024, value - 1, 1)), { month: 'long', timeZone: 'UTC' });
   const causes = byWeight(report.causes).slice(0, 2);
-  const first = orderedRecommendations(report)[0];
   // poza sezonem: zapas przed wiosna i co zrobic przed wiosna (makieta "listopad"), link do lata tego samego pola
   const offSeason = level === 'out_of_season';
   // raport dla dnia z przeszlosci mowi "tego dnia" i w czasie przeszlym - "teraz" przy 2018 r. mylilo
@@ -175,15 +172,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           },
         ]
       : []),
-    ...(first
-      ? [
-          {
-            key: 'first',
-            label: t(offSeason ? 'lines.firstOffSeason' : 'lines.first'),
-            text: tMeasures(`${first.measure}.name`),
-          },
-        ]
-      : []),
+    // "co zrobic najpierw" stoi w osobnej sekcji nad ta karta - tu juz go nie powtarzamy
     {
       key: 'confidence',
       label: t('lines.confidence'),

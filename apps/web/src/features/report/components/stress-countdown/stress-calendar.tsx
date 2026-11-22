@@ -66,7 +66,16 @@ export function stressCalendar(analysisDate: string, daysLeft: number): StressCa
 }
 
 /** Siatka kalendarza; opis slowny daje karta (`answer`), wiec siatka jest ukryta przed czytnikami. */
-export function StressCalendar({ model, daysLeft }: { model: StressCalendarModel; daysLeft: number }) {
+export function StressCalendar({
+  model,
+  daysLeft,
+  past = false,
+}: {
+  model: StressCalendarModel;
+  daysLeft: number;
+  /** raport dla dnia z przeszlosci: pierwszy dzien to "dzien analizy", nie "dzis" */
+  past?: boolean;
+}) {
   const t = useTranslations('report.viz.countdown');
   const format = useFormatter();
 
@@ -97,7 +106,9 @@ export function StressCalendar({ model, daysLeft }: { model: StressCalendarModel
               )}
             >
               {format.dateTime(new Date(day.time), { day: 'numeric', timeZone: 'UTC' })}
-              {day.kind === 'today' && <span className="text-[0.6875rem] font-medium">{t('today')}</span>}
+              {day.kind === 'today' && (
+                <span className="text-[0.6875rem] font-medium">{t(past ? 'analysisDay' : 'today')}</span>
+              )}
               {day.kind === 'threshold' && (
                 <span className="text-[0.6875rem] font-medium">{t('threshold')}</span>
               )}

@@ -453,6 +453,10 @@
         "name": "Cover crop",
         "description": "Plants after harvest protect the soil from drying and add organic matter."
       },
+      "green_manure": {
+        "name": "Green manure to plough in",
+        "description": "After harvest sow lupin, serradella or white mustard and plough it in before the next sowing. On light, poor soil this is the fastest way to build humus so the soil holds more water next year. Lupin and serradella also add nitrogen."
+      },
       "mulch_residue": {
         "name": "Straw mulch",
         "description": "Straw left on the field reduces evaporation from the soil."
@@ -908,7 +912,7 @@
     "waterTitle": "Water now and this week",
     "waterEmpty": "We have no soil water balance for this day, so we do not show the reserve or the forecast. The assessment and history are below.",
     "historyTitle": "10 years on this field and why",
-    "todoTitle": "What to do",
+    "todoTitle": "What to do on this field",
     "asOf": "As of {date}",
     "weatherTo": "Weather measured up to {date}, later days calculated without rain.",
     "scale": {
@@ -958,7 +962,10 @@
       "then": "Then:",
       "irrigation": "Irrigation:",
       "all": "{count, plural, one {Recommendation details} other {All recommendations ({count})}}",
-      "titleOffSeason": "Do before spring"
+      "titleOffSeason": "Do before spring",
+      "irrigationMore": "Irrigation details",
+      "irrigationTiming": "Irrigate early in the morning or in the evening. In daytime and in wind much of the water evaporates before it reaches the roots.",
+      "irrigationCheck": "The day after irrigating, check the soil with a spade to root depth (about 30 cm): if it is dry, give the next dose sooner."
     },
     "limits": {
       "title": "What to keep in mind about this assessment",
@@ -1021,7 +1028,9 @@
         "sat": "Saturday",
         "sun": "Sunday"
       },
-      "source": "Crop water use from the average evaporation of the last 7 days (FAO-56); the forecast variant uses the forecast rain."
+      "source": "Crop water use from the average evaporation of the last 7 days (FAO-56); the forecast variant uses the forecast rain.",
+      "analysisDay": "analysis",
+      "untilPast": "Without rain the water would have lasted until {lastDay}, {lastDate}. From {thresholdDay} the plants would have started to suffer."
     },
     "forecast": {
       "title": "Will this week bring relief?",

@@ -33,9 +33,10 @@ export interface ReportOverviewProps {
 }
 
 /**
- * Pierwsza czesc raportu ("Pogodynka wody"): werdykt ze skala i krotka analiza, karta "Twoje pole" na cala szerokosc
+ * Pierwsza czesc raportu ("Pogodynka wody"): najpierw "Co zrobic na tym polu" (zalecenia), potem werdykt ze skala i
+ * krotka analiza, karta "Twoje pole" na cala szerokosc
  * (obraz pola w czterech trybach, miejsca na polu i objasnienia), potem woda teraz i w tym tygodniu, 10 lat
- * i "dlaczego", "zrob najpierw" i "czego ocena nie wie". Klocek bez danych znika; gdy w sekcji wody nie ma zadnego - jedno zdanie dlaczego. To samo jest pierwsza
+ * i "dlaczego", na koncu "czego ocena nie wie". Klocek bez danych znika; gdy w sekcji wody nie ma zadnego - jedno zdanie dlaczego. To samo jest pierwsza
  * strona wydruku.
  */
 export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
@@ -58,6 +59,20 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
+      {/* zalecenia jako pierwsza sekcja raportu i pierwszej strony wydruku: rolnik od razu wie, co robic (decyzja
+          wlasciciela 2026-11-22); werdykt, pole, woda i historia ponizej tlumacza dlaczego */}
+      {hasFirstStep && (
+        <section
+          aria-labelledby="co-robic-title"
+          className="flex flex-col gap-4 print:block print:space-y-3 print:break-inside-avoid"
+          data-testid="todo-section"
+        >
+          <h2 id="co-robic-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
+            {t('todoTitle')}
+          </h2>
+          <FirstStep report={report} allHref={withHash(detailsHref, 'retencja')} />
+        </section>
+      )}
       <ShortAnalysis report={report} />
       <FieldMap
         field={report.field}
@@ -105,18 +120,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
         </div>
       </section>
 
-      <section
-        aria-labelledby="co-robic-title"
-        className="flex flex-col gap-4 print:block print:space-y-3 print:break-inside-avoid"
-      >
-        <h2 id="co-robic-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
-          {t('todoTitle')}
-        </h2>
-        <div className={cn('grid gap-4 print:gap-3', hasFirstStep ? TWO_COLUMNS : 'max-w-3xl')}>
-          <FirstStep report={report} allHref={withHash(detailsHref, 'retencja')} />
-          <KnownLimits report={report} />
-        </div>
-      </section>
+      <KnownLimits report={report} />
     </div>
   );
 }

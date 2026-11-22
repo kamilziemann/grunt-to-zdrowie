@@ -1,12 +1,12 @@
 import type { WaterReport } from '@app/contracts';
-import { ArrowRight } from 'lucide-react';
-import { useTranslations } from 'use-intl';
+import { ArrowRight, ChevronDown } from 'lucide-react';
+import { useFormatter, useTranslations } from 'use-intl';
 
 import { Link } from '@/lib/navigation';
 import type { AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-import { isPastAnalysis } from '../../utils/report-data';
+import { isPastAnalysis, volumeM3 } from '../../utils/report-data';
 import { orderedRecommendations, stepBadge, type StepBadge } from '../../utils/report-summary';
 
 /** Plakietka mozliwosci: "mozesz od razu" jasna, "najpierw sprawdz / uzgodnij" piaskowa z ramka. */
@@ -107,6 +107,9 @@ export function FirstStep({ report, allHref }: { report: WaterReport; allHref: A
           )}
         </dl>
       )}
+      {irrigation && irrigation.advisable !== 'no' && report.assessment.level !== 'excess' && (
+        <IrrigationDetails report={report} />
+      )}
       <Link
         href={allHref}
         className="inline-flex min-h-12 w-fit items-center gap-2 rounded-full border border-current/40 px-5 text-base font-semibold hover:bg-current/10 print:hidden"
@@ -115,5 +118,65 @@ export function FirstStep({ report, allHref }: { report: WaterReport; allHref: A
         <ArrowRight aria-hidden="true" className="size-5" />
       </Link>
     </section>
+  );
+}
+
+/**
+ * Rozwijane "Szczegoly podlewania" pod krotkim zdaniem w karcie zalecen: ile wody na cale pole, dawka i odstep, ile
+ * brakuje do pelnego zapasu, prognoza deszczu i jak podlewac, zeby woda nie uciekla. Na wydruku rozwiniete.
+ */
+function IrrigationDetails({ report }: { report: WaterReport }) {
+  const t = useTranslations('report.simple.first');
+  const tIrrigation = useTranslations('report.irrigation');
+  const format = useFormatter();
+  const irrigation = report.recommendations.irrigation;
+
+  if (!irrigation) return null;
+  const number = (value: number) => format.number(value, { maximumFractionDigits: 0 });
+  const plan =
+    irrigation.doses !== undefined && irrigation.doseMm !== undefined
+      ? { doses: irrigation.doses, doseMm: irrigation.doseMm }
+      : null;
+  const lines = [
+    plan
+      ? tIrrigation('planVolume', {
+          dose: format.number(volumeM3(plan.doseMm, report.field.areaHa)),
+          total: format.number(volumeM3(plan.doseMm * plan.doses, report.field.areaHa)),
+        })
+      : null,
+    irrigation.netDepthMm === null
+      ? null
+      : tIrrigation('deficit', {
+          mm: number(irrigation.netDepthMm),
+          volume: format.number(volumeM3(irrigation.netDepthMm, report.field.areaHa)),
+        }),
+    plan ? tIrrigation('planNote') : tIrrigation('deficitNote'),
+    irrigation.forecastPrecipMm === null
+      ? null
+      : tIrrigation('forecast', {
+          mm: format.number(irrigation.forecastPrecipMm, { maximumFractionDigits: 1 }),
+        }),
+    t('irrigationTiming'),
+    t('irrigationCheck'),
+  ].filter((line): line is string => line !== null);
+
+  return (
+    <details
+      className="group/irrigation rounded-xl border border-current/20"
+      data-testid="first-step-irrigation"
+    >
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-4 text-base font-semibold [&::-webkit-details-marker]:hidden">
+        {t('irrigationMore')}
+        <ChevronDown
+          aria-hidden="true"
+          className="size-5 shrink-0 transition-transform group-open/irrigation:rotate-180 print:hidden"
+        />
+      </summary>
+      <ul className="flex list-disc flex-col gap-1.5 px-4 pb-4 pl-9 text-base">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+    </details>
   );
 }

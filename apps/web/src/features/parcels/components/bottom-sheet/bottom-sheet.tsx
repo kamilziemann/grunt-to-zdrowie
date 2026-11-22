@@ -2,6 +2,8 @@
 // zgadywania szerokosci ekranu w SSR). Na telefonie arkusz ma stala wysokosc i przesuwa sie transformacja
 // (bez przeliczania ukladu przy przeciaganiu); widoczna czesc to `--sheet-h` minus `--sheet-offset`. Zwiniety arkusz
 // pokazuje tylko uchwyt i pasek akcji - jego wysokosc (`--sheet-peek`) mierzymy, bo pasek bywa o linijke wyzszy.
+// W pelni rozwiniety arkusz konczy sie pod polem wyszukiwania mapy (4,75 rem od gory): wczesniej wchodzil pod pole,
+// ktore przykrywalo uchwyt i nie dalo sie go zwinac dotknieciem. Na niskim ekranie pole stoi obok, wiec arkusz siega gory.
 // Rodzic musi miec `container-type: size` - wysokosc arkusza liczy sie od niego (jednostka cqh).
 // Skladanie: <BottomSheet><BottomSheetBody/>?<BottomSheetFooter/></BottomSheet>.
 import {
@@ -26,7 +28,8 @@ export const SHEET_HALF_FRACTION = 0.55;
 
 const OFFSETS: Record<SheetSnap, string> = {
   peek: 'calc(var(--sheet-h) - var(--sheet-peek))',
-  half: `calc(var(--sheet-h) * ${1 - SHEET_HALF_FRACTION})`,
+  // widoczna czesc w polozeniu posrednim to ulamek wysokosci rodzica (tak liczy ja mapa), nie arkusza
+  half: `calc(var(--sheet-h) - ${Math.round(SHEET_HALF_FRACTION * 100)}cqh)`,
   full: '0px',
 };
 
@@ -43,8 +46,11 @@ export interface BottomSheetProps {
   className?: string;
 }
 
-function snapOffsets(height: number, peek: number): Record<SheetSnap, number> {
-  return { peek: height - peek, half: height * (1 - SHEET_HALF_FRACTION), full: 0 };
+function snapOffsets(sheet: HTMLElement, peek: number): Record<SheetSnap, number> {
+  const height = sheet.offsetHeight;
+  const container = sheet.parentElement?.clientHeight ?? height;
+
+  return { peek: height - peek, half: Math.max(0, height - container * SHEET_HALF_FRACTION), full: 0 };
 }
 
 function fallbackPeek(): number {
@@ -139,7 +145,7 @@ export function BottomSheet({
       sheet.dataset.dragging = 'true';
       sheet.style.setProperty(
         '--sheet-offset',
-        `${clamp(state.startOffset + delta, snapOffsets(sheet.offsetHeight, peek ?? fallbackPeek()).peek)}px`,
+        `${clamp(state.startOffset + delta, snapOffsets(sheet, peek ?? fallbackPeek()).peek)}px`,
       );
     },
     [peek],
@@ -159,7 +165,7 @@ export function BottomSheet({
       // po przeciagnieciu przegladarka wysyla jeszcze `click` - nie moze on przelaczyc polozenia drugi raz
       suppressClick.current = true;
 
-      const offsets = snapOffsets(sheet.offsetHeight, peek ?? fallbackPeek());
+      const offsets = snapOffsets(sheet, peek ?? fallbackPeek());
       const current = clamp(state.startOffset + event.clientY - state.startY, offsets.peek);
       const nearest = ORDER.reduce((best, candidate) =>
         Math.abs(offsets[candidate] - current) < Math.abs(offsets[best] - current) ? candidate : best,
@@ -172,7 +178,7 @@ export function BottomSheet({
     [onSnapChange, peek],
   );
 
-  // Dotkniecie albo klawiatura: zwiniety -> posredni -> pelny -> posredni.
+  // Dotkniecie albo klawiatura: zwiniety -> posredni -> pelny -> zwiniety (z pelnego wraca sie do mapy).
   const onHandleClick = useCallback(() => {
     if (suppressClick.current) {
       suppressClick.current = false;
@@ -180,7 +186,7 @@ export function BottomSheet({
       return;
     }
 
-    onSnapChange(snap === 'half' ? 'full' : 'half');
+    onSnapChange(snap === 'peek' ? 'half' : snap === 'half' ? 'full' : 'peek');
   }, [onSnapChange, snap]);
 
   return (
@@ -191,7 +197,7 @@ export function BottomSheet({
       style={style}
       className={cn(
         'group/sheet absolute z-10 flex flex-col bg-card text-card-foreground shadow-lg',
-        'max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-(--sheet-h) max-lg:translate-y-(--sheet-offset) max-lg:rounded-t-2xl max-lg:border-t max-lg:[--sheet-h:calc(100cqh-0.75rem)]',
+        'max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-(--sheet-h) max-lg:translate-y-(--sheet-offset) max-lg:rounded-t-2xl max-lg:border-t max-lg:[--sheet-h:calc(100cqh-4.75rem)] max-lg:[@media(height<30rem)]:[--sheet-h:calc(100cqh-0.75rem)]',
         'max-lg:transition-transform max-lg:duration-(--duration-slow) max-lg:ease-(--ease-out) max-lg:data-dragging:transition-none',
         'lg:top-3 lg:bottom-3 lg:left-3 lg:w-100 lg:rounded-xl lg:border',
         className,

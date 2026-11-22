@@ -128,7 +128,7 @@ function ToastViewport({ items, onDismiss }: { items: ToastItem[]; onDismiss: (i
     <ol
       aria-live="polite"
       aria-label={t('notifications')}
-      className="pointer-events-none fixed inset-x-4 top-[max(0.75rem,env(safe-area-inset-top))] z-100 flex flex-col gap-2 md:top-auto md:right-4 md:bottom-4 md:left-auto md:w-full md:max-w-sm"
+      className="pointer-events-none fixed inset-x-4 top-[max(0.75rem,env(safe-area-inset-top))] z-100 flex flex-col gap-2 md:top-auto md:right-4 md:bottom-4 md:left-auto md:w-full md:max-w-sm print:hidden"
       data-testid="toasts"
     >
       {items.map((item) => (

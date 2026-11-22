@@ -21,7 +21,7 @@ import { cropAtDate } from '../crop-calendar';
 import { cropProfile } from '../crops';
 import { drainedLowland } from '../drained-lowland';
 import { addDays } from '../iso-date';
-import { isNotFarmland } from '../land-use';
+import { isNotFarmland, soilClassesOf, soilClassNumber } from '../land-use';
 import { saxtonRawls } from '../soil-water';
 import { rootZoneSimulation } from '../water-indicators';
 import { zoneForMeasure } from '../zones';
@@ -93,6 +93,28 @@ const POND_MIN_M3 = 30;
  * ale zalecenie nie podaje jego liczb.
  */
 const POND_MAX_M2 = 10_000;
+/** klasa bonitacyjna od tej (V, VI, VIz) to gleba bardzo slaba */
+const WEAK_REGISTRY_CLASS = 5;
+
+/**
+ * Gleba bardzo slaba: kategoria I (piasek), mniej niz 90 mm wody na metr albo najlepsza klasa gruntu ornego z
+ * ewidencji to V-VI. Tu zwykly miedzyplon to za malo - potrzebny nawoz zielony przyorywany co roku.
+ */
+export function veryWeakSoil({ soil, field }: StageInput): boolean {
+  const classes = soilClassesOf(field.landUse ?? []).flatMap((soilClass) => {
+    const value = soilClassNumber(soilClass);
+
+    return value === null ? [] : [value];
+  });
+  const weakByRegistry = classes.length > 0 && Math.min(...classes) >= WEAK_REGISTRY_CLASS;
+
+  return (
+    weakByRegistry ||
+    soil?.category === 1 ||
+    (soil !== null && soil.availableWaterMmPerM < LIGHT_SOIL_MM_PER_M)
+  );
+}
+
 /** przy takiej zawartosci materii organicznej (%) gleba jest juz prochniczna - "wiecej prochnicy" nic nie doda */
 const HUMUS_RICH_PCT = 3.5;
 /** staw do 1000 m2 (i 3 m glebokosci) na wlasnym gruncie to zgloszenie wodnoprawne; wiekszy - pozwolenie */
@@ -380,6 +402,23 @@ const RULES: readonly Rule[] = [
     },
     answers: ['low_soil_retention', 'crop_sensitivity'],
     fits: isArable,
+    // na glebie bardzo slabej miedzyplon zastepuje nawoz zielony (nizej) - ten sam siew po zbiorze, ale przyorany
+    when: (input) => !veryWeakSoil(input),
+  },
+  {
+    // nawoz zielony (lubin, seradela, gorczyca) przyorany przed nastepna uprawa: na piaskach i glebach klasy V-VI
+    // najszybszy sposob, zeby przybylo prochnicy i gleba trzymala wiecej wody w kolejnym sezonie
+    measure: {
+      measure: 'green_manure',
+      category: 'agrotech',
+      priority: 1,
+      effect: null,
+      effort: 'medium',
+      legal: 'none',
+    },
+    answers: ['low_soil_retention', 'crop_sensitivity'],
+    fits: isArable,
+    when: veryWeakSoil,
   },
   {
     measure: {

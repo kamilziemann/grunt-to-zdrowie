@@ -457,6 +457,7 @@ const WHERE: Partial<Record<MeasureId, Pick2>> = {
   organic_matter: drier,
   mulch_residue: drier,
   cover_crop: drier,
+  green_manure: drier,
 };
 
 /** Strefa dla zalecenia albo null (cale pole), gdy podzialu nie ma albo zadna strefa nie pasuje. */

@@ -302,7 +302,7 @@ export function FieldMap({
     <section
       id={SATELLITE_ANCHOR}
       aria-labelledby="pole-title"
-      className="flex scroll-mt-24 flex-col gap-5 rounded-3xl border bg-card p-4 shadow-card sm:p-6 print:gap-3 print:rounded-lg print:p-3 print:shadow-none"
+      className="flex scroll-mt-24 flex-col gap-5 rounded-3xl border bg-card p-4 shadow-card sm:p-6 print:break-before-page print:gap-3 print:rounded-lg print:p-3 print:shadow-none"
       data-testid="field-map"
       data-hydro={state}
       data-mode={mode}
