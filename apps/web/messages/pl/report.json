@@ -57,7 +57,8 @@
   },
   "status": {
     "partial": "Części danych zabrakło, więc wynik jest mniej pewny. Szczegóły są na końcu raportu.",
-    "insufficient": "Za mało danych, żeby ocenić to pole. Lista źródeł jest na końcu raportu."
+    "insufficient": "Za mało danych, żeby ocenić to pole. Lista źródeł jest na końcu raportu.",
+    "missing": "Brak danych: {sources}."
   },
   "sections": {
     "verdict": "Ocena",
@@ -836,7 +837,9 @@
       "historyMonths": "Wody brakowało w {dry} z {total} sezonów, najczęściej: {months}.",
       "why": "Dlaczego",
       "first": "Co zrobić najpierw",
-      "confidence": "Pewność"
+      "confidence": "Pewność",
+      "nowOffSeason": "Zapas wody przed wiosną",
+      "firstOffSeason": "Co zrobić przed wiosną"
     },
     "causes": {
       "title": "Dlaczego brakuje wody",
@@ -856,12 +859,17 @@
       "before": "Zanim zaczniesz",
       "then": "Potem:",
       "irrigation": "Podlewanie:",
-      "all": "{count, plural, one {Szczegóły zalecenia} other {Wszystkie zalecenia ({count})}}"
+      "all": "{count, plural, one {Szczegóły zalecenia} other {Wszystkie zalecenia ({count})}}",
+      "titleOffSeason": "Zrób przed wiosną"
     },
     "limits": {
       "title": "Czego ta ocena nie wie",
       "advice": "To porada z ogólnodostępnych danych, nie ekspertyza. Przed inwestycją porozmawiaj z doradcą ODR.",
       "method": "Jak liczymy"
+    },
+    "offSeason": {
+      "now": "Rośliny teraz nie rosną, a suszę rolniczą liczy się od 21 marca do 30 września. Pokazujemy, ile wody gleba ma na wiosnę, jak często susza wracała w 10 latach i co zrobić przed sezonem.",
+      "summer": "Zobacz, jak było latem ({date})"
     }
   },
   "viz": {

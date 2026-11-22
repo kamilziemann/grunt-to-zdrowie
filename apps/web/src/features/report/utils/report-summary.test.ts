@@ -1,10 +1,12 @@
 import type { Recommendation } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
+import { AUTUMN_REPORT } from '../fixtures/autumn-report';
 import { WEATHER_REPORT } from '../fixtures/weather-report';
 import {
   drySeasons,
   forecastSummary,
+  lastSummerDate,
   orderedRecommendations,
   rainUseSummary,
   riskMonthRange,
@@ -78,5 +80,13 @@ describe('report-summary', () => {
 
     expect(vegetation.skipped).toBe(4);
     expect(vegetation.latest?.used).toBe(true);
+  });
+
+  it('poza sezonem: 15 czerwca ostatniego sezonu (jesien - ten rok, przedwiosnie - poprzedni)', () => {
+    expect(lastSummerDate(AUTUMN_REPORT)).toBe('2026-06-15');
+    expect(
+      lastSummerDate({ ...AUTUMN_REPORT, meta: { ...AUTUMN_REPORT.meta, analysisDate: '2026-02-10' } }),
+    ).toBe('2025-06-15');
+    expect(lastSummerDate(WEATHER_REPORT)).toBeNull();
   });
 });

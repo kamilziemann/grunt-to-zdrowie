@@ -57,7 +57,8 @@
   },
   "status": {
     "partial": "Some data is missing, so the result is less certain. Details are at the end of the report.",
-    "insufficient": "There is too little data to assess this field. The list of sources is at the end of the report."
+    "insufficient": "There is too little data to assess this field. The list of sources is at the end of the report.",
+    "missing": "Missing data: {sources}."
   },
   "sections": {
     "verdict": "Assessment",
@@ -836,7 +837,9 @@
       "historyMonths": "Water was short in {dry} of {total} seasons, most often: {months}.",
       "why": "Why",
       "first": "What to do first",
-      "confidence": "Confidence"
+      "confidence": "Confidence",
+      "nowOffSeason": "Water reserve before spring",
+      "firstOffSeason": "What to do before spring"
     },
     "causes": {
       "title": "Why water is short",
@@ -856,12 +859,17 @@
       "before": "Before you start",
       "then": "Then:",
       "irrigation": "Irrigation:",
-      "all": "{count, plural, one {Recommendation details} other {All recommendations ({count})}}"
+      "all": "{count, plural, one {Recommendation details} other {All recommendations ({count})}}",
+      "titleOffSeason": "Do before spring"
     },
     "limits": {
       "title": "What this assessment does not know",
       "advice": "This is advice from open data, not an expert opinion. Talk to an agricultural adviser before investing.",
       "method": "How we calculate"
+    },
+    "offSeason": {
+      "now": "Plants are not growing now, and agricultural drought is assessed from 21 March to 30 September. We show how much water the soil holds for spring, how often drought returned in 10 years and what to do before the season.",
+      "summer": "See how it was in summer ({date})"
     }
   },
   "viz": {

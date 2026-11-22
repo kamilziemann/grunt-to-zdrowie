@@ -11,6 +11,8 @@ const FARMER_LIMITS: readonly LimitationId[] = [
   'meteo_missing',
   'soil_missing',
   'vegetation_missing',
+  'vegetation_before_archive',
+  'vegetation_few_pixels',
   'meteo_coarse_grid',
   'soil_estimated',
   'drainage_structures_unknown',

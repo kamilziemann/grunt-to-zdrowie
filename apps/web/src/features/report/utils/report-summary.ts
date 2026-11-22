@@ -177,3 +177,14 @@ export function findEvidence(report: WaterReport, metric: string): Evidence | un
     ),
   ].find((item) => item.metric === metric);
 }
+
+/**
+ * Poza sezonem (21 marca - 30 wrzesnia) - dzien w srodku ostatniego sezonu (15 czerwca), zeby jednym kliknieciem
+ * zobaczyc, jak bylo latem na tym polu. Jesien = ten sam rok, przedwiosnie = poprzedni.
+ */
+export function lastSummerDate(report: WaterReport): string | null {
+  if (report.assessment.level !== 'out_of_season') return null;
+  const [year = 0, month = 1] = report.meta.analysisDate.split('-').map(Number);
+
+  return `${month >= 10 ? year : year - 1}-06-15`;
+}

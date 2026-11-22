@@ -98,6 +98,13 @@ export function ReportView({
   // nadmiar wody: sekcja 3 mowi, skad woda, a sekcja 4 nie obiecuje jej zatrzymywania
   const excess = report.assessment.level === 'excess';
   const extras = reportExtras(report);
+  const tSources = useTranslations('report.sources.categories');
+  // brakujace zrodla slowami ("Prognoza pogody, Zdjecia satelitarne"), bez powtorzen (dwa wpisy rowow)
+  const missingSources = [
+    ...new Set(
+      report.sources.filter((source) => source.status === 'missing').map((source) => tSources(source.id)),
+    ),
+  ];
   const sections = useMemo(
     () => [
       { id: 'ocena', title: t('sections.verdict') },
@@ -137,8 +144,13 @@ export function ReportView({
         {report.meta.status !== 'complete' && (
           <Alert variant="warning" className="text-base" data-testid="report-status">
             <CircleAlert aria-hidden="true" />
-            <AlertDescription className="text-base text-foreground">
-              {t(`status.${report.meta.status}`)}
+            <AlertDescription className="flex flex-col gap-1 text-base text-foreground">
+              <span>{t(`status.${report.meta.status}`)}</span>
+              {missingSources.length > 0 && (
+                <span data-testid="report-status-missing">
+                  {t('status.missing', { sources: missingSources.join(', ') })}
+                </span>
+              )}
             </AlertDescription>
           </Alert>
         )}

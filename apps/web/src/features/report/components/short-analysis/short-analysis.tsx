@@ -2,12 +2,15 @@ import type { WaterReport } from '@app/contracts';
 import { CalendarOff, CircleCheck, CircleHelp, CloudSun, Droplets, Sun, type LucideIcon } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
+import { Link } from '@/lib/navigation';
+import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-import { byWeight, isoDay, verdictCaveat } from '../../utils/report-data';
+import { byWeight, isoDay, reportSearch, verdictCaveat } from '../../utils/report-data';
 import { waterTank } from '../../utils/report-extras';
 import {
   drySeasons,
+  lastSummerDate,
   orderedRecommendations,
   riskMonthRange,
   scaleStep,
@@ -128,8 +131,15 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
     format.dateTime(new Date(Date.UTC(2024, value - 1, 1)), { month: 'long', timeZone: 'UTC' });
   const causes = byWeight(report.causes).slice(0, 2);
   const first = orderedRecommendations(report)[0];
+  // poza sezonem: zapas przed wiosna i co zrobic przed wiosna (makieta "listopad"), link do lata tego samego pola
+  const offSeason = level === 'out_of_season';
+  const summer = lastSummerDate(report);
   const lines: { key: string; label: string; text: string }[] = [
-    { key: 'now', label: t('lines.now'), text: tVerdict(`sentences.${level}`) },
+    {
+      key: 'now',
+      label: t(offSeason ? 'lines.nowOffSeason' : 'lines.now'),
+      text: offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`),
+    },
     ...(seasons
       ? [
           {
@@ -160,7 +170,15 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           },
         ]
       : []),
-    ...(first ? [{ key: 'first', label: t('lines.first'), text: tMeasures(`${first.measure}.name`) }] : []),
+    ...(first
+      ? [
+          {
+            key: 'first',
+            label: t(offSeason ? 'lines.firstOffSeason' : 'lines.first'),
+            text: tMeasures(`${first.measure}.name`),
+          },
+        ]
+      : []),
     {
       key: 'confidence',
       label: t('lines.confidence'),
@@ -198,7 +216,9 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
         </div>
       </div>
       {step && <Scale step={step} />}
-      <p className="text-lg leading-snug lg:hidden print:hidden">{tVerdict(`sentences.${level}`)}</p>
+      <p className="text-lg leading-snug lg:hidden print:hidden">
+        {offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`)}
+      </p>
       {caveat && (
         <p
           className="rounded-xl border-2 border-warning bg-warning/10 px-3 py-2 text-base font-medium lg:border-viz-sand lg:bg-transparent print:border-warning"
@@ -220,6 +240,22 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           </div>
         ))}
       </dl>
+      {summer && (
+        <Link
+          href={routes.report({ ...reportSearch(report), data: summer })}
+          className="flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground hover:bg-primary/90 lg:bg-viz-panel-accent lg:text-viz-panel print:hidden"
+          data-testid="summer-link"
+        >
+          {t('offSeason.summer', {
+            date: format.dateTime(isoDay(summer), {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'UTC',
+            }),
+          })}
+        </Link>
+      )}
       <p className="text-base text-muted-foreground lg:text-viz-panel-muted print:text-muted-foreground">
         {t('asOf', {
           date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),

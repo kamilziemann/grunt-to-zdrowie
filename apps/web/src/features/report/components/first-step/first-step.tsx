@@ -48,7 +48,7 @@ export function FirstStep({ report, allHref }: { report: WaterReport; allHref: A
       data-first-measure={first.measure}
     >
       <h3 id="najpierw-title" className="text-sm font-bold tracking-wider text-viz-panel-accent uppercase">
-        {t('title')}
+        {t(report.assessment.level === 'out_of_season' ? 'titleOffSeason' : 'title')}
       </h3>
       <p className="text-2xl leading-tight font-bold text-balance">{tMeasures(`${first.measure}.name`)}</p>
       {badge && (

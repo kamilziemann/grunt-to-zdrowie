@@ -1,5 +1,6 @@
 import type { WaterReport } from '@app/contracts';
 
+import { AUTUMN_REPORT } from '../src/features/report/fixtures/autumn-report';
 import { FIELD_REPORT } from '../src/features/report/fixtures/field-report';
 import { FOREST_REPORT } from '../src/features/report/fixtures/forest-report';
 import { HEAT_REPORT } from '../src/features/report/fixtures/heat-report';
@@ -292,5 +293,39 @@ test.describe('otoczenie pola', () => {
     await expect(page.getByTestId('field-sketch-structure').first()).toBeAttached();
     await expect(legend).toContainText('Rząd drzew albo żywopłot');
     await expect(legend).toContainText('Jaz, zapora albo śluza');
+  });
+});
+
+test.describe('stany raportu', () => {
+  test('poza sezonem (listopad): zapas przed wiosną, prognoza, „Zrób przed wiosną” i link do lata', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockReport(page, AUTUMN_REPORT);
+    await page.goto(reportUrl(AUTUMN_REPORT));
+
+    await expect(page.getByTestId('verdict-word')).toHaveText('Poza sezonem');
+    await expect(page.getByTestId('short-analysis')).toContainText('ile wody gleba ma na wiosnę');
+    await expect(page.getByTestId('chart-forecast').locator('li')).toHaveCount(7);
+    await expect(page.getByTestId('chart-countdown')).toHaveCount(0);
+    await expect(page.getByTestId('first-step')).toContainText('Zrób przed wiosną');
+    await expect(page.getByTestId('summer-link')).toHaveAttribute('href', /data=2026-06-15/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+
+  test('brak źródła: ramka nazywa brakujące dane słowami', async ({ page }) => {
+    const report: WaterReport = {
+      ...FIELD_REPORT,
+      meta: { ...FIELD_REPORT.meta, status: 'partial' },
+      sources: FIELD_REPORT.sources.map((source) =>
+        source.id === 'vegetation'
+          ? Object.assign(structuredClone(source), { status: 'missing' as const })
+          : source,
+      ),
+    };
+
+    await mockReport(page, report);
+    await page.goto(reportUrl(report));
+    await expect(page.getByTestId('report-status-missing')).toHaveText('Brak danych: Zdjęcia satelitarne.');
   });
 });
