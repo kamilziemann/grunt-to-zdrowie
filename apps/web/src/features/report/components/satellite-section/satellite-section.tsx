@@ -57,7 +57,7 @@ export function SatelliteSection({ report }: { report: WaterReport }) {
       id={ANCHOR}
       open={open}
       onToggle={onToggle}
-      className="group scroll-mt-28 rounded-2xl border print:break-before-page print:border-0"
+      className="group scroll-mt-28 rounded-2xl border print:border-0"
       data-testid="satellite-section"
     >
       <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 select-none hover:bg-muted/50 [&::-webkit-details-marker]:hidden print:min-h-0 print:px-0 print:py-1">

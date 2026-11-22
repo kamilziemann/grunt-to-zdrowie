@@ -1,6 +1,6 @@
 // Raporty wzorcowe do oddania (`docs/samples/*.pdf`): Playwright otwiera raport na dzialajacym serwerze z prawdziwym
 // API (`bun run --cwd apps/web dev -- --port 3310`), czeka na pelny raport i szkic, drukuje A4 tak, jak przegladarka
-// ("Drukuj / zapisz PDF"). Nie jest czescia e2e: woła prawdziwe zrodla (GUGiK ma nocny limit), wiec uruchamiamy recznie,
+// ("Drukuj / zapisz PDF") razem z obrazami "Pole z satelity". Nie jest czescia e2e: woła prawdziwe zrodla (GUGiK ma nocny limit), wiec uruchamiamy recznie,
 // jeden raport po drugim. Uzycie: `bun run --cwd apps/web samples:pdf` (SAMPLES_BASE_URL zmienia serwer).
 // Adres w naglowku i krotki link to adres wdrozenia (SAMPLES_PUBLIC_URL), nie `localhost`: przegladarka otwiera
 // adres wdrozenia, a skrypt podaje tresc z serwera lokalnego (SAMPLES_API_URL - osobny serwer API, np. z nowszym
@@ -57,6 +57,30 @@ try {
     await page.goto(url);
     await page.getByTestId('short-analysis').waitFor({ timeout: 90_000 });
     await page.locator('[data-hydro="ready"], [data-hydro="unavailable"]').waitFor({ timeout: 30_000 });
+    // "Pole z satelity" jak po kliknieciu "Zapisz PDF": rozwiniecie pobiera oba obrazy, czekamy na wynik (obraz albo
+    // jedno zdanie o braku zdjecia); pierwsze pobranie z Copernicus trwa do kilkunastu sekund
+    await page.evaluate(() => {
+      const section = document.querySelector<HTMLDetailsElement>('[data-testid="satellite-section"]');
+
+      if (section) section.open = true;
+    });
+    await page
+      .locator(
+        '[data-testid="satellite-images"], [data-testid="satellite-problem"], [data-testid="satellite-none"]',
+      )
+      .first()
+      .waitFor({ state: 'attached', timeout: 90_000 });
+    await page
+      .locator('[data-testid="satellite-loading"]')
+      .first()
+      .waitFor({ state: 'detached', timeout: 90_000 });
+    await page.evaluate(async () => {
+      await Promise.allSettled(
+        [...document.querySelectorAll<HTMLImageElement>('img[data-satellite-image]')].map((image) =>
+          image.decode(),
+        ),
+      );
+    });
     await page.emulateMedia({ media: 'print' });
     // otwiera szczegoly dla doradcy jak przed prawdziwym wydrukiem (`beforeprint`)
     await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
