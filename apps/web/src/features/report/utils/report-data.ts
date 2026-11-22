@@ -457,3 +457,62 @@ export function heatSpell(report: WaterReport): { days: number; normal: number }
 
   return days >= HEAT_MIN_DAYS && days >= 2 * normal ? { days, normal: Math.round(normal) } : null;
 }
+
+export interface ExcessFacts {
+  /** opad z ostatnich dni na tle mediany lat (ocena `precipitation`) */
+  rain: { days: number; sumMm: number; medianMm: number; rank: number; years: number } | null;
+  /** 60 dni: deszcz, parowanie i to, co zostalo w glebie (bilans klimatyczny) */
+  balance: { precipMm: number; evapotranspirationMm: number; balanceMm: number } | null;
+  /** zaglebienia bez odplywu na polu i ich laczna pojemnosc (m3, 0 = nieznana) */
+  depressions: { count: number; volumeM3: number };
+  /** miejsca, gdzie zbiera sie woda */
+  collecting: number;
+  /** rowy w polu (m) z dowodow; null = brak miary */
+  ditchInFieldM: number | null;
+  /** przy ktoryms z mokrych miejsc biegnie row */
+  ditchNearWetZones: boolean;
+}
+
+/**
+ * Co raport wie o nadmiarze wody (przyczyn nadmiaru silnik nie podaje): deszcz ponad norme, bilans 60 dni na plusie,
+ * zaglebienia bez odplywu i miejsca, gdzie zbiera sie woda, rowy, ktore odprowadzaja nadmiar.
+ */
+export function excessFacts(report: WaterReport): ExcessFacts {
+  const { precipitation, climaticBalance } = report.assessment;
+  const wet = fieldZones(report)
+    .map((item) => item.zone)
+    .filter((zone) => zone.kind === 'depression' || zone.kind === 'collecting');
+  const depressions = wet.filter((zone) => zone.kind === 'depression');
+  const balance =
+    climaticBalance?.balanceMm === null || climaticBalance?.balanceMm === undefined
+      ? null
+      : { ...climaticBalance, balanceMm: climaticBalance.balanceMm };
+
+  return {
+    rain:
+      precipitation && precipitation.sumMm > precipitation.medianMm
+        ? {
+            days: precipitation.days,
+            sumMm: precipitation.sumMm,
+            medianMm: precipitation.medianMm,
+            rank: precipitation.rank,
+            years: precipitation.years,
+          }
+        : null,
+    balance:
+      balance && balance.precipMm !== null && balance.evapotranspirationMm !== null && balance.balanceMm > 0
+        ? {
+            precipMm: balance.precipMm,
+            evapotranspirationMm: balance.evapotranspirationMm,
+            balanceMm: balance.balanceMm,
+          }
+        : null,
+    depressions: {
+      count: depressions.length,
+      volumeM3: depressions.reduce((sum, zone) => sum + (zone.volumeM3 ?? 0), 0),
+    },
+    collecting: wet.length - depressions.length,
+    ditchInFieldM: ditchInFieldM(report),
+    ditchNearWetZones: wet.some((zone) => zone.ditchDistanceM !== undefined),
+  };
+}

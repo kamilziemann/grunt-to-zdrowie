@@ -26,6 +26,20 @@ export function IrrigationSection({ report }: { report: WaterReport }) {
 
   if (!irrigation) return <p className="text-base text-muted-foreground">{t('none')}</p>;
   const past = isPastAnalysis(report);
+
+  // nadmiar wody: jedno zdanie zamiast "nawadnianie rozwaz po dzialaniach wyzej"
+  if (report.assessment.level === 'excess' && irrigation.advisable === 'no') {
+    return (
+      <p
+        className="flex items-center gap-2 rounded-lg border-2 bg-card p-4 text-lg font-semibold"
+        data-testid="irrigation-excess"
+      >
+        <Droplet aria-hidden="true" className="size-5 text-water" />
+        {t(past ? 'excessPast' : 'excess')}
+      </p>
+    );
+  }
+
   const plan =
     irrigation.doses !== undefined && irrigation.doseMm !== undefined
       ? { doses: irrigation.doses, doseMm: irrigation.doseMm, intervalDays: irrigation.intervalDays ?? 0 }

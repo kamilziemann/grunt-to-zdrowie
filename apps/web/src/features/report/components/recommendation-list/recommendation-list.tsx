@@ -51,7 +51,15 @@ export function RecommendationList({ category, recommendations, report }: Recomm
   const describe = useZoneDescription();
   const { active } = useZoneFocus();
 
-  if (sorted.length === 0) return <p className="text-base text-muted-foreground">{t(`none.${category}`)}</p>;
+  if (sorted.length === 0) {
+    const excess = category === 'retention' && report.assessment.level === 'excess';
+
+    return (
+      <p className="text-base text-muted-foreground">
+        {t(excess ? 'none.retentionExcess' : `none.${category}`)}
+      </p>
+    );
+  }
 
   return (
     <ol className="flex flex-col gap-3 print:block print:space-y-3">

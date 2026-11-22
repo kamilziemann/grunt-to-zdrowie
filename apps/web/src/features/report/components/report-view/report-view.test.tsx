@@ -559,4 +559,38 @@ describe('ReportView', () => {
       expect(container).not.toHaveTextContent(t('evidence.unknownMetric'));
     });
   });
+
+  describe('nadmiar wody', () => {
+    it('sekcja 3 "Skad nadmiar wody" z deszczem na tle lat, zaglebieniami i rowami; bez zdania o niedoborze', () => {
+      const { container } = renderReport(MEADOW_REPORT);
+      const causes = container.querySelector('#przyczyny');
+
+      expect(causes).toHaveTextContent('Skąd nadmiar wody');
+      expect(causes).not.toHaveTextContent('Dlaczego brakuje wody');
+      expect(causes).not.toHaveTextContent(t('causes.none'));
+      expect(screen.getByTestId('excess-causes')).toHaveTextContent(
+        'W ostatnich 30 dniach spadło 167 l/m² deszczu – zwykle o tej porze ok. 42 l/m², czyli ok. 4 razy więcej. ' +
+          'To najbardziej mokry taki okres z 11 lat.',
+      );
+      expect(container.querySelector('[data-fact="balance"]')).toHaveTextContent(
+        'zostało ok. 97 l/m² wody więcej',
+      );
+      expect(container.querySelector('[data-fact="zones"]')).toHaveTextContent(
+        'Na polu są 2 zagłębienia bez odpływu, razem na ok. 8200 m³ wody.',
+      );
+      expect(container.querySelector('[data-fact="ditches"]')).toHaveTextContent('sprawdź, czy są drożne');
+    });
+
+    it('nawadnianie: jedno zdanie "nie nawadniaj"; retencja nie obiecuje zatrzymywania; bez dni niedoboru w ocenie', () => {
+      const { container } = renderReport(MEADOW_REPORT);
+
+      expect(screen.getByTestId('irrigation-excess')).toHaveTextContent(
+        'Wtedy nie było potrzeby nawadniać – w glebie było za dużo wody.',
+      );
+      expect(container.querySelector('#nawadnianie')).not.toHaveTextContent(t('irrigation.first'));
+      expect(container.querySelector('#retencja')).toHaveTextContent('Woda na polu i wokół niego');
+      expect(container.querySelector('#retencja')).toHaveTextContent('Teraz wody jest za dużo');
+      expect(screen.getByTestId('verdict-section-facts')).not.toHaveTextContent(t('verdict.stress'));
+    });
+  });
 });

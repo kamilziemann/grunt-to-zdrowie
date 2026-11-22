@@ -64,7 +64,9 @@
     "retention": "How to keep water on the field",
     "agrotech": "Farming that saves water",
     "irrigation": "Irrigation",
-    "sources": "Where the data comes from and how far to trust it"
+    "sources": "Where the data comes from and how far to trust it",
+    "causesExcess": "Where the excess water comes from",
+    "retentionExcess": "Water on and around the field"
   },
   "details": "Details for the advisor",
   "verdict": {
@@ -277,6 +279,18 @@
         "title": "The crop is sensitive to water shortage now",
         "description": "At this growth stage the plant needs a lot of water, so a shortage cuts the yield faster."
       }
+    },
+    "excess": {
+      "intro": "What the data says about this field:",
+      "rain": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m² at this time{times, plural, =0 {} other {, so about # times more}}. {side, select, wet {{wet, plural, =1 {This is the wettest such period} other {This is the #th wettest such period}}} other {This is the {rank}th driest such period}} in {years} years.",
+      "balance": "In the last 60 days {precip} l/m² fell and about {et} l/m² evaporated – about {left} l/m² more water stayed in the soil and on the field than left it.",
+      "depressions": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow.",
+      "depressionsVolume": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow, holding about {volume} m³ of water together.",
+      "collecting": "There {count, plural, one {is also # spot} other {are also # spots}} where water collects.",
+      "zonesNote": "Water stands there longest – see the sketch in section 4.",
+      "ditchesLength": "Ditches run through the field (about {meters} m). They carry the excess away – check that they are clear, not overgrown or silted up.",
+      "ditchesNear": "Ditches run next to the wet spots. They carry the excess away – check that they are clear, not overgrown or silted up.",
+      "none": "The data does not show where so much water came from – check the field on site."
     }
   },
   "evidence": {
@@ -354,7 +368,8 @@
   "recommendations": {
     "none": {
       "retention": "We see no need for water retention structures on this field.",
-      "agrotech": "We have no additional farming advice for this field."
+      "agrotech": "We have no additional farming advice for this field.",
+      "retentionExcess": "There is too much water now, so we do not recommend holding it back. The hollows and ditches on the sketch will help when drought comes – check the report again then."
     },
     "priority": {
       "p1": "Start with this",
@@ -463,7 +478,9 @@
     },
     "plan": "Irrigation plan: {doses, plural, one {# application} other {# applications}} of {dose} l/m²{interval, plural, =0 {} one { every day} other { every # days}}.",
     "planVolume": "One application is about {dose} m³ of water for the whole field, the whole plan about {total} m³.",
-    "planNote": "The soil cannot take a bigger dose at once – the water would run off or drain below the roots."
+    "planNote": "The soil cannot take a bigger dose at once – the water would run off or drain below the roots.",
+    "excess": "Do not irrigate now – there is too much water in the soil.",
+    "excessPast": "There was no need to irrigate then – there was too much water in the soil."
   },
   "sources": {
     "confidence": "Confidence: {level}",

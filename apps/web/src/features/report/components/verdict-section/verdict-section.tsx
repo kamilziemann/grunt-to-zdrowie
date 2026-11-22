@@ -128,6 +128,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
   // miejsca na polu odrozniaja raport od mapy gminnej - zapowiedz ich juz w karcie oceny
   const zoneCount = fieldZones(report).length;
   const heat = heatSpell(report);
+  const excess = assessment.level === 'excess';
 
   return (
     <div className="flex flex-col gap-4">
@@ -178,7 +179,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
 
       <div className="flex flex-col gap-3">
         <h3 className="sr-only">{t('facts')}</h3>
-        <dl className="grid gap-3 sm:grid-cols-2">
+        <dl className="grid gap-3 sm:grid-cols-2" data-testid="verdict-section-facts">
           {water && (
             <Fact label={t('soilWater')} value={t('soilWaterValue', { percent: water.percent })}>
               <progress
@@ -213,7 +214,8 @@ export function VerdictSection({ report }: { report: WaterReport }) {
               {t('rankNote', { from: day(balance.periodFrom), to: day(balance.periodTo) })}
             </Fact>
           )}
-          {rootZone && (
+          {/* przy nadmiarze wody dni z niedoborem i brak wody dla roslin przecza ocenie - zostaja w historii */}
+          {rootZone && !excess && (
             <Fact label={t('stress')} value={t('stressValue', { days: rootZone.stressDays30 })}>
               {rootZone.seasonStressDays === undefined
                 ? null
@@ -225,7 +227,7 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                     })}
             </Fact>
           )}
-          {rootZone?.etDeficitShare60d !== undefined && (
+          {rootZone?.etDeficitShare60d !== undefined && !excess && (
             <Fact
               label={t('etDeficit')}
               value={

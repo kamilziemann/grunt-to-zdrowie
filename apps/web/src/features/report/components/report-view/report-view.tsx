@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { AppHref } from '@/lib/routes';
 
 import { CausesSection } from '../causes-section';
+import { ExcessCauses } from '../excess-causes';
 import { FieldMap } from '../field-map';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
@@ -75,6 +76,8 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
   const sampleRecommendations = samples.has('recommendations');
 
   const zones = useMemo(() => fieldZones(report), [report]);
+  // nadmiar wody: sekcja 3 mowi, skad woda, a sekcja 4 nie obiecuje jej zatrzymywania
+  const excess = report.assessment.level === 'excess';
 
   useOpenDetailsForPrint(root);
 
@@ -110,13 +113,19 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
         <ReportSection id="historia" number={2} title={t('sections.history')} sample={samples.has('history')}>
           <HistorySection report={report} />
         </ReportSection>
-        <ReportSection id="przyczyny" number={3} title={t('sections.causes')} sample={samples.has('causes')}>
-          <CausesSection causes={report.causes} />
+        <ReportSection
+          id="przyczyny"
+          number={3}
+          title={t(excess ? 'sections.causesExcess' : 'sections.causes')}
+          sample={samples.has('causes')}
+        >
+          {excess ? <ExcessCauses report={report} /> : null}
+          {excess && report.causes.length === 0 ? null : <CausesSection causes={report.causes} />}
         </ReportSection>
         <ReportSection
           id="retencja"
           number={4}
-          title={t('sections.retention')}
+          title={t(excess ? 'sections.retentionExcess' : 'sections.retention')}
           sample={sampleRecommendations}
         >
           {/* na wydruku blok, nie flex - wtedy Chrome trzyma naglowek przy szkicu (break-after w flexie nie dziala) */}

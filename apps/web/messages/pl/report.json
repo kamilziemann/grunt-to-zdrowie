@@ -64,7 +64,9 @@
     "retention": "Jak zatrzymać wodę na polu",
     "agrotech": "Uprawa, która oszczędza wodę",
     "irrigation": "Nawadnianie",
-    "sources": "Skąd są dane i na ile im ufać"
+    "sources": "Skąd są dane i na ile im ufać",
+    "causesExcess": "Skąd nadmiar wody",
+    "retentionExcess": "Woda na polu i wokół niego"
   },
   "details": "Szczegóły dla doradcy",
   "verdict": {
@@ -277,6 +279,18 @@
         "title": "Uprawa jest teraz wrażliwa na brak wody",
         "description": "W tej fazie rozwoju roślina potrzebuje dużo wody, więc niedobór szybciej obniża plon."
       }
+    },
+    "excess": {
+      "intro": "Co mówią dane o tym polu:",
+      "rain": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle o tej porze ok. {median} l/m²{times, plural, =0 {} other {, czyli ok. # razy więcej}}. {side, select, wet {{wet, plural, =1 {To najbardziej mokry taki okres} other {To #. najbardziej mokry taki okres}}} other {To {rank}. najsuchszy taki okres}} z {years} lat.",
+      "balance": "W ostatnich 60 dniach spadło {precip} l/m², a wyparowało ok. {et} l/m² – w glebie i na polu zostało ok. {left} l/m² wody więcej, niż ubyło.",
+      "depressions": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu.",
+      "depressionsVolume": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu, razem na ok. {volume} m³ wody.",
+      "collecting": "{count, plural, one {Jest też # miejsce} few {Są też # miejsca} many {Jest też # miejsc} other {Jest też # miejsca}}, gdzie zbiera się woda.",
+      "zonesNote": "Tam woda stoi najdłużej – zobacz szkic w sekcji 4.",
+      "ditchesLength": "Przez pole biegną rowy (ok. {meters} m). To one odprowadzają nadmiar – sprawdź, czy są drożne, nie zarośnięte i nie zamulone.",
+      "ditchesNear": "Przy mokrych miejscach biegną rowy. To one odprowadzają nadmiar – sprawdź, czy są drożne, nie zarośnięte i nie zamulone.",
+      "none": "W danych nie widać, skąd wzięło się tyle wody – sprawdź pole na miejscu."
     }
   },
   "evidence": {
@@ -354,7 +368,8 @@
   "recommendations": {
     "none": {
       "retention": "Nie widzimy potrzeby budowy urządzeń zatrzymujących wodę na tym polu.",
-      "agrotech": "Nie mamy dodatkowych zaleceń uprawowych dla tego pola."
+      "agrotech": "Nie mamy dodatkowych zaleceń uprawowych dla tego pola.",
+      "retentionExcess": "Teraz wody jest za dużo, więc nie zalecamy jej zatrzymywania. Zagłębienia i rowy ze szkicu przydadzą się, gdy przyjdzie susza – wtedy sprawdź raport ponownie."
     },
     "priority": {
       "p1": "Zacznij od tego",
@@ -463,7 +478,9 @@
     },
     "plan": "Plan podlewania: {doses, plural, one {# podlanie} few {# podlania} many {# podlań} other {# podlania}} po {dose} l/m²{interval, plural, =0 {} one { co # dzień} other { co # dni}}.",
     "planVolume": "Jedno podlanie to ok. {dose} m³ wody na całe pole, cały plan ok. {total} m³.",
-    "planNote": "Większej dawki naraz gleba nie przyjmie – woda spłynie albo ucieknie pod korzenie."
+    "planNote": "Większej dawki naraz gleba nie przyjmie – woda spłynie albo ucieknie pod korzenie.",
+    "excess": "Teraz nie nawadniaj – w glebie jest za dużo wody.",
+    "excessPast": "Wtedy nie było potrzeby nawadniać – w glebie było za dużo wody."
   },
   "sources": {
     "confidence": "Pewność oceny: {level}",
