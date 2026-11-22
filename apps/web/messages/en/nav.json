@@ -6,5 +6,9 @@
   "tagline": "drought check for farmers",
   "menu": "Menu",
   "otherParcel": "Check another parcel",
-  "method": "How we calculate"
+  "method": "How we calculate",
+  "homeHow": "How it works",
+  "homeResult": "What you get",
+  "homeFaq": "Questions",
+  "homeCheck": "Check parcel"
 }

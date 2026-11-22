@@ -12,9 +12,19 @@ import { cn } from '@/lib/utils/cn';
 
 const HOME_PATHS = new Set(['/', '/en', '/en/']);
 
+/** Kotwice sekcji strony glownej (makieta: "Jak to dziala", "Co dostaniesz", "Pytania"); id sekcji w HomeScreen. */
+const HOME_ANCHORS = [
+  { href: '#jak', labelKey: 'homeHow' },
+  { href: '#wynik', labelKey: 'homeResult' },
+  { href: '#pytania', labelKey: 'homeFaq' },
+] as const;
+
+const LINK_CLASS =
+  'flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors hover:bg-muted';
+
 /**
  * Naglowek aplikacji: znak i nazwa (powrot na strone glowna), "Sprawdz inna dzialke" poza strona glowna, pozycje
- * menu i jezyk. Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
+ * menu i jezyk. Na stronie glownej zamiast pozycji menu sa kotwice jej sekcji i "Sprawdz dzialke" (przewija do pola). Na telefonie wszystko poza logo chowa sie pod przyciskiem "Menu" (natywny popover: Esc
  * i klikniecie obok zamykaja, fokus wraca na przycisk).
  */
 export function AppNav({ appName }: { appName: string }) {
@@ -32,7 +42,17 @@ export function AppNav({ appName }: { appName: string }) {
     if (menu && 'hidePopover' in menu && menu.matches(':popover-open')) menu.hidePopover();
   }, []);
 
-  const links = (
+  const links = onHome ? (
+    <>
+      {HOME_ANCHORS.map((anchor) => (
+        <li key={anchor.href}>
+          <Link href={anchor.href} onClick={closeMenu} className={cn(LINK_CLASS, 'text-foreground')}>
+            {t(anchor.labelKey)}
+          </Link>
+        </li>
+      ))}
+    </>
+  ) : (
     <>
       {items.map((item) => {
         const active = isNavItemActive(item, pathname);
@@ -43,10 +63,7 @@ export function AppNav({ appName }: { appName: string }) {
               href={item.href}
               onClick={closeMenu}
               aria-current={active ? 'page' : undefined}
-              className={cn(
-                'flex min-h-11 items-center rounded-full px-4 text-base font-medium transition-colors hover:bg-muted',
-                active ? 'bg-muted text-foreground' : 'text-foreground/80',
-              )}
+              className={cn(LINK_CLASS, active ? 'bg-muted text-foreground' : 'text-foreground/80')}
             >
               {t(item.labelKey)}
             </Link>
@@ -55,6 +72,10 @@ export function AppNav({ appName }: { appName: string }) {
       })}
     </>
   );
+  // glowne dzialanie w naglowku: poza strona glowna inna dzialka, na glownej przewiniecie do pola numeru
+  const action = onHome
+    ? { href: '#szukaj' as const, label: t('homeCheck'), variant: 'default' as const }
+    : { href: routes.home(), label: t('otherParcel'), variant: 'outline' as const };
 
   return (
     <nav aria-label={t('main')} className="flex flex-1 items-center gap-3 md:gap-6">
@@ -67,14 +88,15 @@ export function AppNav({ appName }: { appName: string }) {
       </Link>
       <ul className="flex items-center gap-1 max-md:hidden">{links}</ul>
       <div className="ml-auto flex items-center gap-1 max-md:hidden">
-        {!onHome && (
-          <Link
-            href={routes.home()}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'mr-2 text-base')}
-          >
-            {t('otherParcel')}
-          </Link>
-        )}
+        <Link
+          href={action.href}
+          className={cn(
+            buttonVariants({ variant: action.variant, size: onHome ? 'default' : 'sm' }),
+            'mr-2 text-base',
+          )}
+        >
+          {action.label}
+        </Link>
         <LocaleSwitcher />
       </div>
       <button
@@ -92,18 +114,16 @@ export function AppNav({ appName }: { appName: string }) {
         className="inset-auto top-16 right-gutter m-0 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border bg-popover p-3 text-popover-foreground shadow-lg md:hidden"
       >
         <ul className="flex flex-col gap-1">
-          {!onHome && (
-            <li>
-              <Link
-                href={routes.home()}
-                onClick={closeMenu}
-                className={cn(buttonVariants({ variant: 'default', size: 'default' }), 'w-full')}
-              >
-                {t('otherParcel')}
-              </Link>
-            </li>
-          )}
           {links}
+          <li className="mt-1">
+            <Link
+              href={action.href}
+              onClick={closeMenu}
+              className={cn(buttonVariants({ variant: 'default', size: 'default' }), 'w-full')}
+            >
+              {action.label}
+            </Link>
+          </li>
         </ul>
         {ENABLED_LOCALES.length > 1 && (
           <div className="mt-2 flex items-center gap-1 border-t pt-2">

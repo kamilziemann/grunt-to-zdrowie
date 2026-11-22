@@ -23,7 +23,7 @@ function renderNav() {
 
 describe('AppNav', () => {
   it('pokazuje logo i pozycje menu z poprawnymi adresami', () => {
-    nav.pathname.mockReturnValue('/');
+    nav.pathname.mockReturnValue('/raport');
     renderNav();
 
     expect(screen.getByRole('navigation', { name: 'Nawigacja główna' })).toBeInTheDocument();
@@ -50,6 +50,22 @@ describe('AppNav', () => {
     renderNav();
 
     expect(screen.queryByRole('button', { name: /Motyw/ })).not.toBeInTheDocument();
+  });
+
+  it('na stronie głównej kotwice sekcji i „Sprawdź działkę” zamiast pozycji menu', () => {
+    nav.pathname.mockReturnValue('/');
+    renderNav();
+
+    for (const [name, href] of [
+      ['Jak to działa', '#jak'],
+      ['Co dostaniesz', '#wynik'],
+      ['Pytania', '#pytania'],
+      ['Sprawdź działkę', '#szukaj'],
+    ]) {
+      for (const link of screen.getAllByRole('link', { name })) expect(link).toHaveAttribute('href', href);
+    }
+
+    expect(screen.queryByRole('link', { name: 'Sprawdź inną działkę' })).not.toBeInTheDocument();
   });
 
   it('na stronie głównej żadna sekcja nie jest aktywna', () => {
