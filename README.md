@@ -1,6 +1,6 @@
 # Grunt to Zdrowie
 
-**Zespół:** _[nazwa zespołu — do uzupełnienia]_ · **Zadanie:** KOWR „Zatrzymaj wodę, chroń plony” (HackNation 2026)
+**Zespół:** KDKZ · **Zadanie:** KOWR „Zatrzymaj wodę, chroń plony” (HackNation 2026)
 
 - **Działająca wersja:** <https://grunt-to-zdrowie.hoxu.workers.dev> (strony i API; dokumentacja API: `/api/docs`)
 - **Jak liczymy** (metody, źródła, licencje, ograniczenia — w aplikacji):
@@ -105,8 +105,8 @@ ostatnie dni 3 godziny), raport „na dziś” liczy się od nowa po dobie. Meto
 - **Porównanie z ogłoszeniami IUNG** ([`docs/validation.md`](docs/validation.md)): 21 przypadków z Systemu
   Monitoringu Suszy Rolniczej IUNG-PIB (8 z suszą, 13 bez), liczone przez prawdziwe API skryptem
   `apps/server/scripts/validate-iung.ts`. Zgodność poziomu 21/21, zgodność KBW 20/21, werdykty dla czterech kategorii
-  gleby 60/64. Ostatnia powtórka na silniku 0.8.0; wersje 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
-  zalecenia poza sezonem, nie rachunek oceny — powtórka na 0.8.5 **do zrobienia**.
+  gleby 60/64. Ostatnia powtórka na silniku 0.8.5 (22.11.2026): tabela bez zmian. Wersje 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
+  zalecenia poza sezonem, nie rachunek oceny.
 - **Progi i wzory ze źródłem**: 784 wartości progów KBW porównane ze stroną IUNG; bilans FAO-56 odtwarza przykłady
   37 i 38 z publikacji FAO-56 (test jednostkowy).
 - **Testy przeliczone ręcznie** dla każdej reguły silnika (susza zakończona ulewą, uprawa poza sezonem, luki w
@@ -153,7 +153,8 @@ ograniczeniach.
 Zasady: każdą zmianę sprawdzają narzędzia (`bun check`: format, lint, granice architektury, typy, testy) i człowiek;
 notatki z researchu agentów są oznaczone jako niezweryfikowane ([`docs/research/`](docs/research/README.md)), a liczby
 użyte w kodzie (progi IUNG, wzory, licencje) sprawdzaliśmy u źródła. Przebieg pracy: [`docs/progress/`](docs/progress/README.md).
-Wersje modeli Codex i Antigravity — **do potwierdzenia**.
+Przeglądy z 22.11.2026 szły na domyślnym modelu Codex CLI oraz w Antigravity na modelu Claude Opus; wersje modeli z
+wcześniejszego researchu — **do potwierdzenia**.
 
 ## Biblioteki, komponenty, usługi i licencje
 
@@ -175,7 +176,10 @@ potwierdzenia** przez zespół.
 
 **Koszty (pkt 5.4).** Źródła danych są bezpłatne. Płatne warstwy: Cloudflare Workers Paid (5 USD/mies.; D1 w cenie)
 i Neon Launch (przechowywanie BDOT10k ok. 1,45 GB i czas pracy bazy) — razem rząd wielkości **ok. 12 USD/mies.** przy
-ruchu konkursowym (szacunek; plan konta Cloudflare i zmierzony czas CPU analizy **do potwierdzenia**). Copernicus:
+ruchu konkursowym (szacunek; wdrożenie działa na planie Workers Paid i Neon Launch — potwierdzone przez zespół;
+zmierzony czas CPU analizy **do potwierdzenia**). Baza BDOT10k (ok. 1,45 GB) nie mieści się w darmowym planie Neon
+(0,5 GB); może to być dowolny Postgres z PostGIS, ale Worker łączy się dziś sterownikiem HTTP Neon
+(`@neondatabase/serverless`), więc inna baza wymaga podmiany jednego adaptera (`hydro-postgis/neon-runner.ts`). Copernicus:
 darmowe konto (10 000 zapytań/mies.). Alternatywy: Supabase, własny serwer z PostGIS (np. Hetzner), BDOT10k w plikach
 R2 zamiast bazy. Ceny, limity i źródła: [README konkursowe, pkt 5.4](docs/submission/README-konkursowe.md#infrastruktura-i-koszty-pkt-54).
 

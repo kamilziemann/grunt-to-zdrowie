@@ -57,23 +57,18 @@ try {
     await page.goto(url);
     await page.getByTestId('short-analysis').waitFor({ timeout: 90_000 });
     await page.locator('[data-hydro="ready"], [data-hydro="unavailable"]').waitFor({ timeout: 30_000 });
-    // "Pole z satelity" jak po kliknieciu "Zapisz PDF": rozwiniecie pobiera oba obrazy, czekamy na wynik (obraz albo
-    // jedno zdanie o braku zdjecia); pierwsze pobranie z Copernicus trwa do kilkunastu sekund
+    // Jak rolnik: przycisk "Drukuj / zapisz PDF" sam pobiera zdjecia z satelity do wydruku i dopiero potem otwiera
+    // okno wydruku. Okno zastepujemy znacznikiem - gdy aplikacja je "otworzy", strona jest gotowa do PDF.
     await page.evaluate(() => {
-      const section = document.querySelector<HTMLDetailsElement>('[data-testid="satellite-section"]');
-
-      if (section) section.open = true;
+      window.print = () => {
+        document.documentElement.dataset.printRequested = 'true';
+      };
     });
     await page
-      .locator(
-        '[data-testid="satellite-images"], [data-testid="satellite-problem"], [data-testid="satellite-none"]',
-      )
+      .getByRole('button', { name: /Drukuj|Zapisz PDF/ })
       .first()
-      .waitFor({ state: 'attached', timeout: 90_000 });
-    await page
-      .locator('[data-testid="satellite-loading"]')
-      .first()
-      .waitFor({ state: 'detached', timeout: 90_000 });
+      .click();
+    await page.locator('html[data-print-requested="true"]').waitFor({ state: 'attached', timeout: 90_000 });
     await page.evaluate(async () => {
       await Promise.allSettled(
         [...document.querySelectorAll<HTMLImageElement>('img[data-satellite-image]')].map((image) =>

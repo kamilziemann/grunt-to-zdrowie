@@ -123,7 +123,7 @@ przytoczyć ze źródłem.
    wykazów gmin Systemu Monitoringu Suszy Rolniczej IUNG-PIB, 8 z suszą i 13 bez (te same gminy, uprawy i pory roku).
    Skrypt `bun run validate:iung -- --api <adres API>` liczy raporty przez prawdziwe API ze wszystkimi źródłami.
    Wynik (silnik 0.4.0–0.8.0, bez zmian; 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy oraz przyczyny i zalecenia poza
-   sezonem, nie rachunek oceny — powtórka na 0.8.5 **do zrobienia**): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
+   sezonem, nie rachunek oceny — powtórka na 0.8.5 z 22.11.2026 dała tę samą tabelę): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
    13/13), **zgodność KBW 20/21**, „obserwuj” bez suszy 9/13, werdykty dla każdej z czterech kategorii gleby zgodne
    z wykazem gminy **60/64**. Rozbieżności i ich przyczyny (siatka NASA POWER, punkt zamiast gminy, gleba z modelu)
    są opisane w tym samym pliku; 21 przypadków to nadal mało (brak gór i Żuław w zestawie).
@@ -251,11 +251,10 @@ Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i AP
 
 ## Do uzupełnienia przed oddaniem
 
-- Nazwa zespołu i link do repozytorium w głównym `README.md`.
+- Link do repozytorium w głównym `README.md` (zespół: KDKZ).
 - Prezentacja PDF (do 10 slajdów) i film do 3 minut — linki w głównym `README.md`. Raporty wzorcowe są w
-  [`docs/samples/`](../samples/README.md) (silnik 0.8.0 — do odświeżenia na 0.8.5 po zmianach karty raportu).
-- Plan konta Cloudflare wdrożenia (Free czy Paid) i zmierzony czas CPU analizy — **do potwierdzenia** (koszty wyżej).
+  [`docs/samples/`](../samples/README.md) (silnik 0.8.5, odświeżone 22.11.2026).
+- Zmierzony czas CPU analizy — **do potwierdzenia** (plan: Workers Paid i Neon Launch, potwierdzone przez zespół).
 - Licencja kodu własnego (dziś `"private": true`, bez pliku licencji) i wersje modeli Codex / Antigravity.
-- Powtórka walidacji IUNG na silniku 0.8.5.
 - Licencje i podstawy oznaczone „do potwierdzenia” (brzmienie art. 40a Pgik, PostGIS w Supabase, zużycie PU
   Copernicus, uzgodnienie limitu z GUGiK przy dużym ruchu, licencja stylu OpenFreeMap „liberty”).
