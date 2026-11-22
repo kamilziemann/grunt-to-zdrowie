@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { closeRing, decodeRing, type Position } from '@/lib/field-geometry';
 
-import { deriveFieldDraw, type SplitTarget } from './use-field-draw';
+import { deriveFieldDraw, insideRing, type SplitTarget } from './use-field-draw';
 
 const SQUARE: Position[] = [
   [21.5, 52.17],
@@ -67,5 +67,27 @@ describe('tryb "wlasne pole"', () => {
         TARGET,
       ).issue,
     ).toBe('lineOutside');
+  });
+});
+
+describe('insideRing', () => {
+  it('rozpoznaje punkt w srodku i poza kwadratem', () => {
+    expect(insideRing([21.501, 52.1705], SQUARE)).toBe(true);
+    expect(insideRing([21.51, 52.1705], SQUARE)).toBe(false);
+  });
+
+  it('podzial: obie czesci maja obrysy, w ktore da sie stuknac', () => {
+    const split = deriveFieldDraw(
+      'split',
+      [
+        [21.501, 52.169],
+        [21.501, 52.172],
+      ],
+      0,
+      TARGET,
+    );
+    const [a, b] = split.partRings ?? [[], []];
+
+    expect(insideRing([21.5005, 52.1705], a) !== insideRing([21.5005, 52.1705], b)).toBe(true);
   });
 });

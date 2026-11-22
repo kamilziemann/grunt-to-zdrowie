@@ -204,16 +204,16 @@
     "hint": "Wybierz miejsce. Mapa tam dojedzie, a Ty klikniesz swoją działkę."
   },
   "field": {
-    "intro": "Działka to nie zawsze pole",
-    "introDescription": "Uprawiasz tylko część działki albo pole obejmuje kilka działek? Wskaż na mapie dokładny obszar.",
-    "startDraw": "Narysuj własne pole",
+    "intro": "Uprawiasz tylko część działki?",
+    "introDescription": "Pokaż na mapie swoje pole: podziel działkę linią albo obrysuj pole narożnikami.",
+    "startDraw": "Obrysuj pole na mapie",
     "startSplit": "Podziel działkę linią",
     "splitNeedsOne": "Żeby podzielić działkę, zostaw na liście jedną działkę.",
     "title": "Własne pole",
     "modeLabel": "Sposób wskazania",
     "modes": {
-      "draw": "Rysuj obszar",
-      "split": "Podziel działkę"
+      "draw": "Obrysuj pole",
+      "split": "Podziel linią"
     },
     "drawHelp": "Stukaj w mapę w narożnikach pola, po kolei wzdłuż granicy. Obszar zamyka się sam między ostatnim a pierwszym punktem.",
     "splitHelp": "Stuknij w mapę dwa punkty po obu stronach miejsca, gdzie kończy się Twoje pole. Linia przez nie podzieli działkę {number} na dwie części.",
@@ -227,16 +227,43 @@
     "partsLabel": "Którą część analizować?",
     "part": "Część {letter}",
     "partArea": "{area} ha",
-    "undo": "Cofnij punkt",
+    "undo": "Cofnij",
     "clear": "Zacznij od nowa",
-    "cancel": "Wróć do listy działek",
-    "analyze": "Analizuj ten obszar",
-    "analyzeHint": "Wskaż obszar na mapie, żeby przejść do analizy.",
+    "cancel": "Anuluj",
+    "analyze": "Gotowe – dalej",
+    "analyzeHint": "Pokaż pole na mapie, żeby przejść dalej.",
     "summaryTitle": "Własny obszar",
     "summaryDrawn": "Obszar narysowany na mapie",
     "summaryPart": "Część działki {numbers}",
     "summaryArea": "{area} ha",
-    "invalidArea": "Obszaru z linku nie da się odczytać. Narysuj go jeszcze raz."
+    "invalidArea": "Obszaru z linku nie da się odczytać. Narysuj go jeszcze raz.",
+    "hint": {
+      "splitStart": "Stuknij na mapie początek linii – tuż za działką, tam gdzie zaczyna się granica Twojego pola.",
+      "splitEnd": "Teraz stuknij koniec linii po drugiej stronie działki.",
+      "splitOutside": "Linia nie przecina działki. Stuknij nowy początek linii.",
+      "splitChoose": "Stuknij część, którą uprawiasz. Wybrana: {area} ha.",
+      "splitNoParcel": "Żeby podzielić działkę, zostaw na liście jedną działkę.",
+      "drawStart": "Stuknij narożniki swojego pola, po kolei dookoła pola.",
+      "drawMore": "Dobrze. Jeszcze {count, plural, one {# narożnik} few {# narożniki} many {# narożników} other {# narożnika}}.",
+      "drawCrossing": "Boki się przecinają. Naciśnij „Cofnij” i postaw narożnik w innym miejscu.",
+      "drawDone": "Twoje pole: {area} ha. Stuknij kolejny narożnik albo naciśnij „Gotowe – dalej”."
+    },
+    "titleSplit": "Pokaż swoją część działki",
+    "titleDraw": "Obrysuj swoje pole",
+    "stepsLabel": "Kroki",
+    "steps": {
+      "split": {
+        "start": "Stuknij początek linii",
+        "end": "Stuknij koniec linii",
+        "choose": "Stuknij swoją część"
+      },
+      "draw": {
+        "start": "Stuknij narożniki pola",
+        "area": "Sprawdź powierzchnię",
+        "done": "Naciśnij „Gotowe – dalej”"
+      }
+    },
+    "yourArea": "Twoje pole: {area} ha"
   },
   "firstSteps": {
     "title": "Sprawdź wodę na polu w 3 krokach",

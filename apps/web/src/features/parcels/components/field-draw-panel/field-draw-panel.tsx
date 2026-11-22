@@ -1,4 +1,4 @@
-import { PencilRuler, Scissors, Undo2, X } from 'lucide-react';
+import { PencilRuler, RotateCcw, Scissors, Undo2, X } from 'lucide-react';
 import { useCallback, useEffect, useId, useRef, type ChangeEvent } from 'react';
 import { useTranslations } from 'use-intl';
 
@@ -62,10 +62,67 @@ export interface FieldDrawPanelProps {
   splitTarget: SplitTarget | null;
 }
 
+type HintKey =
+  | 'splitStart'
+  | 'splitEnd'
+  | 'splitOutside'
+  | 'splitChoose'
+  | 'splitNoParcel'
+  | 'drawStart'
+  | 'drawMore'
+  | 'drawCrossing'
+  | 'drawDone';
+
+/** Co rolnik ma teraz zrobic na mapie (jedno zdanie) i ktory to krok z trzech. */
+function guidance(draw: FieldDraw, splitTarget: SplitTarget | null): { hint: HintKey; step: 0 | 1 | 2 } {
+  if (draw.mode === 'split') {
+    if (!splitTarget) return { hint: 'splitNoParcel', step: 0 };
+
+    if (draw.points.length === 0) return { hint: 'splitStart', step: 0 };
+
+    if (draw.points.length === 1) return { hint: 'splitEnd', step: 1 };
+
+    return draw.partsHa ? { hint: 'splitChoose', step: 2 } : { hint: 'splitOutside', step: 0 };
+  }
+
+  if (draw.points.length === 0) return { hint: 'drawStart', step: 0 };
+
+  if (draw.issue === 'needMore') return { hint: 'drawMore', step: 0 };
+
+  if (draw.issue === 'selfIntersecting') return { hint: 'drawCrossing', step: 0 };
+
+  return { hint: 'drawDone', step: 2 };
+}
+
+const STEP_KEYS = {
+  split: ['steps.split.start', 'steps.split.end', 'steps.split.choose'],
+  draw: ['steps.draw.start', 'steps.draw.area', 'steps.draw.done'],
+} as const;
+
 /**
- * Panel trybu "wlasne pole": przelacznik rysowanie / podzial, instrukcja, liczba punktow i pole powierzchni na
- * biezaco, komunikat o problemie (za malo punktow, przeciete boki, linia obok dzialki), wybor czesci po podziale.
- * Przyciski "cofnij" i "analizuj" sa w pasku arkusza (widoczne takze w zwinietym arkuszu na telefonie).
+ * Duza podpowiedz na mapie w trybie "wlasne pole": jedno zdanie, co zrobic teraz (czytnik ekranu ja odczytuje).
+ * Stoi u gory mapy, wiec nie zaslania miejsca, w ktorym rolnik stuka.
+ */
+export function FieldDrawHint({ draw, splitTarget }: FieldDrawPanelProps) {
+  const t = useTranslations('parcels.field.hint');
+  const formatArea = useAreaFormatter();
+  const { hint } = guidance(draw, splitTarget);
+
+  return (
+    <output
+      aria-live="polite"
+      className="block rounded-2xl bg-foreground px-4 py-3 text-base font-medium text-background shadow-lg md:text-lg"
+      data-testid="field-draw-hint"
+    >
+      {t(hint, { area: formatArea(draw.areaHa ?? 0), count: draw.missingPoints })}
+    </output>
+  );
+}
+
+/**
+ * Panel trybu "wlasne pole": wybor sposobu (podzial linia albo obrys), trzy kroki z zaznaczonym biezacym, pole
+ * powierzchni na biezaco, wybor czesci po podziale (tez stuknieciem w mape) i "Zacznij od nowa". "Cofnij" i "Gotowe -
+ * dalej" sa w pasku arkusza (widoczne takze w zwinietym arkuszu na telefonie), podpowiedz - na mapie.
  */
 export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
   const t = useTranslations('parcels.field');
@@ -73,6 +130,7 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
   const ids = useId();
   const mode = draw.mode ?? 'draw';
   const { start, stop, clear, choosePart } = draw;
+  const { step } = guidance(draw, splitTarget);
   const changeMode = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => start(event.currentTarget.value === 'split' ? 'split' : 'draw'),
     [start],
@@ -96,35 +154,33 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
   return (
     <section
       ref={rootRef}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-4"
       aria-labelledby={`${ids}-title`}
       data-testid="field-draw"
     >
       <div className="flex items-center justify-between gap-2">
-        <h1 id={`${ids}-title`} className="text-xl font-bold text-primary">
-          {t('title')}
+        <h1 id={`${ids}-title`} className="text-2xl font-medium tracking-tight max-md:text-xl">
+          {mode === 'split' ? t('titleSplit') : t('titleDraw')}
         </h1>
-        <Button variant="ghost" size="xl" className="min-w-11 px-3" onClick={stop}>
+        <Button variant="ghost" size="sm" className="min-w-11 px-3" onClick={stop}>
           <X aria-hidden="true" />
           <span className="max-sm:sr-only">{t('cancel')}</span>
         </Button>
       </div>
 
-      <output className="block text-base font-semibold" data-testid="field-area" aria-live="polite">
+      <p className="text-2xl font-medium tabular-nums" data-testid="field-area">
         {draw.areaHa === null
           ? t('points', { count: draw.points.length })
-          : t('area', { area: formatArea(draw.areaHa) })}
-      </output>
+          : t('yourArea', { area: formatArea(draw.areaHa) })}
+      </p>
 
       <fieldset className="flex flex-col gap-2">
         <legend className="sr-only">{t('modeLabel')}</legend>
         <div className="grid grid-cols-2 gap-2">
-          {(['draw', 'split'] as const).map((option) => (
+          {(['split', 'draw'] as const).map((option) => (
             <label
               key={option}
-              className={cn(
-                'flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium has-checked:border-primary has-checked:bg-primary/10 has-focus-visible:ring-2 has-focus-visible:ring-ring/60 has-disabled:cursor-not-allowed has-disabled:opacity-50',
-              )}
+              className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-input px-3 text-base font-medium has-checked:border-accent has-checked:bg-accent has-checked:text-accent-foreground has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring has-disabled:cursor-not-allowed has-disabled:opacity-50"
             >
               <input
                 type="radio"
@@ -136,9 +192,9 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
                 className="sr-only"
               />
               {option === 'draw' ? (
-                <PencilRuler aria-hidden="true" className="size-4" />
+                <PencilRuler aria-hidden="true" className="size-5" />
               ) : (
-                <Scissors aria-hidden="true" className="size-4" />
+                <Scissors aria-hidden="true" className="size-5" />
               )}
               {t(`modes.${option}`)}
             </label>
@@ -146,24 +202,38 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
         </div>
       </fieldset>
 
-      <p className="text-sm">
-        {mode === 'draw' ? t('drawHelp') : t('splitHelp', { number: splitTarget?.number ?? '' })}
-      </p>
+      <ol aria-label={t('stepsLabel')} className="flex flex-col gap-2">
+        {STEP_KEYS[mode].map((key, index) => (
+          <li
+            key={key}
+            aria-current={index === step ? 'step' : undefined}
+            className={cn(
+              'flex items-center gap-3',
+              index === step ? 'font-medium' : 'text-muted-foreground',
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                'grid size-8 shrink-0 place-items-center rounded-full text-sm font-semibold',
+                index === step ? 'bg-accent text-accent-foreground' : 'border-2 border-input',
+              )}
+            >
+              {index + 1}
+            </span>
+            {t(key)}
+          </li>
+        ))}
+      </ol>
 
-      {draw.issue && (
-        <p
-          className={cn(
-            'rounded-lg px-3 py-2 text-sm',
-            draw.issue === 'selfIntersecting' || draw.issue === 'lineOutside'
-              ? 'bg-destructive/10 text-foreground'
-              : 'bg-muted',
-          )}
-          data-issue={draw.issue}
-        >
-          {draw.issue === 'needMore' && t('needMore', { count: draw.missingPoints })}
-          {draw.issue === 'selfIntersecting' && t('selfIntersecting')}
-          {draw.issue === 'lineMissing' && t('lineMissing', { count: draw.points.length })}
-          {draw.issue === 'lineOutside' && t('lineOutside')}
+      {draw.issue === 'selfIntersecting' && (
+        <p className="rounded-xl bg-destructive/10 px-4 py-3" data-issue={draw.issue}>
+          {t('selfIntersecting')}
+        </p>
+      )}
+      {draw.issue === 'lineOutside' && (
+        <p className="rounded-xl bg-destructive/10 px-4 py-3" data-issue={draw.issue}>
+          {t('lineOutside')}
         </p>
       )}
       {full && (
@@ -172,12 +242,12 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
 
       {mode === 'split' && draw.partsHa && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-sm font-medium">{t('partsLabel')}</legend>
+          <legend className="mb-1 text-base font-medium">{t('partsLabel')}</legend>
           <div className="grid grid-cols-2 gap-2">
             {draw.partsHa.map((areaHa, index) => (
               <label
                 key={index === 0 ? 'a' : 'b'}
-                className="flex min-h-14 cursor-pointer flex-col justify-center rounded-lg border px-3 py-2 has-checked:border-primary has-checked:bg-primary/10 has-focus-visible:ring-2 has-focus-visible:ring-ring/60"
+                className="flex min-h-14 cursor-pointer flex-col justify-center rounded-xl border-2 border-input px-4 py-2 has-checked:border-accent has-checked:bg-accent has-checked:text-accent-foreground has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
               >
                 <input
                   type="radio"
@@ -188,9 +258,7 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
                   className="sr-only"
                 />
                 <span className="font-semibold">{t('part', { letter: index === 0 ? 'A' : 'B' })}</span>
-                <span className="text-sm text-muted-foreground">
-                  {t('partArea', { area: formatArea(areaHa) })}
-                </span>
+                <span className="text-sm">{t('partArea', { area: formatArea(areaHa) })}</span>
               </label>
             ))}
           </div>
@@ -198,7 +266,8 @@ export function FieldDrawPanel({ draw, splitTarget }: FieldDrawPanelProps) {
       )}
 
       {draw.points.length > 0 && (
-        <Button variant="outline" size="xl" onClick={clear}>
+        <Button variant="outline" size="lg" onClick={clear}>
+          <RotateCcw aria-hidden="true" />
           {t('clear')}
         </Button>
       )}

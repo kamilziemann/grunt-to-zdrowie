@@ -52,7 +52,7 @@ import {
   type SheetSnap,
 } from '../bottom-sheet';
 import { ContextLegend } from '../context-legend';
-import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
+import { FieldDrawEntry, FieldDrawHint, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { MapIntro } from '../map-intro';
 import { HydroLegend } from '../hydro-legend';
 import { ImageryLegend } from '../imagery-legend';
@@ -485,7 +485,11 @@ export function ParcelsScreen({
       <div
         ref={controlsRef}
         // otwarty panel warstw na telefonie przykrywa arkusz dzialek (arkusz ma z-10)
-        className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 has-aria-expanded:z-30 md:left-106"
+        // w trybie "wlasne pole" warstwy i legendy ustepuja miejsca podpowiedzi (rysowane miejsce ma byc odsloniete)
+        className={cn(
+          'absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 has-aria-expanded:z-30 md:left-106',
+          drawing && 'hidden',
+        )}
       >
         <LayersPanel open={layersOpen} onOpenChange={setLayersOpen} layers={layers} onChange={updateLayers}>
           <ImagerySwitch
@@ -514,7 +518,14 @@ export function ParcelsScreen({
         )}
       </div>
 
-      {hint && (
+      {drawing && (
+        // podpowiedz "co teraz" u gory mapy (obok przyciskow przyblizenia) - rysowane miejsce zostaje odsloniete
+        <div className="absolute top-3 right-14 left-3 z-20 md:right-auto md:left-106 md:max-w-xl">
+          <FieldDrawHint draw={draw} splitTarget={splitTarget} />
+        </div>
+      )}
+
+      {hint && !drawing && (
         <output className="absolute top-32 left-1/2 z-10 block w-max max-w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg md:top-3 md:left-[calc(50%+12.5rem)]">
           {t(`map.${hint}`)}
         </output>

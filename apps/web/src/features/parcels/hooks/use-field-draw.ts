@@ -51,6 +51,8 @@ export interface FieldDrawDerived {
   areaHa: number | null;
   /** pola obu czesci przy podziale */
   partsHa: [number, number] | null;
+  /** obrysy obu czesci przy podziale (w kolejnosci A, B) - stukniecie w czesc ja wybiera */
+  partRings: [Position[], Position[]] | null;
   overlay: FieldDrawOverlay;
   area: FieldDrawArea | null;
 }
@@ -79,6 +81,7 @@ export function deriveFieldDraw(
       missingPoints: missing,
       areaHa,
       partsHa: null,
+      partRings: null,
       overlay: {
         areas: missing === 0 ? [{ ring: pointsCopy, role: simple ? 'chosen' : 'draft' }] : [],
         line: points.length >= 2 ? pointsCopy : null,
@@ -112,6 +115,7 @@ export function deriveFieldDraw(
       missingPoints: 0,
       areaHa: null,
       partsHa: null,
+      partRings: null,
       overlay: { areas: [], line, points: pointsCopy },
       area: null,
     };
@@ -129,6 +133,7 @@ export function deriveFieldDraw(
     missingPoints: 0,
     areaHa: partsHa[part],
     partsHa,
+    partRings: [parts[0], parts[1]],
     overlay: {
       areas: [
         { ring: other, role: 'other' },
@@ -145,6 +150,20 @@ export function deriveFieldDraw(
       bbox: ringBbox(chosen),
     },
   };
+}
+
+/** Czy punkt lezy wewnatrz pierscienia (promien w prawo, parzystosc przeciec). */
+export function insideRing([x, y]: Position, ring: readonly Position[]): boolean {
+  let inside = false;
+
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index, index += 1) {
+    const [xi = 0, yi = 0] = ring[index] ?? [];
+    const [xj = 0, yj = 0] = ring[previous] ?? [];
+
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+
+  return inside;
 }
 
 export interface FieldDraw extends FieldDrawDerived {
@@ -174,22 +193,32 @@ export function useFieldDraw(target: SplitTarget | null): FieldDraw {
     setMode(null);
     setPoints([]);
   }, []);
-  const addPoint = useCallback(
-    (lng: number, lat: number) => {
-      setPoints((current) => {
-        if (mode === 'split') return current.length >= 2 ? [[lng, lat]] : [...current, [lng, lat]];
-
-        return current.length >= FIELD_LIMITS.maxVertices ? current : [...current, [lng, lat]];
-      });
-    },
-    [mode],
-  );
   const undo = useCallback(() => setPoints((current) => current.slice(0, -1)), []);
   const clear = useCallback(() => setPoints([]), []);
 
   const derived = useMemo(
     () => deriveFieldDraw(mode ?? 'draw', points, part, target),
     [mode, points, part, target],
+  );
+  const { partRings } = derived;
+  const addPoint = useCallback(
+    (lng: number, lat: number) => {
+      // linia podzialu gotowa: stukniecie w czesc dzialki wybiera ja, stukniecie obok zaczyna nowa linie
+      const tapped = partRings?.findIndex((ring) => insideRing([lng, lat], ring)) ?? -1;
+
+      if (mode === 'split' && (tapped === 0 || tapped === 1)) {
+        setPart(tapped);
+
+        return;
+      }
+
+      setPoints((current) => {
+        if (mode === 'split') return current.length >= 2 ? [[lng, lat]] : [...current, [lng, lat]];
+
+        return current.length >= FIELD_LIMITS.maxVertices ? current : [...current, [lng, lat]];
+      });
+    },
+    [mode, partRings],
   );
 
   return { ...derived, mode, points, part, start, stop, addPoint, undo, clear, choosePart: setPart };

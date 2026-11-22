@@ -204,16 +204,16 @@
     "hint": "Choose a place. The map will go there and you can click your parcel."
   },
   "field": {
-    "intro": "A parcel is not always a field",
-    "introDescription": "Do you farm only part of a parcel, or does your field span several parcels? Mark the exact area on the map.",
-    "startDraw": "Draw your own field",
-    "startSplit": "Split a parcel with a line",
+    "intro": "Do you farm only part of the parcel?",
+    "introDescription": "Show your field on the map: split the parcel with a line or outline the field by its corners.",
+    "startDraw": "Outline the field on the map",
+    "startSplit": "Split the parcel with a line",
     "splitNeedsOne": "To split a parcel, keep exactly one parcel on the list.",
     "title": "Your own field",
     "modeLabel": "How to mark the field",
     "modes": {
-      "draw": "Draw an area",
-      "split": "Split the parcel"
+      "draw": "Outline field",
+      "split": "Split with a line"
     },
     "drawHelp": "Tap the map at the corners of the field, one after another along its edge. The area closes itself between the last and the first point.",
     "splitHelp": "Tap two points on the map on both sides of where your field ends. The line through them will split parcel {number} into two parts.",
@@ -227,16 +227,43 @@
     "partsLabel": "Which part should be analysed?",
     "part": "Part {letter}",
     "partArea": "{area} ha",
-    "undo": "Undo point",
+    "undo": "Undo",
     "clear": "Start again",
-    "cancel": "Back to the parcel list",
-    "analyze": "Analyse this area",
-    "analyzeHint": "Mark an area on the map to continue to the analysis.",
+    "cancel": "Cancel",
+    "analyze": "Done – next",
+    "analyzeHint": "Show the field on the map to continue.",
     "summaryTitle": "Your own area",
     "summaryDrawn": "Area drawn on the map",
     "summaryPart": "Part of parcel {numbers}",
     "summaryArea": "{area} ha",
-    "invalidArea": "The area in the link cannot be read. Draw it again."
+    "invalidArea": "The area in the link cannot be read. Draw it again.",
+    "hint": {
+      "splitStart": "Tap the start of the line on the map – just outside the parcel, where your field's edge begins.",
+      "splitEnd": "Now tap the end of the line on the other side of the parcel.",
+      "splitOutside": "The line does not cross the parcel. Tap a new start of the line.",
+      "splitChoose": "Tap the part you farm. Selected: {area} ha.",
+      "splitNoParcel": "To split a parcel, keep only one parcel on the list.",
+      "drawStart": "Tap the corners of your field, one by one around it.",
+      "drawMore": "Good. {count, plural, one {# more corner} other {# more corners}}.",
+      "drawCrossing": "The sides cross. Press “Undo” and place the corner elsewhere.",
+      "drawDone": "Your field: {area} ha. Tap another corner or press “Done – next”."
+    },
+    "titleSplit": "Show your part of the parcel",
+    "titleDraw": "Outline your field",
+    "stepsLabel": "Steps",
+    "steps": {
+      "split": {
+        "start": "Tap the start of the line",
+        "end": "Tap the end of the line",
+        "choose": "Tap your part"
+      },
+      "draw": {
+        "start": "Tap the field corners",
+        "area": "Check the area",
+        "done": "Press “Done – next”"
+      }
+    },
+    "yourArea": "Your field: {area} ha"
   },
   "firstSteps": {
     "title": "Check the water on your field in 3 steps",
