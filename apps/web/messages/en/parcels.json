@@ -427,6 +427,7 @@
     },
     "steps": {
       "title": "Three steps, a few seconds",
+      "stepLabel": "Step {step}",
       "find": {
         "title": "Find",
         "text": "Enter the parcel number or click it on the map."

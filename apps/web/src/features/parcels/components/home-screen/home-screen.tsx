@@ -1,4 +1,4 @@
-import { Check, MapPinned } from 'lucide-react';
+import { Check, CircleCheck, Droplets, MapPin, MapPinned } from 'lucide-react';
 import { useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { SectionTitle } from './section-title';
 
 const PROMISES = ['free', 'noAccount', 'fast'] as const;
 const STEPS = ['find', 'check', 'analyze'] as const;
+/** Ikona kroku zamiast kolka z cyfra: znajdz dzialke, potwierdz, wynik o wodzie. */
+const STEP_ICONS = { find: MapPin, check: CircleCheck, analyze: Droplets } as const;
 const SOURCES = ['weather', 'satellite', 'soil', 'terrain', 'water', 'parcel'] as const;
 const QUESTIONS = ['cost', 'account', 'number', 'aid', 'accuracy', 'privacy'] as const;
 
@@ -96,18 +98,28 @@ export function HomeScreen({ initialQuery }: { initialQuery?: string | undefined
         <div className="flex flex-col gap-6">
           <SectionTitle id="steps-title">{t('steps.title')}</SectionTitle>
           <ol className="grid gap-4 md:grid-cols-3">
-            {STEPS.map((key, index) => (
-              <li key={key} className="flex flex-col gap-2.5 rounded-3xl bg-muted p-6">
-                <span
-                  aria-hidden="true"
-                  className="grid size-10 place-items-center rounded-full bg-accent text-lg font-semibold text-accent-foreground"
-                >
-                  {index + 1}
-                </span>
-                <span className="text-xl font-medium">{t(`steps.${key}.title`)}</span>
-                <span className="text-lg text-muted-foreground">{t(`steps.${key}.text`)}</span>
-              </li>
-            ))}
+            {STEPS.map((key, index) => {
+              const Icon = STEP_ICONS[key];
+
+              return (
+                // telefon: ikona po lewej, tekst po prawej (trzy karty w ok. polowie ekranu); od `md` ikona nad tekstem
+                <li key={key} className="flex gap-4 rounded-3xl bg-muted p-5 md:flex-col md:gap-3 md:p-6">
+                  <span
+                    aria-hidden="true"
+                    className="grid size-12 shrink-0 place-items-center rounded-xl border bg-card text-foreground"
+                  >
+                    <Icon className="size-6" strokeWidth={1.9} />
+                  </span>
+                  <span className="flex min-w-0 flex-col gap-1">
+                    <span className="text-[0.78125rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                      {t('steps.stepLabel', { step: index + 1 })}
+                    </span>
+                    <span className="text-xl font-medium">{t(`steps.${key}.title`)}</span>
+                    <span className="text-lg text-muted-foreground">{t(`steps.${key}.text`)}</span>
+                  </span>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </section>

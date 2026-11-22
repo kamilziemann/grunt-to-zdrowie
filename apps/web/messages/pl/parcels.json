@@ -427,6 +427,7 @@
     },
     "steps": {
       "title": "Trzy kroki, kilkanaście sekund",
+      "stepLabel": "Krok {step}",
       "find": {
         "title": "Znajdź",
         "text": "Wpisz numer działki albo kliknij ją na mapie."

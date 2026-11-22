@@ -986,8 +986,28 @@
       "beyondAnswer": "Zapasu wody wystarczy na ponad {days} dni nawet bez deszczu.",
       "stressedUnit": "{days, plural, one {dzień z rzędu} other {dni z rzędu}}",
       "stressedAnswer": "Zapas wody w glebie jest poniżej progu – rośliny rosną wolniej, a plon może spaść.",
-      "noRain": "Jeśli nie spadnie deszcz",
-      "withRain": "Z deszczem z prognozy",
+      "until": "Bez deszczu woda wystarczy do {lastDay}, {lastDate}. Od {thresholdDay} rośliny zaczną cierpieć.",
+      "withForecast": "Z deszczem z prognozy zapas wystarczy na {withRain, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}}.",
+      "today": "dziś",
+      "threshold": "próg",
+      "weekdaysShort": {
+        "mon": "pn",
+        "tue": "wt",
+        "wed": "śr",
+        "thu": "cz",
+        "fri": "pt",
+        "sat": "sb",
+        "sun": "nd"
+      },
+      "weekdaysGenitive": {
+        "mon": "poniedziałku",
+        "tue": "wtorku",
+        "wed": "środy",
+        "thu": "czwartku",
+        "fri": "piątku",
+        "sat": "soboty",
+        "sun": "niedzieli"
+      },
       "source": "Zużycie wody przez uprawę ze średniego parowania z ostatnich 7 dni (FAO-56); wariant z prognozą bierze deszcz z prognozy."
     },
     "forecast": {

@@ -986,8 +986,28 @@
       "beyondAnswer": "The water reserve will last more than {days} days even without rain.",
       "stressedUnit": "{days, plural, one {day in a row} other {days in a row}}",
       "stressedAnswer": "The soil water reserve is below the threshold – plants grow slower and the yield may drop.",
-      "noRain": "If no rain falls",
-      "withRain": "With the forecast rain",
+      "until": "Without rain the water lasts until {lastDay}, {lastDate}. From {thresholdDay} the plants will start to suffer.",
+      "withForecast": "With the forecast rain the reserve lasts {withRain, plural, one {# day} other {# days}}.",
+      "today": "today",
+      "threshold": "limit",
+      "weekdaysShort": {
+        "mon": "Mo",
+        "tue": "Tu",
+        "wed": "We",
+        "thu": "Th",
+        "fri": "Fr",
+        "sat": "Sa",
+        "sun": "Su"
+      },
+      "weekdaysGenitive": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      },
       "source": "Crop water use from the average evaporation of the last 7 days (FAO-56); the forecast variant uses the forecast rain."
     },
     "forecast": {
