@@ -47,27 +47,50 @@ test.describe('analiza i raport', () => {
         ),
       );
       await expect(page.getByRole('heading', { level: 1, name: 'Raport wodny pola' })).toBeVisible();
-      // widok prosty: jedno slowo na skali, pelna analiza ukryta
+      // jedna strona: jedno slowo na skali, szczegoly zwiniete na koncu
       await expect(page.getByTestId('verdict-word')).toHaveText('Sucho');
       await expect(page.getByTestId('sample-banner')).toContainText('nie podejmuj na ich podstawie decyzji');
       await expect(page.getByTestId('report-details')).toBeHidden();
 
-      // "Szczegolowo": parametr w adresie (link dla doradcy), sekcje w kolejnosci z zadania
-      await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+      // "Pokaz szczegoly": parametr w adresie (link dla doradcy), sekcje w kolejnosci z zadania
+      const toggle = page.getByTestId('show-details');
+
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await toggle.click();
       await expect(page).toHaveURL(/widok=szczegoly/);
+      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
       await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
       await expect(page.locator('[data-report-section] h2')).toHaveText(SECTIONS);
 
+      // odswiezenie zostawia szczegoly rozwiniete (stan w adresie) i przewija do nich
       await page.reload();
       await expect(page.getByTestId('verdict')).toBeVisible();
+      await expect(page.getByTestId('show-details')).toBeInViewport();
 
-      // wybor zapamietany w przegladarce: ten sam raport bez parametru wraca do szczegolow
-      await page.goto(REPORT_URL.replace('2026-06-15', new URL(page.url()).searchParams.get('data') ?? ''));
-      await expect(page).toHaveURL(/widok=szczegoly/);
-      await page.getByTestId('view-switch').getByRole('link', { name: 'Prosto' }).click();
+      await page.getByTestId('show-details').click();
+      await expect(page).not.toHaveURL(/widok=/);
       await expect(page.getByTestId('report-details')).toBeHidden();
     },
   );
+
+  test('kotwica do sekcji rozwija szczegóły i przewija do niej; „Wszystkie zalecenia” też', async ({
+    page,
+  }) => {
+    await mockAnalysisApi(page);
+    await page.goto(`${REPORT_URL}#przyczyny`);
+
+    await expect(page.getByTestId('report-details')).toBeVisible();
+    await expect(page.getByTestId('show-details')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#przyczyny')).toBeInViewport();
+
+    // zwiniete szczegoly, potem link z pierwszego kroku do wszystkich zalecen
+    await page.goto(REPORT_URL);
+    await expect(page.getByTestId('report-details')).toBeHidden();
+    await page.getByTestId('first-step').getByRole('link').last().click();
+    await expect(page).toHaveURL(/widok=szczegoly#retencja$/);
+    await expect(page.getByTestId('report-details')).toBeVisible();
+    await expect(page.locator('#retencja')).toBeInViewport();
+  });
 
   test('brak danych źródła i ograniczenia są nazwane wprost', async ({ page }) => {
     await mockAnalysisApi(page);
@@ -121,14 +144,14 @@ test.describe('analiza i raport', () => {
     { tag: '@smoke' },
     async ({ page }) => {
       await mockAnalysisApi(page);
-      // widok prosty na ekranie - wydruk i tak ma pelna analize po stronie pierwszej
+      // szczegoly zwiniete na ekranie - wydruk i tak ma calosc
       await page.goto(REPORT_URL);
       await expect(page.getByTestId('short-analysis')).toBeVisible();
       await page.emulateMedia({ media: 'print' });
 
       await expect(page.getByRole('button', { name: 'Drukuj / zapisz PDF' })).toBeHidden();
       await expect(page.locator('header').filter({ has: page.getByRole('navigation') })).toBeHidden();
-      await expect(page.getByTestId('view-switch')).toBeHidden();
+      await expect(page.getByTestId('show-details')).toBeHidden();
       await expect(page.getByTestId('share-bar')).toBeHidden();
       await expect(page.getByTestId('report-details')).toBeVisible();
       await expect(page.getByText(/Klimatyczny bilans wodny/)).toBeVisible();
@@ -170,8 +193,9 @@ test.describe('analiza i raport', () => {
       await expectTouchTargets(page.getByTestId('share-bar').getByRole('button'));
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
 
-      // szczegoly na telefonie: sekcje zwiniete, naglowek rozwija sekcje
-      await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+      // szczegoly na telefonie: duzy przycisk na koncu, sekcje zwiniete, naglowek rozwija sekcje
+      expect((await page.getByTestId('show-details').boundingBox())?.height).toBeGreaterThanOrEqual(56);
+      await page.getByTestId('show-details').click();
       await expect(page.locator('#przyczyny > details')).not.toHaveAttribute('open');
       await page.locator('#przyczyny > details > summary').click();
       await expect(page.locator('#przyczyny > details')).toHaveAttribute('open');

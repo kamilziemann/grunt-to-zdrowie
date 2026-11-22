@@ -1,8 +1,11 @@
 // Pomocniki testow komponentow z tlumaczeniami: dostawca use-intl z prawdziwymi komunikatami (domyslnie pl, wiec
-// asercje na polskim tekscie pozostaja prawdziwe) i tlumacz do wyliczania oczekiwanych tekstow.
+// asercje na polskim tekscie pozostaja prawdziwe), powiadomienia jak w powloce aplikacji i tlumacz do wyliczania
+// oczekiwanych tekstow.
 import { render, type RenderResult } from '@testing-library/react';
 import { createTranslator, IntlProvider } from 'use-intl';
 import type { ReactElement, ReactNode } from 'react';
+
+import { ToastProvider } from '@/components/ui/toast';
 
 import { FULL_CATALOG as MESSAGES } from '@/i18n/full-catalog';
 import type { Namespace } from '@/i18n/namespaces';
@@ -11,7 +14,7 @@ import type { AppLocale } from '@/lib/locale';
 export function IntlTestProvider({ locale = 'pl', children }: { locale?: AppLocale; children: ReactNode }) {
   return (
     <IntlProvider locale={locale} messages={MESSAGES[locale]}>
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </IntlProvider>
   );
 }

@@ -14,7 +14,7 @@ import { toProblem } from '@/lib/problems';
 import type { AppHref } from '@/lib/routes';
 
 import { ReportView } from '../report-view';
-import type { ReportViewMode } from '../view-switch';
+import type { DetailsState } from '../full-analysis';
 
 export interface ReportScreenProps {
   request: AnalysisRequest;
@@ -22,15 +22,15 @@ export interface ReportScreenProps {
   mapHref: AppHref;
   /** ten sam raport z uprawa "laka lub pastwisko" */
   grasslandHref?: AppHref;
-  /** widok prosty albo szczegolowy (parametr `widok` w adresie) */
-  view: ReportViewMode;
+  /** szczegoly rozwiniete albo zwiniete (parametr `widok` w adresie) */
+  details: DetailsState;
 }
 
 /**
  * Ekran raportu dla parametrow z adresu: analiza liczy sie w przegladarce (SSR nie czeka do 30 s na zrodla), w tym
  * czasie kroki postepu; blad ma ponowienie i powrot do formularza. Raport policzony z formularza jest juz w cache.
  */
-export function ReportScreen({ request, changeHref, mapHref, grasslandHref, view }: ReportScreenProps) {
+export function ReportScreen({ request, changeHref, mapHref, grasslandHref, details }: ReportScreenProps) {
   const t = useTranslations('report');
   const query = useQuery(analysisReportQuery(request));
   const { refetch } = query;
@@ -52,7 +52,7 @@ export function ReportScreen({ request, changeHref, mapHref, grasslandHref, view
         changeHref={changeHref}
         mapHref={mapHref}
         grasslandHref={grasslandHref}
-        view={view}
+        details={details}
       />
     );
   }

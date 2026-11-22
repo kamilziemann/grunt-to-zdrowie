@@ -1,9 +1,7 @@
 import type { WaterReport } from '@app/contracts';
-import { ArrowRight } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
-import { Link } from '@/lib/navigation';
 import { withHash, type AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
@@ -22,9 +20,8 @@ import { WaterTankChart } from '../water-tank-chart';
 
 export interface ReportOverviewProps {
   report: WaterReport;
-  /** pelna analiza (widok szczegolowy) - link "Pokaz pelna analize" i "Wszystkie zalecenia" */
-  detailedHref: AppHref;
-  detailed: boolean;
+  /** raport z rozwinietymi szczegolami - link "Wszystkie zalecenia" (do sekcji retencji) */
+  detailsHref: AppHref;
 }
 
 /**
@@ -33,7 +30,7 @@ export interface ReportOverviewProps {
  * wie". Klocek bez danych znika; gdy w sekcji wody nie ma zadnego - jedno zdanie dlaczego. To samo jest pierwsza
  * strona wydruku.
  */
-export function ReportOverview({ report, detailedHref, detailed }: ReportOverviewProps) {
+export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
   const t = useTranslations('report.simple');
   const zones = useMemo(() => fieldZones(report), [report]);
   const extras = reportExtras(report);
@@ -103,24 +100,10 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
           {t('todoTitle')}
         </h2>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:gap-3">
-          <FirstStep report={report} allHref={withHash(detailedHref, 'retencja')} />
+          <FirstStep report={report} allHref={withHash(detailsHref, 'retencja')} />
           <KnownLimits report={report} />
         </div>
       </section>
-
-      {!detailed && (
-        <Link
-          href={withHash(detailedHref, 'analiza')}
-          className="flex min-h-16 items-center justify-between gap-4 rounded-2xl bg-muted px-6 py-4 text-lg font-semibold text-foreground hover:bg-muted/70 print:hidden"
-          data-testid="show-details"
-        >
-          <span className="flex flex-col">
-            {t('showDetails')}
-            <span className="text-base font-normal text-muted-foreground">{t('showDetailsNote')}</span>
-          </span>
-          <ArrowRight aria-hidden="true" className="size-6 shrink-0" />
-        </Link>
-      )}
     </div>
   );
 }

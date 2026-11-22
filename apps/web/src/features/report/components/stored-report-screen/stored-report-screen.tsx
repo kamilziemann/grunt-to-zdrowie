@@ -12,19 +12,19 @@ import { routes } from '@/lib/routes';
 
 import { reportSearch } from '../../utils/report-data';
 import { ReportView } from '../report-view';
-import type { ReportViewMode } from '../view-switch';
+import type { DetailsState } from '../full-analysis';
 
 export interface StoredReportScreenProps {
   /** identyfikator z adresu (`raport=`) */
   reportId: string;
-  view: ReportViewMode;
+  details: DetailsState;
 }
 
 /**
  * Raport z krotkiego linku (`/raport?raport=r-…`): zapisany raport z GET /api/reports/:id, bez liczenia i bez
  * pytania zrodel. Nieznany albo zly identyfikator - czytelny komunikat i wyjscie do mapy.
  */
-export function StoredReportScreen({ reportId, view }: StoredReportScreenProps) {
+export function StoredReportScreen({ reportId, details }: StoredReportScreenProps) {
   const t = useTranslations('report');
   const valid = isReportId(reportId);
   const query = useQuery({ ...storedReportQuery(reportId), enabled: valid });
@@ -47,7 +47,7 @@ export function StoredReportScreen({ reportId, view }: StoredReportScreenProps) 
           search.uprawa === 'grassland' ? undefined : routes.report({ ...search, uprawa: 'grassland' })
         }
         recomputeHref={recomputeHref}
-        view={view}
+        details={details}
       />
     );
   }

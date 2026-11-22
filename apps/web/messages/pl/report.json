@@ -21,7 +21,11 @@
     "copyManual": "Skopiuj adres raportu:",
     "share": "Udostępnij",
     "savePdf": "Zapisz PDF",
-    "preparingPdf": "Ładuję zdjęcia z satelity…"
+    "preparingPdf": "Ładuję zdjęcia z satelity…",
+    "copiedToast": "Skopiowano link do raportu",
+    "copiedToastNote": "Wklej go w wiadomości – doradca albo sąsiad otworzy ten sam raport.",
+    "pdfToast": "Przygotowuję PDF",
+    "pdfToastNote": "Za chwilę otworzy się okno drukowania – wybierz w nim „Zapisz jako PDF” albo drukarkę."
   },
   "missing": {
     "title": "Brakuje danych do raportu",
@@ -813,11 +817,11 @@
     "source": "Z mapy topograficznej BDOT10k (GUGiK). Zastawek i przepustów na rowach ta mapa nie pokazuje – sprawdź je na miejscu."
   },
   "view": {
-    "label": "Poziom szczegółów raportu",
-    "simple": "Prosto",
-    "detailed": "Szczegółowo",
     "sections": "Sekcje pełnej analizy",
-    "fullTitle": "Pełna analiza"
+    "fullTitle": "Pełna analiza",
+    "show": "Pokaż szczegóły",
+    "hide": "Zwiń szczegóły",
+    "note": "Liczby z odniesieniem, kalendarz suszy z 10 lat, satelita, wszystkie zalecenia, źródła i ograniczenia oceny."
   },
   "simple": {
     "title": "Krótka analiza",
@@ -826,8 +830,6 @@
     "waterEmpty": "Nie mamy bilansu wody w glebie dla tego dnia, więc nie pokazujemy zapasu ani prognozy. Ocena i historia są niżej.",
     "historyTitle": "10 lat na tym polu i dlaczego",
     "todoTitle": "Co robić",
-    "showDetails": "Pokaż pełną analizę",
-    "showDetailsNote": "Liczby z odniesieniem, kalendarz 10 lat, satelita, miejsca na polu, wszystkie zalecenia i źródła.",
     "asOf": "Stan na {date}",
     "scale": {
       "label": "Na skali od mokro do bardzo sucho: {step}.",

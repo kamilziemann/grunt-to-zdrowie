@@ -17,11 +17,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/api', () => ({ getApi: () => ({ analysis: { $post: mocks.post } }) }));
 
 const tAnalysis = translator('analysis');
-const VIEW = {
-  detailed: false,
-  explicit: false,
-  simpleHref: '/raport' as AppHref,
-  detailedHref: '/raport?widok=szczegoly' as AppHref,
+const DETAILS = {
+  open: false,
+  closedHref: '/raport' as AppHref,
+  openHref: '/raport?widok=szczegoly' as AppHref,
 };
 const REQUEST: AnalysisRequest = {
   field: { parcelIds: ['141201_1.0001.6509'] },
@@ -37,7 +36,7 @@ function renderScreen(client: QueryClient) {
           request={REQUEST}
           changeHref={'/analiza' as AppHref}
           mapHref={'/' as AppHref}
-          view={VIEW}
+          details={DETAILS}
         />
       </IntlTestProvider>
     </QueryClientProvider>,

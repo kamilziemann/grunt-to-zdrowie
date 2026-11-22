@@ -13,7 +13,7 @@ import {
   ReportScreen,
   reportSearchSchema,
   StoredReportScreen,
-  type ReportViewMode,
+  type DetailsState,
 } from '@/features/report';
 import { routes } from '@/lib/routes';
 import { headLocale, headTranslator, pageHead } from '@/lib/seo';
@@ -52,7 +52,8 @@ function ReportPage() {
     data: search.data,
   });
   const mapHref = routes.parcels(dzialki);
-  const view = useMemo((): ReportViewMode => {
+  // szczegoly rozwiniete w adresie (`widok=szczegoly`) - stare linki i zapisane raporty dzialaja dalej
+  const details = useMemo((): DetailsState => {
     const fieldSearch = search.raport
       ? { raport: search.raport }
       : {
@@ -64,10 +65,9 @@ function ReportPage() {
         };
 
     return {
-      detailed: search.widok === 'szczegoly',
-      explicit: search.widok !== undefined,
-      simpleHref: routes.report(fieldSearch),
-      detailedHref: routes.report({ ...fieldSearch, widok: 'szczegoly' }),
+      open: search.widok === 'szczegoly',
+      closedHref: routes.report(fieldSearch),
+      openHref: routes.report({ ...fieldSearch, widok: 'szczegoly' }),
     };
   }, [dzialki, search.raport, search.obszar, search.rodzaj, search.uprawa, search.data, search.widok]);
   const grasslandHref =
@@ -81,7 +81,7 @@ function ReportPage() {
           data: search.data,
         });
 
-  if (search.raport) return <StoredReportScreen reportId={search.raport} view={view} />;
+  if (search.raport) return <StoredReportScreen reportId={search.raport} details={details} />;
 
   if (!request) {
     return <ReportMissing changeHref={dzialki || search.obszar ? changeHref : null} mapHref={mapHref} />;
@@ -93,7 +93,7 @@ function ReportPage() {
       changeHref={changeHref}
       mapHref={mapHref}
       grasslandHref={grasslandHref}
-      view={view}
+      details={details}
     />
   );
 }

@@ -21,7 +21,11 @@
     "copyManual": "Copy the report address:",
     "share": "Share",
     "savePdf": "Save PDF",
-    "preparingPdf": "Loading satellite images…"
+    "preparingPdf": "Loading satellite images…",
+    "copiedToast": "Report link copied",
+    "copiedToastNote": "Paste it into a message – your adviser or neighbour will open the same report.",
+    "pdfToast": "Preparing the PDF",
+    "pdfToastNote": "The print window opens in a moment – choose “Save as PDF” or a printer there."
   },
   "missing": {
     "title": "The report is missing data",
@@ -813,11 +817,11 @@
     "source": "From the BDOT10k topographic map (GUGiK). The map does not show weirs or culverts on ditches – check them on site."
   },
   "view": {
-    "label": "Report detail level",
-    "simple": "Simple",
-    "detailed": "Detailed",
     "sections": "Full analysis sections",
-    "fullTitle": "Full analysis"
+    "fullTitle": "Full analysis",
+    "show": "Show details",
+    "hide": "Hide details",
+    "note": "Numbers with reference values, drought calendar for 10 years, satellite, all recommendations, sources and limits of the assessment."
   },
   "simple": {
     "title": "Short analysis",
@@ -826,8 +830,6 @@
     "waterEmpty": "We have no soil water balance for this day, so we do not show the reserve or the forecast. The assessment and history are below.",
     "historyTitle": "10 years on this field and why",
     "todoTitle": "What to do",
-    "showDetails": "Show the full analysis",
-    "showDetailsNote": "Numbers with references, 10-year calendar, satellite, spots on the field, all recommendations and sources.",
     "asOf": "As of {date}",
     "scale": {
       "label": "On the scale from wet to very dry: {step}.",

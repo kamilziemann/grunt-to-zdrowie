@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
 import { localizePath, useAppLocale } from '@/lib/locale';
 import type { AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
@@ -30,6 +31,7 @@ export function CopyLinkButton({
   buttonClassName?: string;
 }) {
   const t = useTranslations('report.actions');
+  const { toast } = useToast();
   const [state, setState] = useState<CopyState>('idle');
   const [url, setUrl] = useState('');
   const timer = useRef<number | undefined>(undefined);
@@ -62,11 +64,12 @@ export function CopyLinkButton({
     try {
       await navigator.clipboard.writeText(href);
       setState('copied');
+      toast({ title: t('copiedToast'), description: t('copiedToastNote'), variant: 'success' });
       timer.current = window.setTimeout(() => setState('idle'), COPIED_MS);
     } catch {
       setState('manual');
     }
-  }, [path, locale, share]);
+  }, [path, locale, share, toast, t]);
   const onClick = useCallback(() => void copy(), [copy]);
 
   return (

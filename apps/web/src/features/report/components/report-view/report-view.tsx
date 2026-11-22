@@ -5,13 +5,13 @@ import { useTranslations } from 'use-intl';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { AppHref } from '@/lib/routes';
-import { cn } from '@/lib/utils/cn';
 
 import { AdvisorNotes } from '../advisor-notes';
 import { AnalysisNav } from '../analysis-nav';
 import { CauseShares } from '../cause-shares';
 import { CausesSection } from '../causes-section';
 import { ExcessCauses } from '../excess-causes';
+import { FullAnalysis, type DetailsState } from '../full-analysis';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
 import { KeyNumbers } from '../key-numbers';
@@ -32,7 +32,6 @@ import { SourcesSection } from '../sources-section';
 import { SurroundingsCard } from '../surroundings-card';
 import { VegetationChart } from '../vegetation-chart';
 import { VerdictSection } from '../verdict-section';
-import type { ReportViewMode } from '../view-switch';
 import { ZoneFocusProvider } from '../zone-focus';
 import { ZoneList } from '../zone-list';
 
@@ -44,8 +43,8 @@ export interface ReportViewProps {
   grasslandHref?: AppHref;
   /** raport otwarty z zapisu (krotki link): adres z parametrami, pod ktorym policzy sie od nowa */
   recomputeHref?: AppHref;
-  /** widok prosty (domyslny) albo szczegolowy - z adresu (`widok=szczegoly`) */
-  view: ReportViewMode;
+  /** szczegoly rozwiniete albo zwiniete - z adresu (`widok=szczegoly`) */
+  details: DetailsState;
 }
 
 /** Na czas wydruku otwiera wszystkie szczegoly (PDF dla doradcy ma komplet liczb), potem przywraca stan. */
@@ -75,11 +74,11 @@ function useOpenDetailsForPrint(root: RefObject<HTMLElement | null>) {
 }
 
 /**
- * Raport wodny "Pogodynka wody" na dwoch poziomach. Prosto (domyslnie): werdykt ze skala, szkic pola, woda teraz
- * i w tym tygodniu, 10 lat, dlaczego, co zrobic najpierw, czego ocena nie wie. Szczegolowo: to samo plus pelna
+ * Raport wodny "Pogodynka wody" jako jedna strona: najpierw werdykt ze skala, karta "Twoje pole", woda teraz
+ * i w tym tygodniu, 10 lat i dlaczego, co zrobic najpierw, czego ocena nie wie; na koncu zwiniete szczegoly - pelna
  * analiza w kolejnosci z zadania (ocena -> historia -> przyczyny -> retencja -> agrotechnika -> nawadnianie ->
- * zrodla). Wydruk A4 ma zawsze oba: strona 1 = widok prosty jako infografika, dalej pelna analiza i miejsce na
- * notatki doradcy. Ramki ostrzegawcze (grunt nierolny, obszar chroniony, dane przykladowe, braki) stoja na gorze.
+ * zrodla). Wydruk A4 ma zawsze calosc: strona 1 = infografika, dalej pelna analiza i miejsce na notatki doradcy.
+ * Ramki ostrzegawcze (grunt nierolny, obszar chroniony, dane przykladowe, braki) stoja na gorze.
  */
 export function ReportView({
   report,
@@ -87,7 +86,7 @@ export function ReportView({
   mapHref,
   grasslandHref,
   recomputeHref,
-  view,
+  details,
 }: ReportViewProps) {
   const t = useTranslations('report');
   const root = useRef<HTMLElement>(null);
@@ -129,7 +128,6 @@ export function ReportView({
           ref={root}
           className="report flex flex-col gap-section pb-24 sm:pb-0 print:block print:space-y-6 print:pb-0"
           data-testid="report"
-          data-view={view.detailed ? 'detailed' : 'simple'}
         >
           <PrintPageMargins report={report} />
           <PrintHeader report={report} />
@@ -138,7 +136,6 @@ export function ReportView({
             changeHref={changeHref}
             mapHref={mapHref}
             recomputeHref={recomputeHref}
-            view={view}
           />
           <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
           <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
@@ -156,15 +153,8 @@ export function ReportView({
               </AlertDescription>
             </Alert>
           )}
-          <ReportOverview report={report} detailedHref={view.detailedHref} detailed={view.detailed} />
-          <div
-            id="analiza"
-            className={cn(
-              'flex scroll-mt-4 flex-col gap-4 print:block print:space-y-6',
-              !view.detailed && 'hidden print:block',
-            )}
-            data-testid="report-details"
-          >
+          <ReportOverview report={report} detailsHref={details.openHref} />
+          <FullAnalysis state={details}>
             <h2 className="text-3xl leading-tight font-bold print:text-2xl">{t('view.fullTitle')}</h2>
             <KeyNumbers report={report} />
             <AnalysisNav items={sections} />
@@ -209,7 +199,7 @@ export function ReportView({
             <ReportSection id="zrodla" number={7} title={title(6)}>
               <SourcesSection report={report} />
             </ReportSection>
-          </div>
+          </FullAnalysis>
           <AdvisorNotes />
           <PrintFooter report={report} />
           <ShareBar report={report} />

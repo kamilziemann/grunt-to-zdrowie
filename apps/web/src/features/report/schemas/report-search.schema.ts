@@ -1,5 +1,5 @@
-// Adres raportu: parametry analizy (feature "analysis") i poziom szczegolow. `widok=szczegoly` otwiera widok
-// szczegolowy (link dla doradcy); inna wartosc = widok prosty, bez bledu.
+// Adres raportu: parametry analizy (feature "analysis") i stan szczegolow. `widok=szczegoly` otwiera strone
+// z rozwinietymi szczegolami (stare linki "widok szczegolowy" i link dla doradcy); inna wartosc = zwiniete, bez bledu.
 import { z } from 'zod';
 
 import { analysisSearchSchema } from '@/features/analysis';

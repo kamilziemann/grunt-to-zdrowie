@@ -33,7 +33,7 @@ const PAGES = [
     'Twoje pole',
   ],
   ['raport wodny', REPORT_URL, 'Raport wodny pola'],
-  ['raport wodny – widok szczegółowy', `${REPORT_URL}&widok=szczegoly`, 'Raport wodny pola'],
+  ['raport wodny – szczegóły rozwinięte', `${REPORT_URL}&widok=szczegoly`, 'Raport wodny pola'],
   [
     'raport z prawdziwego silnika (kalendarz suszy, części przykładowe)',
     DROUGHT_REPORT_URL,
@@ -74,7 +74,7 @@ test.describe('a11y', () => {
         await expect(map).toHaveAttribute('data-map-state', 'ready');
       }
 
-      // raport sprawdzamy w pelnej postaci (nie w stanie postepu); widok szczegolowy - z oceną w pelnej analizie
+      // raport sprawdzamy w pelnej postaci (nie w stanie postepu); szczegoly rozwiniete - z oceną w pelnej analizie
       if (path.startsWith('/raport?')) await expect(page.getByTestId('short-analysis')).toBeVisible();
 
       if (path.includes('widok=szczegoly')) await expect(page.getByTestId('verdict')).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('a11y', () => {
     ['pogodynka: poza sezonem z prognozą (0.8.0)', AUTUMN_REPORT],
   ] as const) {
     for (const widok of ['', '&widok=szczegoly']) {
-      test(`${name}${widok ? ' – szczegółowo' : ''}`, async ({ page }) => {
+      test(`${name}${widok ? ' – szczegóły rozwinięte' : ''}`, async ({ page }) => {
         await mockReport(page, report);
         await mockBasemap(page);
         await mockHydroApi(page, { tiles: {} });

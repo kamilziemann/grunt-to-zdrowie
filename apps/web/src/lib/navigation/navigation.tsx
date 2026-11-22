@@ -95,7 +95,13 @@ export function useRouter() {
   return useMemo(
     () => ({
       push: (href: AppHref) => void navigate({ href: localizePath(href, locale) }),
-      replace: (href: AppHref) => void navigate({ href: localizePath(href, locale), replace: true }),
+      // `scroll: false` = bez przewiniecia na gore (zmiana stanu strony w adresie, np. rozwiniete szczegoly)
+      replace: (href: AppHref, options?: { scroll?: boolean }) =>
+        void navigate({
+          href: localizePath(href, locale),
+          replace: true,
+          resetScroll: options?.scroll ?? true,
+        }),
       refresh: () => void router.invalidate(),
       back: () => router.history.back(),
     }),

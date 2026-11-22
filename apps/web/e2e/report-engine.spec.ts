@@ -205,7 +205,7 @@ test.describe('miejsca na polu', () => {
 
   test('wydruk: numery miejsc na szkicu i lista bez przycisków „Pokaż na szkicu”', async ({ page }) => {
     await mockReport(page, FIELD_REPORT);
-    // widok prosty: lista miejsc jest w pelnej analizie, ktora wydruk ma zawsze
+    // szczegoly zwiniete: wydruk ma zawsze calosc
     await page.goto(reportUrl(FIELD_REPORT));
     await expect(page.getByTestId('short-analysis')).toBeVisible();
     await page.emulateMedia({ media: 'print' });

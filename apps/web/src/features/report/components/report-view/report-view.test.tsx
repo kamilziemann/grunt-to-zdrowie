@@ -15,23 +15,22 @@ import { MEADOW_REPORT } from '../../fixtures/meadow-report';
 import { AUTUMN_REPORT } from '../../fixtures/autumn-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
 import { WEATHER_REPORT } from '../../fixtures/weather-report';
-import type { ReportViewMode } from '../view-switch';
+import type { DetailsState } from '../full-analysis';
 import { ReportView } from './report-view';
 
 const t = translator('report');
 const CHANGE = '/analiza' as AppHref;
 const MAP = '/' as AppHref;
-const VIEW: ReportViewMode = {
-  detailed: true,
-  explicit: true,
-  simpleHref: '/raport' as AppHref,
-  detailedHref: '/raport?widok=szczegoly' as AppHref,
+const OPEN: DetailsState = {
+  open: true,
+  closedHref: '/raport' as AppHref,
+  openHref: '/raport?widok=szczegoly' as AppHref,
 };
 
 function renderReport(
   report: WaterReport = SAMPLE_REPORT,
   grasslandHref?: AppHref,
-  view: ReportViewMode = VIEW,
+  details: DetailsState = OPEN,
 ) {
   // mapa pola pobiera kafle hydrografii przez TanStack Query (w jsdom bez sieci - warstwa "niedostepna")
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -43,7 +42,7 @@ function renderReport(
         changeHref={CHANGE}
         mapHref={MAP}
         grasslandHref={grasslandHref}
-        view={view}
+        details={details}
       />
     </QueryClientProvider>,
   );
@@ -674,13 +673,14 @@ describe('ReportView', () => {
   });
 
   describe('pogodynka wody (silnik 0.8.0)', () => {
-    const SIMPLE: ReportViewMode = { ...VIEW, detailed: false, explicit: false };
+    const CLOSED: DetailsState = { ...OPEN, open: false };
 
-    it('widok prosty: werdykt ze skala, zbiornik, odliczanie, rachunek wody, 10 lat, pierwszy krok; pelna analiza ukryta', () => {
-      renderReport(WEATHER_REPORT, undefined, SIMPLE);
+    it('jedna strona: werdykt ze skala, zbiornik, odliczanie, rachunek wody, 10 lat, pierwszy krok; szczegoly zwiniete', () => {
+      renderReport(WEATHER_REPORT, undefined, CLOSED);
 
-      expect(screen.getByTestId('report')).toHaveAttribute('data-view', 'simple');
       expect(screen.getByTestId('report-details')).toHaveClass('hidden');
+      expect(screen.getByTestId('show-details')).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByTestId('show-details')).toHaveTextContent('Pokaż szczegóły');
       expect(screen.getByTestId('verdict-word')).toHaveTextContent('Sucho');
       expect(screen.getByTestId('verdict-scale')).toHaveAttribute('data-step', 'dry');
       expect(screen.getByTestId('verdict-number')).toHaveTextContent('Brakuje ok. 114 l/m² wody');
@@ -695,14 +695,14 @@ describe('ReportView', () => {
       expect(screen.getByTestId('first-step')).toHaveTextContent('Zastawka na rowie');
       expect(screen.getByTestId('first-step-badge')).toHaveTextContent('Najpierw zgłoś do Wód Polskich');
       expect(screen.getByTestId('simple-causes')).toHaveTextContent('ok. 31%');
-      expect(screen.getByTestId('show-details')).toBeInTheDocument();
     });
 
     it('szczegoly: deszcz dzien po dniu, satelita z pominietymi zdjeciami, udzial przyczyn', () => {
       renderReport(WEATHER_REPORT);
 
       expect(screen.getByTestId('report-details')).not.toHaveClass('hidden');
-      expect(screen.queryByTestId('show-details')).toBeNull();
+      expect(screen.getByTestId('show-details')).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByTestId('show-details')).toHaveTextContent('Zwiń szczegóły');
       expect(screen.getByTestId('chart-rain-use')).toHaveTextContent('W ostatnich 60 dniach spadło');
       expect(screen.getByTestId('chart-vegetation')).toHaveTextContent('pominięte przez chmury: 4');
       expect(screen.getByTestId('cause-shares')).toHaveTextContent('31%');
@@ -718,7 +718,7 @@ describe('ReportView', () => {
     });
 
     it('poza sezonem: prognoza 7 dni, zbiornik bez progu, bez odliczania', () => {
-      renderReport(AUTUMN_REPORT, undefined, SIMPLE);
+      renderReport(AUTUMN_REPORT, undefined, CLOSED);
 
       expect(screen.getByTestId('verdict-word')).toHaveTextContent(t('verdict.levels.out_of_season'));
       expect(screen.queryByTestId('verdict-scale')).toBeNull();
@@ -729,7 +729,7 @@ describe('ReportView', () => {
     });
 
     it('stary raport (0.7.0): zbiornik z bilansu strefy korzeni, bez kart nowych pol', () => {
-      renderReport(HEAT_REPORT, undefined, SIMPLE);
+      renderReport(HEAT_REPORT, undefined, CLOSED);
 
       expect(screen.getByTestId('tank-percent')).toHaveTextContent('4%');
       expect(screen.queryByTestId('chart-countdown')).toBeNull();
