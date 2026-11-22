@@ -6,7 +6,7 @@ import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
-import { byWeight, isoDay, reportSearch, verdictCaveat } from '../../utils/report-data';
+import { byWeight, isoDay, reportSearch, verdictCaveat, isPastAnalysis } from '../../utils/report-data';
 import { waterTank } from '../../utils/report-extras';
 import {
   drySeasons,
@@ -135,12 +135,15 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
   const first = orderedRecommendations(report)[0];
   // poza sezonem: zapas przed wiosna i co zrobic przed wiosna (makieta "listopad"), link do lata tego samego pola
   const offSeason = level === 'out_of_season';
+  // raport dla dnia z przeszlosci mowi "tego dnia" i w czasie przeszlym - "teraz" przy 2018 r. mylilo
+  const past = isPastAnalysis(report);
+  const sentences = past ? 'sentencesPast' : 'sentences';
   const summer = lastSummerDate(report);
   const lines: { key: string; label: string; text: string }[] = [
     {
       key: 'now',
-      label: t(offSeason ? 'lines.nowOffSeason' : 'lines.now'),
-      text: offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`),
+      label: t(offSeason ? 'lines.nowOffSeason' : past ? 'lines.nowPast' : 'lines.now'),
+      text: offSeason ? t('offSeason.now') : tVerdict(`${sentences}.${level}`),
     },
     ...(seasons
       ? [
@@ -223,7 +226,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
         </div>
         {step && <Scale step={step} />}
         <p className="text-lg leading-snug lg:hidden print:hidden">
-          {offSeason ? t('offSeason.now') : tVerdict(`sentences.${level}`)}
+          {offSeason ? t('offSeason.now') : tVerdict(`${sentences}.${level}`)}
         </p>
         {caveat && (
           <p

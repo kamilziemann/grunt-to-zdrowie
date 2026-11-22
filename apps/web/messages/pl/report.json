@@ -87,6 +87,15 @@
       "out_of_season": "Poza sezonem",
       "unknown": "Brak oceny"
     },
+    "sentencesPast": {
+      "ok": "Rośliny miały wtedy dość wody w glebie.",
+      "watch": "Zapas wody w glebie malał. Pole wymagało wtedy obserwacji.",
+      "risk": "Wody w glebie zaczynało brakować. Rośliny mogły wkrótce ucierpieć z powodu jej niedoboru.",
+      "drought": "Na polu brakowało wody. Rośliny były pod stresem i plon mógł spaść.",
+      "excess": "W glebie było za dużo wody. Korzenie mogły się dusić, a prace polowe lepiej było odłożyć.",
+      "out_of_season": "Ten dzień jest poza okresem oceny suszy rolniczej (21 marca – 30 września). Niżej znajdziesz historię i zalecenia na kolejny sezon.",
+      "unknown": "Zabrakło danych, żeby ocenić wodę na tym polu. Niżej jest to, co udało się ustalić."
+    },
     "sentences": {
       "ok": "Rośliny mają teraz dość wody w glebie.",
       "watch": "Zapas wody w glebie maleje. Obserwuj pole w najbliższych dniach.",
@@ -916,6 +925,7 @@
     },
     "lines": {
       "now": "Teraz",
+      "nowPast": "Tego dnia",
       "history": "10 lat",
       "historyText": "Wody brakowało w {dry} z {total} sezonów.",
       "historyMonths": "Wody brakowało w {dry} z {total} sezonów, najczęściej: {months}.",
@@ -1066,14 +1076,14 @@
       "title": "Co widzi satelita?",
       "answer": "Ostatnie czyste zdjęcie ({date}): wilgotność roślin {value}.",
       "position": {
-        "below": "To poniżej zakresu z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max}) – rośliny mają mniej wody niż zwykle.",
-        "within": "To w zakresie z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max}).",
-        "above": "To powyżej zakresu z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max})."
+        "below": "{years, plural, one {To mniej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok, więc to słaba wskazówka.} other {To poniżej zakresu z # lat o tej porze ({min} – {max}) – rośliny mają mniej wody niż zwykle.}}",
+        "within": "{years, plural, one {To tyle samo co rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok.} other {To w zakresie z # lat o tej porze ({min} – {max}).}}",
+        "above": "{years, plural, one {To więcej niż rok wcześniej o tej porze ({min}). Do porównania mamy tylko jeden rok.} other {To powyżej zakresu z # lat o tej porze ({min} – {max}).}}"
       },
       "answerNone": "Chmury zasłoniły pole na wszystkich zdjęciach z tego okresu – satelita nic nie pokaże.",
       "source": "Zdjęcia Sentinel-2 (Copernicus), wskaźnik wilgotności roślin NDMI dla całego pola.",
       "counts": "Zdjęcia użyte: {used}, pominięte przez chmury: {skipped}.",
-      "band": "Szary pas – zakres z poprzednich {years, plural, one {# roku} other {# lat}}, linia przerywana – środek.",
+      "band": "{years, plural, one {Linia przerywana – wartość sprzed roku (jeden rok do porównania).} other {Szary pas – zakres z poprzednich # lat, linia przerywana – środek.}}",
       "window": "Zdjęcia z 30 dni przed dniem analizy ({from} – {to}), nie z całego sezonu."
     },
     "shares": {
@@ -1090,7 +1100,7 @@
       "rainPercent": "{percent}% normy (zwykle ok. {median} mm)",
       "rainMedian": "zwykle ok. {median} mm",
       "ndmi": "Wilgotność roślin (NDMI)",
-      "ndmiRange": "zwykle o tej porze {min} – {max} (z {years, plural, one {# roku} other {# lat}})",
+      "ndmiRange": "{years, plural, one {rok wcześniej o tej porze {min} (tylko jeden rok do porównania)} other {zwykle o tej porze {min} – {max} (z # lat)}}",
       "ndmiAnomaly": "{anomaly} względem tej pory w {years, plural, one {# roku} other {# latach}}",
       "ndmiNoBaseline": "bez porównania z poprzednimi latami",
       "dryDays": "Dni bez deszczu z rzędu",
@@ -1126,7 +1136,7 @@
       },
       "moisture": {
         "title": "Woda w roślinach",
-        "what": "Ile wody mają w sobie rośliny: brązowe miejsca są suchsze, niebieskie wilgotniejsze.",
+        "what": "Ile wody mają w sobie rośliny: brązowe miejsca są suchsze, niebieskie wilgotniejsze. Kolory porównują miejsca na polu ze sobą – niebieski nie znaczy, że wody jest dość; o tym mówi ocena na górze raportu.",
         "low": "sucho",
         "high": "wilgotno",
         "alt": "Woda w roślinach na działce – obraz z satelity z obrysem pola",

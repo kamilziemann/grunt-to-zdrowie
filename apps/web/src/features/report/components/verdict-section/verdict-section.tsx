@@ -18,6 +18,7 @@ import {
   fieldZones,
   heatSpell,
   isoDay,
+  isPastAnalysis,
   percentOf,
   rankSide,
   romanCategory as roman,
@@ -151,7 +152,9 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           {t(`levels.${assessment.level}`)}
         </p>
         <p className="text-xl leading-snug font-semibold text-balance sm:text-2xl">
-          {caveat && assessment.level === 'ok' ? t('caveat.sentenceOk') : t(`sentences.${assessment.level}`)}
+          {caveat && assessment.level === 'ok'
+            ? t('caveat.sentenceOk')
+            : t(`${isPastAnalysis(report) ? 'sentencesPast' : 'sentences'}.${assessment.level}`)}
         </p>
         {caveat && <VerdictCaveat reasons={caveat.reasons} scenarios={soilUncertain ? scenarios : null} />}
         {basisInCard.length > 0 && (

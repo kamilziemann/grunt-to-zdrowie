@@ -70,7 +70,8 @@
   },
   "analyze": {
     "cta": "{count, plural, one {Analyse parcel} other {Analyse parcels}}",
-    "disabledHint": "Add a parcel to continue to the analysis."
+    "disabledHint": "Add a parcel to continue to the analysis.",
+    "noneLoadedHint": "None of the parcels on the list could be loaded. Remove it and type another number or click a parcel on the map."
   },
   "map": {
     "label": "Map. Click a parcel to pick it.",
@@ -398,7 +399,7 @@
       "parcel": "Parcel {label}",
       "place": "{area} ha · winter cereals · {date}",
       "verdict": "Very dry",
-      "nowLabel": "Now:",
+      "nowLabel": "That day:",
       "now": "about {mm} l/m² of water missing, soil reservoir {percent}% full",
       "historyLabel": "10 years:",
       "history": "water was short in {dry} of {seasons} seasons",

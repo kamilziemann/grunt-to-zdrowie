@@ -104,7 +104,7 @@ test.describe('strona główna', () => {
 
     await expect(card).toContainText('Działka 349/1 · Chwalim');
     await expect(card).toContainText('Bardzo sucho');
-    await expect(card).toContainText('brakuje ok. 105 l/m² wody');
+    await expect(card).toContainText('brakowało ok. 105 l/m² wody');
     await expect(card).toContainText('wody brakowało w 9 z 10 sezonów');
     await expect(card).toContainText('zastawka na rowie');
     await expect(card).toHaveAttribute(

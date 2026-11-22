@@ -70,7 +70,8 @@
   },
   "analyze": {
     "cta": "{count, plural, one {Analizuj działkę} other {Analizuj działki}}",
-    "disabledHint": "Dodaj działkę, żeby przejść do analizy."
+    "disabledHint": "Dodaj działkę, żeby przejść do analizy.",
+    "noneLoadedHint": "Żadnej działki z listy nie udało się wczytać. Usuń ją z listy i wpisz inny numer albo kliknij działkę na mapie."
   },
   "map": {
     "label": "Mapa. Kliknij działkę, żeby ją wskazać.",
@@ -398,8 +399,8 @@
       "parcel": "Działka {label}",
       "place": "{area} ha · zboża ozime · {date}",
       "verdict": "Bardzo sucho",
-      "nowLabel": "Teraz:",
-      "now": "brakuje ok. {mm} l/m² wody, zbiornik w glebie pełny w {percent}%",
+      "nowLabel": "Tego dnia:",
+      "now": "brakowało ok. {mm} l/m² wody, zbiornik w glebie pełny w {percent}%",
       "historyLabel": "10 lat:",
       "history": "wody brakowało w {dry} z {seasons} sezonów",
       "firstLabel": "Co najpierw:",

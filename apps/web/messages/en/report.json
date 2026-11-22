@@ -87,6 +87,15 @@
       "out_of_season": "Out of season",
       "unknown": "No assessment"
     },
+    "sentencesPast": {
+      "ok": "The plants had enough water in the soil then.",
+      "watch": "The soil water reserve was falling. The field needed watching.",
+      "risk": "Soil water was starting to run short. The plants could soon have suffered from the shortage.",
+      "drought": "The field was short of water. The plants were under stress and the yield could drop.",
+      "excess": "There was too much water in the soil. Roots could suffocate and field work was better postponed.",
+      "out_of_season": "This day is outside the agricultural drought assessment period (21 March – 30 September). Below you will find the history and advice for the next season.",
+      "unknown": "There was not enough data to assess water on this field. Below is what we could establish."
+    },
     "sentences": {
       "ok": "The plants have enough water in the soil right now.",
       "watch": "The water reserve in the soil is shrinking. Keep an eye on the field in the coming days.",
@@ -916,6 +925,7 @@
     },
     "lines": {
       "now": "Now",
+      "nowPast": "That day",
       "history": "10 years",
       "historyText": "Water was short in {dry} of {total} seasons.",
       "historyMonths": "Water was short in {dry} of {total} seasons, most often: {months}.",
@@ -1066,14 +1076,14 @@
       "title": "What does the satellite see?",
       "answer": "Last clear image ({date}): plant moisture {value}.",
       "position": {
-        "below": "That is below the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max}) – plants have less water than usual.",
-        "within": "That is within the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max}).",
-        "above": "That is above the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max})."
+        "below": "{years, plural, one {That is less than a year earlier at this time ({min}). We only have one year to compare, so this is a weak hint.} other {That is below the range of # years at this time ({min} – {max}) – plants have less water than usual.}}",
+        "within": "{years, plural, one {That is the same as a year earlier at this time ({min}). We only have one year to compare.} other {That is within the range of # years at this time ({min} – {max}).}}",
+        "above": "{years, plural, one {That is more than a year earlier at this time ({min}). We only have one year to compare.} other {That is above the range of # years at this time ({min} – {max}).}}"
       },
       "answerNone": "Clouds covered the field on all images from this period – the satellite shows nothing.",
       "source": "Sentinel-2 images (Copernicus), plant moisture index NDMI for the whole field.",
       "counts": "Images used: {used}, skipped because of clouds: {skipped}.",
-      "band": "Grey band – range from the previous {years, plural, one {# year} other {# years}}, dashed line – middle.",
+      "band": "{years, plural, one {Dashed line – the value from a year earlier (one year to compare).} other {Grey band – range from the previous # years, dashed line – middle.}}",
       "window": "Images from the 30 days before the analysis day ({from} – {to}), not the whole season."
     },
     "shares": {
@@ -1090,7 +1100,7 @@
       "rainPercent": "{percent}% of normal (usually about {median} mm)",
       "rainMedian": "usually about {median} mm",
       "ndmi": "Plant moisture (NDMI)",
-      "ndmiRange": "usually at this time {min} – {max} (from {years, plural, one {# year} other {# years}})",
+      "ndmiRange": "{years, plural, one {a year earlier at this time {min} (only one year to compare)} other {usually at this time {min} – {max} (from # years)}}",
       "ndmiAnomaly": "{anomaly} against this time in {years, plural, one {# year} other {# years}}",
       "ndmiNoBaseline": "no comparison with previous years",
       "dryDays": "Days in a row without rain",
@@ -1126,7 +1136,7 @@
       },
       "moisture": {
         "title": "Water in plants",
-        "what": "How much water plants hold: brown spots are drier, blue ones wetter.",
+        "what": "How much water plants hold: brown spots are drier, blue ones wetter. The colours compare places within the field – blue does not mean there is enough water; the assessment at the top of the report says that.",
         "low": "dry",
         "high": "wet",
         "alt": "Water in plants on the parcel – satellite image with the field outline",

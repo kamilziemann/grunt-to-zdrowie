@@ -555,6 +555,8 @@ export function ParcelsScreen({
   // kroki to miejsca, nie stany: mapa to zawsze krok 1 "Dzialka", `/analiza` - 2 "Uprawa i dzien", raport - 3
   const step: ParcelStep = 'find';
   const firstVisit = ids.length === 0 && target === null && submitted === null;
+  // lista jest, ale po wczytaniu nie ma na niej ani jednej dzialki z ewidencji
+  const noneLoaded = ids.length > 0 && selected.settled && selected.parcels.length === 0;
   // szukanie trwa, dopoki odpowiada ktorekolwiek zrodlo (dzialki albo adresy) - przycisk kreci sie do konca
   const searching =
     (submitted !== null && (search.isFetching || places.isFetching)) ||
@@ -859,7 +861,19 @@ export function ParcelsScreen({
               {t('preview.add')}
             </Button>
           )}
-          {!drawing && !canAdd && ids.length > 0 && (
+          {/* zadna dzialka z listy sie nie wczytala (np. nie ma jej w ewidencji): nie ma czego analizowac */}
+          {!drawing && !canAdd && ids.length > 0 && noneLoaded && (
+            <div className="flex flex-col gap-1.5">
+              <Button size="xl" className="w-full" disabled aria-describedby="analyze-none-hint">
+                {t('analyze.cta', { count: ids.length })}
+                <ArrowRight aria-hidden="true" />
+              </Button>
+              <p id="analyze-none-hint" className="text-center text-xs text-muted-foreground">
+                {t('analyze.noneLoadedHint')}
+              </p>
+            </div>
+          )}
+          {!drawing && !canAdd && ids.length > 0 && !noneLoaded && (
             <Button asChild size="xl" className="w-full">
               <Link href={analysisHref(ids)}>
                 {t('analyze.cta', { count: ids.length })}
