@@ -61,20 +61,15 @@ przeglądarka ──▶ Cloudflare Workers Cache ──▶ jeden Worker `grunt-t
                                                        SoilGrids, Copernicus, Terrain Tiles, GUGiK, OSM
 ```
 
-- **Jeden Worker Cloudflare** serwuje strony i API ([ADR 0008](docs/architecture/decisions/0008-tanstack-start-single-worker.md));
-  mapa na MapLibre GL ([ADR 0009](docs/architecture/decisions/0009-field-style-and-maplibre.md)).
+- **Jeden Worker Cloudflare** serwuje strony i API;
+  mapa na MapLibre GL.
 - **API** w warstwach: trasy (`modules`) → przypadki użycia (`services`) → czyste obliczenia (`domain`: KBW, FAO-56,
   gleba, przyczyny, zalecenia); każde źródło danych to adapter za portem (`infrastructure`), więc źródło można
   wymienić bez zmiany silnika. Źródła są pytane równolegle z limitem czasu; gdy któreś milczy, raport jest
   „częściowy” i mówi, czego brakuje.
 - **Kontrakty** (`packages/contracts`): jeden schemat Zod raportu dla API i stron.
-- **Dane** ([ADR 0001](docs/architecture/decisions/0001-d1-instead-of-postgres.md),
-  [ADR 0010](docs/architecture/decisions/0010-postgis-on-neon-for-hydrography.md),
-  [ADR 0011](docs/architecture/decisions/0011-no-user-accounts.md)): D1 na zapisane raporty i pamięć działek,
+- **Dane**: D1 na zapisane raporty i pamięć działek,
   PostGIS na Neon na BDOT10k, bez kont użytkowników.
-
-Więcej: [`docs/architecture/overview.md`](docs/architecture/overview.md),
-[`docs/architecture/deployment.md`](docs/architecture/deployment.md).
 
 ## Dane: źródła, zakresy, sposób pobrania
 
@@ -151,7 +146,7 @@ ograniczeniach.
 | Antigravity CLI (Google, modele Gemini)            | jak wyżej: research i testy aplikacji na wdrożonej wersji                                              |
 
 Zasady: każdą zmianę sprawdzają narzędzia (`bun check`: format, lint, granice architektury, typy, testy) i człowiek;
-notatki z researchu agentów są oznaczone jako niezweryfikowane ([`docs/research/`](docs/research/README.md)), a liczby
+notatki z researchu agentów traktowaliśmy jako niezweryfikowane, a liczby
 użyte w kodzie (progi IUNG, wzory, licencje) sprawdzaliśmy u źródła.
 Przeglądy z 22.11.2026 szły na domyślnym modelu Codex CLI oraz w Antigravity na modelu Claude Opus; wersje modeli z
 wcześniejszego researchu — **do potwierdzenia**.
@@ -188,8 +183,8 @@ wniosek wraca w milisekundach). Analiza nowego pola: 2,6–6,3 s lokalnie, 4,6 s
 Pierwszym wąskim gardłem przy wielu rolnikach są limity ULDK i Copernicus — opis i plan:
 [README konkursowe, pkt 5.5](docs/submission/README-konkursowe.md#skala-wielu-rolników-pkt-55).
 
-**Bezpieczeństwo i dane osobowe (pkt 5.6).** Aplikacja nie ma kont, logowania ani formularzy z danymi osoby
-([ADR 0011](docs/architecture/decisions/0011-no-user-accounts.md)); numer i granice działki to publiczne dane
+**Bezpieczeństwo i dane osobowe (pkt 5.6).** Aplikacja nie ma kont, logowania ani formularzy z danymi osoby;
+numer i granice działki to publiczne dane
 ewidencji, lista działek żyje w adresie strony. Sekrety (Neon, Copernicus) są sekretami Workera, poza repozytorium;
 zmienne środowiska są walidowane; zapytania do bazy parametryzowane; błędy w formacie Problem Details bez szczegółów
 wewnętrznych. Szczegóły: [README konkursowe, pkt 5.6](docs/submission/README-konkursowe.md#bezpieczeństwo-pkt-56).
@@ -228,9 +223,8 @@ bun run dev                                              # jeden serwer: strony 
 
 - Struktura: `apps/web` (jedyny Worker: strony + wejście), `apps/server` (API i silnik analizy), `packages/*`
   (kontrakty, baza, środowisko, HTTP, cache, logger, klient RPC), `tools/*` (checker architektury, zgodność
-  dokumentacji, import BDOT10k, skrypty), `docs/` (stan projektu, plany, ADR-y, dziennik, research).
+  dokumentacji, import BDOT10k, skrypty), `docs/` (zgłoszenie, wzorcowe raporty, walidacja).
 - Sekrety: `apps/web/.dev.vars.example` → `apps/web/.dev.vars` (w `.gitignore`); zmienne niesekretne w
   `apps/web/wrangler.jsonc` → `vars`; walidacja w `packages/env/src/server.ts`; produkcja:
   `wrangler secret put NAZWA --env production`.
-- Zasady pracy w repo (ludzie i agenci AI): [`AGENTS.md`](AGENTS.md); stan prac, plan i decyzje:
-  [`docs/project-status.md`](docs/project-status.md).
+- Zasady pracy w repo (ludzie i agenci AI): [`AGENTS.md`](AGENTS.md).

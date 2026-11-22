@@ -4,7 +4,7 @@ Strony aplikacji na **TanStack Start** (React 19, SSR, routing plikowy) w **jedn
 Hono z `apps/server` (montowane pod `/api`) i cronem. Przed Workerem stoi **Workers Cache**: publiczne strony
 i odczyty API idą z brzegu z tagami, mutacje czyszczą tagi. Komentarze po polsku (bez diakrytyków), teksty UI
 w `messages/{pl,en}/*.json` (use-intl), identyfikatory po angielsku, pliki w kebab-case. Decyzja o jednym Workerze:
-[ADR 0008](../../docs/architecture/decisions/0008-tanstack-start-single-worker.md).
+ADR 0008.
 
 ## Struktura
 

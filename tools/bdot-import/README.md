@@ -2,7 +2,7 @@
 
 Jednorazowy import BDOT10k (GUGiK) do Postgresa z PostGIS: woda (rowy, cieki, wody, mokradła) oraz otoczenie pola
 (drzewa, miejsca na sieci wodnej, obszary chronione). Dlaczego tak:
-[ADR 0010](../../docs/architecture/decisions/0010-postgis-on-neon-for-hydrography.md).
+ADR 0010.
 
 ```bash
 bun run bdot:import                          # wszystkie klasy (z korzenia repo; DATABASE_URL z .env.local)

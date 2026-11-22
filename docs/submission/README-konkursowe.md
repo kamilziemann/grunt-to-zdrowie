@@ -4,10 +4,9 @@
 > o szczegóły: ścieżkę jury, źródła, metody, weryfikację, koszty, skalę i bezpieczeństwo. Stan na 22.11.2026, silnik
 > analizy **0.8.8**; wszystkie źródła raportu są prawdziwe (`meta.sample: false`, bez części przykładowych). Fakty
 > z repozytorium, a ceny, limity i licencje sprawdzone u źródła 22.11.2026 (adresy obok); miejsca oznaczone **„do
-> potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów: [`docs/project-status.md`](../project-status.md),
+> potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów:
 > [`docs/validation.md`](../validation.md), strona „Jak liczymy” (`apps/web/messages/pl/method.json`),
-> [`tools/bdot-import/README.md`](../../tools/bdot-import/README.md), ADR-y w
-> [`docs/architecture/decisions/`](../architecture/decisions).
+> [`tools/bdot-import/README.md`](../../tools/bdot-import/README.md).
 
 ## Zadanie i rozwiązanie
 
@@ -53,8 +52,8 @@ chwila pobrania albo — dla BDOT10k — chwila importu z rejestru `bdot_import`
 **Na bieżąco** (przy każdej analizie; odpowiedzi trzymamy krótko w pamięci podręcznej, niżej) pobieramy pogodę,
 prognozę, glebę, teren, zdjęcia satelitarne, granice i ewidencję działki. **Wcześniej** zaimportowany jest tylko
 BDOT10k: hydrografia 21.11.2026 (ok. 21:40) i otoczenie pola 22.11.2026 (ok. 00:07), import jednorazowy skryptem
-`bun run bdot:import` do Postgresa z PostGIS ([ADR 0010](../architecture/decisions/0010-postgis-on-neon-for-hydrography.md),
-[`tools/bdot-import/README.md`](../../tools/bdot-import/README.md)). Progi IUNG są stałą tabelą w kodzie (z
+`bun run bdot:import` do Postgresa z PostGIS
+([`tools/bdot-import/README.md`](../../tools/bdot-import/README.md)). Progi IUNG są stałą tabelą w kodzie (z
 rozporządzenia, sprawdzone ze stroną IUNG 21.11.2026).
 
 | Dane                                     | Źródło                                                | Pobieranie                 | Licencja / podstawa                                                                                                                                                                                     | Uwagi                                                      |
@@ -199,7 +198,7 @@ naszej stronie; BDOT10k w plikach przy Workerze (R2) zamiast bazy — wymaga prz
 
 ## Bezpieczeństwo (pkt 5.6)
 
-- **Bez kont i danych osobowych** ([ADR 0011](../architecture/decisions/0011-no-user-accounts.md)): nie ma logowania,
+- **Bez kont i danych osobowych**: nie ma logowania,
   sesji ani formularzy z danymi osoby. Numer działki i jej granice to publiczne dane ewidencji; zapisany raport ma
   identyfikator ze skrótu wniosku (pole, uprawa, data, wersja silnika).
 - **Sekrety poza kodem**: `DATABASE_URL` (Neon) i klucze Copernicus są sekretami Workera (`wrangler secret put`),
@@ -233,11 +232,8 @@ ze statusem „częściowy” (bez BDOT10k i zdjęć satelitarnych, oba braki op
 
 ## Technologia
 
-Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i API Hono pod `/api`
-([ADR 0008](../architecture/decisions/0008-tanstack-start-single-worker.md)); mapa MapLibre GL
-([ADR 0009](../architecture/decisions/0009-field-style-and-maplibre.md)); D1 na raporty i pamięć działek, bez kont
-([ADR 0001](../architecture/decisions/0001-d1-instead-of-postgres.md)); PostGIS na Neon dla BDOT10k
-([ADR 0010](../architecture/decisions/0010-postgis-on-neon-for-hydrography.md)); kontrakty Zod w
+Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i API Hono pod `/api`;
+mapa MapLibre GL; D1 na raporty i pamięć działek, bez kont; PostGIS na Neon dla BDOT10k; kontrakty Zod w
 `packages/contracts` wspólne dla API i stron.
 
 ## Użycie AI, biblioteki i licencje

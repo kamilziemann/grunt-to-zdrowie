@@ -5,7 +5,7 @@ Ten plik opisuje słowami to, co egzekwują narzędzia. Źródłem prawdy są pl
 [`.oxfmtrc.json`](.oxfmtrc.json) (format), [`commitlint.config.ts`](commitlint.config.ts) (commity),
 [`packages/tsconfig`](packages/tsconfig) (TypeScript). Zmieniasz regułę? Zmień konfigurację, potem ten opis.
 Szczegóły per obszar: `apps/server/AGENTS.md`, `apps/web/AGENTS.md` — przeczytaj właściwy przed zmianą w aplikacji.
-„Dlaczego” stoi w `docs/architecture/` (ADR-y w `decisions/`). Kod jest źródłem prawdy: jeśli ten plik się z nim
+„Dlaczego” stoi w `docs/architecture/` (ADR-y w `decisions/`; lokalnie, poza repo — zob. `.gitignore`). Kod jest źródłem prawdy: jeśli ten plik się z nim
 rozjeżdża, popraw plik w tej samej zmianie.
 
 ## Jak pracować (ludzie i agenci)
@@ -24,7 +24,7 @@ rozjeżdża, popraw plik w tej samej zmianie.
    `architecture.config.ts` (i opis tutaj) — nigdy po cichu.
 6. **Zostaw ślad.** Każda sesja prowadzi swój plik w `docs/progress` (niżej, skill `progress-log`) i aktualizuje
    go po każdym działającym kroku — także wtedy, gdy nic jeszcze nie jest zacommitowane. Gdy zmienia się zakres,
-   kończy etap albo zapada decyzja, popraw też [`docs/project-status.md`](docs/project-status.md).
+   kończy etap albo zapada decyzja, popraw też `docs/project-status.md`.
 
 Skille (przepisy) są w `.agents/skills/` (`.claude/skills` to symlinki), opis w [`.agents/README.md`](.agents/README.md).
 Skill nigdy nie jest ważniejszy od tego pliku.
@@ -49,10 +49,10 @@ Każda sesja prowadzi własny plik `docs/progress/RRRR-MM-DD/<krótka-nazwa>-<id
 dopisek, np. początek id sesji): **Stan teraz**, **Zrobione** (z hashami commitów, a przed commitem z dopiskiem
 „bez commita”), **Następny krok**. Aktualizuj go po każdym działającym kroku i przed zakończeniem tury, tak żeby
 inny model mógł podjąć pracę bez czytania rozmowy; rzeczy niesprawdzone nazywaj wprost. Zasady:
-[`docs/progress/README.md`](docs/progress/README.md).
+`docs/progress/README.md`.
 
 Obraz całości — co budujemy, co działa, plan dalej, decyzje i ryzyka — stoi w
-[`docs/project-status.md`](docs/project-status.md). Przeczytaj go na początku sesji; zmieniasz zakres, kończysz etap
+`docs/project-status.md`. Przeczytaj go na początku sesji; zmieniasz zakres, kończysz etap
 albo podejmujesz decyzję → popraw go w tej samej zmianie (trwałe decyzje dodatkowo jako ADR).
 
 ## Reguły architektury (= reguły `bun architecture:check`)
@@ -176,7 +176,7 @@ Identyfikatory w nawiasach to reguły checkera (`--only <id>`); naruszenia pokaz
   (`docs/architecture/deployment.md`). Logi pisz loggerem z kontekstu (`c.get('logger')`), nigdy `console.log`.
 - **paczkę opcjonalną** (emails, storage, payments) → dopiero gdy projekt jej potrzebuje: `packages/<nazwa>`,
   wpis w `architecture.config.ts`, zakres w `commitlint.config.ts`.
-- **konta / ochronę endpointu** → nie ma: aplikacja jest bez kont ([ADR 0011](docs/architecture/decisions/0011-no-user-accounts.md)),
+- **konta / ochronę endpointu** → nie ma: aplikacja jest bez kont (ADR 0011),
   API jest publiczne. Funkcja przypisana do osoby = najpierw nowy ADR.
 - **nową funkcję, komponent albo moduł w katalogu jednostek** (lista wyżej, reguła 10) → nowy folder
   `<katalog>/<nazwa>/` z `<nazwa>.ts(x)`, testem i `index.ts`; importujesz folder, nie plik w środku.

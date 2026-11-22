@@ -32,6 +32,12 @@ const IGNORED_PREFIXES = [
   'apps/server/.dev.vars',
   'apps/server/.wrangler',
   'apps/web/.next',
+  // dokumentacja robocza trzymana lokalnie (.gitignore) - agenci do niej pisza, ale nie ma jej w repo
+  'docs/progress',
+  'docs/plans',
+  'docs/architecture',
+  'docs/research',
+  'docs/project-status.md',
 ];
 
 /** Bazy, wzgledem ktorych dokumenty podaja sciezki (root, katalog dokumentu, aplikacje i ich src). */
@@ -61,8 +67,6 @@ export function documentsToCheck(fs: RepoFs): string[] {
     'README.md',
     '.agents/README.md',
     ...['apps/server/AGENTS.md', 'apps/web/AGENTS.md'].filter((p) => fs.exists(p)),
-    ...fs.markdownUnder('docs/architecture'),
-    ...['docs/plans/README.md', 'docs/progress/README.md'].filter((p) => fs.exists(p)),
     ...skills.filter((p) => fs.exists(p)),
   ];
 }

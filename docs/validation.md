@@ -3,9 +3,7 @@
 Porównanie naszego wyniku z suszą rolniczą ogłoszoną przez IUNG (System Monitoringu Suszy Rolniczej) dla znanych
 gmin i regionów. Skrypt: `apps/server/scripts/validate-iung.ts` (`bun run validate:iung -- --api <adres API>
 [--json wynik.json]`), silnik `0.4.0`, uruchomienie 21.11.2026 na lokalnym API z prawdziwymi źródłami (NASA POWER,
-SoilGrids, Terrain Tiles, BDOT10k, Sentinel-2). Przypadki suszy i odnośniki:
-[`docs/research/2026-11-21-metodyka-uprawy-walidacja.md`](research/2026-11-21-metodyka-uprawy-walidacja.md),
-sekcja 5. Przypadki „brak suszy” (runda 4) pochodzą z **wykazów gmin IUNG**
+SoilGrids, Terrain Tiles, BDOT10k, Sentinel-2). Przypadki suszy i odnośniki: w samym skrypcie walidacji. Przypadki „brak suszy” (runda 4) pochodzą z **wykazów gmin IUNG**
 (`https://susza.iung.pulawy.pl/wykazy/<rok>,<TERYT gminy>/`, lata 2020–2025): tabela „+ / - / x” dla każdej
 kategorii gleby I–IV, okresu i uprawy oraz udział powierzchni zagrożonej suszą. Wybraliśmy okresy, w których
 w danej gminie kryterium nie było przekroczone na żadnej kategorii (0% powierzchni), w tych samych gminach,

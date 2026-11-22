@@ -3,7 +3,7 @@
 API: Hono + `@hono/zod-openapi` (zod 4), D1 przez Drizzle (`@app/db`), plus cron (kolejki i Workflow - przepis niżej).
 **Własnego Workera nie ma**: wejścia (`src/index.ts`) eksportuje `@app/server/worker`, a montuje je jedyny Worker
 `apps/web` (`src/worker.ts`: `/api/*` → Hono z odciętym prefiksem, `scheduled`;
-[ADR 0008](../../docs/architecture/decisions/0008-tanstack-start-single-worker.md)). Konfiguracja Workera
+ADR 0008). Konfiguracja Workera
 (bindingi, `vars`, środowiska) jest w [`../web/wrangler.jsonc`](../web/wrangler.jsonc). Lokalnie API działa pod
 <http://localhost:3000/api> (`bun run dev` z korzenia). Wzorcowy obszar:
 `parcels` (moduł, serwis, porty w domenie, adaptery zewnętrznych usług, testy jednostkowe i integracyjne) - kopiuj go
@@ -101,7 +101,7 @@ Bindingi (`apps/web/wrangler.jsonc`): `DB` (D1, migracje z `../../packages/db/mi
 
 ## Bez kont
 
-Aplikacja nie ma kont użytkowników ([ADR 0011](../../docs/architecture/decisions/0011-no-user-accounts.md)): API jest publiczne, nie ma sesji, tożsamości w kontekście ani ról. Nie dodawaj strażników tras ani parametru tożsamości w serwisach bez nowego ADR.
+Aplikacja nie ma kont użytkowników (ADR 0011): API jest publiczne, nie ma sesji, tożsamości w kontekście ani ról. Nie dodawaj strażników tras ani parametru tożsamości w serwisach bez nowego ADR.
 
 ## Testy
 

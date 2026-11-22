@@ -5,7 +5,7 @@
 // ETP liczymy wzorem Doroszewskiego-Gorskiego (1995), uzywanym przez IUNG (mm na miesiac):
 //   ETP = -89,6 + 0,0621 t^2 + 0,00448 h^1,66 + 9,1 f
 // t - srednia temperatura powietrza [C], h - suma godzin uslonecznienia w miesiacu, f - dlugosc dnia w polowie
-// miesiaca [h] (docs/research/2026-11-21-metodyka-uprawy-walidacja.md; wspolczynniki z notatki, nie potwierdzone
+// miesiaca [h] (notatka o metodyce i walidacji; wspolczynniki z notatki, nie potwierdzone
 // w tekscie zrodlowym). Okresy IUNG skladaja sie z pelnych dekad, wiec liczymy dekadami: dekade przeskalowujemy
 // do miesiaca (h x dni miesiaca / dni dekady), liczymy ETP miesieczne i bierzemy z niego czesc dekady. Zrodla
 // siatkowe nie podaja uslonecznienia, wiec h odtwarzamy z promieniowania (Angstrom, domain/evapotranspiration).

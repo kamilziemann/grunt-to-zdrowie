@@ -1,5 +1,5 @@
 # Dependabot: cotygodniowe aktualizacje zaleznosci (Bun) i akcji GitHub. Pary, ktore musza isc razem, sa w grupach -
-# jeden PR podbija cala grupe, CI (bun check + e2e) mowi, czy kombinacja dziala. Zasady: docs/architecture/conventions.md.
+# jeden PR podbija cala grupe, CI (bun check + e2e) mowi, czy kombinacja dziala.
 version: 2
 updates:
   - package-ecosystem: bun

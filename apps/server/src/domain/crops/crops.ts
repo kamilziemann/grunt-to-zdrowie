@@ -1,6 +1,6 @@
 // Katalog upraw z parametrami bilansu wodnego wg FAO-56 (wspolczynniki Kc, dlugosci faz, glebokosc korzeni,
 // frakcja wyczerpania p) i grupa z tabeli progow suszy IUNG. Wartosci startowe: FAO-56 rev. 1 (tab. 6 i 8) oraz
-// kalendarz modelowy dla Polski z docs/research/2026-11-21-metodyka-uprawy-walidacja.md - do strojenia w pakiecie
+// kalendarz modelowy dla Polski z notatki o metodyce i walidacji - do strojenia w pakiecie
 // bilansu (P7); daty faz sa orientacyjne i raport tak je opisuje.
 import { CROP_IDS, type CropId, type IungCropGroup } from '@app/contracts';
 

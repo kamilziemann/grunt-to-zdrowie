@@ -18,7 +18,7 @@ interface Case {
   source: string;
 }
 
-// Przypadki z docs/research/2026-11-21-metodyka-uprawy-walidacja.md (sekcja 5) - z odnosnikami do komunikatow.
+// Przypadki z notatki o metodyce i walidacji (research, sekcja 5) - z odnosnikami do komunikatow.
 const CASES: Case[] = [
   {
     place: 'Sicienko (kujawsko-pomorskie)',

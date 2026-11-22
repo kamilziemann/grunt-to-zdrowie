@@ -15,7 +15,7 @@
 #                            PR zmieniajacy packages/db/migrations nie wdraza preview (wspolna baza D1, migracje do przodu)
 #   workflow_dispatch     -> wybrane srodowisko
 # `development` wymaga bloku env.development w apps/web/wrangler.jsonc
-# (bez niego wrangler odmowi deployu). Konfiguracja srodowisk: docs/architecture/deployment.md.
+# (bez niego wrangler odmowi deployu). Konfiguracja srodowisk: apps/web/wrangler.jsonc.
 name: Deploy
 
 on:

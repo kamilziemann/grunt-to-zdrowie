@@ -46,9 +46,12 @@ Thumbs.db
 # stan lokalny CLI Neon
 .neon
 
-# dzienniki sesji i plany robocze zostaja lokalnie (w repo tylko opis procesu)
-docs/progress/*
-!docs/progress/README.md
-docs/plans/*
-!docs/plans/README.md
-!docs/plans/_template.md
+# dokumentacja robocza (dzienniki, plany, ADR-y, research, stan projektu) zostaje lokalnie;
+# w repo tylko docs/submission, docs/samples i docs/validation.md
+docs/progress/
+docs/plans/
+docs/architecture/
+docs/research/
+docs/hackathon/
+docs/troubleshooting/
+docs/project-status.md

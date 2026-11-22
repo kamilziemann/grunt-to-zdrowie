@@ -111,7 +111,7 @@ jobs:
 
       # turbo: test:e2e zalezy od build (cache turbo, zdalny gdy skonfigurowany); Playwright sam startuje `vite dev`.
       # Testy @visual (zrzuty) sa tu pomijane przez grepInvert w playwright.config.ts (CI=true): baseline'y sa per
-      # system, a repo ma darwin. Wlaczenie: baseline'y linuksa + E2E_VISUAL=1 (docs/architecture/testing.md).
+      # system, a repo ma darwin. Wlaczenie: baseline'y linuksa + E2E_VISUAL=1.
       - name: E2E
         run: bun run test:e2e
 

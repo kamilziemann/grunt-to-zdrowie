@@ -11,7 +11,7 @@ const WORKER_VARS = JSON.stringify({ PUBLIC_URL: `${BASE_URL}/api`, ALLOWED_ORIG
 // Zrzuty wizualne (spec z tagiem @visual) zaleza od systemu (czcionki, antyaliasing), wiec baseline'y leza
 // w e2e/__screenshots__/<platforma>/. Bez baseline'ow biezacej platformy albo w CI @visual jest pomijany.
 // `E2E_VISUAL=1` wymusza @visual (np. do wygenerowania baseline'ow: `bun run --cwd apps/web test:e2e --
-// --update-snapshots`, zob. docs/architecture/testing.md).
+// --update-snapshots`).
 const desktop = { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } };
 const HAS_BASELINES = existsSync(
   fileURLToPath(new URL(`./e2e/__screenshots__/${process.platform}/`, import.meta.url)),
