@@ -153,8 +153,62 @@ export const SOIL_BASES = ['field', 'nearby', 'assumed_medium'] as const;
  */
 export const VERDICT_BASES = ['soil_category', 'scenarios_agree', 'scenarios_disagree'] as const;
 
+/**
+ * Pelna lista miar, ktore silnik naprawde emituje w `evidence.metric` (ocena, przyczyny, zalecenia, polder,
+ * otoczenie, dni upalne). Strony moga sprawdzic, ze maja etykiete dla kazdej; test w apps/server pilnuje, ze zadna
+ * regula nie emituje miary spoza listy. Nowa miara = wpis tutaj i etykieta w apps/web.
+ */
+export const EVIDENCE_METRICS = [
+  // pogoda (NASA POWER) i historia sezonow
+  'precip_period',
+  'precip_30d',
+  'et_period',
+  'et0_period',
+  'hot_days_14d',
+  'hot_days_30d',
+  'hot_days_30d_normal',
+  'deficit_seasons',
+  'drought_seasons',
+  'season_et_deficit_median',
+  // satelita (Sentinel-2)
+  'ndmi_anomaly',
+  'ndvi_anomaly',
+  // gleba (SoilGrids) i ewidencja
+  'available_water_mm_per_m',
+  'soil_category',
+  'organic_matter_pct',
+  'registry_soil_class',
+  // teren (model wysokosci)
+  'slope_mean_pct',
+  'slope_share_above_5_pct',
+  'depression_volume_m3',
+  'depression_area_m2',
+  'elevation_min_m',
+  // woda i otoczenie (BDOT10k)
+  'nearest_ditch_m',
+  'ditch_length_in_field_m',
+  'ditches_in_radius',
+  'water_bodies_in_radius',
+  'wetlands_in_radius',
+  'nearest_wetland_m',
+  'tree_cover_share',
+  'wooded_edge_m',
+  'nearest_structure_m',
+  'piped_junction_m',
+  'nearest_spring_m',
+  'nearest_levee_m',
+] as const;
+
+export const evidenceMetricSchema = z.enum(EVIDENCE_METRICS);
+
+export type EvidenceMetric = z.infer<typeof evidenceMetricSchema>;
+
 export const evidenceSchema = z.object({
-  /** identyfikator miary (tlumaczony w apps/web), np. "precip_60d", "slope_mean" */
+  /**
+   * identyfikator miary (tlumaczony w apps/web), np. "precip_30d", "slope_mean_pct". Silnik emituje tylko miary
+   * z EVIDENCE_METRICS; transport zostaje tolerancyjny (tekst), zeby stary raport z linku albo nowsza miara nie
+   * psuly odczytu - ekran pokazuje wtedy ogolna nazwe
+   */
   metric: z.string(),
   value: z.number(),
   unit: z.string(),
