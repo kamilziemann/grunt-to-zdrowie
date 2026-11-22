@@ -20,6 +20,13 @@ export interface ParcelRecord extends ParcelDescription {
   /** klasouzytki i powierzchnia ewidencyjna (ha) - podaje je tylko WFS ewidencji, ULDK nie */
   landUse?: string[];
   registryAreaHa?: number;
+  /**
+   * kiedy GUGiK oddal te granice (ISO 8601) - podaje go pamiec dzialek (infrastructure/parcel-memory);
+   * brak = rekord prosto ze zrodla, pobrany teraz
+   */
+  fetchedAt?: string;
+  /** rekord z pamieci starszy niz jej waznosc, oddany, bo GUGiK nie odpowiedzial */
+  stale?: boolean;
 }
 
 /** Dane ewidencyjne dzialki, ktorych nie ma w ULDK: klasouzytki i powierzchnia ewidencyjna. */
@@ -32,6 +39,17 @@ export interface ParcelRegistryEntry {
 export interface ParcelRegistry {
   byId(id: string): Promise<ParcelRegistryEntry | null>;
 }
+
+/**
+ * Pamiec dzialek pobranych z GUGiK (implementacja: repositories/parcel-records na D1). `fetchedAt` w rekordzie
+ * mowi, kiedy GUGiK oddal granice. Klucz to identyfikator, o ktory pytano (zwykle rowny `record.id`).
+ */
+export interface ParcelMemoryStore {
+  get(id: string): Promise<StoredParcelRecord | null>;
+  put(id: string, record: StoredParcelRecord): Promise<void>;
+}
+
+export type StoredParcelRecord = ParcelRecord & { fetchedAt: string };
 
 export interface ParcelMatches {
   /** ile dzialek pasuje wg zrodla */

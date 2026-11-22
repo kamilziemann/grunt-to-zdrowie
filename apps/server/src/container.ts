@@ -35,7 +35,9 @@ import {
   createPostgisContextMapSource,
   createPostgisSurroundingsSource,
 } from './infrastructure/surroundings-postgis';
+import { withParcelMemory } from './infrastructure/parcel-memory';
 import { createUldkParcelSource } from './infrastructure/uldk';
+import { createParcelRecordsRepository } from './repositories/parcel-records';
 import { createReportsRepository } from './repositories/reports';
 import { isoDateInPoland } from './domain/iso-date';
 import { createCopernicusImagerySource } from './infrastructure/copernicus-imagery';
@@ -76,8 +78,7 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
   const now = overrides.now ?? nowIso;
 
   const parcels = createParcelsService({
-    // ULDK jest zrodlem podstawowym (pelny opis, cala Polska); gdy zawiedzie albo przytnie limit, dzialke oddaje WFS
-    source: overrides.parcelSource ?? withFallback(createUldkParcelSource(), createEgibWfsParcelSource()),
+    source: overrides.parcelSource ?? rememberedParcels(deps, now),
     outlines: overrides.parcelOutlineSource ?? createEgibWfsOutlineSource(),
     now,
   });
@@ -155,6 +156,22 @@ export function createContainer(deps: ContainerDeps, overrides: ContainerOverrid
     context,
     edgeCache: overrides.edgeCache ?? createEdgeCachePurger(deps.logger.child({ component: 'edge-cache' })),
   };
+}
+
+/**
+ * ULDK jest zrodlem podstawowym (pelny opis, cala Polska); gdy zawiedzie albo przytnie limit, dzialke oddaje WFS.
+ * Na wierzchu pamiec w D1: dzialka raz pobrana wraca bez pytania GUGiK (nocny limit ULDK), a gdy GUGiK lezy -
+ * nawet z wpisu starszego niz miesiac.
+ */
+function rememberedParcels(deps: ContainerDeps, now: () => string): ParcelSource {
+  const log = deps.logger.child({ component: 'parcel-memory' });
+
+  return withParcelMemory(withFallback(createUldkParcelSource(), createEgibWfsParcelSource()), {
+    store: createParcelRecordsRepository(createDb(deps.env.DB)),
+    now,
+    defer: deps.waitUntil,
+    onError: (error, operation) => log.warn('parcel memory unavailable', { operation, error: String(error) }),
+  });
 }
 
 const copernicusKeys = ({ vars }: ContainerDeps) => ({

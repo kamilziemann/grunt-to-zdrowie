@@ -1,8 +1,8 @@
 // Schemat D1 (SQLite). Nowa tabela: dopisz ja tutaj, potem `bun db:generate` i `bun db:migrate`.
 // JSON trzymaj w kolumnach text z `mode: 'json'` i typuj kontraktami z @app/contracts - D1 nie ma typu JSON.
 import { sql } from 'drizzle-orm';
-import type { WaterReport } from '@app/contracts';
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import type { ParcelGeometry, WaterReport } from '@app/contracts';
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 // --- Auth (Better Auth) ---------------------------------------------------------------------------------------
 // Tabele wymagane przez Better Auth (adapter drizzle, provider sqlite); odpowiadaja wynikowi `bunx @better-auth/cli
@@ -112,5 +112,29 @@ export const analysisReport = sqliteTable(
   (t) => [index('analysis_report_field_idx').on(t.fieldId, t.analysisDate)],
 );
 
+// --- Pamiec dzialek -------------------------------------------------------------------------------------------
+// Dzialka raz pobrana z GUGiK (ULDK albo zapasowy WFS ewidencji): kolejne odczyty po numerze nie zaleza od chwilowej
+// dostepnosci i nocnego limitu GUGiK. Wiersz na identyfikator, nadpisywany przy odswiezeniu (`fetched_at` = kiedy
+// GUGiK oddal te granice). Dane publiczne z ewidencji, bez danych osobowych (bez wlascicieli).
+export const parcelRecord = sqliteTable(
+  'parcel_record',
+  {
+    id: text('id').primaryKey(),
+    number: text('number').notNull(),
+    region: text('region').notNull(),
+    commune: text('commune').notNull(),
+    county: text('county').notNull(),
+    voivodeship: text('voivodeship').notNull(),
+    geometry: text('geometry', { mode: 'json' }).$type<ParcelGeometry>().notNull(),
+    /** ktore zrodlo GUGiK oddalo geometrie: 'uldk' albo 'egib-wfs' */
+    origin: text('origin').notNull(),
+    landUse: text('land_use', { mode: 'json' }).$type<string[]>(),
+    registryAreaHa: real('registry_area_ha'),
+    fetchedAt: text('fetched_at').notNull(),
+  },
+  (t) => [index('parcel_record_fetched_idx').on(t.fetchedAt)],
+);
+
 export type UserRow = typeof user.$inferSelect;
 export type AnalysisReportRow = typeof analysisReport.$inferSelect;
+export type ParcelRecordRow = typeof parcelRecord.$inferSelect;
