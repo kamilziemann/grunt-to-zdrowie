@@ -3,7 +3,7 @@
 // i dopiero wtedy otwiera okno wydruku - PDF nie ma pustych ramek. Bez dostawcy (testy pojedynczych komponentow)
 // wydruk rusza od razu.
 import type { WaterReport } from '@app/contracts';
-import { useQueryClient } from '@tanstack/react-query';
+import { CancelledError, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
 
 import { IMAGERY_LAYERS } from '@app/contracts';
@@ -22,6 +22,29 @@ export function imageryRequest(report: WaterReport): { dzialki: string; date: st
 
 /** Najdluzej czekamy na zdjecia przed wydrukiem; potem drukujemy z tym, co jest (zdanie zamiast ramki). */
 const PRINT_WAIT_MS = 30_000;
+
+/** Ile razy czekamy od nowa po anulowanym pobraniu (sekcja przerysowala sie w trakcie i ponowila zapytanie). */
+const CANCEL_RETRIES = 3;
+
+/**
+ * Pobiera obraz i czeka na wynik. Gdy sekcja "Pole z satelity" przerysuje sie w trakcie, jej obserwator anuluje
+ * trwajace pobranie i zaczyna nowe - wtedy dolaczamy do nowego zamiast uznac, ze "juz po pobraniu" (inaczej okno
+ * wydruku otwieraloby sie przed zdjeciami). Blad inny niz anulowanie konczy czekanie: sekcja pokaze zdanie.
+ */
+async function fetchImage(
+  queryClient: QueryClient,
+  options: ReturnType<typeof reportImageryQuery>,
+  attempt = 0,
+): Promise<void> {
+  try {
+    await queryClient.query(options);
+  } catch (error) {
+    if (!(error instanceof CancelledError) || attempt >= CANCEL_RETRIES) return;
+
+    await nextFrame();
+    await fetchImage(queryClient, options, attempt + 1);
+  }
+}
 
 interface SatellitePrint {
   /** obrazy maja sie pobrac (sekcja rozwinieta albo wydruk) */
@@ -70,9 +93,9 @@ export function SatellitePrintProvider({ report, children }: { report: WaterRepo
 
     setRequested(true);
     setPreparing(true);
-    const fetches = Promise.allSettled(
+    const fetches = Promise.all(
       IMAGERY_LAYERS.map((layer) =>
-        queryClient.query(reportImageryQuery(target.dzialki, target.date, layer)),
+        fetchImage(queryClient, reportImageryQuery(target.dzialki, target.date, layer)),
       ),
     );
     const timeout = new Promise<void>((resolve) => {
