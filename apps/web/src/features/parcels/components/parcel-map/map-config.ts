@@ -86,6 +86,74 @@ export function boundaryTiles(
   return tiles;
 }
 
+/** Od tego przyblizenia obciety kafel z14 zastepuja od razu kafle z16 (ponizej zostaje podpowiedz "przybliz"). */
+export const BOUNDARY_FINE_FALLBACK_ZOOM = 15;
+
+/** Co wiemy o kaflu: pelny, obciety przez usluge albo nic (jeszcze niepobrany). */
+export type BoundaryTileState = 'full' | 'truncated' | undefined;
+
+export interface BoundaryPlan {
+  /** kafle do narysowania widoku (pobiera sie tylko te, ktorych nie ma w pamieci) */
+  tiles: BoundaryTile[];
+  /** klucze kafli, ktore trzymamy w pamieci (widok i ich kafle z14) */
+  visible: Set<string>;
+  /** w widoku zostaje obciety kafel bez zastepstwa - prosimy o przyblizenie */
+  zoomHint: boolean;
+}
+
+/**
+ * Plan kafli granic dla widoku [zachod, poludnie, wschod, polnoc] przy przyblizeniu `mapZoom`; null = za duzo kafli
+ * (ogromny ekran) - nic nie pobieramy. Ponizej 16 kafle z14; obciety kafel z14 (miasto, gesta szachownica) od
+ * przyblizenia 15 zastepuja jego kafle z16 w widoku: najwyzej MAX_BOUNDARY_TILES[16], najblizsze punktu `focus`
+ * (srodek czesci mapy widocznej obok paneli); gdy czesc widoku zostaje bez granic albo przyblizenie to 14-15,
+ * zostaje podpowiedz. Od 16 kafle z16 tam, gdzie pelnego kafla z14 nie ma w pamieci. `state` mowi, co wiemy o kaflu.
+ */
+export function planBoundaryTiles(
+  [west, south, east, north]: readonly [number, number, number, number],
+  mapZoom: number,
+  state: (key: string) => BoundaryTileState,
+  focus: readonly [number, number] = [(west + east) / 2, (south + north) / 2],
+): BoundaryPlan | null {
+  const zoom = boundaryTileZoom(mapZoom);
+  const inView = boundaryTiles(west, south, east, north, zoom);
+
+  if (inView.length > MAX_BOUNDARY_TILES[zoom]) return null;
+
+  if (zoom === PARCEL_BOUNDARY_TILE_ZOOM) {
+    return {
+      tiles: inView.filter((tile) => state(boundaryTileKey(coarseParent(tile))) !== 'full'),
+      visible: new Set(
+        inView.flatMap((tile) => [boundaryTileKey(tile), boundaryTileKey(coarseParent(tile))]),
+      ),
+      zoomHint: false,
+    };
+  }
+
+  const truncated = new Set(inView.map(boundaryTileKey).filter((key) => state(key) === 'truncated'));
+  const coarse = inView.filter((tile) => !truncated.has(boundaryTileKey(tile)));
+  const fine =
+    truncated.size > 0 && mapZoom >= BOUNDARY_FINE_FALLBACK_ZOOM
+      ? boundaryTiles(west, south, east, north, PARCEL_BOUNDARY_TILE_ZOOM).filter((tile) =>
+          truncated.has(boundaryTileKey(coarseParent(tile))),
+        )
+      : [];
+  const [focusX, focusY] = [
+    tileX(focus[0], PARCEL_BOUNDARY_TILE_ZOOM),
+    tileY(focus[1], PARCEL_BOUNDARY_TILE_ZOOM),
+  ];
+  const nearest = fine
+    .toSorted((a, b) => Math.hypot(a.x - focusX, a.y - focusY) - Math.hypot(b.x - focusX, b.y - focusY))
+    .slice(0, MAX_BOUNDARY_TILES[PARCEL_BOUNDARY_TILE_ZOOM]);
+  const tiles = [...coarse, ...nearest];
+  const covered = fine.length > 0 && nearest.length === fine.length;
+
+  return {
+    tiles,
+    visible: new Set([...inView, ...tiles].map(boundaryTileKey)),
+    zoomHint: truncated.size > 0 && !covered,
+  };
+}
+
 /**
  * Linie granic (poligony) i punkty podpisow z obrysow wielu kafli; dzialka z dwoch kafli wchodzi raz. Kafel obciety
  * przez usluge nie jest rysowany - dziurawa szachownica mylilaby bardziej niz jej brak.

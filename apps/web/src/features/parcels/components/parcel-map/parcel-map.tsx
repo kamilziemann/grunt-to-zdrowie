@@ -57,9 +57,7 @@ import {
   BOUNDARY_LAYER_IDS,
   BOUNDARY_TILE_CACHE,
   boundaryTileKey,
-  boundaryTiles,
-  boundaryTileZoom,
-  coarseParent,
+  type BoundaryTileState,
   DRAW_SOURCE,
   drawingCollection,
   IMAGERY_PAINT,
@@ -68,12 +66,12 @@ import {
   INITIAL_BOUNDS,
   isPoiLayer,
   LOCAL_NAME,
-  MAX_BOUNDARY_TILES,
   MAX_BOUNDS,
   MIN_PICK_ZOOM,
   outlineCollections,
   type MapParcel,
   parcelCollection,
+  planBoundaryTiles,
   PREVIEW_SOURCE,
   SELECTED_SOURCE,
   type ImageryOverlay,
@@ -188,6 +186,9 @@ type MapState = 'loading' | 'ready' | 'failed';
 const DEFAULT_PADDING: MapPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 const defaultPadding = () => DEFAULT_PADDING;
 const NO_IMAGERY: readonly ImageryOverlay[] = [];
+// Kafle z14 obciete przez usluge (klucze "14/x/y"), pamietane przez cala sesje karty, takze po wyjsciu z mapy i powrocie:
+// o taki kafel nie pytamy drugi raz (w miescie to ok. 290 kB na marne), od przyblizenia 15 od razu kafle z16.
+const truncatedCoarseTiles = new Set<string>();
 const NO_CONTEXT: ContextVisibility = { cover: false, waterworks: false, protected: false };
 const NO_LABELS: ContextKindLabels = {};
 
@@ -206,6 +207,22 @@ function viewOf(map: MapLibre.Map): TileView {
 interface TileLayers {
   hydro: TileLayer<HydroTile>;
   context: ReadonlyMap<ContextLayer, TileLayer<ContextTile>>;
+}
+
+/**
+ * Czesc mapy widoczna obok paneli ([zachod, poludnie, wschod, polnoc]): na komputerze panel zaslania lewa strone, na
+ * telefonie arkusz dol. Margines z jednej strony najwyzej pol mapy.
+ */
+function visibleBounds(map: MapLibre.Map, padding: MapPadding): [number, number, number, number] {
+  const { top = 0, right = 0, bottom = 0, left = 0 } = padding;
+  const canvas = map.getCanvas();
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  const inset = (from: number, size: number) => Math.min(Math.max(from, 0), size / 2);
+  const corner = map.unproject([inset(left, width), inset(top, height)]);
+  const opposite = map.unproject([width - inset(right, width), height - inset(bottom, height)]);
+
+  return [corner.lng, opposite.lat, opposite.lng, corner.lat];
 }
 
 function statusKey(status: LayerStatus): string {
@@ -496,18 +513,10 @@ export function ParcelMap({
 
     if (!map || !latest.current.context.protected) return;
 
-    // podpis ma stanac w czesci mapy widocznej obok paneli (na komputerze panel zaslania lewa strone)
-    const { top = 0, right = 0, bottom = 0, left = 0 } = latest.current.getPadding();
-    const canvas = map.getCanvas();
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const inset = (from: number, size: number) => Math.min(Math.max(from, 0), size / 2);
-    const corner = map.unproject([inset(left, width), inset(top, height)]);
-    const opposite = map.unproject([width - inset(right, width), height - inset(bottom, height)]);
-
+    // podpis ma stanac w czesci mapy widocznej obok paneli, a nie pod nimi
     setContextLabels(
       map,
-      areaLabels(tiles, [corner.lng, opposite.lat, opposite.lng, corner.lat], latest.current.contextLabels),
+      areaLabels(tiles, visibleBounds(map, latest.current.getPadding()), latest.current.contextLabels),
     );
   }, []);
 
@@ -588,7 +597,7 @@ export function ParcelMap({
    * Dociaga granice dla widoku - tylko gdy warstwa jest wlaczona i od przyblizenia 14. Ponizej 16 grube kafle z14;
    * od 16 drobne kafle z16, ale tylko tam, gdzie pelnego kafla z14 nie ma w pamieci (obciety albo niepobrany).
    */
-  const refreshBoundaries = useCallback(() => {
+  const refreshBoundaries = useCallback(function refresh() {
     const map = mapRef.current;
     const { boundaries: enabled, loadBoundaries: load } = latest.current;
     const cache = boundaryTilesRef.current;
@@ -600,32 +609,29 @@ export function ParcelMap({
       return;
     }
 
-    const zoom = boundaryTileZoom(map.getZoom());
-    const view = map.getBounds();
-    const inView = boundaryTiles(view.getWest(), view.getSouth(), view.getEast(), view.getNorth(), zoom);
+    const { west, south, east, north } = viewOf(map);
+    const tileState = (key: string): BoundaryTileState => {
+      const tile = cache.get(key);
 
-    if (inView.length > MAX_BOUNDARY_TILES[zoom]) {
-      setBoundariesTruncated(false);
+      if (tile) return tile.truncated ? 'truncated' : 'full';
 
-      return;
-    }
-
-    const tiles = inView.filter((tile) => {
-      if (tile.z === BOUNDARIES_MIN_ZOOM) return true;
-
-      const parent = cache.get(boundaryTileKey(coarseParent(tile)));
-
-      return !parent || parent.truncated;
-    });
-    const visible = new Set(
-      inView.flatMap((tile) => [boundaryTileKey(tile), boundaryTileKey(coarseParent(tile))]),
+      return truncatedCoarseTiles.has(key) ? 'truncated' : undefined;
+    };
+    // kafle z16 zastepujace obciety kafel z14 ida od srodka czesci mapy widocznej obok paneli
+    const [visibleWest, visibleSouth, visibleEast, visibleNorth] = visibleBounds(
+      map,
+      latest.current.getPadding(),
     );
-    const truncatedInView = () =>
-      zoom === BOUNDARIES_MIN_ZOOM && tiles.some((tile) => cache.get(boundaryTileKey(tile))?.truncated);
+    const plan = planBoundaryTiles([west, south, east, north], map.getZoom(), tileState, [
+      (visibleWest + visibleEast) / 2,
+      (visibleSouth + visibleNorth) / 2,
+    ]);
 
-    setBoundariesTruncated(truncatedInView());
+    setBoundariesTruncated(plan?.zoomHint ?? false);
 
-    for (const tile of tiles) {
+    if (!plan) return;
+
+    for (const tile of plan.tiles) {
       const key = boundaryTileKey(tile);
 
       if (cache.has(key) || pending.has(key)) continue;
@@ -636,10 +642,13 @@ export function ParcelMap({
         .then((data) => {
           cache.set(key, data);
 
+          // obciety kafel z14 pamietamy do konca sesji: drugi raz o niego nie pytamy, od razu kafle z16
+          if (data.truncated && tile.z === BOUNDARIES_MIN_ZOOM) truncatedCoarseTiles.add(key);
+
           for (const old of cache.keys()) {
             if (cache.size <= BOUNDARY_TILE_CACHE) break;
 
-            if (!visible.has(old)) cache.delete(old);
+            if (!plan.visible.has(old)) cache.delete(old);
           }
 
           const current = mapRef.current;
@@ -648,9 +657,8 @@ export function ParcelMap({
           void current?.getSource<MapLibre.GeoJSONSource>(BOUNDARIES_SOURCE)?.setData(lines);
           void current?.getSource<MapLibre.GeoJSONSource>(BOUNDARY_LABELS_SOURCE)?.setData(points);
 
-          // podpowiedz tylko, jesli mapa stoi tam, gdzie byla (przy ruchu przeliczy ja nastepne odswiezenie)
-          if (current && boundaryTileZoom(current.getZoom()) === zoom)
-            setBoundariesTruncated(truncatedInView());
+          // obciety kafel zmienia plan widoku (kafle z16 albo podpowiedz) - liczymy go od nowa dla obecnej mapy
+          if (data.truncated) refresh();
 
           return data.items.length;
         })
@@ -761,6 +769,10 @@ export function ParcelMap({
         created.on('moveend', refreshBoundaries);
         created.on('moveend', refreshHydro);
         created.on('moveend', refreshContext);
+        // przyblizenie w DOM (bez renderu Reacta): testy e2e czekaja na koniec animacji przyblizania
+        created.on('moveend', () => {
+          target.dataset.mapZoom = created.getZoom().toFixed(2);
+        });
         mapRef.current = created;
         setState('ready');
       });
