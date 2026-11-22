@@ -62,6 +62,15 @@ describe('ParcelCheck', () => {
     );
   });
 
+  it('zanim wczyta sie mapa, pokazuje obrys dzialki z geometrii', () => {
+    renderCheck(PARCEL);
+
+    const map = screen.getByTestId('check-map');
+
+    expect(map.querySelector('[data-testid="parcel-outline"] path')?.getAttribute('d')).toMatch(/^M.+Z$/);
+    expect(map).toHaveTextContent('Wczytuję mapę');
+  });
+
   it('las wg ewidencji: ostrzezenie, ale mozna liczyc dalej', () => {
     renderCheck({ ...PARCEL, landUse: ['LsV'] });
 

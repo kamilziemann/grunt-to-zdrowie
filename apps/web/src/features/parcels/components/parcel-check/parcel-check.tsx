@@ -15,6 +15,7 @@ import { useMapLabels } from '../../hooks/use-map-labels';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
 import { nonFarmKinds } from '../../utils/land-use';
 import { ParcelMap, type Basemap, type MapFocus, type MapParcel } from '../parcel-map';
+import { ParcelOutline } from '../parcel-outline';
 import { useAreaFormatter } from '../parcel-preview';
 import { StepsHeader } from '../steps-header';
 
@@ -158,6 +159,8 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
 
     return box ? { bbox: box, key: `check:${ids.join(',')}` } : null;
   }, [area, ids, selected.parcels, selected.settled]);
+  const outlineGeometries = useMemo(() => mapSelected.map((parcel) => parcel.geometry), [mapSelected]);
+  const outline = useMemo(() => <ParcelOutline geometries={outlineGeometries} />, [outlineGeometries]);
   const chooseBasemap = useCallback((next: Basemap) => setBasemap(next), []);
   const nonFarm = single?.parcel && !area ? nonFarmKinds(single.parcel.landUse) : [];
   const ready = area !== null || selected.parcels.length > 0;
@@ -301,6 +304,7 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
           basemap={basemap}
           interactive={false}
           labels={mapLabels}
+          placeholder={outline}
         />
         <fieldset className="absolute top-3 left-3 z-10 flex gap-1 rounded-full border border-input bg-card p-1 shadow-md">
           <legend className="sr-only">{t('basemap.label')}</legend>

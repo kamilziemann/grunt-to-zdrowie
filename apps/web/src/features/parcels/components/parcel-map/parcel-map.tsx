@@ -14,7 +14,7 @@ import {
 } from '@app/contracts';
 import { LoaderCircle } from 'lucide-react';
 import type * as MapLibre from 'maplibre-gl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import {
   addContextLayers,
@@ -178,6 +178,8 @@ export interface ParcelMapProps {
   /** klikniecie przy zbyt malym przyblizeniu (mapa sama przybliza, wywolujacy pokazuje podpowiedz) */
   onZoomTooLow?: () => void;
   labels: ParcelMapLabels;
+  /** co pokazac, zanim mapa sie wczyta (np. obrys dzialki z geometrii); brak = sam napis "Wczytuje mape" */
+  placeholder?: ReactNode;
   className?: string;
 }
 
@@ -419,6 +421,7 @@ export function ParcelMap({
   status = null,
   statusClassName,
   labels,
+  placeholder,
   className,
 }: ParcelMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -944,8 +947,16 @@ export function ParcelMap({
           {message}
         </output>
       )}
+      {state === 'loading' && placeholder}
       {state !== 'ready' && (
-        <output className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-muted-foreground">
+        <output
+          className={cn(
+            'absolute flex items-center justify-center text-center text-sm text-muted-foreground',
+            state === 'loading' && placeholder
+              ? 'bottom-3 left-1/2 w-max max-w-[calc(100%-6rem)] -translate-x-1/2 rounded-full bg-card/95 px-3 py-1.5 shadow-md'
+              : 'inset-0 px-6',
+          )}
+        >
           {state === 'loading' ? labels.loading : labels.failed}
         </output>
       )}
