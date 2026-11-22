@@ -24,7 +24,6 @@ export default defineArchitecture({
     [`${S}/http`]: { dir: 'packages/http', allowed: [`${S}/contracts`, `${S}/logger`] },
     [`${S}/env`]: { dir: 'packages/env', allowed: [] },
     [`${S}/db`]: { dir: 'packages/db', allowed: [`${S}/contracts`] },
-    [`${S}/auth`]: { dir: 'packages/auth', allowed: [`${S}/contracts`, `${S}/db`] },
     [`${S}/rpc`]: { dir: 'packages/rpc', allowed: [`${S}/contracts`] },
     // Cache brzegowy (Workers Cache): tagi, polityki i naglowki wspolne dla stron i API - czyste funkcje.
     [`${S}/cache`]: { dir: 'packages/cache', allowed: [] },

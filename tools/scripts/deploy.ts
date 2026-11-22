@@ -1,15 +1,22 @@
 // Deploy aplikacji na Cloudflare jedna komenda: `bun run deploy` (production) albo `bun run deploy -- --env preview`.
 // JEDEN Worker (apps/web: strony TanStack Start + API Hono + cron). Idempotentny: zaklada brakujace
-// zasoby (baza D1; nowe bindingi dopisz w kroku zasobow), wpisuje id bazy i adres *.workers.dev do apps/web/wrangler.jsonc, ustawia
-// sekret AUTH_SECRET, gdy go brak, stosuje migracje D1, buduje Workera dla srodowiska (`CLOUDFLARE_ENV` - wtyczka
-// Cloudflare dla Vite wybiera blok env w czasie builda) i wdraza go. Wymaga `bunx wrangler login`. Opcje: --env.
+// zasoby (baza D1; nowe bindingi dopisz w kroku zasobow), wpisuje id bazy i adres *.workers.dev do apps/web/wrangler.jsonc,
+// stosuje migracje D1, buduje Workera dla srodowiska (`CLOUDFLARE_ENV` - wtyczka Cloudflare dla Vite wybiera blok env
+// w czasie builda) i wdraza go. Na koniec przypomina o brakujacych sekretach (sam ich nie ustawia - wartosci zna
+// tylko czlowiek). Wymaga `bunx wrangler login`. Opcje: --env.
 // Cache brzegowy (Workers Cache) jest per wersja Workera - nowy deploy startuje z pustym cache, bez recznego purge.
-import { randomBytes } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { DEPLOY_ENVS, parseDeployEnv, patchD1DatabaseId, secretNames } from './deploy-helpers';
+import {
+  DEPLOY_ENVS,
+  missingSecrets,
+  parseDeployEnv,
+  patchD1DatabaseId,
+  REQUIRED_SECRETS,
+  secretNames,
+} from './deploy-helpers';
 
 const { values } = parseArgs({ options: { env: { type: 'string', default: 'production' } } });
 
@@ -43,15 +50,11 @@ interface RunResult {
   stdout: string;
 }
 
-function run(
-  cmd: string[],
-  cwd: string,
-  options: { input?: string; extraEnv?: Record<string, string> } = {},
-): RunResult {
+function run(cmd: string[], cwd: string, options: { extraEnv?: Record<string, string> } = {}): RunResult {
   const proc = Bun.spawnSync(cmd, {
     cwd,
     env: { ...process.env, ...options.extraEnv },
-    stdin: options.input === undefined ? 'ignore' : new TextEncoder().encode(options.input),
+    stdin: 'ignore',
     stdout: 'pipe',
     stderr: 'pipe',
   });
@@ -61,7 +64,7 @@ function run(
   return { code: proc.exitCode ?? 1, out, stdout };
 }
 
-const wrangler = (args: string[], options: { input?: string; extraEnv?: Record<string, string> } = {}) =>
+const wrangler = (args: string[], options: { extraEnv?: Record<string, string> } = {}) =>
   run([process.execPath, 'x', 'wrangler', ...args], workerDir, options);
 
 function step(title: string) {
@@ -188,32 +191,6 @@ const urlsChanged =
 if (urlsChanged && !configChanged.includes('apps/web/wrangler.jsonc'))
   configChanged.push('apps/web/wrangler.jsonc');
 
-step('Sekret AUTH_SECRET');
-
-// Nieudana lista (blad API, limit, siec) to przerwanie, nie „brak sekretu”: nowy losowy AUTH_SECRET wylogowalby
-// wszystkich uzytkownikow zywego srodowiska.
-const secrets = wrangler(['secret', 'list', '--env', env, '--format', 'json']);
-
-if (secrets.code !== 0) {
-  fail('Nie udalo sie pobrac listy sekretow (AUTH_SECRET bez zmian), uruchom deploy ponownie', secrets.out);
-}
-
-const secretList = secretNames(secrets.stdout);
-
-if (secretList === null) fail('Nieczytelna lista sekretow z wranglera (AUTH_SECRET bez zmian)', secrets.out);
-
-if (secretList.includes('AUTH_SECRET')) {
-  console.log('  jest');
-} else {
-  const put = wrangler(['secret', 'put', 'AUTH_SECRET', '--env', env], {
-    input: randomBytes(32).toString('base64'),
-  });
-
-  if (put.code !== 0) fail('Nie udalo sie ustawic AUTH_SECRET', put.out);
-
-  console.log('  ustawiony (losowy, 32 bajty)');
-}
-
 if (urlsChanged) {
   step('Ponowny deploy z prawdziwym adresem');
   buildAndDeploy();
@@ -226,10 +203,25 @@ if (configChanged.length > 0) {
   console.log(`\nZmienione pliki konfiguracji (zacommituj je): ${configChanged.join(', ')}`);
 }
 
-const appUrl = workerUrl ?? 'adres z wrangler.jsonc';
+// Sekrety ustawia czlowiek (`wrangler secret put` pyta o wartosc). Skrypt tylko sprawdza, czego brakuje: bez nich
+// aplikacja dziala, ale bez map BDOT10k (DATABASE_URL) i zdjec satelitarnych (COPERNICUS_*).
+step('Sekrety');
 
-// Konta sa opcjonalne (AUTH_ENABLED): podpowiedz, jak nadac role pierwszemu kontu
-console.log(
-  `\nKonto admina (gdy AUTH_ENABLED=true): zarejestruj sie na ${appUrl}/sign-up, potem\n  bun run admin:grant -- twoj@email.pl admin --remote` +
-    (env === 'preview' ? ' --env preview' : ''),
-);
+const secrets = wrangler(['secret', 'list', '--env', env, '--format', 'json']);
+const secretList = secrets.code === 0 ? secretNames(secrets.stdout) : null;
+
+if (secretList === null) {
+  console.log(
+    `  nie udalo sie odczytac listy sekretow - sprawdz recznie: bunx wrangler secret list --env ${env}`,
+  );
+} else {
+  const missing = missingSecrets(secretList);
+
+  if (missing.length === 0) {
+    console.log(`  komplet (${REQUIRED_SECRETS.join(', ')})`);
+  } else {
+    console.log(`  brakuje: ${missing.join(', ')}. Ustaw w apps/web:`);
+
+    for (const name of missing) console.log(`    bunx wrangler secret put ${name} --env ${env}`);
+  }
+}

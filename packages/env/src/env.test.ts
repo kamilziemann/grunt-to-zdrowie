@@ -15,7 +15,6 @@ describe('parseServerVars', () => {
       LOG_LEVEL: 'info',
       PUBLIC_URL: 'http://localhost:8787',
       ALLOWED_ORIGINS: '',
-      AUTH_ENABLED: false,
     });
   });
 
@@ -27,47 +26,11 @@ describe('parseServerVars', () => {
     expect(run).toThrow(/ENVIRONMENT/);
   });
 
-  it('ENVIRONMENT jest wymagane: brak nie oznacza po cichu development (panel bez auth, tresc bledow)', () => {
+  it('ENVIRONMENT jest wymagane: brak nie oznacza po cichu development (tresc bledow)', () => {
     const run = () => parseServerVars({ PUBLIC_URL: 'http://localhost:8787' });
 
     expect(run).toThrow(EnvError);
     expect(run).toThrow(/ENVIRONMENT/);
-  });
-});
-
-describe('parseServerVars: auth', () => {
-  const base = LOCAL;
-  const secret = 'x'.repeat(32);
-
-  it('auth jest domyslnie wylaczone i nie wymaga sekretu', () => {
-    expect(parseServerVars(base).AUTH_ENABLED).toBe(false);
-    expect(parseServerVars({ ...base, AUTH_ENABLED: 'false' }).AUTH_ENABLED).toBe(false);
-  });
-
-  it('AUTH_ENABLED=true bez AUTH_SECRET to blad z nazwa pola', () => {
-    const run = () => parseServerVars({ ...base, AUTH_ENABLED: 'true' });
-
-    expect(run).toThrow(EnvError);
-    expect(run).toThrow(/AUTH_SECRET: required when AUTH_ENABLED=true/);
-  });
-
-  it('pusty albo za krotki sekret przy wlaczonym auth to blad', () => {
-    expect(() => parseServerVars({ ...base, AUTH_ENABLED: 'true', AUTH_SECRET: '' })).toThrow(/AUTH_SECRET/);
-    expect(() => parseServerVars({ ...base, AUTH_ENABLED: 'true', AUTH_SECRET: 'short' })).toThrow(
-      /AUTH_SECRET/,
-    );
-  });
-
-  it('wlaczone auth z sekretem przechodzi; AUTH_URL jest opcjonalny', () => {
-    const v = parseServerVars({ ...base, AUTH_ENABLED: 'true', AUTH_SECRET: secret, AUTH_URL: '' });
-
-    expect(v).toMatchObject({ AUTH_ENABLED: true, AUTH_SECRET: secret });
-    expect(v.AUTH_URL).toBeUndefined();
-    expect(() => parseServerVars({ ...base, AUTH_URL: 'nope' })).toThrow(/AUTH_URL/);
-  });
-
-  it('sekret bez wlaczenia auth jest ignorowany bez bledu', () => {
-    expect(parseServerVars({ ...base, AUTH_SECRET: 'short' }).AUTH_ENABLED).toBe(false);
   });
 });
 

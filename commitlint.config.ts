@@ -11,7 +11,6 @@ const config: UserConfig = {
         'server',
         'contracts',
         'db',
-        'auth',
         'env',
         'http',
         'rpc',

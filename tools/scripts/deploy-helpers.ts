@@ -61,7 +61,7 @@ export function patchD1DatabaseId(config: string, env: DeployEnv, uuid: string):
 
 /**
  * Nazwy sekretow Workera z wyniku `wrangler secret list --format json` (stdout). null = wynik nieczytelny: wtedy
- * deploy przerywa, zamiast uznac sekret za brakujacy i nadpisac go nowa wartoscia.
+ * deploy mowi, ze nie zna listy, zamiast zglaszac wszystkie sekrety jako brakujace.
  */
 export function secretNames(stdout: string): string[] | null {
   const start = stdout.indexOf('[');
@@ -84,4 +84,12 @@ export function secretNames(stdout: string): string[] | null {
   } catch {
     return null;
   }
+}
+
+/** Sekrety, bez ktorych aplikacja traci zrodla danych (mapy BDOT10k z Neona, Sentinel-2 z Copernicusa). */
+export const REQUIRED_SECRETS = ['DATABASE_URL', 'COPERNICUS_CLIENT_ID', 'COPERNICUS_CLIENT_SECRET'] as const;
+
+/** Sekrety z `REQUIRED_SECRETS`, ktorych nie ma na liscie Workera (kolejnosc jak w `REQUIRED_SECRETS`). */
+export function missingSecrets(listed: readonly string[]): string[] {
+  return REQUIRED_SECRETS.filter((name) => !listed.includes(name));
 }

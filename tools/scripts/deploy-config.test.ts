@@ -1,5 +1,5 @@
 // Niezmienniki konfiguracji jedynego Workera (apps/web/wrangler.jsonc), na ktorych polega tools/scripts/deploy.ts:
-// blok top-level to lokalny development (ENVIRONMENT=development, auth wylaczone, nazwy *-dev), wiec deploy bez --env
+// blok top-level to lokalny development (ENVIRONMENT=development, nazwy *-dev), wiec deploy bez --env
 // nie trafi na zasoby preview/produkcji; kazde srodowisko ma Workers Cache i API pod /api tego samego originu.
 import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
@@ -53,15 +53,12 @@ describe('apps/web/wrangler.jsonc (jedyny Worker)', () => {
     expect(shared).toEqual([]);
   });
 
-  // AUTH_ENABLED nie dziedziczy sie miedzy srodowiskami: kazdy blok ustawia je jawnie ("true" albo "false").
-  it('top-level to development, a kazde env ma swoja wartosc ENVIRONMENT i jawne AUTH_ENABLED', () => {
+  it('top-level to development, a kazde env ma swoja wartosc ENVIRONMENT', () => {
     expect(worker.vars?.ENVIRONMENT).toBe('development');
 
     for (const env of DEPLOY_ENVS) {
       expect(worker.env[env].vars?.ENVIRONMENT).toBe(env);
     }
-
-    expect(blocks.every((block) => ['true', 'false'].includes(block.vars?.AUTH_ENABLED ?? ''))).toBe(true);
   });
 
   // Stack trace'y w Cloudflare Observability ze zrodla zamiast z minifikatu (bledy z /api/telemetry/errors i SSR).

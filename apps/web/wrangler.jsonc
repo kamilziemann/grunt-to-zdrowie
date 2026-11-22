@@ -46,7 +46,6 @@
   "vars": {
     "ENVIRONMENT": "development",
     "LOG_LEVEL": "debug",
-    "AUTH_ENABLED": "false",
     "PUBLIC_URL": "http://localhost:3000/api",
     "ALLOWED_ORIGINS": "http://localhost:3000",
     // Sentry domyslnie wylaczony (SENTRY_DSN jako sekret: wrangler secret put SENTRY_DSN)
@@ -68,7 +67,6 @@
       "vars": {
         "ENVIRONMENT": "preview",
         "LOG_LEVEL": "info",
-        "AUTH_ENABLED": "false",
         "PUBLIC_URL": "https://grunt-to-zdrowie-preview.YOUR-SUBDOMAIN.workers.dev/api",
         "ALLOWED_ORIGINS": "https://grunt-to-zdrowie-preview.YOUR-SUBDOMAIN.workers.dev",
         "SENTRY_ENABLED": "false",
@@ -91,7 +89,6 @@
       "vars": {
         "ENVIRONMENT": "production",
         "LOG_LEVEL": "info",
-        "AUTH_ENABLED": "false",
         "PUBLIC_URL": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev/api",
         "ALLOWED_ORIGINS": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev",
         "SENTRY_ENABLED": "false",

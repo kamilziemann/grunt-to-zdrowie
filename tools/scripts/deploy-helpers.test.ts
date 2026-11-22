@@ -8,8 +8,10 @@ import {
   D1_ID_PLACEHOLDERS,
   DEPLOY_ENVS,
   d1DatabaseId,
+  missingSecrets,
   parseDeployEnv,
   patchD1DatabaseId,
+  REQUIRED_SECRETS,
   secretNames,
   type DeployEnv,
 } from './deploy-helpers';
@@ -64,18 +66,29 @@ const ids = (config: string) => {
 describe('secretNames', () => {
   it('czyta nazwy z JSON wranglera (takze po banerze i pustej liscie)', () => {
     const listed =
-      '[{"name":"AUTH_SECRET","type":"secret_text"},{"name":"GEMINI_API_KEY","type":"secret_text"}]';
+      '[{"name":"DATABASE_URL","type":"secret_text"},{"name":"COPERNICUS_CLIENT_ID","type":"secret_text"}]';
 
-    expect(secretNames(listed)).toEqual(['AUTH_SECRET', 'GEMINI_API_KEY']);
-    expect(secretNames(`wrangler 4.151.1\n${listed}\n`)).toEqual(['AUTH_SECRET', 'GEMINI_API_KEY']);
+    expect(secretNames(listed)).toEqual(['DATABASE_URL', 'COPERNICUS_CLIENT_ID']);
+    expect(secretNames(`wrangler 4.151.1\n${listed}\n`)).toEqual(['DATABASE_URL', 'COPERNICUS_CLIENT_ID']);
     expect(secretNames('[]')).toEqual([]);
   });
 
-  it('nieczytelny wynik = null (deploy przerywa, AUTH_SECRET nie jest nadpisywany)', () => {
+  it('nieczytelny wynik = null (deploy nie zgaduje, czego brakuje)', () => {
     expect(secretNames('')).toBeNull();
     expect(secretNames('X [ERROR] A request to the Cloudflare API failed')).toBeNull();
-    expect(secretNames('{"name":"AUTH_SECRET"}')).toBeNull();
+    expect(secretNames('{"name":"DATABASE_URL"}')).toBeNull();
     expect(secretNames('[{"type":"secret_text"}]')).toBeNull();
+  });
+});
+
+describe('missingSecrets', () => {
+  it('wypisuje brakujace sekrety w stalej kolejnosci, komplet = pusta lista', () => {
+    expect(missingSecrets([])).toEqual([...REQUIRED_SECRETS]);
+    expect(missingSecrets(['COPERNICUS_CLIENT_SECRET', 'SENTRY_DSN'])).toEqual([
+      'DATABASE_URL',
+      'COPERNICUS_CLIENT_ID',
+    ]);
+    expect(missingSecrets([...REQUIRED_SECRETS])).toEqual([]);
   });
 });
 

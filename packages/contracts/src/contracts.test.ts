@@ -11,8 +11,6 @@ import {
   parcelBoundaryTileQuerySchema,
   problemDetailsSchema,
   problemType,
-  signInInputSchema,
-  signUpInputSchema,
 } from './index';
 
 describe('problems', () => {
@@ -37,26 +35,6 @@ describe('listQuerySchema', () => {
     expect(listQuerySchema.parse({})).toEqual({ limit: 20 });
     expect(listQuerySchema.parse({ limit: '5' })).toEqual({ limit: 5 });
     expect(listQuerySchema.safeParse({ limit: '1000' }).success).toBe(false);
-  });
-});
-
-describe('formularze auth', () => {
-  it('rejestracja wymaga imienia, poprawnego e-maila i hasla 8+ znakow', () => {
-    const ok = { name: ' Ala ', email: ' ala@example.com ', password: 'dlugie-haslo' };
-
-    expect(signUpInputSchema.parse(ok)).toEqual({
-      name: 'Ala',
-      email: 'ala@example.com',
-      password: 'dlugie-haslo',
-    });
-    expect(signUpInputSchema.safeParse({ ...ok, password: 'krotkie' }).success).toBe(false);
-    expect(signUpInputSchema.safeParse({ ...ok, email: 'nie-email' }).success).toBe(false);
-    expect(signUpInputSchema.safeParse({ ...ok, name: ' ' }).success).toBe(false);
-  });
-
-  it('logowanie wymaga e-maila i niepustego hasla', () => {
-    expect(signInInputSchema.safeParse({ email: 'a@b.pl', password: 'x' }).success).toBe(true);
-    expect(signInInputSchema.safeParse({ email: 'a@b.pl', password: '' }).success).toBe(false);
   });
 });
 

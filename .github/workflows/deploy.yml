@@ -4,11 +4,10 @@
 #   sekrety:  CLOUDFLARE_API_TOKEN (token API: Workers Scripts, D1, R2, Queues - edycja; Workers AI - odczyt),
 #             CLOUDFLARE_ACCOUNT_ID
 #   zmienne:  WEB_URL (opcjonalnie, link przy deploymencie), VITE_SITE_URL (opcjonalnie: adres kanoniczny i hreflang)
-#   Sekrety Workera API nie przechodza przez CI. AUTH_SECRET jest WYMAGANY w preview/production (AUTH_ENABLED="true";
-#   bez niego kazde zapytanie API = 503 not_configured, a cron nie rusza) - ustawia go `bun run deploy` przy pierwszym
-#   deployu srodowiska albo `wrangler secret put AUTH_SECRET --env <env>` w apps/web. Opcjonalne: GEMINI_API_KEY,
-#   ANTHROPIC_API_KEY, NOTIFY_WEBHOOK_URL, SENTRY_DSN. Pierwszy deploy srodowiska rob lokalnie `bun run deploy`
-#   (zaklada baze D1, bucket i kolejki, wpisuje id bazy, ustawia AUTH_SECRET); CI robi kolejne.
+#   Sekrety Workera nie przechodza przez CI: DATABASE_URL, COPERNICUS_CLIENT_ID, COPERNICUS_CLIENT_SECRET (bez nich
+#   aplikacja dziala, ale bez map BDOT10k i zdjec satelitarnych), opcjonalnie SENTRY_DSN - ustawia je czlowiek:
+#   `wrangler secret put <NAZWA> --env <env>` w apps/web. Pierwszy deploy srodowiska rob lokalnie `bun run deploy`
+#   (zaklada baze D1, wpisuje id bazy, stosuje migracje i wypisuje brakujace sekrety); CI robi kolejne.
 #
 # Kiedy:
 #   push na main          -> production
