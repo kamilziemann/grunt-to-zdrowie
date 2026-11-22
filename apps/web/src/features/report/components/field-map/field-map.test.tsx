@@ -156,6 +156,10 @@ describe('FieldMap', () => {
     expect(screen.getByTestId('field-satellite-notes')).toHaveTextContent(
       'Zdjęcie satelitarne z 29 maja 2018.',
     );
+    // podpis z data zdjecia satelitarnego stoi tylko przy obrazie z satelity - nie przy szkicu
+    expect(screen.getByTestId('field-map')).toHaveTextContent('zdjęcie z 29 maja 2018');
+    fireEvent.click(screen.getByRole('button', { name: 'Szkic' }));
+    expect(screen.getByTestId('field-map')).not.toHaveTextContent('zdjęcie z 29 maja 2018');
     window.localStorage.removeItem('gtz-field-map-mode');
   });
 

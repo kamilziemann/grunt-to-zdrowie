@@ -292,7 +292,8 @@ export function FieldMap({
     );
   }
 
-  const scene = satellite.state.kind === 'ready' ? satellite.state.data.sceneDate : null;
+  // podpis z data zdjecia tylko w trybie satelitarnym (zapytanie trzyma ostatni obraz takze po zmianie trybu)
+  const scene = layer && satellite.state.kind === 'ready' ? satellite.state.data.sceneDate : null;
 
   return (
     <section
