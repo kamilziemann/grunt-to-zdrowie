@@ -375,7 +375,8 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
     ...(deficitNow ? weatherCauses(input, assessment) : []),
     soilCause(input, real),
     ...landscapeCauses(input, real),
-    cropCause(history),
+    // "uprawa jest teraz wrazliwa" ma sens tylko, gdy uprawa rosnie - poza sezonem przeczylaby "rosliny nie rosna"
+    input.crop.kc === null ? null : cropCause(history),
   ].filter((cause): cause is Cause => cause !== null);
 
   return found.toSorted((a, b) => b.weight - a.weight);

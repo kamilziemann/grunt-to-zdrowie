@@ -52,8 +52,11 @@ const MOISTURE: Record<NonNullable<Zone['moisture']>, string> = {
 /** Powierzchnia "ok. 0,8 ha" (ponizej 0,1 ha - dwa miejsca po przecinku). */
 export function approxHectares(areaHa: number): string {
   const digits = areaHa < 0.1 ? 2 : 1;
+  const scale = 10 ** digits;
+  // zaokraglenie jak na ekranie (Intl: 0,35 -> 0,4); samo toFixed dawalo 0,3, a karta miejsca 0,4 ha
+  const rounded = Math.round((areaHa + Number.EPSILON) * scale) / scale;
 
-  return `ok. ${areaHa.toFixed(digits).replace('.', ',')} ha`;
+  return `ok. ${rounded.toFixed(digits).replace('.', ',')} ha`;
 }
 
 const decimal = (value: number, digits = 1): string => value.toFixed(digits).replace('.', ',');

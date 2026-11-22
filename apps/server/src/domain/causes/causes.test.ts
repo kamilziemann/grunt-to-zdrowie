@@ -260,8 +260,8 @@ describe('causes', () => {
     expect(deficitSeasons(recurrent)).toEqual({ deficit: 5, withData: 10 });
     expect(recurrentDeficit(recurrent)).toBe(true);
     expect(recurrentDeficit({ ...recurrent, seasons: recurrent.seasons.slice(0, 4) })).toBe(false);
+    // bez "uprawa jest teraz wrazliwa" - poza sezonem uprawa nie rosnie
     expect(ids(wet, assessment, recurrent).toSorted()).toEqual([
-      'crop_sensitivity',
       'low_soil_retention',
       'no_landscape_retention',
     ]);

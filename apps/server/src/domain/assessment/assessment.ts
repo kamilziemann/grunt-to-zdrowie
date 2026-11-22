@@ -139,7 +139,12 @@ function rootZone(input: StageInput): { zone: RootZone; today: RootZoneDay } | n
   const recentFrom = addDays(input.date, -(STRESS_WINDOW_DAYS - 1));
   const recent = seasonStress(simulation.days, recentFrom, input.date);
   const season = seasonStress(simulation.days, isoDate(yearOf(input.date), 1, 1), input.date);
-  const deficitShare = etDeficitShare(simulation.days, addDays(input.date, -(WINDOW_DAYS - 1)), input.date);
+  // udzial niedoboru z 60 dni tylko, gdy uprawa rosnie w dniu analizy - poza sezonem liczylby zamkniety sezon i
+  // przeczyl wykresowi "ile padalo, ile wypily rosliny" z tych samych dni
+  const deficitShare =
+    today.kc === null
+      ? null
+      : etDeficitShare(simulation.days, addDays(input.date, -(WINDOW_DAYS - 1)), input.date);
 
   return {
     today,

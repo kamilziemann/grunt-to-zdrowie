@@ -108,7 +108,9 @@ function stressStreak(days: readonly RootZoneDay[]): number {
   for (let index = days.length - 1; index >= 0; index -= 1) {
     const day = days[index];
 
-    if (!day || day.depletionMm <= day.readilyAvailableMm) break;
+    // to samo kryterium co dni stresu w sezonie (ocena, historia): uprawa rosnie i Ks < 1 - inaczej seria bywala
+    // dluzsza niz liczba dni stresu w calym sezonie
+    if (!day || day.kc === null || day.stressCoefficient >= 1) break;
 
     streak += 1;
   }
