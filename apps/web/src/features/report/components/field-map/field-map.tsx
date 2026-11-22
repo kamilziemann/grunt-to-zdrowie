@@ -1,4 +1,4 @@
-import type { FieldArea, HydroFeature, HydroTile } from '@app/contracts';
+import type { ContextFeature, ContextTile, FieldArea, HydroFeature, HydroTile } from '@app/contracts';
 import { useQueries, type UseQueryResult } from '@tanstack/react-query';
 import { PenLine, Satellite } from 'lucide-react';
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
 import { hydroTileQuery } from '@/features/parcels';
-import { buildFieldSketch, SKETCH_RADIUS_M } from '@/lib/field-sketch';
+import { buildFieldSketch, fetchContextTile, SKETCH_RADIUS_M } from '@/lib/field-sketch';
 import {
   hydroTiles,
   hydroWithin,
@@ -59,6 +59,16 @@ function combineTiles(results: UseQueryResult<HydroTile>[]): { state: HydroState
   };
 }
 
+const CONTEXT_LAYERS = ['cover', 'waterworks'] as const;
+const NO_CONTEXT: readonly ContextFeature[] = [];
+
+/** Otoczenie pola z kafli, ktore juz przyszly; blad albo brak bazy = szkic bez tej warstwy (to tylko tlo). */
+function combineContext(results: UseQueryResult<ContextTile>[]): readonly ContextFeature[] {
+  const features = results.flatMap((result) => result.data?.features ?? []);
+
+  return features.length > 0 ? features : NO_CONTEXT;
+}
+
 /** Numer dzialki z opisu pola ("349/1 · Gmina") - podpis na szkicu. */
 function fieldNumber(label: string): string {
   return label.split(' · ')[0] ?? label;
@@ -99,6 +109,19 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
     [zones],
   );
   const radius = zoneShapes.length > 0 ? ZONES_RADIUS_M : SKETCH_RADIUS_M;
+  // kafle otoczenia tylko w zasiegu szkicu (z zapasem na proporcje rysunku)
+  const contextTiles = useMemo(() => hydroTiles(...expand(field.bbox, radius * 1.6)), [field.bbox, radius]);
+  const context = useQueries({
+    queries: contextTiles.flatMap((tile) =>
+      CONTEXT_LAYERS.map((layer) => ({
+        queryKey: ['context-tile', layer, tile.x, tile.y] as const,
+        queryFn: ({ signal }: { signal: AbortSignal }) => fetchContextTile(layer, tile.x, tile.y, signal),
+        staleTime: Infinity,
+        retry: false,
+      })),
+    ),
+    combine: combineContext,
+  });
   const zoneKinds = useMemo(() => zoneMarks.map((zone) => zone.kind), [zoneMarks]);
   const sketch = useMemo(
     () =>
@@ -106,8 +129,9 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
         ditchInFieldM,
         zones: zoneShapes,
         radiusM: radius,
+        context,
       }),
-    [field, hydro, ditchInFieldM, zoneShapes, radius],
+    [field, hydro, ditchInFieldM, zoneShapes, radius, context],
   );
   const { active, setActive, sketchRef } = useZoneFocus();
   const fail = useCallback(() => setFailed(true), []);

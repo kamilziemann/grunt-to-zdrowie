@@ -21,6 +21,9 @@ const MODEL: FieldSketchModel = {
   groups: [],
   scale: { meters: 250, length: 140 },
   zones: [],
+  woods: [],
+  treeRows: [],
+  structures: [],
 };
 
 const CROWDED: FieldSketchModel = {

@@ -361,3 +361,67 @@ describe('miejsca na polu', () => {
     expect(model.zones[0]?.labelAt[1]).toBeCloseTo(model.fieldCenter[1], -1);
   });
 });
+
+describe('otoczenie pola na szkicu', () => {
+  it('las jako obrys, rzad drzew jako linia, jaz jako znak; obiekty spoza widoku i obszary chronione pominiete', () => {
+    const sketch = buildFieldSketch(FIELD, CENTER, [], {
+      context: [
+        {
+          kind: 'forest',
+          name: null,
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [21.5915, 52.172],
+                [21.592, 52.172],
+                [21.592, 52.1726],
+                [21.5915, 52.172],
+              ],
+            ],
+          },
+        },
+        {
+          kind: 'hedge',
+          name: null,
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [21.59, 52.1718],
+              [21.591, 52.1718],
+            ],
+          },
+        },
+        { kind: 'weir', name: 'Jaz Młyn', geometry: { type: 'Point', coordinates: [21.5895, 52.1723] } },
+        // ok. 7 km dalej - poza widokiem
+        { kind: 'dam', name: null, geometry: { type: 'Point', coordinates: [21.69, 52.1723] } },
+        {
+          kind: 'natura2000',
+          name: 'Dolina',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [21.58, 52.16],
+                [21.6, 52.16],
+                [21.6, 52.18],
+                [21.58, 52.16],
+              ],
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(sketch.woods).toHaveLength(1);
+    expect(sketch.woods[0]).toMatch(/Z$/);
+    expect(sketch.treeRows).toHaveLength(1);
+    expect(sketch.structures).toMatchObject([{ kind: 'weir', name: 'Jaz Młyn' }]);
+  });
+
+  it('bez otoczenia: puste warstwy', () => {
+    const sketch = buildFieldSketch(FIELD, CENTER, []);
+
+    expect([sketch.woods, sketch.treeRows, sketch.structures]).toEqual([[], [], []]);
+  });
+});

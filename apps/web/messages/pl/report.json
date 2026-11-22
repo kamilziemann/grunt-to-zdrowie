@@ -651,10 +651,13 @@
           "depression": "Kreski – zagłębienie bez odpływu",
           "flow_path": "Linia przerywana – droga spływu wody",
           "segment": "Odcinek pola (obrys przerywany)"
-        }
+        },
+        "woods": "Las albo zadrzewienie",
+        "treeRows": "Rząd drzew albo żywopłot",
+        "structures": "Jaz, zapora albo śluza"
       },
-      "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
-      "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK."
+      "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
+      "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK."
     }
   },
   "print": {

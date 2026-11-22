@@ -250,4 +250,38 @@ test.describe('otoczenie pola', () => {
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   });
+
+  test('szkic: las, żywopłot i jaz z kafli otoczenia, z legendą', async ({ page }) => {
+    const [lng, lat] = HEAT_REPORT.field.centroid;
+
+    await page.route('**/api/context/tile**', (route) => {
+      const layer = new URL(route.request().url()).searchParams.get('layer');
+      const features =
+        layer === 'waterworks'
+          ? [{ kind: 'weir', name: null, geometry: { type: 'Point', coordinates: [lng + 0.0005, lat] } }]
+          : [
+              {
+                kind: 'hedge',
+                name: null,
+                geometry: {
+                  type: 'LineString',
+                  coordinates: [
+                    [lng - 0.001, lat - 0.0005],
+                    [lng + 0.001, lat - 0.0005],
+                  ],
+                },
+              },
+            ];
+
+      return route.fulfill({ json: { layer, features, truncated: false, importedAt: null } });
+    });
+    await mockReport(page, HEAT_REPORT);
+    await page.goto(reportUrl(HEAT_REPORT));
+
+    const legend = page.getByTestId('field-sketch-legend');
+
+    await expect(page.getByTestId('field-sketch-structure').first()).toBeAttached();
+    await expect(legend).toContainText('Rząd drzew albo żywopłot');
+    await expect(legend).toContainText('Jaz, zapora albo śluza');
+  });
 });

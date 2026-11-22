@@ -2,7 +2,14 @@
 // w promieniu SKETCH_RADIUS_M, sciezki SVG, podzialka, jeden wyrozniony fakt (row przez pole albo najblizszy row
 // lub ciek z linia wymiarowa; kazdy osobny row w polu z wlasnym punktem odniesienia) i miejsca na polu (strefy z raportu) z punktem na numer. Sam model - rysuje go
 // komponent raportu (`FieldSketch`).
-import type { HydroFeature, HydroFeatureKind, ParcelGeometry, Zone } from '@app/contracts';
+import type {
+  ContextFeature,
+  HydroFeature,
+  HydroFeatureKind,
+  ParcelGeometry,
+  WaterStructureKind,
+  Zone,
+} from '@app/contracts';
 import type { Position } from 'geojson';
 
 import { distanceM, WATERCOURSE_KINDS } from '@/lib/hydro-map';
@@ -79,6 +86,21 @@ export interface SketchZone {
   labelAt: SketchPoint;
 }
 
+/** Jaz, zapora albo sluza z otoczenia pola - znak na szkicu. */
+export interface SketchStructure {
+  kind: WaterStructureKind;
+  name: string | null;
+  at: SketchPoint;
+}
+
+const WOOD_KINDS: ReadonlySet<ContextFeature['kind']> = new Set(['forest', 'grove', 'woodland']);
+const TREE_ROW_KINDS: ReadonlySet<ContextFeature['kind']> = new Set(['tree_row', 'hedge']);
+const STRUCTURE_KINDS: ReadonlySet<string> = new Set<WaterStructureKind>(['weir', 'dam', 'lock']);
+
+function isStructureKind(kind: ContextFeature['kind']): kind is WaterStructureKind {
+  return STRUCTURE_KINDS.has(kind);
+}
+
 export interface FieldSketchModel {
   width: number;
   height: number;
@@ -99,6 +121,10 @@ export interface FieldSketchModel {
   scale: { meters: number; length: number };
   /** miejsca na polu w kolejnosci z raportu */
   zones: SketchZone[];
+  /** otoczenie pola (BDOT10k): lasy i zadrzewienia (poligony), rzedy drzew i zywoploty (linie), jazy/zapory/sluzy */
+  woods: string[];
+  treeRows: string[];
+  structures: SketchStructure[];
 }
 
 /** Rzut rownoodlegosciowy wokol punktu: [metry na wschod, metry na polnoc]; na kilka kilometrow wystarczy. */
@@ -426,6 +452,8 @@ export interface FieldSketchOptions {
   radiusM?: number;
   /** miejsca na polu z raportu (`report.zones.zones`) */
   zones?: readonly Pick<Zone, 'id' | 'geometry'>[];
+  /** otoczenie pola z kafli `/api/context/tile` (warstwy cover i waterworks); reszta rodzajow jest pomijana */
+  context?: readonly ContextFeature[];
 }
 
 /**
@@ -436,7 +464,7 @@ export function buildFieldSketch(
   geometry: ParcelGeometry,
   centroid: Position,
   features: readonly HydroFeature[],
-  { ditchInFieldM = null, radiusM = SKETCH_RADIUS_M, zones = [] }: FieldSketchOptions = {},
+  { ditchInFieldM = null, radiusM = SKETCH_RADIUS_M, zones = [], context = [] }: FieldSketchOptions = {},
 ): FieldSketchModel {
   const project = localProjection(centroid);
   const rings = paths(geometry).map((ring) => ring.map(project));
@@ -598,6 +626,55 @@ export function buildFieldSketch(
     };
   });
 
+  // otoczenie: obiekty, ktorych prostokat zahacza o widok (kazdy raz, jak hydrografia); reszte przycina clipPath
+  const woods: string[] = [];
+  const treeRows: string[] = [];
+  const structures: SketchStructure[] = [];
+  const seenContext = new Set<string>();
+
+  for (const feature of context) {
+    const key = `${feature.kind}|${JSON.stringify(feature.geometry.coordinates)}`;
+
+    if (seenContext.has(key)) continue;
+
+    seenContext.add(key);
+    const projected =
+      feature.geometry.type === 'Point'
+        ? [[project(feature.geometry.coordinates)]]
+        : paths(feature.geometry).map((path) => path.map(project));
+    const points = projected.flat();
+    const fx = points.map((point) => point[0]);
+    const fy = points.map((point) => point[1]);
+
+    if (
+      points.length === 0 ||
+      Math.max(...fx) < minX ||
+      Math.min(...fx) > maxX ||
+      Math.max(...fy) < minY ||
+      Math.min(...fy) > maxY
+    ) {
+      continue;
+    }
+
+    if (WOOD_KINDS.has(feature.kind) && feature.geometry.type !== 'Point' && !isLine(feature.geometry)) {
+      woods.push(projected.map((path) => d(path, true)).join(''));
+    } else if (TREE_ROW_KINDS.has(feature.kind)) {
+      treeRows.push(projected.map((path) => d(path, false)).join(''));
+    } else if (isStructureKind(feature.kind)) {
+      // znak w srodku obiektu (punkt, srodek linii albo srednia wierzcholkow obrysu), tylko gdy lezy w widoku
+      const at: Meters =
+        feature.geometry.type === 'Point'
+          ? (points[0] ?? [0, 0])
+          : isLine(feature.geometry)
+            ? midpoint(projected[0] ?? [])
+            : [fx.reduce((a, b) => a + b, 0) / fx.length, fy.reduce((a, b) => a + b, 0) / fy.length];
+
+      if (inView(at)) {
+        structures.push({ kind: feature.kind, name: feature.name, at: toSvg(at) });
+      }
+    }
+  }
+
   return {
     width: SKETCH_WIDTH,
     height: Math.round((maxY - minY) * k),
@@ -612,5 +689,8 @@ export function buildFieldSketch(
     groups: [...groups],
     scale: { meters, length: meters * k },
     zones: sketchZones,
+    woods,
+    treeRows,
+    structures,
   };
 }

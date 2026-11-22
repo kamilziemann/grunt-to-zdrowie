@@ -16,6 +16,47 @@ function Sample({ children }: { children: ReactNode }) {
 }
 
 const SAMPLES = {
+  woods: (
+    <Sample>
+      <rect
+        x="2"
+        y="2"
+        width="28"
+        height="12"
+        fill="none"
+        stroke="var(--muted-foreground)"
+        strokeWidth="0.8"
+        strokeOpacity="0.6"
+      />
+      {[7, 16, 25].map((x) => (
+        <circle
+          key={x}
+          cx={x}
+          cy={x === 16 ? 10 : 6}
+          r="1.8"
+          fill="none"
+          stroke="var(--muted-foreground)"
+          strokeWidth="0.9"
+        />
+      ))}
+    </Sample>
+  ),
+  treeRows: (
+    <Sample>
+      <path
+        d="M3 8H29"
+        stroke="var(--muted-foreground)"
+        strokeWidth="3"
+        strokeDasharray="0 5"
+        strokeLinecap="round"
+      />
+    </Sample>
+  ),
+  structures: (
+    <Sample>
+      <rect x="9" y="5" width="14" height="6" rx="1" fill="var(--foreground)" />
+    </Sample>
+  ),
   field: (
     <Sample>
       <rect
@@ -162,6 +203,16 @@ export function SketchLegend({
           ? t('watercourseNamed', { names: names.join(', ') })
           : t(group),
     });
+  }
+
+  // otoczenie pola: te same znaki co na szkicu
+  if (model.woods.length > 0) items.push({ key: 'woods', sample: SAMPLES.woods, text: t('woods') });
+
+  if (model.treeRows.length > 0)
+    items.push({ key: 'treeRows', sample: SAMPLES.treeRows, text: t('treeRows') });
+
+  if (model.structures.length > 0) {
+    items.push({ key: 'structures', sample: SAMPLES.structures, text: t('structures') });
   }
 
   return (

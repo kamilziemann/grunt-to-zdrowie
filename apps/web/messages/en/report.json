@@ -651,10 +651,13 @@
           "depression": "Lines – hollow without outflow",
           "flow_path": "Dashed line – where water runs off",
           "segment": "Section of the field (dashed outline)"
-        }
+        },
+        "woods": "Forest or woodland",
+        "treeRows": "Tree row or hedge",
+        "structures": "Weir, dam or lock"
       },
-      "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
-      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
+      "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
+      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
     }
   },
   "print": {

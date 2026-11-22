@@ -268,7 +268,7 @@ const LINE_STYLE: Record<
 };
 
 /**
- * Szkic pola w skali: obrys pola, rowy i cieki liniami (grubosc i wzor zamiast samego koloru), wody wypelnieniem,
+ * Szkic pola w skali: lasy i rzedy drzew z otoczenia, jazy, obrys pola, rowy i cieki liniami (grubosc i wzor zamiast samego koloru), wody wypelnieniem,
  * mokradla kreskowaniem z przerywanym obrysem, podzialka, strzalka polnocy, podpis pola i jeden wyrozniony fakt
  * (linia odniesienia albo linia wymiarowa). Czysty SVG: ostry na wydruku, tokeny koloru dzialaja w obu motywach.
  */
@@ -292,6 +292,7 @@ export function FieldSketch({
   const clipId = `${id}-clip`;
   const hatchId = `${id}-hatch`;
   const patternId = `${id}-zone`;
+  const woodId = `${id}-wood`;
   const marks = new Map(zones.map((zone) => [zone.id, zone]));
   const drawnZones = model.zones.flatMap((shape) => {
     const mark = marks.get(shape.id);
@@ -379,9 +380,35 @@ export function FieldSketch({
             />
           </pattern>
           <ZonePatternDefs prefix={patternId} unit={unit} />
+          <WoodPattern id={woodId} unit={unit} />
         </defs>
         <rect width={width} height={height} fill="var(--card)" />
         <g clipPath={`url(#${clipId})`} aria-hidden="true">
+          {/* otoczenie pod woda i polem: las kolkami (drzewa), rzad drzew lancuchem kropek - bez polegania na kolorze */}
+          {model.woods.map((wood, index) => (
+            <path
+              key={`w${String(index)}`}
+              d={wood}
+              fill={`url(#${woodId})`}
+              fillRule="evenodd"
+              stroke="var(--muted-foreground)"
+              strokeWidth={stroke(0.8)}
+              strokeOpacity={0.6}
+              data-group="woods"
+            />
+          ))}
+          {model.treeRows.map((row, index) => (
+            <path
+              key={`t${String(index)}`}
+              d={row}
+              fill="none"
+              stroke="var(--muted-foreground)"
+              strokeWidth={stroke(3)}
+              strokeDasharray={`0 ${String(stroke(5))}`}
+              strokeLinecap="round"
+              data-group="tree-rows"
+            />
+          ))}
           {model.areas.map((area, index) =>
             area.group === 'wetland' ? (
               <path
@@ -497,6 +524,13 @@ export function FieldSketch({
             font={font}
           />
           <NorthArrow x={width - pad * 2.4} y={pad * 1.6} unit={unit} font={font} label={t('north')} />
+          {model.structures.map((structure) => (
+            <StructureMark
+              key={`${structure.kind}${String(structure.at[0])}${String(structure.at[1])}`}
+              at={structure.at}
+              unit={unit}
+            />
+          ))}
           {drawnZones.map((zone) => (
             <ZoneBadge
               key={zone.id}
@@ -511,6 +545,49 @@ export function FieldSketch({
         </g>
       </svg>
     </>
+  );
+}
+
+/** Wzor lasu: male kolka jak drzewa na mapie topograficznej - czytelny w czerni i bieli. */
+function WoodPattern({ id, unit }: { id: string; unit: number }) {
+  const size = 11 * unit;
+
+  return (
+    <pattern id={id} width={size} height={size} patternUnits="userSpaceOnUse">
+      <circle
+        cx={size / 4}
+        cy={size / 4}
+        r={1.8 * unit}
+        fill="none"
+        stroke="var(--muted-foreground)"
+        strokeWidth={0.9 * unit}
+      />
+      <circle
+        cx={(size * 3) / 4}
+        cy={(size * 3) / 4}
+        r={1.8 * unit}
+        fill="none"
+        stroke="var(--muted-foreground)"
+        strokeWidth={0.9 * unit}
+      />
+    </pattern>
+  );
+}
+
+/** Jaz, zapora albo sluza: poprzeczna belka (jak na mapach budowli wodnych), staly rozmiar na ekranie. */
+function StructureMark({ at, unit }: { at: SketchPoint; unit: number }) {
+  return (
+    <rect
+      x={at[0] - 7 * unit}
+      y={at[1] - 3 * unit}
+      width={14 * unit}
+      height={6 * unit}
+      rx={1 * unit}
+      fill="var(--foreground)"
+      stroke="var(--card)"
+      strokeWidth={1.5 * unit}
+      data-testid="field-sketch-structure"
+    />
   );
 }
 
