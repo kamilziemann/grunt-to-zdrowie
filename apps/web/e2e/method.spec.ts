@@ -4,6 +4,7 @@ import { LOW_CONFIDENCE_REPORT_URL, mockAnalysisApi } from './support/analysis-a
 
 import { expect, test } from './support/test';
 import { detailed } from './support/report-view';
+import { expectTouchTargets } from './support/touch-targets';
 
 test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z licencją', async ({ page }) => {
   await page.goto('/');
@@ -45,9 +46,10 @@ test('strona statyczna z cache brzegowym', async ({ page }) => {
   expect(response?.headers()['cache-control']).toMatch(/public/);
 });
 
-test('na telefonie bez przewijania w poziomie', async ({ page }) => {
+test('na telefonie bez przewijania w poziomie, spis treści z celami dotykowymi 44 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/jak-liczymy');
   await expect(page.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  await expectTouchTargets(page.getByRole('navigation', { name: 'Na tej stronie' }).getByRole('link'));
 });

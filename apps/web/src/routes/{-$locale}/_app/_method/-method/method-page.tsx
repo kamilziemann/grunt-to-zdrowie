@@ -93,10 +93,14 @@ export function MethodPage() {
         <h1 className="text-3xl font-semibold text-balance">{t('title')}</h1>
         <p className="text-muted-foreground">{t('lead')}</p>
         <nav aria-label={t('toc')} className="print:hidden">
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {/* cele dotykowe min. 44 px (spis czytaja tez starsi rolnicy na telefonie), podkreslenie = link */}
+          <ul className="flex flex-wrap gap-x-5 text-base">
             {SECTIONS.map((id) => (
               <li key={id}>
-                <a href={`#${id}`} className="text-primary underline-offset-4 hover:underline">
+                <a
+                  href={`#${id}`}
+                  className="inline-flex min-h-11 items-center text-primary underline decoration-1 underline-offset-4 hover:decoration-2"
+                >
                   {t(`${id}.title`)}
                 </a>
               </li>
