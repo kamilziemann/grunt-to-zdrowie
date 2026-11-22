@@ -2,6 +2,7 @@
 // Stan: tekst wyszukiwania, wskazana dzialka (podglad) i polozenie arkusza. Lista "moje dzialki" zyje w adresie
 // strony, wiec przychodzi z trasy (`ids` + `onIdsChange`) - link da sie wyslac, a odswiezenie niczego nie gubi.
 import {
+  type ContextLayer,
   PARCEL_ID_PATTERN,
   PARCEL_LIMITS,
   POLAND_BOUNDS,
@@ -21,9 +22,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from '@/lib/navigation';
 import { toProblem } from '@/lib/problems';
+import { cn } from '@/lib/utils/cn';
 import type { AppHref, FieldSearch } from '@/lib/routes';
 
 import {
+  contextTileQuery,
   hydroTileQuery,
   parcelBoundariesQuery,
   parcelSearchQuery,
@@ -34,13 +37,12 @@ import {
   type ParcelTarget,
 } from '../../api/parcels.queries';
 import { useFieldDraw, type FieldDrawMode, type SplitTarget } from '../../hooks/use-field-draw';
-import { useMapLabels } from '../../hooks/use-map-labels';
+import { useMapLayers } from '../../hooks/use-map-layers';
+import { useContextKindLabels, useMapLabels } from '../../hooks/use-map-labels';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
 import { useVegetationImagery, type ImageryChoice } from '../../hooks/use-vegetation-imagery';
 import { validateParcelSearch, type ParcelSearchError } from '../../schemas/parcel-search.schema';
 import { todayInPoland } from '../../utils/imagery-months';
-import { BasemapToggle } from '../basemap-toggle';
-import { BoundariesToggle } from '../boundaries-toggle';
 import {
   BottomSheet,
   BottomSheetBody,
@@ -49,15 +51,23 @@ import {
   SHEET_PEEK_REM,
   type SheetSnap,
 } from '../bottom-sheet';
+import { ContextLegend } from '../context-legend';
 import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { FirstSteps } from '../first-steps';
 import { HydroLegend } from '../hydro-legend';
-import { HydroToggle } from '../hydro-toggle';
 import { ImageryLegend } from '../imagery-legend';
 import { ImagerySwitch } from '../imagery-switch';
+import { LAYER_GROUP_LEGEND, LayersPanel } from '../layers-panel';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
-import { ParcelMap, type Basemap, type HydroStatus, type MapFocus, type MapPadding } from '../parcel-map';
+import {
+  ParcelMap,
+  type ContextVisibility,
+  type HydroStatus,
+  type LayerStatus,
+  type MapFocus,
+  type MapPadding,
+} from '../parcel-map';
 import { ParcelPreview, useAreaFormatter } from '../parcel-preview';
 import { ParcelSearch } from '../parcel-search';
 import { PlaceResults } from '../place-results';
@@ -105,12 +115,18 @@ function insidePoland(lng: number, lat: number): boolean {
 }
 
 const HYDRO_OFF: HydroStatus = { state: 'off', importedAt: null, truncated: false };
+const CONTEXT_OFF: Record<ContextLayer, LayerStatus> = {
+  cover: HYDRO_OFF,
+  waterworks: HYDRO_OFF,
+  protected: HYDRO_OFF,
+};
 
 export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenProps) {
   const t = useTranslations('parcels');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const mapLabels = useMapLabels();
+  const contextLabels = useContextKindLabels();
   const rootRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const hintTimer = useRef<number | undefined>(undefined);
@@ -124,12 +140,12 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   // Czy mapa ma dojechac do podgladu: tak po wyszukaniu, nie po kliknieciu w dzialke, ktora juz widac.
   const [focusPreview, setFocusPreview] = useState(true);
   const [shown, setShown] = useState<MapFocus | null>(null);
-  const [basemap, setBasemap] = useState<Basemap>('map');
-  const [boundaries, setBoundaries] = useState(true);
-  const [hydro, setHydro] = useState(true);
+  // warstwy mapy zyja w pamieci przegladarki - wybor wraca po powrocie z raportu
+  const { layers, update: updateLayers } = useMapLayers();
+  const { imagery: imageryChoice, imageryMonth } = layers;
   const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
-  const [imageryChoice, setImageryChoice] = useState<ImageryChoice>('none');
-  const [imageryMonth, setImageryMonth] = useState<string | null>(null);
+  const [contextStatuses, setContextStatuses] = useState(CONTEXT_OFF);
+  const [layersOpen, setLayersOpen] = useState(false);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
   const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 ? 'half' : 'peek');
   const [hint, setHint] = useState<MapHint | null>(null);
@@ -301,16 +317,46 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     [queryClient],
   );
 
+  const loadContext = useCallback(
+    (layer: ContextLayer, x: number, y: number) => queryClient.query(contextTileQuery(layer, x, y)),
+    [queryClient],
+  );
+
+  const onContextStatus = useCallback(
+    (layer: ContextLayer, status: LayerStatus) =>
+      setContextStatuses((current) => ({ ...current, [layer]: status })),
+    [],
+  );
+
+  const context = useMemo(
+    (): ContextVisibility => ({
+      cover: layers.cover,
+      waterworks: layers.waterworks,
+      protected: layers.protected,
+    }),
+    [layers.cover, layers.waterworks, layers.protected],
+  );
+  // legenda otoczenia od chwili wlaczenia warstwy - przy oddalonej mapie mowi "przybliz", bo nic jeszcze nie widac
+  const contextShown = (['cover', 'waterworks', 'protected'] as const).some(
+    (layer) => layers[layer] && contextStatuses[layer].state !== 'off',
+  );
+
+  const setImageryMonth = useCallback(
+    (month: string | null) => updateLayers({ imageryMonth: month }),
+    [updateLayers],
+  );
+
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
   const chooseImagery = useCallback(
     (choice: ImageryChoice) => {
-      setImageryChoice(choice);
+      updateLayers({ imagery: choice });
 
-      // na telefonie arkusz zaslania mape - po wyborze warstwy chowamy go, zeby bylo widac kolory na polu
+      // na telefonie arkusz i panel warstw zaslaniaja mape - po wyborze chowamy oba, zeby bylo widac kolory na polu
       if (choice === 'none' || window.matchMedia(DESKTOP_QUERY).matches) return;
 
       setSnap('peek');
+      setLayersOpen(false);
 
       // dojazd do pol: kolory maja stanac nad arkuszem i pod legenda, a nie pod nimi
       const box = unionBbox(selected.parcels);
@@ -320,7 +366,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
       // fokus w schowanym arkuszu przewinalby caly ekran (kontener mapy) w strone przelacznika
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     },
-    [selected.parcels],
+    [selected.parcels, updateLayers],
   );
 
   const chooseCandidate = useCallback((candidate: ParcelCandidate) => {
@@ -392,12 +438,16 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
           selected={drawing ? NO_PARCELS : selected.parcels}
           preview={drawing ? (draw.mode === 'split' ? (onlyParcel ?? null) : null) : previewShape}
           drawing={drawing ? draw.overlay : null}
-          basemap={basemap}
-          boundaries={boundaries}
+          basemap={layers.basemap}
+          boundaries={layers.boundaries}
           loadBoundaries={loadBoundaries}
-          hydro={hydro}
+          hydro={layers.hydro}
           loadHydro={loadHydro}
           onHydroStatus={setHydroStatus}
+          context={context}
+          loadContext={loadContext}
+          onContextStatus={onContextStatus}
+          contextLabels={contextLabels}
           imagery={imagery.overlays}
           focus={focus}
           getPadding={getPadding}
@@ -411,17 +461,25 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
 
       <div
         ref={controlsRef}
-        className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 md:left-106"
+        // otwarty panel warstw na telefonie przykrywa arkusz dzialek (arkusz ma z-10)
+        className="absolute top-3 left-3 z-10 flex max-w-[calc(100%-4.5rem)] flex-col items-start gap-2 has-aria-expanded:z-30 md:left-106"
       >
-        <div className="flex flex-wrap items-start gap-2">
-          <BasemapToggle value={basemap} onChange={setBasemap} />
-          <BoundariesToggle value={boundaries} onChange={setBoundaries} />
-          <HydroToggle value={hydro} onChange={setHydro} />
-        </div>
+        <LayersPanel open={layersOpen} onOpenChange={setLayersOpen} layers={layers} onChange={updateLayers}>
+          <ImagerySwitch
+            value={imageryChoice}
+            onChange={chooseImagery}
+            month={imageryMonth}
+            onMonthChange={setImageryMonth}
+            today={todayInPoland()}
+            enabled={ids.length > 0}
+            legendClassName={cn(LAYER_GROUP_LEGEND, 'px-0')}
+          />
+        </LayersPanel>
         {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
-        {hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
+        {layers.hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
           <HydroLegend status={hydroStatus} />
         )}
+        {contextShown && <ContextLegend enabled={context} statuses={contextStatuses} />}
         {imageryChoice !== 'none' && imagery.state !== 'off' && (
           <ImageryLegend
             layer={imageryChoice}
@@ -531,15 +589,6 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
                 totalAreaHa={selected.totalAreaHa}
                 onShow={showOnMap}
                 onRemove={removeParcel}
-              />
-
-              <ImagerySwitch
-                value={imageryChoice}
-                onChange={chooseImagery}
-                month={imageryMonth}
-                onMonthChange={setImageryMonth}
-                today={todayInPoland()}
-                enabled={ids.length > 0}
               />
 
               <FieldDrawEntry splitTarget={splitTarget} onStart={beginFieldDraw} />

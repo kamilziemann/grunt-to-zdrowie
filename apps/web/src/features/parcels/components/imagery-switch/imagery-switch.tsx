@@ -18,6 +18,8 @@ export interface ImagerySwitchProps {
   /** false = lista "moje dzialki" jest pusta (obraz liczymy tylko dla wybranych dzialek) */
   enabled: boolean;
   className?: string;
+  /** wyglad tytulu grupy (w panelu warstw taki jak tytuly pozostalych grup) */
+  legendClassName?: string;
 }
 
 const CHOICES = [
@@ -44,6 +46,7 @@ export function ImagerySwitch({
   today,
   enabled,
   className,
+  legendClassName,
 }: ImagerySwitchProps) {
   const t = useTranslations('parcels.imagery');
   const format = useFormatter();
@@ -72,7 +75,7 @@ export function ImagerySwitch({
       className={cn('flex min-w-0 flex-col gap-2', className)}
       data-testid="imagery-switch"
     >
-      <legend className="mb-2 text-base font-semibold">{t('title')}</legend>
+      <legend className={cn('mb-2 text-base font-semibold', legendClassName)}>{t('title')}</legend>
       <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
         {CHOICES.map(({ choice, Icon }) => (
           <label
