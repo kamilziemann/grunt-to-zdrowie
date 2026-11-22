@@ -1,8 +1,10 @@
-# Grunt to Zdrowie — README konkursowe (szkic)
+# Grunt to Zdrowie — README konkursowe
 
-> Szkic toru „serwer” (runda 6, uzupełniony w rundzie 8, 22.11.2026). Zawiera fakty z repozytorium i — przy cenach,
-> limitach i licencjach — sprawdzone u źródła 22.11.2026 (adresy obok); miejsca oznaczone **„do potwierdzenia”**
-> trzeba sprawdzić przed oddaniem. Źródła faktów: [`docs/project-status.md`](../project-status.md),
+> Rozszerzenie głównego [`README.md`](../../README.md) (tam skrót wszystkich wymaganych punktów, w tym użycie AI)
+> o szczegóły: ścieżkę jury, źródła, metody, weryfikację, koszty, skalę i bezpieczeństwo. Stan na 22.11.2026, silnik
+> analizy **0.8.4**; wszystkie źródła raportu są prawdziwe (`meta.sample: false`, bez części przykładowych). Fakty
+> z repozytorium, a ceny, limity i licencje sprawdzone u źródła 22.11.2026 (adresy obok); miejsca oznaczone **„do
+> potwierdzenia”** trzeba sprawdzić przed oddaniem. Wykaz bibliotek i licencji: [`licencje.md`](licencje.md). Źródła faktów: [`docs/project-status.md`](../project-status.md),
 > [`docs/validation.md`](../validation.md), strona „Jak liczymy” (`apps/web/messages/pl/method.json`),
 > [`tools/bdot-import/README.md`](../../tools/bdot-import/README.md), ADR-y w
 > [`docs/architecture/decisions/`](../architecture/decisions), dzienniki w [`docs/progress/`](../progress).
@@ -28,7 +30,7 @@ publicznych dla wskazanego pola i dnia (dowolna data z ostatnich 10 lat).
 3. **Raport.** `/raport`: ocena z pewnością (wysoka/średnia/niska) → historia 10 sezonów i kalendarz ryzyka →
    przyczyny z dowodami liczbowymi → zalecenia retencyjne, agrotechniczne i nawadnianie → miejsca na polu (strefy) →
    źródła i ograniczenia. Wydruk A4, eksport CSV/JSON dla doradcy, raport otwiera się z linku. Od silnika 0.8.0
-   raport niesie też dane „Pogodynki wody”: zbiornik wody w glebie (ile procent zostało, ile zwykle, za ile dni bez
+   (obecnie 0.8.4) raport niesie też dane „Pogodynki wody”: zbiornik wody w glebie (ile procent zostało, ile zwykle, za ile dni bez
    deszczu zacznie się stres), prognozę na 7 dni, rachunek wody od 21 marca, ostatnie 60 dni dzień po dniu i zdjęcia
    satelitarne z ostatnich 30 dni (także pominięte przez chmury).
 
@@ -120,7 +122,8 @@ przytoczyć ze źródłem.
 1. **Porównanie z ogłoszeniami IUNG.** [`docs/validation.md`](../validation.md): 21 przypadków z komunikatów i
    wykazów gmin Systemu Monitoringu Suszy Rolniczej IUNG-PIB, 8 z suszą i 13 bez (te same gminy, uprawy i pory roku).
    Skrypt `bun run validate:iung -- --api <adres API>` liczy raporty przez prawdziwe API ze wszystkimi źródłami.
-   Wynik (silnik 0.4.0–0.8.0, bez zmian): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
+   Wynik (silnik 0.4.0–0.8.0, bez zmian; 0.8.1–0.8.4 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy oraz przyczyny i zalecenia poza
+   sezonem, nie rachunek oceny — powtórka na 0.8.4 **do zrobienia**): **zgodność poziomu 21/21** (alarm przy suszy 8/8, brak alarmu bez suszy
    13/13), **zgodność KBW 20/21**, „obserwuj” bez suszy 9/13, werdykty dla każdej z czterech kategorii gleby zgodne
    z wykazem gminy **60/64**. Rozbieżności i ich przyczyny (siatka NASA POWER, punkt zamiast gminy, gleba z modelu)
    są opisane w tym samym pliku; 21 przypadków to nadal mało (brak gór i Żuław w zestawie).
@@ -237,10 +240,22 @@ Jeden Worker Cloudflare (`apps/web`): strony TanStack Start (React 19, SSR) i AP
 ([ADR 0010](../architecture/decisions/0010-postgis-on-neon-for-hydrography.md)); kontrakty Zod w
 `packages/contracts` wspólne dla API i stron.
 
+## Użycie AI, biblioteki i licencje
+
+- Użycie AI (pkt 5.1): sekcja „Użycie AI” w głównym [`README.md`](../../README.md#użycie-ai). W skrócie: aplikacja
+  w działaniu nie woła modeli AI ani LLM — ocenę, przyczyny i zalecenia liczą jawne reguły i modele fizyczne
+  (KBW wg IUNG, FAO-56, Saxton–Rawls); SoilGrids to zewnętrzne mapy gleby z modelu uczenia maszynowego ISRIC. Przy
+  budowie użyliśmy agentów programistycznych: Claude Code (modele Claude), Codex CLI i Antigravity CLI (research,
+  testy na wdrożonej wersji, przeglądy).
+- Biblioteki, komponenty, usługi i dane z wersjami i licencjami: [`licencje.md`](licencje.md).
+
 ## Do uzupełnienia przed oddaniem
 
-- Regulamin wymaga wskazania narzędzi sztucznej inteligencji użytych w rozwiązaniu — sekcję dopisuje właściciel.
-- Prezentacja PDF (do 10 slajdów), film do 3 minut, przykładowe raporty (wymogi regulaminu).
+- Nazwa zespołu i link do repozytorium w głównym `README.md`.
+- Prezentacja PDF (do 10 slajdów) i film do 3 minut — linki w głównym `README.md`. Raporty wzorcowe są w
+  [`docs/samples/`](../samples/README.md) (silnik 0.8.0 — do odświeżenia na 0.8.4 po zmianach karty raportu).
 - Plan konta Cloudflare wdrożenia (Free czy Paid) i zmierzony czas CPU analizy — **do potwierdzenia** (koszty wyżej).
+- Licencja kodu własnego (dziś `"private": true`, bez pliku licencji) i wersje modeli Codex / Antigravity.
+- Powtórka walidacji IUNG na silniku 0.8.4.
 - Licencje i podstawy oznaczone „do potwierdzenia” (brzmienie art. 40a Pgik, PostGIS w Supabase, zużycie PU
-  Copernicus, uzgodnienie limitu z GUGiK przy dużym ruchu).
+  Copernicus, uzgodnienie limitu z GUGiK przy dużym ruchu, licencja stylu OpenFreeMap „liberty”).
