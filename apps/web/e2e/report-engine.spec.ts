@@ -261,11 +261,14 @@ test.describe('pole z satelity', () => {
     await mockImageryApi(page);
     // pierwsze pobranie trwa - przycisk mowi, ze laduje (trasa dodana pozniej dziala pierwsza)
     await page.route('**/api/imagery/vegetation**', async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 4000));
       await route.fallback();
     });
     await mockReport(page, FIELD_REPORT);
     await page.goto(reportUrl(FIELD_REPORT));
+    // raport liczy sie po hydratacji i podmienia adres na zapisany - klikamy w gotowy raport
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
+    await page.waitForLoadState('networkidle');
 
     await page.getByRole('button', { name: 'Drukuj / zapisz PDF' }).click();
     await expect(page.getByRole('button', { name: 'Ładuję zdjęcia z satelity…' })).toBeVisible();
