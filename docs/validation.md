@@ -30,7 +30,8 @@ uprawach i porach roku co przypadki suszy; część z nich to okresy, gdy susza 
 
 Powtórka 22.11.2026 na silniku `0.6.0` (otoczenie pola z BDOT10k, nowe reguły zaleceń, poprawka udziału czystych
 pikseli Sentinel-2) dała ten sam wynik: poziom 21/21, KBW 20/21, „obserwuj” bez suszy 9/13, kategorie 60/64 —
-zmiany nie dotykają oceny.
+zmiany nie dotykają oceny. Kolejna powtórka 22.11.2026 na `0.7.0` (dni upalne jako dowody, wspólne lata tła
+historii): wynik identyczny.
 
 | Miejsce, data                                    | Uprawa        | IUNG  | IUNG kat. I/II/III/IV | KBW / próg (kat., okres)               | Pod progiem kat. I/II/III/IV | Poziom / pewność | Zgodność KBW | Zgodność poziomu |
 | ------------------------------------------------ | ------------- | ----- | --------------------- | -------------------------------------- | ---------------------------- | ---------------- | ------------ | ---------------- |
