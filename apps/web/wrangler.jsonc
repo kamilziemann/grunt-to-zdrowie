@@ -79,7 +79,7 @@
         {
           "binding": "DB",
           "database_name": "grunt-to-zdrowie",
-          "database_id": "REPLACE_WITH_PRODUCTION_D1_ID",
+          "database_id": "c6f94d78-a487-4392-96e1-e5211299b234",
           "migrations_dir": "../../packages/db/migrations",
         },
       ],
@@ -89,8 +89,8 @@
       "vars": {
         "ENVIRONMENT": "production",
         "LOG_LEVEL": "info",
-        "PUBLIC_URL": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev/api",
-        "ALLOWED_ORIGINS": "https://grunt-to-zdrowie.YOUR-SUBDOMAIN.workers.dev",
+        "PUBLIC_URL": "https://grunt-to-zdrowie.hoxu.workers.dev/api",
+        "ALLOWED_ORIGINS": "https://grunt-to-zdrowie.hoxu.workers.dev",
         "SENTRY_ENABLED": "false",
       },
     },
