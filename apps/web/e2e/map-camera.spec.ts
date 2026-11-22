@@ -165,7 +165,8 @@ test.describe('kadr mapy między krokami', () => {
       expectSameView(onCheck, onMap, 1);
 
       await page.getByRole('link', { name: 'Tylko część' }).click();
-      await expect(page.getByTestId('field-draw')).toBeVisible();
+      // na telefonie panel rysowania siedzi w zwinietym arkuszu - tryb poznajemy po podpowiedzi na mapie
+      await expect(page.getByTestId('field-draw-hint')).toBeVisible();
       expectSameView(await settledView(page), onMap);
     });
   });

@@ -38,7 +38,8 @@ test.describe('działki', () => {
   }) => {
     await mockAnalysisApi(page);
     await page.goto('/mapa');
-    await page.getByLabel('Numer działki, obręb z numerem albo adres').fill(PARCEL_ID);
+    // pole jest na stronie dwa razy (panel i gora mapy na telefonie) - po roli trafiamy w to widoczne
+    await page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' }).fill(PARCEL_ID);
     await page.keyboard.press('Enter');
 
     const toasts = page.getByTestId('toasts');
