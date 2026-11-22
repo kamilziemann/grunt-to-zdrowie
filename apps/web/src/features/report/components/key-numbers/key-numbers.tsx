@@ -136,7 +136,7 @@ export function KeyNumbers({ report }: { report: WaterReport }) {
           data-number={item.id}
         >
           <dt className="text-base text-muted-foreground">{item.label}</dt>
-          <dd className={cn('text-3xl font-bold tabular-nums', item.alarm && 'text-viz-orange-deep')}>
+          <dd className={cn('text-3xl font-bold tabular-nums', item.alarm && 'text-warning')}>
             {item.value}
           </dd>
           <dd className="text-base leading-snug">{item.reference}</dd>

@@ -65,10 +65,7 @@ export function SeasonBars({ report }: { report: WaterReport }) {
               data-season-bar={bar.year}
             >
               <span
-                className={cn(
-                  'text-sm leading-none font-bold tabular-nums',
-                  bar.drought && 'text-viz-orange-deep',
-                )}
+                className={cn('text-sm leading-none font-bold tabular-nums', bar.drought && 'text-warning')}
               >
                 {bar.stressDays === null ? '?' : bar.drought ? `${bar.stressDays}!` : bar.stressDays}
               </span>
@@ -85,7 +82,7 @@ export function SeasonBars({ report }: { report: WaterReport }) {
                     patternUnits="userSpaceOnUse"
                     patternTransform="rotate(45)"
                   >
-                    <rect width="4" height="4" className="fill-viz-orange-deep" />
+                    <rect width="4" height="4" className="fill-data-orange-dark" />
                     <line
                       x1="0"
                       y1="0"
@@ -116,8 +113,8 @@ export function SeasonBars({ report }: { report: WaterReport }) {
                     rx="1"
                     fill={bar.drought ? `url(#season-hatch-${bar.year})` : undefined}
                     className={cn(
-                      !bar.drought && (bar.current ? 'fill-viz-water' : 'fill-viz-orange'),
-                      bar.current && 'stroke-viz-water',
+                      !bar.drought && (bar.current ? 'fill-water' : 'fill-data-orange'),
+                      bar.current && 'stroke-water',
                     )}
                     strokeWidth={bar.current ? 2 : 0}
                     vectorEffect="non-scaling-stroke"
@@ -133,7 +130,7 @@ export function SeasonBars({ report }: { report: WaterReport }) {
               key={bar.year}
               className={cn(
                 'text-center text-sm leading-tight tabular-nums',
-                bar.current && 'font-bold text-viz-water',
+                bar.current && 'font-bold text-water',
               )}
             >
               <span className="sm:hidden">{`’${String(bar.year).slice(2)}`}</span>
@@ -144,16 +141,16 @@ export function SeasonBars({ report }: { report: WaterReport }) {
       </div>
       <ul className="flex flex-wrap gap-x-4 gap-y-1 text-base text-muted-foreground" aria-hidden="true">
         <li className="flex items-center gap-1.5">
-          <span className="size-3.5 rounded-sm bg-viz-orange" />
+          <span className="size-3.5 rounded-sm bg-data-orange" />
           {t('legendDays')}
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="size-3.5 rounded-sm bg-viz-orange-deep" />
+          <span className="size-3.5 rounded-sm bg-data-orange-dark" />
           {t('legendDrought')}
         </li>
         {bars.some((bar) => bar.current) && (
           <li className="flex items-center gap-1.5">
-            <span className="size-3.5 rounded-sm bg-viz-water" />
+            <span className="size-3.5 rounded-sm bg-water" />
             {t('legendCurrent')}
           </li>
         )}

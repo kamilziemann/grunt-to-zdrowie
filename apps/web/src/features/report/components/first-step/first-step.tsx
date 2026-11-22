@@ -11,11 +11,12 @@ import { orderedRecommendations, stepBadge, type StepBadge } from '../../utils/r
 
 /** Plakietka mozliwosci: "mozesz od razu" jasna, "najpierw sprawdz / uzgodnij" piaskowa z ramka. */
 const BADGE_STYLES: Record<StepBadge, string> = {
-  now: 'bg-viz-panel-accent text-viz-panel print:border print:border-foreground print:bg-transparent print:text-foreground',
-  check: 'bg-viz-sand text-foreground print:border print:border-foreground',
-  protected: 'bg-viz-sand text-foreground print:border print:border-foreground',
-  notification: 'bg-viz-sand text-foreground print:border print:border-foreground',
-  permit: 'bg-viz-sand text-foreground print:border print:border-foreground',
+  now: 'bg-accent text-accent-foreground print:border print:border-foreground print:bg-transparent print:text-foreground',
+  check: 'bg-data-sand text-accent-foreground print:border print:border-foreground print:text-foreground',
+  protected: 'bg-data-sand text-accent-foreground print:border print:border-foreground print:text-foreground',
+  notification:
+    'bg-data-sand text-accent-foreground print:border print:border-foreground print:text-foreground',
+  permit: 'bg-data-sand text-accent-foreground print:border print:border-foreground print:text-foreground',
 };
 
 /**
@@ -43,11 +44,11 @@ export function FirstStep({ report, allHref }: { report: WaterReport; allHref: A
   return (
     <section
       aria-labelledby="najpierw-title"
-      className="flex flex-col gap-4 rounded-2xl bg-viz-panel p-5 text-viz-panel-foreground shadow-card sm:p-6 print:break-inside-avoid print:border-2 print:border-foreground/70 print:p-4 print:shadow-none"
+      className="flex flex-col gap-4 surface-panel rounded-2xl p-5 shadow-card print:bg-transparent print:[color-scheme:light] sm:p-6 print:break-inside-avoid print:border-2 print:border-foreground/70 print:p-4 print:shadow-none"
       data-testid="first-step"
       data-first-measure={first.measure}
     >
-      <h3 id="najpierw-title" className="text-sm font-bold tracking-wider text-viz-panel-accent uppercase">
+      <h3 id="najpierw-title" className="text-sm font-bold tracking-wider text-success uppercase">
         {t(report.assessment.level === 'out_of_season' ? 'titleOffSeason' : 'title')}
       </h3>
       <p className="text-2xl leading-tight font-bold text-balance">{tMeasures(`${first.measure}.name`)}</p>

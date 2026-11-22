@@ -8,13 +8,13 @@ import { causeShare } from '../../utils/report-extras';
 
 /** Kolejne odcinki: kolor i wzor (ukosne paski, kropki) - na wydruku cz.-b. odcinki roznia sie wzorem. */
 const SEGMENTS = [
-  'fill-viz-orange-deep',
-  'fill-viz-orange',
-  'fill-viz-sand',
-  'fill-viz-water-soft',
-  'fill-viz-water',
+  'fill-data-orange-dark',
+  'fill-data-orange',
+  'fill-data-sand',
+  'fill-data-blue-light',
+  'fill-water',
   'fill-muted-foreground',
-  'fill-viz-grid',
+  'fill-border',
 ];
 
 /**

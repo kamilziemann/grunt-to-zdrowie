@@ -22,28 +22,28 @@ import {
 const STEP_STYLES: Record<ScaleStep, { icon: LucideIcon; text: string; fill: string }> = {
   wet: {
     icon: Droplets,
-    text: 'text-viz-water lg:text-viz-water-soft print:text-viz-water',
-    fill: 'bg-viz-water',
+    text: 'text-water',
+    fill: 'bg-water',
   },
   good: {
     icon: CircleCheck,
-    text: 'text-success lg:text-viz-panel-accent print:text-success',
-    fill: 'bg-viz-water-soft',
+    text: 'text-success',
+    fill: 'bg-data-blue-light',
   },
   slightlyDry: {
     icon: CloudSun,
-    text: 'text-viz-orange-strong lg:text-viz-sand print:text-viz-orange-strong',
-    fill: 'bg-viz-sand',
+    text: 'text-warning lg:text-data-sand print:text-warning',
+    fill: 'bg-data-sand',
   },
   dry: {
     icon: Sun,
-    text: 'text-viz-orange-strong lg:text-viz-orange print:text-viz-orange-strong',
-    fill: 'bg-viz-orange',
+    text: 'text-data-orange-strong lg:text-data-orange print:text-data-orange-strong',
+    fill: 'bg-data-orange',
   },
   veryDry: {
     icon: Sun,
-    text: 'text-viz-orange-deep lg:text-viz-orange print:text-viz-orange-deep',
-    fill: 'bg-viz-orange-deep',
+    text: 'text-data-orange-dark lg:text-data-orange print:text-data-orange-dark',
+    fill: 'bg-data-orange-dark',
   },
 };
 
@@ -54,24 +54,26 @@ function Scale({ step }: { step: ScaleStep }) {
   return (
     <div className="flex flex-col gap-1.5" data-testid="verdict-scale" data-step={step}>
       <p className="sr-only">{t('label', { step: t(step) })}</p>
-      <ol aria-hidden="true" className="grid grid-cols-5 items-end gap-1">
+      {/* paski w jednym rzedzie (wysokosc najwyzszego), podpisy od tej samej linii - dwuwierszowy podpis nie podnosi
+          paska */}
+      <ol aria-hidden="true" className="grid grid-cols-5 items-start gap-1">
         {SCALE_STEPS.map((item) => (
-          <li key={item} className="flex min-w-0 flex-col gap-1">
-            <span
-              className={cn(
-                'block rounded-full',
-                STEP_STYLES[item].fill,
-                item === step
-                  ? 'h-4 ring-2 ring-current ring-offset-2 ring-offset-card lg:ring-offset-viz-panel print:ring-offset-card'
-                  : 'h-2 opacity-45',
-              )}
-            />
+          <li key={item} className="flex min-w-0 flex-col items-stretch gap-1.5">
+            <span className="flex h-6 items-center">
+              <span
+                className={cn(
+                  'block w-full rounded-full',
+                  STEP_STYLES[item].fill,
+                  item === step
+                    ? 'h-4 ring-2 ring-current ring-offset-2 ring-offset-card lg:ring-offset-panel print:ring-offset-card'
+                    : 'h-2 opacity-45',
+                )}
+              />
+            </span>
             <span
               className={cn(
                 'text-center text-sm leading-tight',
-                item === step
-                  ? 'font-bold'
-                  : 'text-muted-foreground lg:text-viz-panel-muted print:text-muted-foreground',
+                item === step ? 'font-bold' : 'text-muted-foreground',
               )}
             >
               {t(item)}
@@ -189,7 +191,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
   return (
     <section
       aria-labelledby="ocena-skrot-title"
-      className="flex flex-col gap-5 rounded-3xl border bg-card p-5 text-card-foreground shadow-card sm:p-7 lg:border-transparent lg:bg-viz-panel lg:text-viz-panel-foreground print:rounded-lg print:border-2 print:border-foreground/70 print:bg-card print:p-4 print:text-foreground print:shadow-none"
+      className="flex flex-col gap-5 rounded-3xl border bg-card p-5 text-card-foreground shadow-card sm:p-7 lg:border-transparent lg:surface-panel print:rounded-lg print:[color-scheme:light] print:border-2 print:border-foreground/70 print:bg-card print:p-4 print:text-foreground print:shadow-none"
       data-testid="short-analysis"
       data-level={level}
     >
@@ -221,7 +223,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
       </p>
       {caveat && (
         <p
-          className="rounded-xl border-2 border-warning bg-warning/10 px-3 py-2 text-base font-medium lg:border-viz-sand lg:bg-transparent print:border-warning"
+          className="rounded-xl border-2 border-warning bg-warning/10 px-3 py-2 text-base font-medium lg:border-data-sand lg:bg-transparent print:border-warning"
           data-testid="verdict-caveat-short"
         >
           {tVerdict('caveat.title')}
@@ -233,9 +235,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
       >
         {lines.map((line) => (
           <div key={line.key} className="flex flex-col gap-0.5" data-line={line.key}>
-            <dt className="text-sm font-semibold tracking-wide text-viz-panel-accent uppercase print:text-primary">
-              {line.label}
-            </dt>
+            <dt className="text-sm font-semibold tracking-wide text-success uppercase">{line.label}</dt>
             <dd className="text-lg leading-snug print:text-base">{line.text}</dd>
           </div>
         ))}
@@ -243,7 +243,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
       {summer && (
         <Link
           href={routes.report({ ...reportSearch(report), data: summer })}
-          className="flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground hover:bg-primary/90 lg:bg-viz-panel-accent lg:text-viz-panel print:hidden"
+          className="flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-base font-semibold text-primary-foreground hover:bg-primary/90 print:hidden"
           data-testid="summer-link"
         >
           {t('offSeason.summer', {
@@ -256,7 +256,7 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           })}
         </Link>
       )}
-      <p className="text-base text-muted-foreground lg:text-viz-panel-muted print:text-muted-foreground">
+      <p className="text-base text-muted-foreground">
         {t('asOf', {
           date: format.dateTime(isoDay(report.meta.analysisDate), { dateStyle: 'long', timeZone: 'UTC' }),
         })}

@@ -39,7 +39,7 @@ export function WaterTankChart({ report }: { report: WaterReport }) {
       data-testid="chart-tank"
     >
       <div className="flex items-stretch gap-5">
-        <div className="relative h-48 w-24 shrink-0 overflow-hidden rounded-b-3xl rounded-t-lg border-2 border-foreground/70 bg-viz-track">
+        <div className="relative h-48 w-24 shrink-0 overflow-hidden rounded-b-3xl rounded-t-lg border-2 border-foreground/70 bg-muted">
           <svg
             aria-hidden="true"
             viewBox="0 0 100 100"
@@ -54,8 +54,8 @@ export function WaterTankChart({ report }: { report: WaterReport }) {
                 patternUnits="userSpaceOnUse"
                 patternTransform="rotate(45)"
               >
-                <rect width="6" height="6" className="fill-viz-track" />
-                <line x1="0" y1="0" x2="0" y2="6" className="stroke-viz-orange" strokeWidth="2" />
+                <rect width="6" height="6" className="fill-muted" />
+                <line x1="0" y1="0" x2="0" y2="6" className="stroke-data-orange" strokeWidth="2" />
               </pattern>
             </defs>
             {tank.stressBelowPct !== undefined && (
@@ -68,7 +68,7 @@ export function WaterTankChart({ report }: { report: WaterReport }) {
                 opacity="0.5"
               />
             )}
-            <rect x="0" y={level} width="100" height={tank.availablePct} className="fill-viz-water" />
+            <rect x="0" y={level} width="100" height={tank.availablePct} className="fill-water" />
             {tank.typicalPct !== undefined && (
               <line
                 x1="0"
@@ -87,7 +87,7 @@ export function WaterTankChart({ report }: { report: WaterReport }) {
                 x2="100"
                 y1={100 - tank.stressBelowPct}
                 y2={100 - tank.stressBelowPct}
-                className="stroke-viz-orange-strong"
+                className="stroke-data-orange-strong"
                 strokeWidth="3"
                 vectorEffect="non-scaling-stroke"
               />
@@ -116,7 +116,7 @@ export function WaterTankChart({ report }: { report: WaterReport }) {
           )}
           {tank.stressBelowPct !== undefined && (
             <div className="flex items-center gap-2">
-              <span aria-hidden="true" className="w-6 shrink-0 border-t-[3px] border-viz-orange-strong" />
+              <span aria-hidden="true" className="w-6 shrink-0 border-t-[3px] border-data-orange-strong" />
               <dt className="sr-only">{t('stressLabel')}</dt>
               <dd>{t('stressLegend', { percent: tank.stressBelowPct })}</dd>
             </div>

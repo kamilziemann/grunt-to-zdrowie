@@ -39,7 +39,7 @@ export function CausesSection({ causes }: { causes: readonly Cause[] }) {
                 aria-hidden="true"
                 value={percent}
                 max={100}
-                className="h-1.5 w-full appearance-none overflow-hidden rounded-full bg-muted [&::-moz-progress-bar]:bg-viz-orange [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-viz-orange"
+                className="h-1.5 w-full appearance-none overflow-hidden rounded-full bg-muted [&::-moz-progress-bar]:bg-data-orange [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-data-orange"
               />
               <p className="text-base">{t(`items.${cause.id}.description`)}</p>
               <details className="text-sm">

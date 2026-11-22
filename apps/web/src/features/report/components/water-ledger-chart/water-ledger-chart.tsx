@@ -12,11 +12,11 @@ type RowKind = 'storage' | 'rain' | 'use' | 'lost' | 'shortfall';
 
 /** Wypelnienie paska: kolor i wzor (czytelne na wydruku czarno-bialym). */
 const BAR: Record<RowKind, string> = {
-  storage: 'fill-viz-water-soft',
-  rain: 'fill-viz-water',
-  use: 'fill-viz-orange',
-  lost: 'fill-viz-sand',
-  shortfall: 'fill-transparent stroke-viz-orange-deep',
+  storage: 'fill-data-blue-light',
+  rain: 'fill-water',
+  use: 'fill-data-orange',
+  lost: 'fill-data-sand',
+  shortfall: 'fill-transparent stroke-data-orange-dark',
 };
 
 interface LedgerRow {
@@ -109,7 +109,7 @@ export function WaterLedgerChart({ report }: { report: WaterReport }) {
                   y="0"
                   width={(row.value / scale) * 100}
                   height="10"
-                  className="fill-none stroke-viz-orange-strong"
+                  className="fill-none stroke-data-orange-strong"
                   strokeWidth="1.5"
                   strokeDasharray="3 2"
                   vectorEffect="non-scaling-stroke"
@@ -119,7 +119,7 @@ export function WaterLedgerChart({ report }: { report: WaterReport }) {
             <span
               className={cn(
                 'text-right text-lg font-semibold tabular-nums',
-                row.kind === 'use' && 'text-viz-orange-deep',
+                row.kind === 'use' && 'text-warning',
               )}
             >
               {row.sign}
@@ -136,13 +136,13 @@ export function WaterLedgerChart({ report }: { report: WaterReport }) {
                 y="0.5"
                 width={Math.max(0, (ledger.shortfallMm / scale) * 100 - 1)}
                 height="9"
-                className="fill-none stroke-viz-orange-deep"
+                className="fill-none stroke-data-orange-dark"
                 strokeWidth="2"
                 strokeDasharray="4 3"
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
-            <span className="text-right text-lg font-semibold text-viz-orange-deep tabular-nums">
+            <span className="text-right text-lg font-semibold text-warning tabular-nums">
               {mm(ledger.shortfallMm)}
             </span>
           </li>

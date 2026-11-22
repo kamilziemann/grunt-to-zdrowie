@@ -102,7 +102,8 @@ export function PrintPageMargins({ report }: { report: WaterReport }) {
   const bottom = url
     ? t('pageFooterLink', { url, sources: providers.join(', ') })
     : t('pageFooter', { sources: providers.join(', ') });
-  const css = `@media print { @page {
+  // raport na A4: cala skala (tekst i odstepy w rem) mniejsza, zeby strona 1 byla infografika, a nie plakatem
+  const css = `@media print { html:has(.report) { font-size: 10.5px; } @page {
     margin: 18mm 12mm 18mm;
     @top-left { content: ${cssString(top)}; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: bottom; padding-bottom: 3mm; }
     @top-right { content: ${cssString(t('pageId', { id: report.meta.reportId }))}; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: bottom; padding-bottom: 3mm; }

@@ -35,7 +35,7 @@ export function KnownLimits({ report }: { report: WaterReport }) {
   return (
     <section
       aria-labelledby="nie-wie-title"
-      className="flex flex-col gap-3 rounded-2xl border border-viz-sand bg-viz-sand/25 p-5 sm:p-6 print:break-inside-avoid print:border-foreground/40 print:bg-transparent print:p-4"
+      className="flex flex-col gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-5 sm:p-6 print:break-inside-avoid print:border-foreground/40 print:bg-transparent print:p-4"
       data-testid="known-limits"
     >
       <h3 id="nie-wie-title" className="text-xl font-semibold">

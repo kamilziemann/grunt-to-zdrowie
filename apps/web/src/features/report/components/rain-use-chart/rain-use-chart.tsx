@@ -60,7 +60,7 @@ export function RainUseChart({ report }: { report: WaterReport }) {
               x2={width}
               y1={HEIGHT / 2}
               y2={HEIGHT / 2}
-              className="stroke-viz-grid"
+              className="stroke-border"
               strokeWidth="1"
               vectorEffect="non-scaling-stroke"
             />
@@ -92,13 +92,13 @@ export function RainUseChart({ report }: { report: WaterReport }) {
                   y={y(rain)}
                   width="8"
                   height={HEIGHT - y(rain)}
-                  className="fill-viz-water"
+                  className="fill-water"
                 />
               );
             })}
             <polyline
               points={line}
-              className="fill-none stroke-viz-orange-strong"
+              className="fill-none stroke-data-orange-strong"
               strokeWidth="2.5"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
@@ -112,11 +112,11 @@ export function RainUseChart({ report }: { report: WaterReport }) {
       </div>
       <ul aria-hidden="true" className="flex flex-wrap gap-x-4 gap-y-1 text-base text-muted-foreground">
         <li className="flex items-center gap-1.5">
-          <span className="h-3.5 w-2 rounded-sm bg-viz-water" />
+          <span className="h-3.5 w-2 rounded-sm bg-water" />
           {t('legendRain')}
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="w-5 border-t-[3px] border-viz-orange-strong" />
+          <span className="w-5 border-t-[3px] border-data-orange-strong" />
           {t('legendUse')}
         </li>
         <li>{t('unit')}</li>

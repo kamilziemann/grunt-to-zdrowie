@@ -80,7 +80,7 @@ export function VegetationChart({ report }: { report: WaterReport }) {
                   width="100"
                   y={y(range.max)}
                   height={y(range.min) - y(range.max)}
-                  className="fill-viz-grid"
+                  className="fill-border"
                   opacity="0.55"
                 />
                 <line
@@ -97,7 +97,7 @@ export function VegetationChart({ report }: { report: WaterReport }) {
             )}
             <polyline
               points={usedPoints.map((item) => `${x(item.date)},${y(item.ndmi ?? 0)}`).join(' ')}
-              className="fill-none stroke-viz-water"
+              className="fill-none stroke-water"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
             />
@@ -109,7 +109,7 @@ export function VegetationChart({ report }: { report: WaterReport }) {
                 x2={x(item.date)}
                 y1={y(item.ndmi ?? 0)}
                 y2={y(item.ndmi ?? 0)}
-                className="stroke-viz-water"
+                className="stroke-water"
                 strokeWidth="11"
                 strokeLinecap="round"
                 vectorEffect="non-scaling-stroke"
@@ -123,7 +123,7 @@ export function VegetationChart({ report }: { report: WaterReport }) {
               key={item.date}
               className={
                 item.used
-                  ? 'flex items-center gap-1 rounded-full bg-viz-water/15 px-2 py-0.5 text-sm font-medium'
+                  ? 'flex items-center gap-1 rounded-full bg-water/15 px-2 py-0.5 text-sm font-medium'
                   : 'flex items-center gap-1 rounded-full border border-dashed border-muted-foreground px-2 py-0.5 text-sm text-muted-foreground'
               }
               data-used={item.used}

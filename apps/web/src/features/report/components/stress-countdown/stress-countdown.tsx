@@ -26,11 +26,14 @@ function Strip({ label, days, testId }: { label: string; days: number | undefine
               key={day}
               className={cn(
                 'flex h-9 items-center justify-center rounded-md text-sm font-bold',
-                stressDay && 'bg-viz-orange-deep text-background',
+                stressDay && 'bg-data-orange-dark text-data-sand',
                 !stressDay &&
                   before &&
-                  (days !== undefined && day >= days - 2 ? 'bg-viz-orange' : 'bg-viz-sand'),
-                !stressDay && !before && 'border border-dashed border-viz-orange-strong bg-viz-track',
+                  cn(
+                    'text-accent-foreground',
+                    days !== undefined && day >= days - 2 ? 'bg-data-orange' : 'bg-data-sand',
+                  ),
+                !stressDay && !before && 'border border-dashed border-data-orange-strong bg-muted',
               )}
             >
               {stressDay ? '!' : day}
@@ -65,7 +68,7 @@ export function StressCountdown({ report }: { report: WaterReport }) {
         data-testid="chart-countdown"
       >
         <p className="flex items-baseline gap-3">
-          <span className="text-6xl leading-none font-bold text-viz-orange-deep tabular-nums">{since}</span>
+          <span className="text-6xl leading-none font-bold text-warning tabular-nums">{since}</span>
           <span className="text-xl font-semibold">{t('stressedUnit', { days: since })}</span>
         </p>
         <p className="text-lg">{t('stressedLead')}</p>
@@ -94,7 +97,7 @@ export function StressCountdown({ report }: { report: WaterReport }) {
         <span
           className={cn(
             'text-6xl leading-none font-bold tabular-nums',
-            noRain === undefined ? 'text-viz-water' : 'text-viz-orange-deep',
+            noRain === undefined ? 'text-water' : 'text-warning',
           )}
         >
           {noRain ?? t('beyond', { days: horizon })}

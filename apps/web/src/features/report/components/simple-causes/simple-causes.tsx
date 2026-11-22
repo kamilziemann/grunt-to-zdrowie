@@ -11,10 +11,10 @@ const MAX_CAUSES = 4;
 
 /** Znacznik przyczyny: wielkosc kropki rosnie z udzialem (kolor tylko wzmacnia), obok slowo "glowna". */
 const DOT = [
-  'size-4 bg-viz-orange-deep',
-  'size-3.5 bg-viz-orange-strong',
-  'size-3 bg-viz-orange',
-  'size-3 bg-viz-sand',
+  'size-4 bg-data-orange-dark',
+  'size-3.5 bg-data-orange-strong',
+  'size-3 bg-data-orange',
+  'size-3 bg-data-sand',
 ];
 
 /**
@@ -49,7 +49,7 @@ export function SimpleCauses({ report }: { report: WaterReport }) {
               <p className="flex flex-wrap items-baseline gap-x-2 text-lg leading-snug font-semibold">
                 {tItems(`${cause.id}.title`)}
                 {index === 0 && (
-                  <span className="rounded-full bg-viz-orange-deep px-2 py-0.5 text-sm font-semibold text-background">
+                  <span className="rounded-full bg-data-orange-dark px-2 py-0.5 text-sm font-semibold text-data-sand">
                     {t('main')}
                   </span>
                 )}

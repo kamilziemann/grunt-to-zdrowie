@@ -22,14 +22,14 @@ type CellKind = PeriodStatus | 'excess' | 'later';
  */
 const STATUS_STYLES: Record<CellKind, { cell: string; mark: string }> = {
   drought: {
-    cell: 'bg-viz-orange-deep text-background bg-[repeating-linear-gradient(135deg,transparent_0_3px,color-mix(in_oklab,var(--color-background)_35%,transparent)_3px_5px)]',
+    cell: 'bg-data-orange-dark text-data-sand bg-[repeating-linear-gradient(135deg,transparent_0_3px,color-mix(in_oklab,var(--color-background)_35%,transparent)_3px_5px)]',
     mark: '!',
   },
   excess: {
-    cell: 'bg-viz-water-soft/60 text-foreground bg-[repeating-linear-gradient(0deg,transparent_0_3px,color-mix(in_oklab,var(--color-viz-water)_55%,transparent)_3px_4px)]',
+    cell: 'bg-data-blue-light/60 text-foreground bg-[repeating-linear-gradient(0deg,transparent_0_3px,color-mix(in_oklab,var(--color-water)_55%,transparent)_3px_4px)]',
     mark: '≈',
   },
-  ok: { cell: 'bg-viz-grid text-foreground', mark: '' },
+  ok: { cell: 'bg-border text-foreground', mark: '' },
   not_monitored: { cell: 'bg-muted text-muted-foreground', mark: '–' },
   missing: { cell: 'border border-dashed border-foreground/40 text-muted-foreground', mark: '?' },
   later: { cell: 'border border-dotted border-border', mark: '' },

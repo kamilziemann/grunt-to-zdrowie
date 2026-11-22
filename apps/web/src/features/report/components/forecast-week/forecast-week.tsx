@@ -78,23 +78,23 @@ export function ForecastWeek({ report }: { report: WaterReport }) {
               key={day.date}
               className={cn(
                 'flex min-w-0 flex-col items-center gap-1 rounded-xl px-0.5 py-2',
-                rainy ? 'bg-viz-water/10 ring-1 ring-viz-water/40' : 'bg-viz-track',
+                rainy ? 'bg-water/10 ring-1 ring-water/40' : 'bg-muted',
               )}
               data-rainy={rainy || undefined}
             >
               <span className="text-sm font-semibold">{weekday(day.date)}</span>
-              <Icon className={cn('size-5', rainy ? 'text-viz-water' : 'text-viz-orange-strong')} />
+              <Icon className={cn('size-5', rainy ? 'text-water' : 'text-warning')} />
               <span className="text-sm tabular-nums">
                 {day.tMaxC === undefined ? '–' : t('temp', { temp: Math.round(day.tMaxC) })}
               </span>
               <svg viewBox="0 0 10 40" preserveAspectRatio="none" className="h-14 w-3">
-                <rect x="0" y="0" width="10" height="40" className="fill-viz-grid" opacity="0.5" />
+                <rect x="0" y="0" width="10" height="40" className="fill-border" opacity="0.5" />
                 <rect
                   x="0"
                   y={40 - (rain / scale) * 40}
                   width="10"
                   height={(rain / scale) * 40}
-                  className="fill-viz-water"
+                  className="fill-water"
                 />
               </svg>
               <span className={cn('text-base tabular-nums', rainy ? 'font-bold' : 'text-muted-foreground')}>
