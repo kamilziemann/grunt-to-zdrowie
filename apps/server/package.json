@@ -17,11 +17,9 @@
     "check:types": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "admin:grant": "bun scripts/grant-role.ts",
     "validate:iung": "bun scripts/validate-iung.ts"
   },
   "dependencies": {
-    "@app/auth": "workspace:*",
     "@app/cache": "workspace:*",
     "@app/contracts": "workspace:*",
     "@app/db": "workspace:*",

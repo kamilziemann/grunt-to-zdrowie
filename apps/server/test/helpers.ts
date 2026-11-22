@@ -19,7 +19,7 @@ export interface TestApp {
   request(path: string, init?: RequestInit): Promise<Response>;
 }
 
-/** `extend` dopina trasy testowe (np. straznik `requireAuth()`) do prawdziwej aplikacji, zanim ruszy pierwszy request. */
+/** `extend` dopina trasy testowe (np. trase rzucajaca bledem) do prawdziwej aplikacji, zanim ruszy pierwszy request. */
 export function makeApp(
   overrides: ContainerOverrides = {},
   extraEnv: Record<string, unknown> = {},

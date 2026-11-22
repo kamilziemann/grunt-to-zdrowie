@@ -7,7 +7,6 @@ import { contextModule } from '../../modules/context';
 import { healthModule } from '../../modules/health';
 import { hydroModule } from '../../modules/hydro';
 import { imageryModule } from '../../modules/imagery';
-import { meModule } from '../../modules/me';
 import { parcelsModule } from '../../modules/parcels';
 import { placesModule } from '../../modules/places';
 import { reportsModule } from '../../modules/reports';
@@ -18,19 +17,13 @@ import { mountCacheRules } from './cache-rules';
 export * from './paths';
 
 export function mountRoutes(app: OpenAPIHono<AppEnv>) {
-  // Cache brzegowy przed straznikami i modulami: polityki publicznych odczytow i purge po mutacjach.
+  // Cache brzegowy przed modulami: polityki publicznych odczytow i purge po mutacjach. API jest publiczne
+  // (aplikacja bez kont, ADR 0011).
   mountCacheRules(app);
-
-  // Domyslnie wszystko jest publiczne (auth jest opcjonalne i wylaczone). Ochrona modulu to jedna linia PRZED
-  // jego zamontowaniem; przy AUTH_ENABLED=false straznik przepuszcza, wiec API dziala bez kont:
-  //   app.use('/x/*', requireAuth());                       // wymaga zalogowania (401 bez sesji)
-  //   app.use('/x/*', requirePolicy(hasAnyRole('admin')));  // wymaga polityki (401 / 403)
-  // (import `requireAuth`/`requirePolicy` z '../middlewares', polityki z '../../domain/authorization').
 
   return app
     .route('/health', healthModule)
     .route('/telemetry', telemetryModule)
-    .route('/me', meModule)
     .route('/parcels', parcelsModule)
     .route('/places', placesModule)
     .route('/hydro', hydroModule)

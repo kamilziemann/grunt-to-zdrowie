@@ -24,9 +24,6 @@ export default defineConfig(async () => {
             ALLOWED_ORIGINS: 'http://localhost:3000',
             ENVIRONMENT: 'development',
             LOG_LEVEL: 'silent',
-            // lokalne sekrety z apps/web/.dev.vars nie moga zmieniac wyniku testow - kazdy test ustawia, czego potrzebuje
-            AUTH_ENABLED: 'false',
-            AUTH_SECRET: '',
           },
         },
       }),

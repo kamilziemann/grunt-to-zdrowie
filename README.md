@@ -105,7 +105,7 @@ docs/
 - `apps/web/.dev.vars.example` → `.dev.vars` obok niego (w `.gitignore`): sekrety Workera do `vite dev`. Zmienne
   niesekretne (`PUBLIC_URL`, CORS, `LOG_LEVEL`) są w `apps/web/wrangler.jsonc` → `vars`. Walidacja:
   `packages/env/src/server.ts`.
-- Opcjonalne: konta (`AUTH_ENABLED` + `AUTH_SECRET`, [docs/architecture/auth.md](docs/architecture/auth.md)), Sentry
+- Opcjonalne: Sentry
   (`SENTRY_ENABLED` + `SENTRY_DSN`), Postgres z PostGIS na Neon (`DATABASE_URL`, konfiguracja w `neon.ts`).
 - Produkcja: `wrangler secret put NAZWA --env production` w `apps/web`.
 

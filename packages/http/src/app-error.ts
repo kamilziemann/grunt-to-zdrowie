@@ -94,8 +94,6 @@ const TITLES: Record<ProblemCode, string> = {
   validation_failed: 'Validation failed',
   not_found: 'Not found',
   conflict: 'Conflict',
-  forbidden: 'Forbidden',
-  unauthorized: 'Unauthorized',
   rate_limited: 'Rate limited',
   payload_too_large: 'Payload too large',
   unsupported_media_type: 'Unsupported media type',

@@ -25,7 +25,6 @@
       "name": "@app/server",
       "version": "0.1.0",
       "dependencies": {
-        "@app/auth": "workspace:*",
         "@app/cache": "workspace:*",
         "@app/contracts": "workspace:*",
         "@app/db": "workspace:*",

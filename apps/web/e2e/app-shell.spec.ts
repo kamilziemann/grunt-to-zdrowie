@@ -1,4 +1,5 @@
 // Powloka aplikacji bez kont (ADR 0011): naglowek ma tylko logo, jezyk i motyw, a dawne adresy kont to 404.
+import { API_URL } from './support/api-state';
 import { expect, test } from './support/test';
 
 test('nagłówek nie ma elementów konta', async ({ page }) => {
@@ -19,3 +20,11 @@ for (const path of ['/sign-in', '/sign-up', '/account']) {
     await expect(page.getByRole('heading', { level: 1, name: 'Nie ma takiej strony' })).toBeVisible();
   });
 }
+
+test('API nie ma tras kont', async ({ request }) => {
+  for (const path of ['/me', '/auth/get-session']) {
+    const response = await request.get(`${API_URL}${path}`);
+
+    expect(response.status()).toBe(404);
+  }
+});

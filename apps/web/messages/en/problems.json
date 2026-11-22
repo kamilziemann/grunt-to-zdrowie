@@ -2,8 +2,6 @@
   "validation_failed": "The data is invalid. Check the filled-in fields.",
   "not_found": "Resource not found. It may have been deleted.",
   "conflict": "Conflict: the resource was changed in the meantime. Refresh and try again.",
-  "forbidden": "You do not have permission for this operation.",
-  "unauthorized": "This operation requires signing in.",
   "rate_limited": "Too many requests. Wait a moment and try again.",
   "payload_too_large": "The submitted data is too large.",
   "unsupported_media_type": "Unsupported data format.",

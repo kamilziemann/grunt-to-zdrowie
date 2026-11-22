@@ -58,12 +58,12 @@ describe('renderErrorProblem', () => {
 
   it('RpcError z loadera zachowuje kod z API', () => {
     const problem: ProblemDetails = {
-      type: problemType(PROBLEM_CODES.FORBIDDEN),
-      title: 'Forbidden',
-      status: 403,
-      code: PROBLEM_CODES.FORBIDDEN,
+      type: problemType(PROBLEM_CODES.CONFLICT),
+      title: 'Conflict',
+      status: 409,
+      code: PROBLEM_CODES.CONFLICT,
     };
 
-    expect(renderErrorProblem(new RpcError(problem)).code).toBe(PROBLEM_CODES.FORBIDDEN);
+    expect(renderErrorProblem(new RpcError(problem)).code).toBe(PROBLEM_CODES.CONFLICT);
   });
 });

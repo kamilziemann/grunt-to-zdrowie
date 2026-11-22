@@ -49,10 +49,10 @@ describe('ProblemAlert', () => {
   });
 
   it('ten sam kod w angielskim interfejsie daje angielski komunikat', () => {
-    renderWithIntl(<ProblemAlert problem={problem(PROBLEM_CODES.FORBIDDEN)} />, 'en');
+    renderWithIntl(<ProblemAlert problem={problem(PROBLEM_CODES.CONFLICT)} />, 'en');
 
-    expect(screen.getByText(tEn(PROBLEM_CODES.FORBIDDEN))).toBeInTheDocument();
-    expect(tEn(PROBLEM_CODES.FORBIDDEN)).not.toBe(tPl(PROBLEM_CODES.FORBIDDEN));
+    expect(screen.getByText(tEn(PROBLEM_CODES.CONFLICT))).toBeInTheDocument();
+    expect(tEn(PROBLEM_CODES.CONFLICT)).not.toBe(tPl(PROBLEM_CODES.CONFLICT));
   });
 
   it('dla nieznanego kodu lub jego braku zwraca komunikat ogólny', () => {
@@ -114,6 +114,6 @@ describe('describeProblem', () => {
   });
 
   it('bez detail zwraca sam komunikat', () => {
-    expect(describeProblem(tPl, problem(PROBLEM_CODES.FORBIDDEN))).toBe(tPl(PROBLEM_CODES.FORBIDDEN));
+    expect(describeProblem(tPl, problem(PROBLEM_CODES.CONFLICT))).toBe(tPl(PROBLEM_CODES.CONFLICT));
   });
 });

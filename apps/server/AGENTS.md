@@ -30,7 +30,7 @@ Zależności serwisów od świata zewnętrznego to **porty** (interfejsy w `serv
 
 ## Przepływ requestu
 
-`entry/app.ts` (middleware: request-id → logger → env → CORS → kontener → tożsamość; `/auth/*` obsługuje Better Auth) → reguły cache (`entry/routes/cache-rules.ts`) i straże ról w `entry/routes/index.ts` → **moduł** (`modules/<nazwa>`) → **handler** → **serwis** (`c.get('container').<serwis>`) → **repozytorium** (Drizzle) lub **infrastruktura**.
+`entry/app.ts` (middleware: request-id → logger → env → CORS → kontener) → reguły cache (`entry/routes/cache-rules.ts`) w `entry/routes/index.ts` → **moduł** (`modules/<nazwa>`) → **handler** → **serwis** (`c.get('container').<serwis>`) → **repozytorium** (Drizzle) lub **infrastruktura**.
 
 - Moduł = cienka warstwa HTTP: `*.schemas.ts` (DTO zod), `*.routes.ts` (`createRoute`), `*.handlers.ts` (`RouteHandler<typeof route, AppEnv>`), `index.ts` (`new OpenAPIHono<AppEnv>({ defaultHook: openApiValidationHook }).openapi(route, handler)`). Handler tylko wyciąga zwalidowane dane (`c.req.valid(...)`), woła serwis i zwraca `c.json(...)`.
 - Serwis = logika aplikacji, rzuca `AppError` (`@app/http`); `entry/app.ts` zamienia błędy na `application/problem+json` (RFC 9457). Serwis nie zna HTTP ani Drizzle.
@@ -97,27 +97,11 @@ dostaje tylko błędy 5xx przez `reportError` w `createApp`. Szczegóły: `docs/
 
 ## Env i bindingi
 
-Bindingi (`apps/web/wrangler.jsonc`): `DB` (D1, migracje z `../../packages/db/migrations`) i `triggers.crons`. Zmienne nie-sekretne są w `vars` (nie dziedziczą się między `env.preview`/`env.production`: każde środowisko ma pełną kopię). Sekrety lokalnie: `.dev.vars` w `apps/web` (wzór: [`../web/.dev.vars.example`](../web/.dev.vars.example), plik jest w `.gitignore`), w chmurze: `wrangler secret put` w `apps/web`. Walidacja: `packages/env/src/server.ts` (`serverVarsSchema`, `optionalSecret` dla opcjonalnych kluczy; `AUTH_SECRET` wymagany tylko przy `AUTH_ENABLED=true`). Zła konfiguracja = HTTP `503 not_configured` z listą pól.
+Bindingi (`apps/web/wrangler.jsonc`): `DB` (D1, migracje z `../../packages/db/migrations`) i `triggers.crons`. Zmienne nie-sekretne są w `vars` (nie dziedziczą się między `env.preview`/`env.production`: każde środowisko ma pełną kopię). Sekrety lokalnie: `.dev.vars` w `apps/web` (wzór: [`../web/.dev.vars.example`](../web/.dev.vars.example), plik jest w `.gitignore`), w chmurze: `wrangler secret put` w `apps/web`. Walidacja: `packages/env/src/server.ts` (`serverVarsSchema`, `optionalSecret` dla opcjonalnych kluczy). Zła konfiguracja = HTTP `503 not_configured` z listą pól.
 
-## Auth (opcjonalne)
+## Bez kont
 
-Better Auth (`@app/auth`, email + hasło, adapter Drizzle/D1) jest gotowe i **domyślnie wyłączone** ([ADR 0002](../../docs/architecture/decisions/0002-optional-auth.md)). Wyłączone: `/auth/*` zwraca 503 `not_configured`, `identity` w kontekście = `null`, `GET /me` mówi `authEnabled: false`, a `requireAuth()`/`requirePolicy()` **przepuszczają** zapytania (aplikacja bez kont działa bez zmian).
-
-**Jak włączyć** (konfiguracją, bez przebudowy): `AUTH_ENABLED="true"` w `apps/web/wrangler.jsonc` → `vars` (każde `env`) i sekret `AUTH_SECRET` (min. 32 znaki, `openssl rand -base64 32`): lokalnie w `.dev.vars` (`apps/web`), w chmurze `wrangler secret put AUTH_SECRET --env production` w `apps/web`. Opcjonalnie `AUTH_URL` (domyślnie `PUBLIC_URL`). Tabele auth (`user`/`session`/`account`/`verification`/`rate_limit`) są w migracji `0000_init`: zastosuj `bun db:migrate` (`db:migrate:remote`). Limit prób jest zawsze włączony (`AUTH_RATE_LIMIT` w `packages/auth`, liczniki per IP z `CF-Connecting-IP` w D1): logowanie 5/min, rejestracja 10/h, potem 429; nie polegaj na `NODE_ENV`, którego Workers nie ustawiają. Zła konfiguracja (brak sekretu) = 503 `not_configured` z nazwą pola. Zmiana pluginów/pól Better Auth: zaktualizuj `packages/db/src/schema.ts` (porównaj z `bunx @better-auth/cli generate`) i `bun db:generate`.
-
-**Podział odpowiedzialności:**
-
-- **authN** (kim jesteś): `entry/middlewares/auth.ts`. `identityMiddleware` czyta ciasteczko sesji i ustawia `c.get('identity')` (`Identity` z `@app/contracts`: `{ userId, email, roles }` albo `null`). Handler Better Auth jest pod `/auth/*` (`entry/routes/auth.ts`): `POST /auth/sign-up/email`, `/auth/sign-in/email`, `/auth/sign-out`, `GET /auth/get-session`. Poza `@app/auth` nikt nie importuje Better Auth.
-- **authZ** (czy wolno): polityki `(identity, resource?) => boolean` w `domain/authorization` (`isAuthenticated`, `hasAnyRole`, `hasAllRoles`, `isOwner`, `anyOf`, `allOf`; własne dopisujesz obok), przekazywane **jawnie**. Ról biznesowych jeszcze nie ma: `roles` to `string[]` z rekordu użytkownika (domyślnie `[]`), nadaje je backend, nie rejestracja.
-
-**Jak chronić moduł:**
-
-1. Cała trasa: w `entry/routes/index.ts` PRZED montażem modułu `app.use('/analysis/*', requireAuth())` (401 `unauthorized`) albo `requirePolicy(hasAnyRole('admin'))` (401 bez sesji, 403 `forbidden` bez roli). Dziś trasy domeny (`parcels`, `places`, `analysis`) są publiczne.
-2. Reguła zależna od zasobu (np. właściciel): handler przekazuje `c.get('identity')` do serwisu jako parametr, a serwis woła `authorize(isOwner((r) => r.ownerId), identity, report)` z `services/authorization`. Serwis nie zna Hono ani Better Auth, testujesz go z fałszywą `Identity`. Własność zasobu (`owner_id`) to kolumna + migracja.
-
-Strony: API i strony mają jeden origin (`/api/auth/*` → `/auth/*` po odcięciu prefiksu), więc ciasteczko sesji jest first-party (ADR 0002). `AUTH_URL` domyślnie = `PUBLIC_URL` (`<origin>/api`), a origin stron musi być w `ALLOWED_ORIGINS` (zaufany origin Better Auth: ochrona CSRF). Loadery SSR wołają API w procesie z ciasteczkiem bieżącego zapytania (klient izomorficzny), a stan konta w powłoce pobiera przeglądarka z `/api/me` (HTML w cache nie zależy od ciasteczek). CORS: przy `AUTH_ENABLED=true` odpowiedzi mają `Access-Control-Allow-Credentials: true` (origin tylko z `ALLOWED_ORIGINS`/`PUBLIC_URL`, nigdy `*`). Ciasteczko ma `SameSite=Lax`.
-
-Testy: `makeApp({}, { AUTH_ENABLED: 'true', AUTH_SECRET })` + prawdziwe endpointy Better Auth (wzór: `test/integration/auth.test.ts`); trasy testowe dopinasz trzecim argumentem `makeApp(…, (app) => app.get(…))`.
+Aplikacja nie ma kont użytkowników ([ADR 0011](../../docs/architecture/decisions/0011-no-user-accounts.md)): API jest publiczne, nie ma sesji, tożsamości w kontekście ani ról. Nie dodawaj strażników tras ani parametru tożsamości w serwisach bez nowego ADR.
 
 ## Testy
 
@@ -136,12 +120,11 @@ którą czyta strona; skrypty mówiące do API domyślnie używają `http://loca
 
 Z `apps/server` (jeśli nie napisano inaczej):
 
-| Komenda                                               | Co robi                                                          |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `bun run admin:grant -- <email> admin`                | rola `editor`/`admin` w lokalnej D1 (gdy lokalnie włączysz auth) |
-| `bun run test` / `test:watch`                         | Vitest w workerd (bindingi z `apps/web/wrangler.jsonc`)          |
-| `bun run check:types`                                 | `tsc` dla `src`/`test` i dla `scripts`                           |
-| `bun run lint`, `bun run architecture:check` (korzeń) | oxlint (`--type-aware --deny-warnings`) i reguły warstw          |
+| Komenda                                               | Co robi                                                 |
+| ----------------------------------------------------- | ------------------------------------------------------- |
+| `bun run test` / `test:watch`                         | Vitest w workerd (bindingi z `apps/web/wrangler.jsonc`) |
+| `bun run check:types`                                 | `tsc` dla `src`/`test` i dla `scripts`                  |
+| `bun run lint`, `bun run architecture:check` (korzeń) | oxlint (`--type-aware --deny-warnings`) i reguły warstw |
 
 Pierwszy start lokalny (z korzenia): `cp apps/web/.dev.vars.example apps/web/.dev.vars && bun run setup:local && bun run dev` (`setup:local` = migracje lokalnej D1). Pierwszy deploy: `bun run deploy` z roota zakłada bazę D1 i wpisuje jej id tylko w `env.production`/`env.preview` w `apps/web/wrangler.jsonc` (`database_id` top-level to klucz lokalnej bazy `vite dev` - nie zmieniaj go).
 

@@ -176,10 +176,8 @@ Identyfikatory w nawiasach to reguły checkera (`--only <id>`); naruszenia pokaz
   (`docs/architecture/deployment.md`). Logi pisz loggerem z kontekstu (`c.get('logger')`), nigdy `console.log`.
 - **paczkę opcjonalną** (emails, storage, payments) → dopiero gdy projekt jej potrzebuje: `packages/<nazwa>`,
   wpis w `architecture.config.ts`, zakres w `commitlint.config.ts`.
-- **auth / ochronę endpointu** → auth jest gotowe i domyślnie wyłączone ([ADR 0002](docs/architecture/decisions/0002-optional-auth.md)):
-  włączasz `AUTH_ENABLED=true` + sekret `AUTH_SECRET`; trasę chronisz `requireAuth()`/`requirePolicy(policy)` w
-  `entry/routes`, politykę (authZ) piszesz w `apps/server/src/domain/authorization`, a serwis dostaje `Identity` jako
-  parametr. Patrz `apps/server/AGENTS.md` („Auth (opcjonalne)”).
+- **konta / ochronę endpointu** → nie ma: aplikacja jest bez kont ([ADR 0011](docs/architecture/decisions/0011-no-user-accounts.md)),
+  API jest publiczne. Funkcja przypisana do osoby = najpierw nowy ADR.
 - **nową funkcję, komponent albo moduł w katalogu jednostek** (lista wyżej, reguła 10) → nowy folder
   `<katalog>/<nazwa>/` z `<nazwa>.ts(x)`, testem i `index.ts`; importujesz folder, nie plik w środku.
   Nowy katalog jednostek = wpis w `folderUnits.dirs` w `architecture.config.ts`.

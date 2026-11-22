@@ -11,14 +11,12 @@ import {
   contextMiddleware,
   corsMiddleware,
   envMiddleware,
-  identityMiddleware,
   loggerMiddleware,
   requestIdMiddleware,
   rootLoggerFor,
   type LoggerMiddlewareOptions,
 } from './middlewares';
 import { mountRoutes } from './routes';
-import { mountAuth } from './routes/auth';
 
 /** Raport bledu 5xx do zewnetrznego narzedzia (Sentry); domyslnie brak - wystarczaja logi Cloudflare. */
 export type ErrorReporter = (
@@ -53,7 +51,6 @@ export function createApp(options: AppOptions) {
   app.use(envMiddleware);
   app.use(corsMiddleware);
   app.use(contextMiddleware(options.createContainer));
-  app.use(identityMiddleware);
 
   app.onError((err, c) => {
     // vars moga nie istniec, jesli blad poleci przed envMiddleware (np. w requestId/logger)
@@ -74,8 +71,6 @@ export function createApp(options: AppOptions) {
     return handler(err, c);
   });
   app.notFound(notFoundHandler);
-
-  mountAuth(app);
 
   const routes = mountRoutes(app);
 

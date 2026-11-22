@@ -1,7 +1,6 @@
 // Kontrakt kontenera (DI) i zmiennych requestu Hono. Lezy w services, bo to jedyna warstwa, ktora moga importowac
 // zarowno modules (handlery biora serwisy z c.get('container')), jak i entry (middleware buduje kontener).
 // Implementacja fabryki: src/container.ts (root), wstrzykiwana do createApp() przez src/index.ts.
-import type { Identity } from '@app/contracts';
 import type { RawServerEnv, ServerVars } from '@app/env/server';
 import type { Logger, TraceContext } from '@app/logger';
 
@@ -47,8 +46,6 @@ export interface AppVariables {
   logger: Logger;
   vars: ServerVars;
   container: Container;
-  /** zalogowany uzytkownik; null = niezalogowany albo auth wylaczone (AUTH_ENABLED=false) */
-  identity: Identity | null;
 }
 
 export interface AppEnv {
