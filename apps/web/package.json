@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check:js-budget": "bun scripts/check-js-budget.ts"
+    "check:js-budget": "bun scripts/check-js-budget.ts",
+    "samples:pdf": "bun scripts/sample-reports.ts"
   },
   "dependencies": {
     "@app/cache": "workspace:*",

@@ -65,3 +65,46 @@ export function PrintFooter({ report }: { report: WaterReport }) {
     </footer>
   );
 }
+
+/** Napis CSS w cudzyslowach (tresc pola marginesu strony); bez `<`, zeby opis pola nie zamknal elementu `style`. */
+function cssString(text: string): string {
+  return `"${text
+    .replaceAll('\\', '\\\\')
+    .replaceAll('"', '\\"')
+    .replaceAll(/[\n\r<]+/g, ' ')}"`;
+}
+
+/** Krotka nazwa dostawcy do stopki strony: "NASA POWER (MERRA-2, ...)" -> "NASA POWER". */
+function shortProvider(provider: string): string {
+  return provider.split(/ \(| - /)[0]?.trim() ?? provider;
+}
+
+/**
+ * Naglowek i stopka na KAZDEJ stronie wydruku: pola marginesu `@page` (Chrome 131+) z nazwa aplikacji, polem, dniem
+ * analizy, identyfikatorem raportu, zrodlami i numerem strony. Przegladarki bez pol marginesu drukuja jak dotad -
+ * pelny naglowek na pierwszej stronie i stopke na ostatniej (`PrintHeader`, `PrintFooter`).
+ */
+export function PrintPageMargins({ report }: { report: WaterReport }) {
+  const t = useTranslations('report.print');
+  const format = useFormatter();
+  const date = format.dateTime(new Date(`${report.meta.analysisDate}T12:00:00Z`), {
+    dateStyle: 'long',
+    timeZone: 'UTC',
+  });
+  const providers = [...new Set(report.sources.map((source) => shortProvider(source.provider)))];
+  const top = t('pageHeader', {
+    app: BRAND,
+    field: report.field.label || report.field.parcelIds.join(', '),
+    date,
+  });
+  const bottom = t('pageFooter', { sources: providers.join(', ') });
+  const css = `@media print { @page {
+    margin: 18mm 12mm 18mm;
+    @top-left { content: ${cssString(top)}; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: bottom; padding-bottom: 3mm; }
+    @top-right { content: ${cssString(t('pageId', { id: report.meta.reportId }))}; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: bottom; padding-bottom: 3mm; }
+    @bottom-left { content: ${cssString(bottom)}; font: 7.5pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: top; padding-top: 3mm; }
+    @bottom-right { content: ${cssString(t('pageNumber'))} counter(page) " / " counter(pages); width: 24mm; white-space: nowrap; text-align: right; font: 8pt system-ui, sans-serif; color: var(--muted-foreground); vertical-align: top; padding-top: 3mm; }
+  } }`;
+
+  return <style data-testid="print-page-margins">{css}</style>;
+}

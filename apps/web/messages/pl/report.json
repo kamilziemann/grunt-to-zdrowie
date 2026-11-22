@@ -620,7 +620,11 @@
     "address": "Raport: {url}",
     "sources": "Źródła danych – {sources}.",
     "sample": "atrapa",
-    "footerMeta": "{app} · raport {id}, silnik {version}. Licencje i zakresy dat źródeł – sekcja 7."
+    "footerMeta": "{app} · raport {id}, silnik {version}. Licencje i zakresy dat źródeł – sekcja 7.",
+    "pageHeader": "{app} · raport wodny pola · {field} · stan na {date}",
+    "pageId": "raport {id}",
+    "pageFooter": "Źródła danych: {sources}. Licencje – sekcja 7.",
+    "pageNumber": "strona "
   },
   "landUse": {
     "label": "Użytki w ewidencji",

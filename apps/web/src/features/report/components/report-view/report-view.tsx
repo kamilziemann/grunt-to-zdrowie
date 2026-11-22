@@ -11,7 +11,7 @@ import { FieldMap } from '../field-map';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
 import { LandUseNotice } from '../land-use-notice';
-import { PrintFooter, PrintHeader } from '../print-frame';
+import { PrintFooter, PrintHeader, PrintPageMargins } from '../print-frame';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
 import { ditchInFieldM, fieldZones, sampleParts } from '../../utils/report-data';
@@ -78,7 +78,12 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
 
   return (
     <ZoneFocusProvider>
-      <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
+      <article
+        ref={root}
+        className="report flex flex-col gap-section print:block print:space-y-6"
+        data-testid="report"
+      >
+        <PrintPageMargins report={report} />
         <PrintHeader report={report} />
         <ReportHeader
           report={report}
@@ -111,8 +116,9 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref, recompu
           title={t('sections.retention')}
           sample={sampleRecommendations}
         >
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold">{t('fieldMap.title')}</h3>
+          {/* na wydruku blok, nie flex - wtedy Chrome trzyma naglowek przy szkicu (break-after w flexie nie dziala) */}
+          <div className="flex flex-col gap-2 print:block print:space-y-2">
+            <h3 className="text-lg font-semibold print:break-after-avoid">{t('fieldMap.title')}</h3>
             <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} zones={zones} />
           </div>
           <ZoneList report={report} />

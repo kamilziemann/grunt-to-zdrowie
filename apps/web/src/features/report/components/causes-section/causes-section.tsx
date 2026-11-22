@@ -15,9 +15,10 @@ export function CausesSection({ causes }: { causes: readonly Cause[] }) {
   if (sorted.length === 0) return <p className="text-base text-muted-foreground">{t('none')}</p>;
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">{t('intro')}</p>
-      <ol className="flex flex-col gap-3">
+    // na wydruku blok, nie flex: Chrome trzyma wtedy naglowek i zdanie wstepu przy pierwszej karcie
+    <div className="flex flex-col gap-3 print:block print:space-y-3">
+      <p className="text-sm text-muted-foreground print:break-after-avoid">{t('intro')}</p>
+      <ol className="flex flex-col gap-3 print:block print:space-y-3">
         {sorted.map((cause) => (
           <li
             key={cause.id}

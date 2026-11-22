@@ -620,7 +620,11 @@
     "address": "Report: {url}",
     "sources": "Data sources – {sources}.",
     "sample": "placeholder",
-    "footerMeta": "{app} · report {id}, engine {version}. Source licences and date ranges – section 7."
+    "footerMeta": "{app} · report {id}, engine {version}. Source licences and date ranges – section 7.",
+    "pageHeader": "{app} · field water report · {field} · as of {date}",
+    "pageId": "report {id}",
+    "pageFooter": "Data sources: {sources}. Licences – section 7.",
+    "pageNumber": "page "
   },
   "landUse": {
     "label": "Land use in the register",

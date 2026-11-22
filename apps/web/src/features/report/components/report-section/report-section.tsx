@@ -34,7 +34,7 @@ export function ReportSection({
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className={cn('flex scroll-mt-20 flex-col gap-4', className)}
+      className={cn('flex scroll-mt-20 flex-col gap-4 print:block print:space-y-4', className)}
       data-report-section={id}
     >
       <h2
@@ -70,7 +70,7 @@ export function ReportSection({
 export function ReportDetails({ summary, children }: { summary: string; children: ReactNode }) {
   return (
     <details className="group rounded-lg border bg-card print:border-0 print:bg-transparent">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2 text-base font-medium select-none [&::-webkit-details-marker]:hidden print:min-h-0 print:px-0">
+      <summary className="flex min-h-11 print:break-after-avoid cursor-pointer list-none items-center justify-between gap-3 px-4 py-2 text-base font-medium select-none [&::-webkit-details-marker]:hidden print:min-h-0 print:px-0">
         {summary}
         <ChevronDown
           aria-hidden="true"

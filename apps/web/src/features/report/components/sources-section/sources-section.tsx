@@ -135,7 +135,7 @@ export function SourcesSection({ report }: { report: WaterReport }) {
                   href={source.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-11 w-fit items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline print:min-h-0"
+                  className="inline-flex min-h-11 w-fit items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline print:block print:min-h-0 print:w-auto print:text-xs"
                 >
                   <ExternalLink aria-hidden="true" className="size-4 print:hidden" />
                   {t('link', { provider: source.provider })}

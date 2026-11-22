@@ -54,7 +54,7 @@ export function RecommendationList({ category, recommendations, report }: Recomm
   if (sorted.length === 0) return <p className="text-base text-muted-foreground">{t(`none.${category}`)}</p>;
 
   return (
-    <ol className="flex flex-col gap-3">
+    <ol className="flex flex-col gap-3 print:block print:space-y-3">
       {sorted.map((recommendation) => {
         const zone = zoneOf(report, recommendation.zoneId);
         const number = zone ? numbered.get(zone.id) : undefined;
@@ -87,7 +87,8 @@ export function RecommendationList({ category, recommendations, report }: Recomm
               </p>
               <h3 className="text-lg font-semibold">{t(`measures.${recommendation.measure}.name`)}</h3>
               <p className="text-base">{t(`measures.${recommendation.measure}.description`)}</p>
-              {recommendation.effect && (
+              {/* efekt zaokraglony do zera ("ok. 0 l/m2") nic rolnikowi nie mowi */}
+              {recommendation.effect && Math.round(recommendation.effect.value * 10) !== 0 && (
                 <p className="text-base font-semibold text-water">
                   {t(`effect.${recommendation.effect.kind}`, {
                     value: format.number(recommendation.effect.value, { maximumFractionDigits: 1 }),

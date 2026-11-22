@@ -105,7 +105,7 @@ export function ZoneList({ report }: { report: WaterReport }) {
   const vegetation = map?.basis?.includes('vegetation') ?? false;
 
   return (
-    <div className="flex max-w-xl flex-col gap-2" data-testid="zone-list">
+    <div className="flex max-w-xl flex-col gap-2 print:break-inside-avoid" data-testid="zone-list">
       <h3 className="text-lg font-semibold">{t('title')}</h3>
       <ol className="flex flex-col gap-1" aria-label={t('title')}>
         {zones.map(({ zone, number }: NumberedZone) => (
