@@ -13,7 +13,9 @@ const HEADERS: Record<string, string> = {
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
   'referrer-policy': 'strict-origin-when-cross-origin',
-  'permissions-policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  // geolokalizacja tylko dla wlasnej strony: przycisk "Gdzie jestem" na mapie dzialek (bez tego przegladarka
+  // odmawia polozenia, zanim zapyta uzytkownika)
+  'permissions-policy': 'camera=(), microphone=(), geolocation=(self), payment=()',
 };
 
 /** HSTS tylko po HTTPS (lokalnie http://localhost - przegladarka i tak by go zignorowala). */

@@ -143,7 +143,7 @@ test.describe('mapa na telefonie', () => {
 
       const locate = page.getByRole('button', { name: 'Gdzie jestem' });
 
-      // brak zgody w przegladarce testu (dzis polozenie blokuje tez naglowek Permissions-Policy strony)
+      // brak zgody w przegladarce testu
       await locate.click();
       await expect(locate).toHaveAttribute('data-locate-state', 'denied');
       await expect(page.getByText('Brak dostępu do położenia.', { exact: false })).toBeVisible();
@@ -152,14 +152,6 @@ test.describe('mapa na telefonie', () => {
     test('„Gdzie jestem” ze zgodą: mapa pokazuje położenie', async ({ page, context }) => {
       await context.grantPermissions(['geolocation']);
       await context.setGeolocation({ latitude: 52.172, longitude: 21.59 });
-      // strona bez naglowka Permissions-Policy, ktory dzis wylacza geolokalizacje (prosba do integratora)
-      await page.route('**/mapa?*', async (route) => {
-        const response = await route.fetch();
-        const headers = { ...response.headers() };
-
-        delete headers['permissions-policy'];
-        await route.fulfill({ response, headers });
-      });
       await mockHydroApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
       await waitForMap(page);
