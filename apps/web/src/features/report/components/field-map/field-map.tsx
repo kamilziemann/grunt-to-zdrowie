@@ -257,7 +257,7 @@ export function FieldMap({
           </p>
         </div>
         <fieldset
-          className="grid grid-cols-2 gap-1 rounded-3xl bg-muted p-1 sm:grid-cols-4 sm:rounded-full print:hidden"
+          className="grid grid-cols-2 gap-1 rounded-3xl bg-muted p-1 lg:grid-cols-4 lg:rounded-full print:hidden"
           data-testid="field-map-mode"
         >
           <legend className="sr-only">{t('modeLabel')}</legend>
@@ -468,7 +468,7 @@ function ModeButton({ mode, pressed, label }: { mode: FieldMode; pressed: boolea
       )}
       data-testid={`field-map-mode-${mode}`}
     >
-      <Icon aria-hidden="true" className="size-5 shrink-0" />
+      <Icon aria-hidden="true" className="hidden size-5 shrink-0 sm:block" />
       {label}
     </button>
   );

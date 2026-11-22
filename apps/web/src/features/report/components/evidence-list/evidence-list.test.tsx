@@ -21,7 +21,10 @@ describe('EvidenceList', () => {
   it('nowe miary silnika po polsku: promien w nazwie, sezony "z", kategoria rzymska, bez identyfikatorow', () => {
     renderWithIntl(<EvidenceList evidence={EVIDENCE} />);
 
-    const items = screen.getAllByRole('listitem').map((item) => item.textContent ?? '');
+    // liczba i jednostka sa zlaczone twarda spacja - porownujemy zwykle spacje
+    const items = screen
+      .getAllByRole('listitem')
+      .map((item) => (item.textContent ?? '').replaceAll('\u00a0', ' '));
 
     expect(items[0]).toContain('Odległość do najbliższego rowu: 0 m');
     expect(items[1]).toContain('Długość rowów w polu: 382 m');

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils/cn';
 
 import { ditchInFieldM, fieldZones } from '../../utils/report-data';
 import { reportExtras, waterTank } from '../../utils/report-extras';
+import { orderedRecommendations } from '../../utils/report-summary';
 import { FieldMap } from '../field-map';
 import { FirstStep } from '../first-step';
 import { ForecastWeek } from '../forecast-week';
@@ -19,6 +20,10 @@ import { WaterLedgerChart } from '../water-ledger-chart';
 import { WaterTankChart } from '../water-tank-chart';
 import { imageryRequest } from '../satellite-section';
 import { ZoneList } from '../zone-list';
+
+/** Dwie kolumny 3:2 (wykres albo pierwszy krok obok krotszego klocka). */
+const TWO_COLUMNS =
+  'lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]';
 
 export interface ReportOverviewProps {
   report: WaterReport;
@@ -45,6 +50,9 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
     extras.waterLedger !== undefined,
   ].filter(Boolean).length;
   const hasWater = waterCards > 0;
+  // klocek bez danych znika - wtedy jedna kolumna zamiast pustej polowy rzedu (np. nadmiar wody bez zalecen)
+  const hasCauses = report.causes.length > 0;
+  const hasFirstStep = orderedRecommendations(report).length > 0;
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
@@ -87,7 +95,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
         <h2 id="lata-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
           {t('historyTitle')}
         </h2>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:gap-3">
+        <div className={cn('grid gap-4 print:gap-3', hasCauses && TWO_COLUMNS)}>
           <SeasonBars report={report} />
           <SimpleCauses report={report} />
         </div>
@@ -100,7 +108,7 @@ export function ReportOverview({ report, detailsHref }: ReportOverviewProps) {
         <h2 id="co-robic-title" className="text-2xl font-semibold print:break-after-avoid print:text-xl">
           {t('todoTitle')}
         </h2>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:gap-3">
+        <div className={cn('grid gap-4 print:gap-3', hasFirstStep ? TWO_COLUMNS : 'max-w-3xl')}>
           <FirstStep report={report} allHref={withHash(detailsHref, 'retencja')} />
           <KnownLimits report={report} />
         </div>

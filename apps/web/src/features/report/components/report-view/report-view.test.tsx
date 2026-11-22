@@ -661,7 +661,9 @@ describe('ReportView', () => {
       );
       expect(history).toHaveTextContent('Kalendarz suszy: bieżący rok na tle 10 poprzednich');
       expect(history?.querySelector('tr[data-current] th')).toHaveTextContent('2017bieżący');
-      expect(history?.querySelector('[data-season="2017"]')).toHaveTextContent('bieżący20 wrz');
+      // sezony na wykresie sa juz wyzej ("Jak bylo przez 10 lat?") - szczegoly ich nie powtarzaja
+      expect(history?.querySelector('[data-season]')).toBeNull();
+      expect(container.querySelector('[data-season-bar="2017"]')).toBeInTheDocument();
     });
 
     it('nawadnianie: jedno zdanie "nie nawadniaj"; retencja nie obiecuje zatrzymywania; bez dni niedoboru w ocenie', () => {

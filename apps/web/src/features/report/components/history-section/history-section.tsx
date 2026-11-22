@@ -11,6 +11,7 @@ import {
   seasonRows,
   stressSummary,
 } from '../../utils/report-data';
+import { drySeasons, seasonBars } from '../../utils/report-summary';
 import { ReportDetails } from '../report-section';
 import { RiskCalendar } from '../risk-calendar';
 
@@ -52,6 +53,8 @@ export function HistorySection({ report }: { report: WaterReport }) {
   const format = useFormatter();
   const { history } = report;
   const rows = seasonRows(report);
+  // wykres sezonow jest juz wyzej ("Jak bylo przez 10 lat?") - tu tylko dla starych raportow bez niego
+  const barsAbove = seasonBars(report).length > 0 && drySeasons(report) !== null;
   const previous = rows.filter((row) => !row.current);
   const current = rows.find((row) => row.current) ?? null;
   const summary = stressSummary(rows);
@@ -121,11 +124,11 @@ export function HistorySection({ report }: { report: WaterReport }) {
         )}
       </div>
 
-      {rows.length > 0 && (
+      {rows.length > 0 && !barsAbove && (
         <figure className="flex flex-col gap-2 rounded-lg border bg-card p-4 print:break-inside-avoid">
           <figcaption className="flex flex-col gap-0.5">
             <span className="text-sm font-medium">{t('chartLabel')}</span>
-            <span className="text-xs text-muted-foreground">{t('chartNote')}</span>
+            <span className="text-sm text-muted-foreground">{t('chartNote')}</span>
           </figcaption>
           <ul className="flex flex-col gap-1.5">
             {rows.map((row) => {

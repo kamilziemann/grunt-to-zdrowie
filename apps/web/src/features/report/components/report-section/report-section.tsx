@@ -71,7 +71,7 @@ export function ReportSection({
       id={id}
       aria-labelledby={`${id}-title`}
       className={cn(
-        'scroll-mt-28 rounded-3xl border bg-card shadow-card print:rounded-none print:border-0 print:bg-transparent print:shadow-none',
+        'scroll-mt-36 rounded-3xl border bg-card shadow-card print:rounded-none print:border-0 print:bg-transparent print:shadow-none',
         className,
       )}
       data-report-section={id}

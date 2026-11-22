@@ -100,7 +100,7 @@ export function FullAnalysis({ state, children }: { state: DetailsState; childre
         aria-expanded={open}
         aria-controls={ANCHOR}
         onClick={toggle}
-        className="flex min-h-16 w-full scroll-mt-4 items-center justify-between gap-4 rounded-3xl border-2 border-primary/40 bg-card px-5 py-4 text-left shadow-card transition-colors duration-150 hover:border-primary hover:bg-muted/40 sm:px-7 print:hidden"
+        className="flex min-h-16 w-full scroll-mt-24 items-center justify-between gap-4 rounded-3xl border-2 border-primary/40 bg-card px-5 py-4 text-left shadow-card transition-colors duration-150 hover:border-primary hover:bg-muted/40 sm:px-7 print:hidden"
         data-testid="show-details"
       >
         <span className="flex flex-col gap-1">
@@ -118,7 +118,7 @@ export function FullAnalysis({ state, children }: { state: DetailsState; childre
       <div
         ref={content}
         id={ANCHOR}
-        className={cn('scroll-mt-4 flex-col gap-4 print:block print:space-y-6', open ? 'flex' : 'hidden')}
+        className={cn('scroll-mt-24 flex-col gap-4 print:block print:space-y-6', open ? 'flex' : 'hidden')}
         data-testid="report-details"
       >
         {children}

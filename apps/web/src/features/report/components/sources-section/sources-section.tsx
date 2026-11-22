@@ -176,7 +176,7 @@ export function SourcesSection({ report }: { report: WaterReport }) {
 
       <ExportButtons report={report} />
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {t('meta', {
           id: report.meta.reportId,
           version: report.meta.engineVersion,

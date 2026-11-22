@@ -273,10 +273,10 @@ test.describe('mapa pola w raporcie', () => {
     await expect(sketch).toBeVisible();
     await expect(sketch).toContainText('Działka 6509');
     // dwa osobne rowy w polu: jedna tabliczka z laczna dlugoscia, linia do kazdego rowu
-    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^2 rowy przez pole, razem \d+ m$/);
+    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^2 rowy przez pole, razem \d+\sm$/);
     await expect(page.getByTestId('field-sketch-fact-line')).toHaveCount(2);
     await expect(page.getByTestId('field-sketch-highlight')).toBeAttached();
-    await expect(page.getByTestId('field-sketch-scale')).toContainText(/\d+ m/);
+    await expect(page.getByTestId('field-sketch-scale')).toContainText(/\d+\sm/);
     await expect(page.getByTestId('field-sketch-legend')).toContainText('Rowy płynące przez pole');
     await expect(map).toContainText('BDOT10k, GUGiK (dane z 21 lis 2026)');
     await expect(page.getByTestId('field-map-nearest')).toContainText(
@@ -329,7 +329,7 @@ test.describe('mapa pola w raporcie', () => {
     await mockHydroApi(page);
     await page.goto(LOW_CONFIDENCE_REPORT_URL);
     await page.getByTestId('field-map').scrollIntoViewIfNeeded();
-    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^Rów na skraju pola, \d+ m$/);
+    await expect(page.getByTestId('field-sketch-fact')).toHaveText(/^Rów na skraju pola, \d+\sm$/);
   });
 
   test('szkic na telefonie mieści się w ekranie', async ({ page }) => {

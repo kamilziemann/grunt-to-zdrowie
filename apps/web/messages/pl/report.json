@@ -6,11 +6,11 @@
     "crop": "Uprawa",
     "date": "Dzień analizy",
     "area": "Powierzchnia",
-    "areaValue": "{area} ha",
+    "areaValue": "{area} ha",
     "landUse": "Użytki w ewidencji",
     "ownAreaPart": "Część działki {numbers}",
     "ownAreaDrawn": "Własny obszar narysowany na mapie",
-    "areaRegistry": "w ewidencji {area} ha"
+    "areaRegistry": "w ewidencji {area} ha"
   },
   "actions": {
     "print": "Drukuj / zapisz PDF",
@@ -101,8 +101,8 @@
     "soilWaterValue": "{percent}% pełnego zapasu",
     "soilWaterNote": "{left} z {total} litrów na m² dostępnych dla korzeni",
     "rain": "Deszcz w ostatnich {days} dniach",
-    "rainValue": "{sum} l/m²",
-    "rainNote": "zwykle {median} l/m², {side, select, wet {{wet, plural, =1 {najbardziej mokry okres} other {#. najbardziej mokry okres}}} other {{rank}. najsuchszy okres}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}})",
+    "rainValue": "{sum} l/m²",
+    "rainNote": "zwykle {median} l/m², {side, select, wet {{wet, plural, =1 {najbardziej mokry okres} other {#. najbardziej mokry okres}}} other {{rank}. najsuchszy okres}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}})",
     "stress": "Dni, w których roślinom brakowało wody",
     "stressValue": "{days} z ostatnich 30",
     "plants": "Rośliny na zdjęciach satelitarnych",
@@ -119,7 +119,7 @@
       "possible_other_stress": "są słabsze niż zwykle, ale przyczyna może być inna niż woda"
     },
     "balance": "Klimatyczny bilans wodny (KBW)",
-    "balanceValue": "{balance} mm = opad {precip} mm − ewapotranspiracja {et} mm",
+    "balanceValue": "{balance} mm = opad {precip} mm − ewapotranspiracja {et} mm",
     "balancePeriod": "okres {no} (60 dni): {from} – {to}",
     "balanceStatus": {
       "ok": "policzony",
@@ -128,7 +128,7 @@
       "missing": "brak danych"
     },
     "threshold": "Próg suszy IUNG",
-    "thresholdValue": "{threshold} mm, kategoria gleby {category}",
+    "thresholdValue": "{threshold} mm, kategoria gleby {category}",
     "thresholdNone": "brak progu dla tej uprawy, gleby lub okresu",
     "belowThreshold": "bilans poniżej progu – susza wg IUNG",
     "aboveThreshold": "bilans powyżej progu",
@@ -138,9 +138,9 @@
       "iung_dg95": "metoda IUNG"
     },
     "rootZone": "Strefa korzeniowa (FAO-56)",
-    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, ubytek Dr {depletion} mm, Ks {ks}",
+    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, ubytek Dr {depletion} mm, Ks {ks}",
     "cropStage": "Faza uprawy",
-    "cropStageValue": "{stage}, Kc {kc}, korzenie do {depth} m",
+    "cropStageValue": "{stage}, Kc {kc}, korzenie do {depth} m",
     "cropStageNoKc": "{stage}",
     "stages": {
       "dormant": "spoczynek",
@@ -156,7 +156,7 @@
     "rank": "Ostatnie 60 dni na tle lat",
     "rankValue": "{side, select, wet {{wet, plural, =1 {najbardziej mokry okres} other {#. najbardziej mokry okres}}} other {{rank, plural, =1 {najsuchszy okres} other {#. najsuchszy okres}}}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}})",
     "rankNote": "deszcz minus parowanie, {from} – {to}",
-    "stressSeason": "od początku sezonu: {days} dni, brakło ok. {mm} l/m² wody",
+    "stressSeason": "od początku sezonu: {days} dni, brakło ok. {mm} l/m² wody",
     "stressSeasonDays": "od początku sezonu: {days} dni",
     "coverage": "dane pogodowe z {percent}% dni okresu",
     "scenarios": "Wynik na innych glebach",
@@ -166,7 +166,7 @@
       "lighter": "Na glebie lżejszej (kategoria {drought}) byłaby susza, na cięższej ({ok}) nie.",
       "mixed": "Susza na glebach kategorii {drought}, bez suszy na {ok}."
     },
-    "scenarioItem": "kategoria {category} ({name}): próg {threshold} mm – {result}",
+    "scenarioItem": "kategoria {category} ({name}): próg {threshold} mm – {result}",
     "scenarioCurrent": "przyjęta dla tego pola",
     "soilNames": {
       "1": "bardzo lekka",
@@ -199,7 +199,7 @@
     "basis": "Na czym opieramy ocenę",
     "soilBasis": {
       "field": "Gleba z mapy gleb dla tego pola.",
-      "nearby": "W samym polu mapa gleb nie ma danych (np. las, zabudowa albo woda), więc bierzemy glebę z miejsca oddalonego o ok. {distance} m.",
+      "nearby": "W samym polu mapa gleb nie ma danych (np. las, zabudowa albo woda), więc bierzemy glebę z miejsca oddalonego o ok. {distance} m.",
       "nearbyUnknown": "W samym polu mapa gleb nie ma danych (np. las, zabudowa albo woda), więc bierzemy glebę z najbliższego miejsca obok.",
       "assumed_medium": "Nie znamy gleby w tym miejscu, więc przyjmujemy glebę średnią (kategoria III)."
     },
@@ -220,7 +220,7 @@
     "noData": "Brak danych historycznych dla tego pola.",
     "riskMonths": "Najczęściej brakowało wody w miesiącach: {months}.",
     "stressDays": "{days} dni stresu",
-    "minBalance": "najniższy bilans {balance} mm",
+    "minBalance": "najniższy bilans {balance} mm",
     "calendar": "Kalendarz suszy: bieżący rok na tle 10 poprzednich",
     "year": "Rok",
     "status": {
@@ -241,7 +241,7 @@
     "seasonNoData": "{year}: brak danych",
     "seasonCurrent": "{year} (bieżący) do {date}",
     "droughtPeriods": "{count, plural, one {# okres suszy} few {# okresy suszy} many {# okresów suszy} other {# okresu suszy}}",
-    "etDeficit": "brakło {mm} l/m²",
+    "etDeficit": "brakło {mm} l/m²",
     "calendarDescription": "Kratka to 60 dni kończące się w podanym dniu – tak ocenia suszę IUNG (od 21 marca do 30 września).",
     "periodEnd": "60 dni do {date}",
     "periodEndDay": "do",
@@ -250,7 +250,7 @@
     "scrollHint": "Przesuń tabelę w bok, żeby zobaczyć cały sezon.",
     "monthOfEnd": "Miesiąc końca okresu",
     "deficit": "{deficit, plural, =0 {W żadnym z {seasons} poprzednich sezonów uprawie nie zabrakło wyraźnie wody.} other {Uprawie brakowało wody w # z {seasons} poprzednich sezonów.}}",
-    "deficitNote": "Liczymy sezony, w których według bilansu wody w glebie zabrakło co najmniej 50 l/m² albo był przekroczony próg suszy IUNG.",
+    "deficitNote": "Liczymy sezony, w których według bilansu wody w glebie zabrakło co najmniej 50 l/m² albo był przekroczony próg suszy IUNG.",
     "excessSeasons": "{count, plural, one {Nadmiar wody (deszcz wyraźnie większy od parowania) był w # z {seasons} sezonów.} other {Nadmiar wody (deszcz wyraźnie większy od parowania) był w # z {seasons} sezonów.}}",
     "currentShort": "bieżący"
   },
@@ -291,13 +291,13 @@
     },
     "excess": {
       "intro": "Co mówią dane o tym polu:",
-      "rain": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle o tej porze ok. {median} l/m²{times, plural, =0 {} other {, czyli ok. # razy więcej}}. {side, select, wet {{wet, plural, =1 {To najbardziej mokry taki okres} other {To #. najbardziej mokry taki okres}}} other {To {rank}. najsuchszy taki okres}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}}).",
-      "balance": "W ostatnich 60 dniach spadło {precip} l/m², a wyparowało ok. {et} l/m² – w glebie i na polu zostało ok. {left} l/m² wody więcej, niż ubyło.",
+      "rain": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle o tej porze ok. {median} l/m²{times, plural, =0 {} other {, czyli ok. # razy więcej}}. {side, select, wet {{wet, plural, =1 {To najbardziej mokry taki okres} other {To #. najbardziej mokry taki okres}}} other {To {rank}. najsuchszy taki okres}} z {years} lat (bieżący i {previous, plural, one {# poprzedni} few {# poprzednie} many {# poprzednich} other {# poprzedniego}}).",
+      "balance": "W ostatnich 60 dniach spadło {precip} l/m², a wyparowało ok. {et} l/m² – w glebie i na polu zostało ok. {left} l/m² wody więcej, niż ubyło.",
       "depressions": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu.",
-      "depressionsVolume": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu, razem na ok. {volume} m³ wody.",
+      "depressionsVolume": "Na polu {count, plural, one {jest # zagłębienie} few {są # zagłębienia} many {jest # zagłębień} other {jest # zagłębienia}} bez odpływu, razem na ok. {volume} m³ wody.",
       "collecting": "{count, plural, one {Jest też # miejsce} few {Są też # miejsca} many {Jest też # miejsc} other {Jest też # miejsca}}, gdzie zbiera się woda.",
       "zonesNote": "Tam woda stoi najdłużej – zobacz szkic w sekcji 4.",
-      "ditchesLength": "Przez pole biegną rowy (ok. {meters} m). To one odprowadzają nadmiar – sprawdź, czy są drożne, nie zarośnięte i nie zamulone.",
+      "ditchesLength": "Przez pole biegną rowy (ok. {meters} m). To one odprowadzają nadmiar – sprawdź, czy są drożne, nie zarośnięte i nie zamulone.",
       "ditchesNear": "Przy mokrych miejscach biegną rowy. To one odprowadzają nadmiar – sprawdź, czy są drożne, nie zarośnięte i nie zamulone.",
       "none": "W danych nie widać, skąd wzięło się tyle wody – sprawdź pole na miejscu."
     }
@@ -307,7 +307,7 @@
     "reference": "odniesienie: {reference}",
     "source": "źródło: {source}",
     "metrics": {
-      "available_water_mm_per_m": "Woda dostępna dla roślin w 1 m gleby",
+      "available_water_mm_per_m": "Woda dostępna dla roślin w 1 m gleby",
       "slope_mean_pct": "Średnie nachylenie pola",
       "precip_30d": "Opad z 30 dni",
       "precip_60d": "Opad z 60 dni",
@@ -331,9 +331,9 @@
       "et_period": "Parowanie z 60 dni (ewapotranspiracja)",
       "soil_category": "Kategoria gleby (IUNG)",
       "ditch_length_in_field_m": "Długość rowów w polu",
-      "ditches_in_radius": "Odcinki rowów w promieniu {radius} m",
-      "water_bodies_in_radius": "Jeziora i stawy w promieniu {radius} m",
-      "wetlands_in_radius": "Mokradła w promieniu {radius} m",
+      "ditches_in_radius": "Odcinki rowów w promieniu {radius} m",
+      "water_bodies_in_radius": "Jeziora i stawy w promieniu {radius} m",
+      "wetlands_in_radius": "Mokradła w promieniu {radius} m",
       "drought_seasons": "Sezony z suszą rolniczą (progi IUNG)",
       "deficit_seasons": "Sezony z niedoborem wody",
       "season_et_deficit_median": "Typowy niedobór wody w sezonie (mediana)",
@@ -355,11 +355,11 @@
     },
     "unknownMetric": "Inny wskaźnik",
     "units": {
-      "mm": "{value} mm",
-      "mmPerM": "{value} mm na 1 m gleby",
-      "m": "{value} m",
-      "m3": "{value} m³",
-      "ha": "{value} ha",
+      "mm": "{value} mm",
+      "mmPerM": "{value} mm na 1 m gleby",
+      "m": "{value} m",
+      "m3": "{value} m³",
+      "ha": "{value} ha",
       "percent": "{value}%",
       "days": "{value} dni",
       "none": "{value}",
@@ -370,7 +370,7 @@
       "index": "{value}",
       "m2": "{value} m²",
       "soilClass": "klasa {roman}",
-      "mOf": "{value} m z {total} m"
+      "mOf": "{value} m z {total} m"
     },
     "referenceNormal": "zwykle o tej porze: {reference}"
   },
@@ -386,8 +386,8 @@
       "p3": "Do rozważenia"
     },
     "effect": {
-      "volume_m3": "zatrzyma ok. {value} m³ wody",
-      "water_mm": "ok. {value} l/m² więcej wody w glebie",
+      "volume_m3": "zatrzyma ok. {value} m³ wody",
+      "water_mm": "ok. {value} l/m² więcej wody w glebie",
       "evaporation_pct": "parowanie mniejsze o ok. {value}%"
     },
     "effort": "Nakład pracy: {level}",
@@ -403,7 +403,7 @@
     },
     "answers": "Odpowiada na: {causes}",
     "wholeField": "Dotyczy całego pola",
-    "zone": "Dotyczy części pola: {kind}, {area} ha",
+    "zone": "Dotyczy części pola: {kind}, {area} ha",
     "zoneKinds": {
       "drying": "miejsce, które przesycha najszybciej",
       "collecting": "miejsce, gdzie zbiera się woda",
@@ -475,10 +475,10 @@
       "yes": "Pole warto nawodnić."
     },
     "within": "{days, plural, =0 {Najlepiej dziś.} one {W ciągu # dnia.} other {W ciągu # dni.}}",
-    "forecast": "Prognoza deszczu na najbliższe dni: {mm} l/m².",
+    "forecast": "Prognoza deszczu na najbliższe dni: {mm} l/m².",
     "noForecast": "Brak prognozy pogody dla tego dnia, więc nie podajemy terminu podlewania.",
     "none": "Nie oceniamy nawadniania w tym raporcie, bo brakuje danych o zapasie wody w glebie.",
-    "deficit": "Do pełnego zapasu w glebie brakuje ok. {mm} l/m² (ok. {volume} m³ na całe pole).",
+    "deficit": "Do pełnego zapasu w glebie brakuje ok. {mm} l/m² (ok. {volume} m³ na całe pole).",
     "deficitNote": "To łączny niedobór, a nie jedna dawka – uzupełnia się go w kilku podlaniach.",
     "advisablePast": {
       "no": "Nawadnianie nie było wtedy potrzebne.",
@@ -486,7 +486,7 @@
       "yes": "Pole warto było wtedy nawodnić."
     },
     "plan": "Plan podlewania: {doses, plural, one {# podlanie} few {# podlania} many {# podlań} other {# podlania}} po {dose} l/m²{interval, plural, =0 {} one { co # dzień} other { co # dni}}.",
-    "planVolume": "Jedno podlanie to ok. {dose} m³ wody na całe pole, cały plan ok. {total} m³.",
+    "planVolume": "Jedno podlanie to ok. {dose} m³ wody na całe pole, cały plan ok. {total} m³.",
     "planNote": "Większej dawki naraz gleba nie przyjmie – woda spłynie albo ucieknie pod korzenie.",
     "excess": "Teraz nie nawadniaj – w glebie jest za dużo wody.",
     "excessPast": "Wtedy nie było potrzeby nawadniać – w glebie było za dużo wody."
@@ -595,17 +595,17 @@
   },
   "fieldMap": {
     "title": "Woda wokół pola",
-    "label": "Mapa: {field} na zdjęciu lotniczym, z rowami i ciekami w promieniu 500 m",
+    "label": "Mapa: {field} na zdjęciu lotniczym, z rowami i ciekami w promieniu 500 m",
     "loading": "Wczytuję mapę pola…",
     "failed": "Nie udało się pokazać mapy w tej przeglądarce.",
     "unavailable": "Warstwa rowów i cieków jest chwilowo niedostępna – na mapie jest sam obrys pola.",
     "touches": "przy samym polu albo przez pole",
-    "distance": "{meters} m od pola",
+    "distance": "{meters} m od pola",
     "nearestDitch": "Najbliższy rów melioracyjny: {distance}.",
-    "noDitch": "Brak rowów melioracyjnych w promieniu {radius} m.",
+    "noDitch": "Brak rowów melioracyjnych w promieniu {radius} m.",
     "nearestNamed": "Najbliższy ciek z nazwą: {label}, {distance}.",
     "nearestWatercourse": "Najbliższy ciek: {kind} bez nazwy, {distance}.",
-    "noWatercourse": "Brak rzek, strumieni i kanałów w promieniu {radius} m.",
+    "noWatercourse": "Brak rzek, strumieni i kanałów w promieniu {radius} m.",
     "kinds": {
       "ditch": "rów",
       "river": "rzeka",
@@ -620,23 +620,23 @@
     "sourcesDated": "Zdjęcie lotnicze: ortofotomapa GUGiK. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}).",
     "highlight": "Pomarańczowy kolor – najbliższy rów i ciek.",
     "sketch": {
-      "label": "Szkic: {field} i woda w promieniu {radius} m od pola.",
+      "label": "Szkic: {field} i woda w promieniu {radius} m od pola.",
       "loading": "Wczytuję rowy i cieki…",
       "unavailable": "Danych o rowach i ciekach chwilowo brak – szkic pokazuje sam obrys pola.",
-      "noWater": "Brak rowów, cieków i wód w promieniu {radius} m od pola.",
+      "noWater": "Brak rowów, cieków i wód w promieniu {radius} m od pola.",
       "field": {
         "parcel": "Działka {number}",
         "parcels": "Działki {number}",
         "part": "Część działki {number}",
         "drawn": "Twoje pole"
       },
-      "ditchThrough": "Rów przez pole, {meters} m",
-      "ditchAlongEdge": "Rów na skraju pola, {meters} m",
-      "ditchesThrough": "{count, plural, few {# rowy} many {# rowów} other {# rowu}} przez pole, razem {meters} m",
-      "ditchesAlongEdge": "{count, plural, few {# rowy} many {# rowów} other {# rowu}} na skraju pola, razem {meters} m",
-      "nearestDitch": "Najbliższy rów: {meters} m",
-      "nearestWatercourse": "Najbliższy ciek: {meters} m",
-      "nearestNamed": "Najbliższy ciek ({name}): {meters} m",
+      "ditchThrough": "Rów przez pole, {meters} m",
+      "ditchAlongEdge": "Rów na skraju pola, {meters} m",
+      "ditchesThrough": "{count, plural, few {# rowy} many {# rowów} other {# rowu}} przez pole, razem {meters} m",
+      "ditchesAlongEdge": "{count, plural, few {# rowy} many {# rowów} other {# rowu}} na skraju pola, razem {meters} m",
+      "nearestDitch": "Najbliższy rów: {meters} m",
+      "nearestWatercourse": "Najbliższy ciek: {meters} m",
+      "nearestNamed": "Najbliższy ciek ({name}): {meters} m",
       "north": "N",
       "legend": {
         "title": "Legenda szkicu",
@@ -663,8 +663,8 @@
         "structures": "Jaz, zapora albo śluza",
         "zonesTitle": "Legenda miejsc na polu"
       },
-      "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
-      "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK.",
+      "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
+      "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK.",
       "zoneButton": "Miejsce {number} na polu"
     },
     "above": "Miejsca na polu z numerami są w karcie „Twoje pole” na górze raportu – kliknij numer, żeby zobaczyć miejsce na szkicu.",
@@ -743,27 +743,27 @@
     "grasslandLink": "Policz dla łąki i pastwiska",
     "advisorCodes": "Klasoużytki z ewidencji: {codes}.",
     "advisorClasses": "Klasy bonitacyjne gruntów rolnych: {classes}.",
-    "areas": "Powierzchnia w ewidencji: {registry} ha, z obrysu działki: {geometry} ha.",
+    "areas": "Powierzchnia w ewidencji: {registry} ha, z obrysu działki: {geometry} ha.",
     "sourceNote": "Rodzaj gruntu i klasy gleby z ewidencji gruntów i budynków (EGiB)."
   },
   "zones": {
     "title": "Miejsca na polu",
     "number": "Miejsce {number}:",
-    "fallback": "{kind}, ok. {area} ha",
+    "fallback": "{kind}, ok. {area} ha",
     "share": "{percent} pola",
-    "image": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu {from} – {to}) i z modelu terenu o oczkach ok. 30 m.",
-    "imageUnknown": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego i z modelu terenu o oczkach ok. 30 m.",
-    "terrainOnly": "Zdjęcia satelitarne z tego okresu były zachmurzone, więc miejsca wskazaliśmy z samego ukształtowania terenu (model ok. 30 m) i rowów.",
+    "image": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu {from} – {to}) i z modelu terenu o oczkach ok. 30 m.",
+    "imageUnknown": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego i z modelu terenu o oczkach ok. 30 m.",
+    "terrainOnly": "Zdjęcia satelitarne z tego okresu były zachmurzone, więc miejsca wskazaliśmy z samego ukształtowania terenu (model ok. 30 m) i rowów.",
     "verify": "To podpowiedź, gdzie iść: obejrzyj te miejsca na polu, zanim coś w nich zmienisz.",
     "reason": {
-      "field_too_small": "Pole jest za małe, żeby wskazać w nim różne miejsca – satelita widzi kwadraty 10 × 10 m.",
+      "field_too_small": "Pole jest za małe, żeby wskazać w nim różne miejsca – satelita widzi kwadraty 10 × 10 m.",
       "uniform": "Na polu nie widać miejsc wyraźnie suchszych ani wilgotniejszych od reszty – całe pole zachowuje się podobnie.",
       "no_spatial_data": "Miejsc na polu nie udało się wskazać – zabrakło zdjęcia satelitarnego i modelu terenu dla tego pola.",
       "scattered_parts": "Działki leżą daleko od siebie, więc nie dzielimy ich na miejsca razem – policz raport dla każdej działki osobno."
     },
     "teaser": "{count, plural, one {Na polu jest # miejsce, które różni się wodą od reszty} few {Na polu są # miejsca, które różnią się wodą od reszty} other {Na polu jest # miejsc, które różnią się wodą od reszty}} – zobacz szkic.",
     "measures": {
-      "grid": "Siatka {size} m ({cells} komórek w polu); dane: {basis}.",
+      "grid": "Siatka {size} m ({cells} komórek w polu); dane: {basis}.",
       "basis": {
         "vegetation": "zdjęcie Sentinel-2 (NDMI, NDVI)",
         "terrain": "model terenu",
@@ -772,12 +772,12 @@
       "item": "Miejsce {number}: {measures}",
       "ndmi": "NDMI {value} względem pola",
       "ndvi": "NDVI {value}",
-      "elevation": "wysokość {value} m n.p.m.",
+      "elevation": "wysokość {value} m n.p.m.",
       "slope": "spadek {value}%",
       "twi": "wskaźnik gromadzenia wody (TWI) {value}",
-      "ditch": "rów lub ciek {value} m",
-      "volume": "pojemność zagłębienia ok. {value} m³",
-      "segment": "odcinek {from}–{to} m",
+      "ditch": "rów lub ciek {value} m",
+      "volume": "pojemność zagłębienia ok. {value} m³",
+      "segment": "odcinek {from}–{to} m",
       "none": "brak liczb",
       "note": "NDMI i NDVI z jednej sceny – duża różnica może też oznaczać inny użytek albo inny termin siewu, nie tylko wilgotność."
     },
@@ -810,7 +810,7 @@
     "title": "Otoczenie pola",
     "intro": "Drzewa przy polu osłaniają je przed wiatrem i wysychaniem. Jazy i inne budowle na rowach pokazują, kto już piętrzy wodę w okolicy.",
     "trees": "Drzewa przy granicy",
-    "treesValue": "rosną przy {wooded} m z {edge} m granicy pola",
+    "treesValue": "rosną przy {wooded} m z {edge} m granicy pola",
     "openToWind": "pole otwarte na wiatr",
     "forest": "Najbliższy las",
     "treeRow": "Najbliższy rząd drzew albo żywopłot",
@@ -830,11 +830,11 @@
     "junction": "Rów wchodzi w rurę",
     "junctionValue": "{distance} – zwykle pod drogą; to naturalne miejsce na piętrzenie wody",
     "lowland": "Teren odwadniany mechanicznie (polder): woda odpływa stąd rowami do przepompowni, a obniżenie w polu to część polderu, nie miejsce na oczko.",
-    "distance": "{meters} m od pola",
+    "distance": "{meters} m od pola",
     "touching": "przy samej granicy pola",
     "none": "brak w promieniu {radius}",
-    "radiusM": "{value} m",
-    "radiusKm": "{value} km",
+    "radiusM": "{value} m",
+    "radiusKm": "{value} km",
     "source": "Z mapy topograficznej BDOT10k (GUGiK). Zastawek i przepustów na rowach ta mapa nie pokazuje – sprawdź je na miejscu."
   },
   "view": {
@@ -861,10 +861,10 @@
       "veryDry": "Bardzo sucho"
     },
     "verdict": {
-      "excess": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle ok. {median} l/m².",
+      "excess": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle ok. {median} l/m².",
       "resting": "W glebie jest {percent}% wody, którą mogą wziąć rośliny.",
       "ok": "Zbiornik wody w glebie jest pełny w {percent}%.",
-      "missing": "Brakuje ok. {mm} l/m² wody – zbiornik w glebie jest pełny tylko w {percent}%."
+      "missing": "Brakuje ok. {mm} l/m² wody – zbiornik w glebie jest pełny tylko w {percent}%."
     },
     "lines": {
       "now": "Teraz",
@@ -916,10 +916,10 @@
       "answerResting": "W glebie jest {percent}% wody, którą mogą wziąć rośliny. Uprawa teraz nie rośnie, więc nie liczymy progu suszy.",
       "typical": "Zwykle tego dnia: {percent}%.",
       "source": "Bilans wody w strefie korzeni (metoda FAO-56) z pogody i gleby z map – model, nie pomiar na polu.",
-      "description": "Woda dostępna dla roślin: {percent}% zbiornika, {mm} z {capacity} l/m².",
+      "description": "Woda dostępna dla roślin: {percent}% zbiornika, {mm} z {capacity} l/m².",
       "now": "Teraz",
       "percent": "{percent}%",
-      "mm": "{mm} z {capacity} l/m²",
+      "mm": "{mm} z {capacity} l/m²",
       "typicalLabel": "Zwykle",
       "typicalLegend": "zwykle tego dnia: {percent}%",
       "stressLabel": "Próg",
@@ -942,12 +942,12 @@
     },
     "forecast": {
       "title": "Czy w tym tygodniu będzie lżej?",
-      "answer": "W najbliższych {days} dniach spadnie ok. {total} l/m² deszczu, najwięcej w {day} ({max} l/m²).",
+      "answer": "W najbliższych {days} dniach spadnie ok. {total} l/m² deszczu, najwięcej w {day} ({max} l/m²).",
       "answerDry": "W najbliższych {days} dniach deszczu prawie nie będzie.",
-      "tooLittle": "To za mało, żeby uzupełnić zapas w glebie (brakuje ok. {missing} l/m²).",
+      "tooLittle": "To za mało, żeby uzupełnić zapas w glebie (brakuje ok. {missing} l/m²).",
       "source": "Prognoza: {source}.",
       "sourceIssued": "Prognoza: {source}, wydana {date}.",
-      "dayDescription": "{day}: {mm} l/m², do {temp}°C",
+      "dayDescription": "{day}: {mm} l/m², do {temp}°C",
       "temp": "{temp}°",
       "legend": "Górny wiersz: najwyższa temperatura, dolny: deszcz w l/m² (= mm)."
     },
@@ -962,7 +962,7 @@
       "answerMore": "Rośliny i słońce zabrały {ratio} razy więcej wody, niż spadło deszczu.",
       "answerLess": "Spadło więcej deszczu, niż zużyły rośliny – zapas w glebie się odbudował.",
       "answerEven": "Deszczu spadło mniej więcej tyle, ile zużyły rośliny.",
-      "answerNoRain": "Nie spadł deszcz, a rośliny zużyły {use} l/m² wody z zapasu.",
+      "answerNoRain": "Nie spadł deszcz, a rośliny zużyły {use} l/m² wody z zapasu.",
       "source": "Bilans wody w strefie korzeni (FAO-56). Model nie liczy spływu po powierzchni.",
       "missingDays": "{days, plural, one {# dzień} other {# dni}} bez danych pogodowych liczymy bez deszczu.",
       "unit": "Liczby w l/m² (= mm). „Zabrakło roślinom” – ile wody potrzebowały ponad to, co miały."
@@ -982,14 +982,14 @@
     },
     "rainUse": {
       "title": "Ile padało, a ile wypiły rośliny?",
-      "answer": "W ostatnich {days} dniach spadło {rain} l/m² deszczu, a uprawa potrzebowała {use} l/m².",
+      "answer": "W ostatnich {days} dniach spadło {rain} l/m² deszczu, a uprawa potrzebowała {use} l/m².",
       "dryStreak": "Od {days} dni nie padało.",
       "source": "Deszcz z danych pogodowych; potrzeby uprawy = parowanie × współczynnik uprawy (FAO-56).",
       "gaps": "{days, plural, one {# dzień} other {# dni}} bez danych o deszczu (pusta kolumna) – to luka w danych, nie dzień bez deszczu.",
       "legendRain": "deszcz",
       "legendUse": "potrzeby uprawy",
       "unit": "l/m² na dobę",
-      "answerGaps": "W ostatnich {days} dniach spadło co najmniej {rain} l/m² deszczu (z {gaps, plural, one {# dnia} other {# dni}} nie ma jeszcze danych), a uprawa potrzebowała {use} l/m².",
+      "answerGaps": "W ostatnich {days} dniach spadło co najmniej {rain} l/m² deszczu (z {gaps, plural, one {# dnia} other {# dni}} nie ma jeszcze danych), a uprawa potrzebowała {use} l/m².",
       "legendGap": "brak danych o deszczu"
     },
     "vegetation": {
@@ -1013,19 +1013,19 @@
     },
     "numbers": {
       "balance": "Bilans wody wg metody IUNG, 60 dni",
-      "mm": "{value} mm",
+      "mm": "{value} mm",
       "balanceThreshold": "próg suszy dla gleby kat. {category}: {threshold} mm{below, select, yes { – przekroczony} other {}}",
       "balanceNoThreshold": "w tym okresie uprawa nie ma progu suszy",
       "rain": "Deszcz, ostatnie {days} dni",
-      "rainPercent": "{percent}% normy (zwykle ok. {median} mm)",
-      "rainMedian": "zwykle ok. {median} mm",
+      "rainPercent": "{percent}% normy (zwykle ok. {median} mm)",
+      "rainMedian": "zwykle ok. {median} mm",
       "ndmi": "Wilgotność roślin (NDMI)",
       "ndmiRange": "zwykle o tej porze {min} – {max} (z {years, plural, one {# roku} other {# lat}})",
       "ndmiAnomaly": "{anomaly} względem tej pory w {years, plural, one {# roku} other {# latach}}",
       "ndmiNoBaseline": "bez porównania z poprzednimi latami",
       "dryDays": "Dni bez deszczu z rzędu",
       "days": "{days, plural, one {# dzień} other {# dni}}",
-      "dryReference": "padało w {rainy} z ostatnich {days} dni (≥ 1 mm)",
+      "dryReference": "padało w {rainy} z ostatnich {days} dni (≥ 1 mm)",
       "heat": "Dni upału > 30°C, ostatnie {window} dni",
       "heatNormal": "zwykle ok. {normal}",
       "heatNoNormal": "bez normy z poprzednich lat"
@@ -1052,7 +1052,7 @@
         "low": "słabiej",
         "high": "lepiej",
         "alt": "Kondycja roślin na działce – obraz z satelity z obrysem pola",
-        "advisor": "Dla doradcy: NDVI z Sentinel-2 (pasma B04 i B08, piksel 10 m), skala {low}–{high}."
+        "advisor": "Dla doradcy: NDVI z Sentinel-2 (pasma B04 i B08, piksel 10 m), skala {low}–{high}."
       },
       "moisture": {
         "title": "Woda w roślinach",
@@ -1060,11 +1060,11 @@
         "low": "sucho",
         "high": "wilgotno",
         "alt": "Woda w roślinach na działce – obraz z satelity z obrysem pola",
-        "advisor": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
+        "advisor": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
       }
     },
     "limits": {
-      "pixel": "Jeden kwadrat to 10–20 m w terenie, więc na małej działce widać tylko kilkadziesiąt kwadratów.",
+      "pixel": "Jeden kwadrat to 10–20 m w terenie, więc na małej działce widać tylko kilkadziesiąt kwadratów.",
       "oneDay": "To zdjęcie z jednego dnia – po deszczu, upale albo koszeniu obraz będzie inny.",
       "plantsNotSoil": "„Woda w roślinach” to wilgotność roślin, nie gleby.",
       "relative": "Kolory porównują miejsca w obrębie pola, a nie pola między sobą.",

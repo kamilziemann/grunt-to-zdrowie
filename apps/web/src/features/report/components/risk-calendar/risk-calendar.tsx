@@ -96,7 +96,7 @@ export function RiskCalendar({ calendar, current = null, currentYear = NO_CELLS 
             {t('currentPeriod', { date: endLabel(currentNo), drought: count.drought, years: count.years })}
           </span>
         )}
-        <span className="text-xs text-muted-foreground">{t('calendarDescription')}</span>
+        <span className="text-sm text-muted-foreground">{t('calendarDescription')}</span>
       </figcaption>
       {/* `relative` trzyma ukryte etykiety sr-only w srodku kontenera - inaczej rozpychaja strone w poziomie */}
       <section
@@ -192,8 +192,8 @@ export function RiskCalendar({ calendar, current = null, currentYear = NO_CELLS 
           </tbody>
         </table>
       </section>
-      <p className="text-xs text-muted-foreground sm:hidden print:hidden">{t('scrollHint')}</p>
-      <ul aria-label={t('legend')} className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+      <p className="text-sm text-muted-foreground sm:hidden print:hidden">{t('scrollHint')}</p>
+      <ul aria-label={t('legend')} className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
         {legend.map((status) => (
           <li key={status} className="flex items-center gap-1.5">
             <span

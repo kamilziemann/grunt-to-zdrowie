@@ -57,7 +57,7 @@ describe('FieldMap', () => {
     expect(sketch).toHaveTextContent('Działka 6509');
     expect(sketch).toHaveTextContent('100 m');
     expect(screen.getByTestId('field-sketch-fact')).toHaveTextContent(/^Rów na skraju pola, \d+ m$/);
-    expect(screen.getByTestId('field-sketch-label').textContent).toMatch(
+    expect(screen.getByTestId('field-sketch-label').textContent?.replaceAll('\u00a0', ' ')).toMatch(
       /^Szkic: Działka 6509 i woda w promieniu 250 m od pola\. Rów na skraju pola/,
     );
     expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Granica pola');

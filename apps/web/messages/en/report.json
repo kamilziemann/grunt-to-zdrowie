@@ -6,11 +6,11 @@
     "crop": "Crop",
     "date": "Analysis day",
     "area": "Area",
-    "areaValue": "{area} ha",
+    "areaValue": "{area} ha",
     "landUse": "Land use in the register",
     "ownAreaPart": "Part of parcel {numbers}",
     "ownAreaDrawn": "Your own area drawn on the map",
-    "areaRegistry": "{area} ha in the register"
+    "areaRegistry": "{area} ha in the register"
   },
   "actions": {
     "print": "Print / save PDF",
@@ -101,8 +101,8 @@
     "soilWaterValue": "{percent}% of a full reserve",
     "soilWaterNote": "{left} of {total} litres per m² available to the roots",
     "rain": "Rain in the last {days} days",
-    "rainValue": "{sum} l/m²",
-    "rainNote": "usually {median} l/m², {side, select, wet {{wet, plural, =1 {wettest period} other {wettest period no. #}}} other {driest period no. {rank}}} of {years} years (this one and {previous, plural, other {# before}})",
+    "rainValue": "{sum} l/m²",
+    "rainNote": "usually {median} l/m², {side, select, wet {{wet, plural, =1 {wettest period} other {wettest period no. #}}} other {driest period no. {rank}}} of {years} years (this one and {previous, plural, other {# before}})",
     "stress": "Days when the plants lacked water",
     "stressValue": "{days} of the last 30",
     "plants": "Plants in satellite images",
@@ -119,7 +119,7 @@
       "possible_other_stress": "are weaker than usual, but the cause may not be water"
     },
     "balance": "Climatic water balance (CWB)",
-    "balanceValue": "{balance} mm = precipitation {precip} mm − evapotranspiration {et} mm",
+    "balanceValue": "{balance} mm = precipitation {precip} mm − evapotranspiration {et} mm",
     "balancePeriod": "period {no} (60 days): {from} – {to}",
     "balanceStatus": {
       "ok": "calculated",
@@ -128,7 +128,7 @@
       "missing": "no data"
     },
     "threshold": "IUNG drought threshold",
-    "thresholdValue": "{threshold} mm, soil category {category}",
+    "thresholdValue": "{threshold} mm, soil category {category}",
     "thresholdNone": "no threshold for this crop, soil or period",
     "belowThreshold": "balance below the threshold – drought according to IUNG",
     "aboveThreshold": "balance above the threshold",
@@ -138,9 +138,9 @@
       "iung_dg95": "IUNG method"
     },
     "rootZone": "Root zone (FAO-56)",
-    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, depletion Dr {depletion} mm, Ks {ks}",
+    "rootZoneValue": "TAW {taw} mm, RAW {raw} mm, depletion Dr {depletion} mm, Ks {ks}",
     "cropStage": "Crop stage",
-    "cropStageValue": "{stage}, Kc {kc}, roots down to {depth} m",
+    "cropStageValue": "{stage}, Kc {kc}, roots down to {depth} m",
     "cropStageNoKc": "{stage}",
     "stages": {
       "dormant": "dormant",
@@ -156,7 +156,7 @@
     "rank": "Last 60 days compared with past years",
     "rankValue": "{side, select, wet {{wet, plural, =1 {wettest period} other {wettest period no. #}}} other {{rank, plural, =1 {driest period} other {driest period no. #}}}} of {years} years (this one and {previous, plural, other {# before}})",
     "rankNote": "rain minus evaporation, {from} – {to}",
-    "stressSeason": "since the start of the season: {days} days, about {mm} l/m² of water missing",
+    "stressSeason": "since the start of the season: {days} days, about {mm} l/m² of water missing",
     "stressSeasonDays": "since the start of the season: {days} days",
     "coverage": "weather data for {percent}% of the days in the period",
     "scenarios": "Result on other soils",
@@ -166,7 +166,7 @@
       "lighter": "On lighter soil (category {drought}) there would be drought, on heavier soil ({ok}) there would not.",
       "mixed": "Drought on soil categories {drought}, no drought on {ok}."
     },
-    "scenarioItem": "category {category} ({name}): threshold {threshold} mm – {result}",
+    "scenarioItem": "category {category} ({name}): threshold {threshold} mm – {result}",
     "scenarioCurrent": "assumed for this field",
     "soilNames": {
       "1": "very light",
@@ -199,7 +199,7 @@
     "basis": "What the assessment rests on",
     "soilBasis": {
       "field": "Soil from the soil map for this field.",
-      "nearby": "The soil map has no data inside the field (e.g. forest, buildings or water), so we use the soil from a place about {distance} m away.",
+      "nearby": "The soil map has no data inside the field (e.g. forest, buildings or water), so we use the soil from a place about {distance} m away.",
       "nearbyUnknown": "The soil map has no data inside the field (e.g. forest, buildings or water), so we use the soil from the nearest place.",
       "assumed_medium": "We do not know the soil here, so we assume a medium soil (category III)."
     },
@@ -220,7 +220,7 @@
     "noData": "There is no historical data for this field.",
     "riskMonths": "Water was most often short in: {months}.",
     "stressDays": "{days} stress days",
-    "minBalance": "lowest balance {balance} mm",
+    "minBalance": "lowest balance {balance} mm",
     "calendar": "Drought calendar: this year against the 10 before",
     "year": "Year",
     "status": {
@@ -241,7 +241,7 @@
     "seasonNoData": "{year}: no data",
     "seasonCurrent": "{year} (this year) to {date}",
     "droughtPeriods": "{count, plural, one {# drought period} other {# drought periods}}",
-    "etDeficit": "{mm} l/m² missing",
+    "etDeficit": "{mm} l/m² missing",
     "calendarDescription": "Each cell is the 60 days ending on the given day – this is how IUNG assesses drought (21 March to 30 September).",
     "periodEnd": "60 days to {date}",
     "periodEndDay": "to",
@@ -250,7 +250,7 @@
     "scrollHint": "Scroll the table sideways to see the whole season.",
     "monthOfEnd": "Month the period ends",
     "deficit": "{deficit, plural, =0 {In none of the {seasons} previous seasons did the crop clearly run short of water.} other {The crop ran short of water in # of {seasons} previous seasons.}}",
-    "deficitNote": "We count seasons in which the soil water balance was short by at least 50 l/m² or the IUNG drought threshold was crossed.",
+    "deficitNote": "We count seasons in which the soil water balance was short by at least 50 l/m² or the IUNG drought threshold was crossed.",
     "excessSeasons": "{count, plural, one {Too much water (rain clearly above evaporation) in # of {seasons} seasons.} other {Too much water (rain clearly above evaporation) in # of {seasons} seasons.}}",
     "currentShort": "this year"
   },
@@ -291,13 +291,13 @@
     },
     "excess": {
       "intro": "What the data says about this field:",
-      "rain": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m² at this time{times, plural, =0 {} other {, so about # times more}}. {side, select, wet {{wet, plural, =1 {This is the wettest such period} other {This is the #th wettest such period}}} other {This is the {rank}th driest such period}} in {years} years (this one and {previous, plural, other {# before}}).",
-      "balance": "In the last 60 days {precip} l/m² fell and about {et} l/m² evaporated – about {left} l/m² more water stayed in the soil and on the field than left it.",
+      "rain": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m² at this time{times, plural, =0 {} other {, so about # times more}}. {side, select, wet {{wet, plural, =1 {This is the wettest such period} other {This is the #th wettest such period}}} other {This is the {rank}th driest such period}} in {years} years (this one and {previous, plural, other {# before}}).",
+      "balance": "In the last 60 days {precip} l/m² fell and about {et} l/m² evaporated – about {left} l/m² more water stayed in the soil and on the field than left it.",
       "depressions": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow.",
-      "depressionsVolume": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow, holding about {volume} m³ of water together.",
+      "depressionsVolume": "The field has {count, plural, one {# hollow} other {# hollows}} without outflow, holding about {volume} m³ of water together.",
       "collecting": "There {count, plural, one {is also # spot} other {are also # spots}} where water collects.",
       "zonesNote": "Water stands there longest – see the sketch in section 4.",
-      "ditchesLength": "Ditches run through the field (about {meters} m). They carry the excess away – check that they are clear, not overgrown or silted up.",
+      "ditchesLength": "Ditches run through the field (about {meters} m). They carry the excess away – check that they are clear, not overgrown or silted up.",
       "ditchesNear": "Ditches run next to the wet spots. They carry the excess away – check that they are clear, not overgrown or silted up.",
       "none": "The data does not show where so much water came from – check the field on site."
     }
@@ -307,7 +307,7 @@
     "reference": "reference: {reference}",
     "source": "source: {source}",
     "metrics": {
-      "available_water_mm_per_m": "Water available to plants in 1 m of soil",
+      "available_water_mm_per_m": "Water available to plants in 1 m of soil",
       "slope_mean_pct": "Mean slope of the field",
       "precip_30d": "Precipitation over 30 days",
       "precip_60d": "Precipitation over 60 days",
@@ -331,9 +331,9 @@
       "et_period": "Evaporation over 60 days (evapotranspiration)",
       "soil_category": "Soil category (IUNG)",
       "ditch_length_in_field_m": "Length of ditches in the field",
-      "ditches_in_radius": "Ditch sections within {radius} m",
-      "water_bodies_in_radius": "Lakes and ponds within {radius} m",
-      "wetlands_in_radius": "Wetlands within {radius} m",
+      "ditches_in_radius": "Ditch sections within {radius} m",
+      "water_bodies_in_radius": "Lakes and ponds within {radius} m",
+      "wetlands_in_radius": "Wetlands within {radius} m",
       "drought_seasons": "Seasons with agricultural drought (IUNG thresholds)",
       "deficit_seasons": "Seasons with a water deficit",
       "season_et_deficit_median": "Typical seasonal water deficit (median)",
@@ -355,11 +355,11 @@
     },
     "unknownMetric": "Other indicator",
     "units": {
-      "mm": "{value} mm",
-      "mmPerM": "{value} mm per 1 m of soil",
-      "m": "{value} m",
-      "m3": "{value} m³",
-      "ha": "{value} ha",
+      "mm": "{value} mm",
+      "mmPerM": "{value} mm per 1 m of soil",
+      "m": "{value} m",
+      "m3": "{value} m³",
+      "ha": "{value} ha",
       "percent": "{value}%",
       "days": "{value} days",
       "none": "{value}",
@@ -370,7 +370,7 @@
       "index": "{value}",
       "m2": "{value} m²",
       "soilClass": "class {roman}",
-      "mOf": "{value} m of {total} m"
+      "mOf": "{value} m of {total} m"
     },
     "referenceNormal": "usually at this time of year: {reference}"
   },
@@ -386,8 +386,8 @@
       "p3": "To consider"
     },
     "effect": {
-      "volume_m3": "keeps about {value} m³ of water",
-      "water_mm": "about {value} l/m² more water in the soil",
+      "volume_m3": "keeps about {value} m³ of water",
+      "water_mm": "about {value} l/m² more water in the soil",
       "evaporation_pct": "about {value}% less evaporation"
     },
     "effort": "Effort: {level}",
@@ -403,7 +403,7 @@
     },
     "answers": "Addresses: {causes}",
     "wholeField": "Applies to the whole field",
-    "zone": "Applies to part of the field: {kind}, {area} ha",
+    "zone": "Applies to part of the field: {kind}, {area} ha",
     "zoneKinds": {
       "drying": "the place that dries out first",
       "collecting": "the place where water collects",
@@ -475,10 +475,10 @@
       "yes": "The field is worth irrigating."
     },
     "within": "{days, plural, =0 {Ideally today.} one {Within # day.} other {Within # days.}}",
-    "forecast": "Rain forecast for the coming days: {mm} l/m².",
+    "forecast": "Rain forecast for the coming days: {mm} l/m².",
     "noForecast": "There is no weather forecast for this day, so we do not suggest when to water.",
     "none": "We do not assess irrigation in this report because data on the soil water reserve is missing.",
-    "deficit": "The soil is about {mm} l/m² short of a full reserve (about {volume} m³ for the whole field).",
+    "deficit": "The soil is about {mm} l/m² short of a full reserve (about {volume} m³ for the whole field).",
     "deficitNote": "This is the total shortfall, not a single dose – it is made up over several waterings.",
     "advisablePast": {
       "no": "Irrigation was not needed then.",
@@ -486,7 +486,7 @@
       "yes": "The field was worth irrigating then."
     },
     "plan": "Irrigation plan: {doses, plural, one {# application} other {# applications}} of {dose} l/m²{interval, plural, =0 {} one { every day} other { every # days}}.",
-    "planVolume": "One application is about {dose} m³ of water for the whole field, the whole plan about {total} m³.",
+    "planVolume": "One application is about {dose} m³ of water for the whole field, the whole plan about {total} m³.",
     "planNote": "The soil cannot take a bigger dose at once – the water would run off or drain below the roots.",
     "excess": "Do not irrigate now – there is too much water in the soil.",
     "excessPast": "There was no need to irrigate then – there was too much water in the soil."
@@ -595,17 +595,17 @@
   },
   "fieldMap": {
     "title": "Water around the field",
-    "label": "Map: {field} on an aerial photo, with ditches and streams within 500 m",
+    "label": "Map: {field} on an aerial photo, with ditches and streams within 500 m",
     "loading": "Loading the field map…",
     "failed": "The map could not be shown in this browser.",
     "unavailable": "The ditches and streams layer is temporarily unavailable – the map shows only the field outline.",
     "touches": "right at or through the field",
-    "distance": "{meters} m from the field",
+    "distance": "{meters} m from the field",
     "nearestDitch": "Nearest drainage ditch: {distance}.",
-    "noDitch": "No drainage ditches within {radius} m.",
+    "noDitch": "No drainage ditches within {radius} m.",
     "nearestNamed": "Nearest named watercourse: {label}, {distance}.",
     "nearestWatercourse": "Nearest watercourse: unnamed {kind}, {distance}.",
-    "noWatercourse": "No rivers, streams or canals within {radius} m.",
+    "noWatercourse": "No rivers, streams or canals within {radius} m.",
     "kinds": {
       "ditch": "ditch",
       "river": "river",
@@ -620,23 +620,23 @@
     "sourcesDated": "Aerial photo: GUGiK orthophoto. Ditches, streams and water: BDOT10k, GUGiK (data from {date}).",
     "highlight": "Orange – nearest ditch and watercourse.",
     "sketch": {
-      "label": "Sketch: {field} and water within {radius} m of the field.",
+      "label": "Sketch: {field} and water within {radius} m of the field.",
       "loading": "Loading ditches and streams…",
       "unavailable": "Ditch and stream data is temporarily unavailable – the sketch shows only the field outline.",
-      "noWater": "No ditches, streams or water within {radius} m of the field.",
+      "noWater": "No ditches, streams or water within {radius} m of the field.",
       "field": {
         "parcel": "Parcel {number}",
         "parcels": "Parcels {number}",
         "part": "Part of parcel {number}",
         "drawn": "Your field"
       },
-      "ditchThrough": "Ditch through the field, {meters} m",
-      "ditchAlongEdge": "Ditch along the field edge, {meters} m",
-      "ditchesThrough": "{count, plural, one {# ditch} other {# ditches}} through the field, {meters} m in total",
-      "ditchesAlongEdge": "{count, plural, one {# ditch} other {# ditches}} along the field edge, {meters} m in total",
-      "nearestDitch": "Nearest ditch: {meters} m",
-      "nearestWatercourse": "Nearest watercourse: {meters} m",
-      "nearestNamed": "Nearest watercourse ({name}): {meters} m",
+      "ditchThrough": "Ditch through the field, {meters} m",
+      "ditchAlongEdge": "Ditch along the field edge, {meters} m",
+      "ditchesThrough": "{count, plural, one {# ditch} other {# ditches}} through the field, {meters} m in total",
+      "ditchesAlongEdge": "{count, plural, one {# ditch} other {# ditches}} along the field edge, {meters} m in total",
+      "nearestDitch": "Nearest ditch: {meters} m",
+      "nearestWatercourse": "Nearest watercourse: {meters} m",
+      "nearestNamed": "Nearest watercourse ({name}): {meters} m",
       "north": "N",
       "legend": {
         "title": "Sketch legend",
@@ -663,8 +663,8 @@
         "structures": "Weir, dam or lock",
         "zonesTitle": "Legend of spots in the field"
       },
-      "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
-      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK.",
+      "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
+      "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK.",
       "zoneButton": "Spot {number} in the field"
     },
     "above": "Numbered spots in the field are in the “Your field” card at the top of the report – click a number to see the spot on the sketch.",
@@ -743,27 +743,27 @@
     "grasslandLink": "Calculate for meadow and pasture",
     "advisorCodes": "Land use codes in the register: {codes}.",
     "advisorClasses": "Soil quality classes of agricultural land: {classes}.",
-    "areas": "Area in the register: {registry} ha, from the parcel outline: {geometry} ha.",
+    "areas": "Area in the register: {registry} ha, from the parcel outline: {geometry} ha.",
     "sourceNote": "Land use and soil classes from the land and building register (EGiB)."
   },
   "zones": {
     "title": "Spots in the field",
     "number": "Spot {number}:",
-    "fallback": "{kind}, about {area} ha",
+    "fallback": "{kind}, about {area} ha",
     "share": "{percent} of the field",
-    "image": "We marked these spots from one satellite image (the least cloudy one between {from} and {to}) and a terrain model with a grid of about 30 m.",
-    "imageUnknown": "We marked these spots from one satellite image and a terrain model with a grid of about 30 m.",
-    "terrainOnly": "Satellite images from this period were cloudy, so we marked the spots from the terrain alone (a model of about 30 m) and the ditches.",
+    "image": "We marked these spots from one satellite image (the least cloudy one between {from} and {to}) and a terrain model with a grid of about 30 m.",
+    "imageUnknown": "We marked these spots from one satellite image and a terrain model with a grid of about 30 m.",
+    "terrainOnly": "Satellite images from this period were cloudy, so we marked the spots from the terrain alone (a model of about 30 m) and the ditches.",
     "verify": "Treat it as a hint where to look: check these spots in the field before changing anything there.",
     "reason": {
-      "field_too_small": "The field is too small to point out different spots in it – the satellite sees squares of 10 × 10 m.",
+      "field_too_small": "The field is too small to point out different spots in it – the satellite sees squares of 10 × 10 m.",
       "uniform": "No spot in the field is clearly drier or wetter than the rest – the whole field behaves alike.",
       "no_spatial_data": "We could not point out spots in the field – there was no satellite image and no terrain model for it.",
       "scattered_parts": "The parcels lie far apart, so we do not split them into spots together – run a report for each parcel."
     },
     "teaser": "{count, plural, one {There is # spot in the field that differs in water from the rest} other {There are # spots in the field that differ in water from the rest}} – see the sketch.",
     "measures": {
-      "grid": "Grid of {size} m ({cells} cells in the field); data: {basis}.",
+      "grid": "Grid of {size} m ({cells} cells in the field); data: {basis}.",
       "basis": {
         "vegetation": "Sentinel-2 image (NDMI, NDVI)",
         "terrain": "terrain model",
@@ -772,12 +772,12 @@
       "item": "Spot {number}: {measures}",
       "ndmi": "NDMI {value} vs the field",
       "ndvi": "NDVI {value}",
-      "elevation": "elevation {value} m a.s.l.",
+      "elevation": "elevation {value} m a.s.l.",
       "slope": "slope {value}%",
       "twi": "wetness index (TWI) {value}",
-      "ditch": "ditch or stream {value} m",
-      "volume": "hollow capacity about {value} m³",
-      "segment": "section {from}–{to} m",
+      "ditch": "ditch or stream {value} m",
+      "volume": "hollow capacity about {value} m³",
+      "segment": "section {from}–{to} m",
       "none": "no figures",
       "note": "NDMI and NDVI come from one scene – a big difference may also mean another land use or sowing date, not only moisture."
     },
@@ -810,7 +810,7 @@
     "title": "Around the field",
     "intro": "Trees next to the field shelter it from wind and drying out. Weirs and other structures on ditches show who already holds water back nearby.",
     "trees": "Trees along the boundary",
-    "treesValue": "grow along {wooded} m of the {edge} m field boundary",
+    "treesValue": "grow along {wooded} m of the {edge} m field boundary",
     "openToWind": "the field is open to the wind",
     "forest": "Nearest forest",
     "treeRow": "Nearest tree row or hedge",
@@ -830,11 +830,11 @@
     "junction": "Ditch enters a pipe",
     "junctionValue": "{distance} – usually under a road; a natural place to hold water back",
     "lowland": "Mechanically drained land (polder): water leaves through ditches to a pumping station, and a hollow in the field is part of the polder, not a place for a pond.",
-    "distance": "{meters} m from the field",
+    "distance": "{meters} m from the field",
     "touching": "right at the field boundary",
     "none": "none within {radius}",
-    "radiusM": "{value} m",
-    "radiusKm": "{value} km",
+    "radiusM": "{value} m",
+    "radiusKm": "{value} km",
     "source": "From the BDOT10k topographic map (GUGiK). The map does not show weirs or culverts on ditches – check them on site."
   },
   "view": {
@@ -861,10 +861,10 @@
       "veryDry": "Very dry"
     },
     "verdict": {
-      "excess": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m².",
+      "excess": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m².",
       "resting": "The soil holds {percent}% of the water plants can take.",
       "ok": "The soil water tank is {percent}% full.",
-      "missing": "About {mm} l/m² of water is missing – the soil tank is only {percent}% full."
+      "missing": "About {mm} l/m² of water is missing – the soil tank is only {percent}% full."
     },
     "lines": {
       "now": "Now",
@@ -916,10 +916,10 @@
       "answerResting": "The soil holds {percent}% of the water plants can take. The crop is not growing now, so we do not count the drought threshold.",
       "typical": "Usually on this day: {percent}%.",
       "source": "Root-zone water balance (FAO-56) from weather and soil maps – a model, not a field measurement.",
-      "description": "Water available to plants: {percent}% of the tank, {mm} of {capacity} l/m².",
+      "description": "Water available to plants: {percent}% of the tank, {mm} of {capacity} l/m².",
       "now": "Now",
       "percent": "{percent}%",
-      "mm": "{mm} of {capacity} l/m²",
+      "mm": "{mm} of {capacity} l/m²",
       "typicalLabel": "Usually",
       "typicalLegend": "usually on this day: {percent}%",
       "stressLabel": "Threshold",
@@ -942,12 +942,12 @@
     },
     "forecast": {
       "title": "Will this week bring relief?",
-      "answer": "In the next {days} days about {total} l/m² of rain will fall, most on {day} ({max} l/m²).",
+      "answer": "In the next {days} days about {total} l/m² of rain will fall, most on {day} ({max} l/m²).",
       "answerDry": "Almost no rain in the next {days} days.",
-      "tooLittle": "That is too little to refill the soil (about {missing} l/m² missing).",
+      "tooLittle": "That is too little to refill the soil (about {missing} l/m² missing).",
       "source": "Forecast: {source}.",
       "sourceIssued": "Forecast: {source}, issued {date}.",
-      "dayDescription": "{day}: {mm} l/m², up to {temp}°C",
+      "dayDescription": "{day}: {mm} l/m², up to {temp}°C",
       "temp": "{temp}°",
       "legend": "Top row: highest temperature, bottom: rain in l/m² (= mm)."
     },
@@ -962,7 +962,7 @@
       "answerMore": "Plants and sun took {ratio} times more water than the rain brought.",
       "answerLess": "More rain fell than the plants used – the soil reserve recovered.",
       "answerEven": "About as much rain fell as the plants used.",
-      "answerNoRain": "No rain fell, and the plants used {use} l/m² from the reserve.",
+      "answerNoRain": "No rain fell, and the plants used {use} l/m² from the reserve.",
       "source": "Root-zone water balance (FAO-56). The model does not count surface runoff.",
       "missingDays": "{days, plural, one {# day} other {# days}} without weather data are counted without rain.",
       "unit": "Numbers in l/m² (= mm). “Plants were short” – how much more water they needed than they had."
@@ -982,14 +982,14 @@
     },
     "rainUse": {
       "title": "How much rain fell and how much did the plants drink?",
-      "answer": "In the last {days} days {rain} l/m² of rain fell, while the crop needed {use} l/m².",
+      "answer": "In the last {days} days {rain} l/m² of rain fell, while the crop needed {use} l/m².",
       "dryStreak": "No rain for {days} days.",
       "source": "Rain from weather data; crop needs = evaporation × crop coefficient (FAO-56).",
       "gaps": "{days, plural, one {# day} other {# days}} without rain data (empty column) – a gap in the data, not a day without rain.",
       "legendRain": "rain",
       "legendUse": "crop needs",
       "unit": "l/m² per day",
-      "answerGaps": "In the last {days} days at least {rain} l/m² of rain fell (no data yet for {gaps, plural, one {# day} other {# days}}), while the crop needed {use} l/m².",
+      "answerGaps": "In the last {days} days at least {rain} l/m² of rain fell (no data yet for {gaps, plural, one {# day} other {# days}}), while the crop needed {use} l/m².",
       "legendGap": "no rain data"
     },
     "vegetation": {
@@ -1013,19 +1013,19 @@
     },
     "numbers": {
       "balance": "Water balance (IUNG method), 60 days",
-      "mm": "{value} mm",
+      "mm": "{value} mm",
       "balanceThreshold": "drought threshold for soil cat. {category}: {threshold} mm{below, select, yes { – exceeded} other {}}",
       "balanceNoThreshold": "the crop has no drought threshold in this period",
       "rain": "Rain, last {days} days",
-      "rainPercent": "{percent}% of normal (usually about {median} mm)",
-      "rainMedian": "usually about {median} mm",
+      "rainPercent": "{percent}% of normal (usually about {median} mm)",
+      "rainMedian": "usually about {median} mm",
       "ndmi": "Plant moisture (NDMI)",
       "ndmiRange": "usually at this time {min} – {max} (from {years, plural, one {# year} other {# years}})",
       "ndmiAnomaly": "{anomaly} against this time in {years, plural, one {# year} other {# years}}",
       "ndmiNoBaseline": "no comparison with previous years",
       "dryDays": "Days in a row without rain",
       "days": "{days, plural, one {# day} other {# days}}",
-      "dryReference": "rain on {rainy} of the last {days} days (≥ 1 mm)",
+      "dryReference": "rain on {rainy} of the last {days} days (≥ 1 mm)",
       "heat": "Heat days > 30°C, last {window} days",
       "heatNormal": "usually about {normal}",
       "heatNoNormal": "no normal from previous years"
@@ -1052,7 +1052,7 @@
         "low": "worse",
         "high": "better",
         "alt": "Crop condition on the parcel – satellite image with the field outline",
-        "advisor": "For advisers: NDVI from Sentinel-2 (bands B04 and B08, 10 m pixel), scale {low}–{high}."
+        "advisor": "For advisers: NDVI from Sentinel-2 (bands B04 and B08, 10 m pixel), scale {low}–{high}."
       },
       "moisture": {
         "title": "Water in plants",
@@ -1060,11 +1060,11 @@
         "low": "dry",
         "high": "wet",
         "alt": "Water in plants on the parcel – satellite image with the field outline",
-        "advisor": "For advisers: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
+        "advisor": "For advisers: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
       }
     },
     "limits": {
-      "pixel": "One square is 10–20 m on the ground, so a small parcel shows only a few dozen squares.",
+      "pixel": "One square is 10–20 m on the ground, so a small parcel shows only a few dozen squares.",
       "oneDay": "This is a picture from one day – after rain, heat or mowing it will look different.",
       "plantsNotSoil": "“Water in plants” is the moisture of plants, not of the soil.",
       "relative": "Colours compare places within the field, not fields with each other.",
