@@ -322,6 +322,11 @@ export const causeSchema = z.object({
   id: causeIdSchema,
   /** udzial w wyjasnieniu niedoboru, 0-1 (suma wag przyczyn nie musi dawac 1) */
   weight: z.number().min(0).max(1),
+  /**
+   * udzial przyczyny wsrod przyczyn raportu, 0-1, suma = 1: waga podzielona przez sume wag. To szacunek wagi
+   * argumentu, nie pomiar, ile mm wody zabrala dana przyczyna. Brak = raport sprzed 0.8.0 albo wszystkie wagi 0.
+   */
+  share: z.number().min(0).max(1).optional(),
   evidence: z.array(evidenceSchema).min(1),
 });
 
@@ -557,6 +562,124 @@ export const limitationIdSchema = z.enum(LIMITATION_IDS);
 
 export type LimitationId = z.infer<typeof limitationIdSchema>;
 
+/**
+ * "Zbiornik wody w glebie" w dniu analizy - z dobowego bilansu strefy korzeniowej FAO-56 (model, nie pomiar).
+ * Procenty to woda dostepna dla roslin: (TAW - wyczerpanie) / TAW. Poza sezonem uprawy (`growing: false`) raport
+ * niesie tylko zapas - bez progu stresu i odliczania, bo uprawa jeszcze (albo juz) nie pobiera wody.
+ */
+export const waterNowSchema = z.object({
+  growing: z.boolean(),
+  /** ile procent wody dostepnej zostalo, 0-100 */
+  availablePct: z.number().min(0).max(100),
+  /** mediana tej samej wartosci w tym samym dniu kalendarzowym w latach tla (10 sezonow przed rokiem analizy) */
+  typicalPct: z.number().min(0).max(100).optional(),
+  /** z ilu lat tla jest `typicalPct` */
+  typicalYears: z.number().int().min(0).optional(),
+  /** ponizej tej wartosci rosliny zaczynaja cierpiec: (1 - p) 100, p = frakcja wody latwo dostepnej uprawy */
+  stressBelowPct: z.number().min(0).max(100).optional(),
+  availableMm: z.number().min(0),
+  /** pelny zbiornik: woda dostepna w strefie korzeni (TAW) */
+  capacityMm: z.number().min(0),
+  rootDepthM: z.number().min(0),
+  /**
+   * za ile dni bez deszczu zapas spadnie ponizej `stressBelowPct` (1 = jutro); 0 = stres juz trwa. Zuzycie: Kc
+   * uprawy w kolejnych dniach x srednie ET0 z ostatnich 7 dni. Brak przy `growing` = nie w horyzoncie `horizonDays`
+   */
+  daysToStressNoRain: z.number().int().min(0).optional(),
+  /** to samo z opadem i ET0 z prognozy (dalej jak bez deszczu); tylko gdy jest prognoza */
+  daysToStressWithForecast: z.number().int().min(0).optional(),
+  /** horyzont odliczania (dni) */
+  horizonDays: z.number().int().positive().optional(),
+  /** srednie zuzycie wody przez uprawe (Kc ET0) z ostatnich 7 dni, mm/dobe */
+  recentUseMmPerDay: z.number().min(0).optional(),
+  /** gdy stres juz trwa: od ilu dni z rzedu (wlacznie z dniem analizy) */
+  stressedSinceDays: z.number().int().positive().optional(),
+  /** krotka nota o metodzie (po polsku) */
+  basis: z.string(),
+});
+
+export type WaterNow = z.infer<typeof waterNowSchema>;
+
+/** Prognoza na najblizsze dni (MET Norway) - tylko dla analizy na dzis. */
+export const forecastSchema = z.object({
+  days: z.array(
+    z.object({
+      date: isoDateSchema,
+      precipitationMm: z.number().min(0).optional(),
+      tMaxC: z.number().optional(),
+      tMinC: z.number().optional(),
+      /** ewapotranspiracja wskaznikowa z temperatur (Hargreaves) */
+      et0Mm: z.number().min(0).optional(),
+    }),
+  ),
+  source: z.string(),
+  /** kiedy wydano prognoze (ISO 8601), gdy zrodlo to podaje; inaczej chwila pobrania */
+  issuedAt: z.string().optional(),
+});
+
+export type Forecast = z.infer<typeof forecastSchema>;
+
+/**
+ * Rachunek wody w strefie korzeni od `from` do `to` (mm): start + opad - zuzycie - przesiakanie = koniec.
+ * `lostBelowRootsMm` to woda, ktora przesiakla ponizej korzeni (model nie liczy splywu po powierzchni).
+ * `shortfallMm` jest poza rownaniem: ile wody zabraklo uprawie wzgledem potrzeb (suma ETc - ETc adj w sezonie).
+ */
+export const waterLedgerSchema = z.object({
+  from: isoDateSchema,
+  to: isoDateSchema,
+  /** zapas na poczatku, liczony dla glebokosci korzeni z dnia `to` (model: glebsza warstwa przy pojemnosci polowej) */
+  startStorageMm: z.number(),
+  precipitationMm: z.number().min(0),
+  /** rzeczywiste zuzycie: transpiracja uprawy i parowanie z gleby (ETc adj, poza sezonem gola gleba) */
+  cropUseMm: z.number().min(0),
+  lostBelowRootsMm: z.number().min(0),
+  endStorageMm: z.number(),
+  shortfallMm: z.number().min(0),
+  /** dni bez danych pogodowych w okresie (opad liczony jako 0) */
+  missingWeatherDays: z.number().int().min(0).optional(),
+});
+
+export type WaterLedger = z.infer<typeof waterLedgerSchema>;
+
+/** Ostatnie dni do daty analizy, dzien po dniu - do wykresu "deszcz i zuzycie". */
+export const dailyWaterSchema = z.object({
+  date: isoDateSchema,
+  /** brak = luka w danych pogodowych */
+  precipitationMm: z.number().min(0).optional(),
+  /** potrzeby uprawy Kc ET0 (poza sezonem: parowanie z gleby, Kc 0,35) */
+  etcMm: z.number().min(0),
+  /** rzeczywiste zuzycie po uwzglednieniu stresu (ETc adj) */
+  etaMm: z.number().min(0).optional(),
+  availablePct: z.number().min(0).max(100),
+});
+
+export const vegetationObservationSchema = z.object({
+  date: isoDateSchema,
+  ndvi: z.number().nullable(),
+  ndmi: z.number().nullable(),
+  validShare: z.number().min(0).max(1),
+  /** false = pominiete, bo chmury zaslonily wiekszosc pola */
+  used: z.boolean(),
+});
+
+const indexRangeSchema = z.object({ min: z.number(), median: z.number(), max: z.number() });
+
+/** Zdjecia Sentinel-2 wokol daty analizy (ostatnie 30 dni) i typowy zakres o tej porze w poprzednich latach. */
+export const vegetationSeriesSchema = z.object({
+  from: isoDateSchema,
+  to: isoDateSchema,
+  observations: z.array(vegetationObservationSchema),
+  baseline: z
+    .object({
+      years: z.number().int().positive(),
+      ndvi: indexRangeSchema.optional(),
+      ndmi: indexRangeSchema.optional(),
+    })
+    .optional(),
+});
+
+export type VegetationSeriesReport = z.infer<typeof vegetationSeriesSchema>;
+
 export const waterReportSchema = z.object({
   meta: z.object({
     reportId: z.string(),
@@ -596,6 +719,12 @@ export const waterReportSchema = z.object({
   zones: zoneMapSchema.nullable(),
   sources: z.array(sourceRefSchema),
   limitations: z.array(limitationIdSchema),
+  /** "Pogodynka wody" (od 0.8.0); brak = raport starszej wersji albo brak danych pogodowych */
+  waterNow: waterNowSchema.optional(),
+  forecast: forecastSchema.optional(),
+  waterLedger: waterLedgerSchema.optional(),
+  dailySeries: z.array(dailyWaterSchema).optional(),
+  vegetationSeries: vegetationSeriesSchema.optional(),
 });
 
 export type WaterReport = z.infer<typeof waterReportSchema>;

@@ -97,6 +97,11 @@ export const sourceRefSchema = z.object({
   resolution: z.string().optional(),
   /** powod statusu partial/missing (dla dewelopera i sekcji "ograniczenia") */
   note: z.string().optional(),
+  /**
+   * `live` = pobierane przy kazdej analizie (albo z krotkiej pamieci odpowiedzi), `preloaded` = zaimportowane
+   * wczesniej do wlasnej bazy (BDOT10k) - wtedy `fetchedAt` to chwila importu. Brak = raport sprzed wersji 0.8.0.
+   */
+  mode: z.enum(['live', 'preloaded']).optional(),
 });
 
 export type SourceRef = z.infer<typeof sourceRefSchema>;
