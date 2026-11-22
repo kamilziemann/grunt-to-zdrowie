@@ -5,7 +5,8 @@ import { mockBasemap, mockHydroApi } from './support/hydro-api';
 import { expect, test } from './support/test';
 
 // Granice dzialek od przyblizenia 14: ponizej 16 mapa pyta o kafle z14, od 16 o kafle z16. Kafel obciety przez
-// usluge ewidencji (miasto) nie jest rysowany, a mapa prosi o przyblizenie. Odpowiedzi trasy granic sa podstawione.
+// usluge ewidencji (miasto) nie jest rysowany: przy 14-15 mapa prosi o przyblizenie, od 15 od razu pobiera jego kafle
+// z16, a o obciety kafel z14 drugi raz nie pyta. Odpowiedzi trasy granic sa podstawione.
 const OUTLINE = { id: PARCEL.id, number: PARCEL.number, geometry: PARCEL.geometry, center: PARCEL.centroid };
 
 async function mockBoundaries(page: Page, { truncated }: { truncated: boolean }): Promise<string[]> {
@@ -23,11 +24,24 @@ async function mockBoundaries(page: Page, { truncated }: { truncated: boolean })
   return requested;
 }
 
-/** Oddala mape przyciskiem do przyblizenia ponizej 16 (dojazd do dzialki konczy sie na 17). */
+/** Klikniecie "Przybliz"/"Oddal" i czekanie na koniec animacji (mapa zapisuje przyblizenie po ruchu). */
+async function zoomStep(page: Page, name: 'Przybliż' | 'Oddal') {
+  const map = page.getByTestId('parcel-map');
+  const before = await map.getAttribute('data-map-zoom');
+
+  await page.getByRole('button', { name }).click();
+  await expect(map).not.toHaveAttribute('data-map-zoom', before ?? '');
+}
+
+/** Oddala mape przyciskiem do przyblizenia 14-15 (dojazd do dzialki konczy sie miedzy 17 a 18). */
 async function zoomOutTo14(page: Page, requested: string[]) {
   await expect.poll(() => requested.some((key) => key.startsWith('16/'))).toBe(true);
 
-  for (let step = 0; step < 3; step += 1) await page.getByRole('button', { name: 'Oddal' }).click();
+  for (let step = 0; step < 3; step += 1) await zoomStep(page, 'Oddal');
+
+  await expect
+    .poll(async () => Number(await page.getByTestId('parcel-map').getAttribute('data-map-zoom')))
+    .toBeLessThan(15);
 
   await expect.poll(() => requested.filter((key) => key.startsWith('14/')).length).toBeGreaterThan(0);
 }
@@ -62,8 +76,37 @@ test.describe('granice działek od przybliżenia 14', () => {
 
     await expect(hint).toHaveText('Przybliż, żeby zobaczyć granice działek.');
 
-    for (let step = 0; step < 2; step += 1) await page.getByRole('button', { name: 'Przybliż' }).click();
+    for (let step = 0; step < 2; step += 1) await zoomStep(page, 'Przybliż');
 
     await expect(hint).toBeHidden();
+  });
+
+  test('obcięty kafel z14 od przybliżenia 15: od razu kafle z16 zamiast podpowiedzi, o z14 nie pyta drugi raz', async ({
+    page,
+  }) => {
+    const requested = await mockBoundaries(page, { truncated: true });
+    const hint = page.getByText('Przybliż, żeby zobaczyć granice działek.');
+    const asked = (key: string) => requested.filter((entry) => entry === key).length;
+
+    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await expect.poll(() => requested.some((key) => key.startsWith('16/'))).toBe(true);
+
+    const fineBefore = new Set(requested.filter((key) => key.startsWith('16/')));
+    const fineAfter = () => new Set(requested.filter((key) => key.startsWith('16/') && !fineBefore.has(key)));
+
+    // dwa stopnie oddalenia (przyblizenie 15-16): kafel z14 wraca obciety, mapa od razu dobiera kafle z16 widoku
+    for (let step = 0; step < 2; step += 1) await zoomStep(page, 'Oddal');
+
+    await expect.poll(() => asked('14/9174/5399')).toBe(1);
+    await expect.poll(() => fineAfter().size).toBeGreaterThan(0);
+    expect(fineAfter().size).toBeLessThanOrEqual(24);
+    await expect(page.getByTestId('map-status')).toBeHidden();
+
+    // ponizej 15: podpowiedz; z powrotem wyzej: bez podpowiedzi i bez drugiego pytania o obciety kafel z14
+    await zoomStep(page, 'Oddal');
+    await expect(hint).toBeVisible();
+    await zoomStep(page, 'Przybliż');
+    await expect(hint).toBeHidden();
+    expect(asked('14/9174/5399')).toBe(1);
   });
 });
