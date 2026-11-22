@@ -133,7 +133,7 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
       }),
     [field, hydro, ditchInFieldM, zoneShapes, radius, context],
   );
-  const { active, setActive, sketchRef } = useZoneFocus();
+  const { active, toggle, sketchRef } = useZoneFocus();
   const fail = useCallback(() => setFailed(true), []);
   const toggleAerial = useCallback(() => setAerial((value) => !value), []);
   const fallback = useMemo(() => <MapPlaceholder text={t('loading')} />, [t]);
@@ -182,7 +182,7 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
             label={[t('sketch.label', { field: fieldName, radius }), factText].filter(Boolean).join(' ')}
             zones={zoneMarks}
             activeZone={active}
-            onZoneSelect={setActive}
+            onZoneSelect={toggle}
           />
         </div>
         <SketchLegend model={sketch} zoneKinds={zoneKinds} />

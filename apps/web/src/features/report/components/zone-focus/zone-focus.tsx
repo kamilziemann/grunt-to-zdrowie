@@ -6,6 +6,8 @@ import { createContext, use, useCallback, useMemo, useRef, useState, type ReactN
 interface ZoneFocus {
   active: string | null;
   setActive: (zoneId: string | null) => void;
+  /** klikniecie miejsca: zaznacza je, a ponowne klikniecie tego samego miejsca zdejmuje wyroznienie */
+  toggle: (zoneId: string) => void;
   /** pokazuje szkic z wyroznionym miejscem (przewija do niego, gdy jest poza ekranem) */
   reveal: (zoneId: string) => void;
   /** element ze szkicem - cel przewiniecia */
@@ -17,6 +19,7 @@ const noop = () => undefined;
 const ZoneFocusContext = createContext<ZoneFocus>({
   active: null,
   setActive: noop,
+  toggle: noop,
   reveal: noop,
   sketchRef: noop,
 });
@@ -26,6 +29,9 @@ export function ZoneFocusProvider({ children }: { children: ReactNode }) {
   const sketch = useRef<HTMLElement | null>(null);
   const sketchRef = useCallback((element: HTMLElement | null) => {
     sketch.current = element;
+  }, []);
+  const toggle = useCallback((zoneId: string) => {
+    setActive((current) => (current === zoneId ? null : zoneId));
   }, []);
   const reveal = useCallback((zoneId: string) => {
     setActive(zoneId);
@@ -40,7 +46,10 @@ export function ZoneFocusProvider({ children }: { children: ReactNode }) {
       element.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' });
     }
   }, []);
-  const value = useMemo(() => ({ active, setActive, reveal, sketchRef }), [active, reveal, sketchRef]);
+  const value = useMemo(
+    () => ({ active, setActive, toggle, reveal, sketchRef }),
+    [active, toggle, reveal, sketchRef],
+  );
 
   return <ZoneFocusContext value={value}>{children}</ZoneFocusContext>;
 }
