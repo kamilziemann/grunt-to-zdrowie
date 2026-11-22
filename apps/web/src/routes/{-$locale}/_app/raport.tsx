@@ -1,5 +1,5 @@
 // Raport wodny pola. Parametry analizy (dzialki, uprawa, dzien) sa w adresie, wiec raport otwiera sie z linku i
-// przezywa odswiezenie. Analize liczy przegladarka (POST /api/analysis, do 30 s) - HTML nie zalezy od danych i idzie
+// przezywa odswiezenie; krotki link `?raport=r-…` otwiera raport z zapisu (bez liczenia). Analize liczy przegladarka (POST /api/analysis, do 30 s) - HTML nie zalezy od danych i idzie
 // z cache brzegowego; raport z formularza jest juz w cache zapytan.
 import { parseParcelSelection, serializeParcelSelection } from '@app/contracts';
 import { routeCache } from '@app/start-kit';
@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { analysisRequestFromSearch, analysisSearchSchema } from '@/features/analysis';
-import { ReportMissing, ReportScreen } from '@/features/report';
+import { ReportMissing, ReportScreen, StoredReportScreen } from '@/features/report';
 import { routes } from '@/lib/routes';
 import { headLocale, headTranslator, pageHead } from '@/lib/seo';
 
@@ -56,6 +56,8 @@ function ReportPage() {
           uprawa: 'grassland',
           data: search.data,
         });
+
+  if (search.raport) return <StoredReportScreen reportId={search.raport} />;
 
   if (!request) {
     return <ReportMissing changeHref={dzialki || search.obszar ? changeHref : null} mapHref={mapHref} />;

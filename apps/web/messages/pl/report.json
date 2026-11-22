@@ -671,5 +671,15 @@
       "scattered_parts": "Działki leżą daleko od siebie, więc nie dzielimy ich na miejsca razem – policz raport dla każdej działki osobno."
     },
     "teaser": "{count, plural, one {Na polu jest # miejsce, które różni się wodą od reszty} few {Na polu są # miejsca, które różnią się wodą od reszty} other {Na polu jest # miejsc, które różnią się wodą od reszty}} – zobacz szkic."
+  },
+  "stored": {
+    "computed": "Policzono {date}, {time}",
+    "recompute": "Policz ponownie",
+    "loading": "Otwieram zapisany raport…",
+    "missing": {
+      "title": "Nie ma takiego raportu",
+      "description": "Link prowadzi do raportu, którego nie znamy – mógł zostać skopiowany z błędem albo pochodzi ze starszej wersji aplikacji. Wybierz pole na mapie i policz raport od nowa.",
+      "map": "Wybierz pole na mapie"
+    }
   }
 }

@@ -1,11 +1,12 @@
 import type { WaterReport } from '@app/contracts';
-import { ArrowLeft, MapPinned } from 'lucide-react';
+import { ArrowLeft, MapPinned, RefreshCw } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
+import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 import { Link } from '@/lib/navigation';
-import type { AppHref } from '@/lib/routes';
+import { routes, type AppHref } from '@/lib/routes';
 
 import { registryArea } from '../../utils/land-use';
 import { isoDay } from '../../utils/report-data';
@@ -31,14 +32,16 @@ export interface ReportHeaderProps {
   changeHref: AppHref;
   /** mapa z tymi samymi dzialkami */
   mapHref: AppHref;
+  /** raport z zapisu (krotki link): adres z parametrami - przycisk "Policz ponownie" */
+  recomputeHref?: AppHref;
 }
 
 /**
  * Naglowek raportu (ekran i A4): pole, dzialki, uprawa, dzien analizy, powierzchnia (z obrysu i ewidencyjna) i uzytki
  * z ewidencji slowami, a na ekranie akcje - wydruk/PDF, zmiana uprawy lub daty, link do raportu, powrot do mapy
- * (na wydruku ukryte).
+ * (na wydruku ukryte). Raport z zapisu mowi dyskretnie, kiedy go policzono; z krotkiego linku ma "Policz ponownie".
  */
-export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps) {
+export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: ReportHeaderProps) {
   const t = useTranslations('report');
   const tCrops = useTranslations('analysis.crops');
   const format = useFormatter();
@@ -46,6 +49,7 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
   const { field } = report;
   const area = (value: number) => format.number(value, { maximumFractionDigits: 2 });
   const registry = registryArea(report);
+  const computedAt = new Date(report.meta.generatedAt);
   // slowa z opisu uzytku w raporcie (pewniejszy), a gdy go nie ma - z klasouzytkow pola
   const landUseCodes = report.landUse?.codes ?? field.landUse ?? [];
   const items: (HeaderItem | null)[] = [
@@ -96,6 +100,27 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
             </div>
           ))}
       </dl>
+      {(recomputeHref || report.meta.reused) && (
+        <div
+          className="flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground"
+          data-testid="report-stored"
+        >
+          <p>
+            {t('stored.computed', {
+              date: format.dateTime(computedAt, { dateStyle: 'long', timeZone: APP_TIME_ZONE }),
+              time: format.dateTime(computedAt, { timeStyle: 'short', timeZone: APP_TIME_ZONE }),
+            })}
+          </p>
+          {recomputeHref && (
+            <Button asChild variant="link" className="min-h-11 px-0 print:hidden">
+              <Link href={recomputeHref}>
+                <RefreshCw aria-hidden="true" />
+                {t('stored.recompute')}
+              </Link>
+            </Button>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap print:hidden">
         <PrintButton className={COMPACT} />
         <Button asChild size="xl" variant="outline" className={COMPACT}>
@@ -104,7 +129,10 @@ export function ReportHeader({ report, changeHref, mapHref }: ReportHeaderProps)
             {t('actions.change')}
           </Link>
         </Button>
-        <CopyLinkButton className="max-sm:col-span-2" />
+        <CopyLinkButton
+          className="max-sm:col-span-2"
+          path={routes.report({ raport: report.meta.reportId })}
+        />
         <Button asChild size="xl" variant="ghost" className="max-sm:hidden">
           <Link href={mapHref}>
             <MapPinned aria-hidden="true" />

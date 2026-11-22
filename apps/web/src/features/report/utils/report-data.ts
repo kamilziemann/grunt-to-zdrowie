@@ -3,6 +3,7 @@
 // Raport niesie liczby i identyfikatory, zdania sklada warstwa komponentow z tlumaczen.
 import {
   REPORT_PARTS,
+  serializeParcelSelection,
   type Cause,
   type ClimaticBalance,
   type History,
@@ -15,6 +16,7 @@ import {
   type Zone,
 } from '@app/contracts';
 
+import { encodeRing, outerRing } from '@/lib/field-geometry';
 import { APP_TIME_ZONE } from '@/lib/locale';
 
 /** Zrodla z danymi przykladowymi (atrapy) - raport musi je nazwac. */
@@ -407,4 +409,28 @@ export function rankSide(rank: number, years: number): { side: 'dry' | 'wet'; ra
   const wet = years - rank + 1;
 
   return { side: years > 1 && wet < rank ? 'wet' : 'dry', rank, wet };
+}
+
+/**
+ * Parametry adresu, z ktorych da sie policzyc ten raport od nowa (`/raport?dzialki=…&uprawa=…&data=…`): dzialki,
+ * a dla czesci dzialki albo narysowanego pola - obrys w zwartym zapisie.
+ */
+export function reportSearch(report: WaterReport): {
+  dzialki?: string;
+  obszar?: string;
+  rodzaj?: 'part' | 'drawn';
+  uprawa: WaterReport['crop']['cropId'];
+  data: string;
+} {
+  const { field } = report;
+  const ring = field.kind === 'part' || field.kind === 'drawn' ? outerRing(field.geometry) : null;
+
+  return {
+    dzialki: serializeParcelSelection(field.parcelIds),
+    ...(ring && (field.kind === 'part' || field.kind === 'drawn')
+      ? { obszar: encodeRing(ring), rodzaj: field.kind }
+      : {}),
+    uprawa: report.crop.cropId,
+    data: report.meta.analysisDate,
+  };
 }

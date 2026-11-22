@@ -3,6 +3,7 @@
 // 10 lat do dzis) liczymy tak jak serwer: dzien kalendarzowy w Polsce.
 import {
   ANALYSIS_LIMITS,
+  REPORT_ID_PATTERN,
   cropIdSchema,
   isoDateSchema,
   parcelSelectionSearchSchema,
@@ -26,7 +27,14 @@ export const analysisSearchSchema = parcelSelectionSearchSchema.extend({
   rodzaj: z.enum(['part', 'drawn']).optional().catch(undefined),
   uprawa: cropIdSchema.optional().catch(undefined),
   data: isoDateSchema.optional().catch(undefined),
+  /** zapisany raport (`meta.reportId`, np. r-95d11135) - ma pierwszenstwo przed parametrami analizy */
+  raport: z.string().max(40).optional().catch(undefined),
 });
+
+/** Identyfikator zapisanego raportu z adresu w poprawnym formacie; zly format = jak nieistniejacy raport. */
+export function isReportId(value: string): boolean {
+  return REPORT_ID_PATTERN.test(value);
+}
 
 export type AnalysisSearch = z.infer<typeof analysisSearchSchema>;
 

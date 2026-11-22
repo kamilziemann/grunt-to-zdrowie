@@ -2,16 +2,20 @@ import type { WaterReport } from '@app/contracts';
 import { useSyncExternalStore } from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
-import { APP_TIME_ZONE } from '@/lib/locale';
+import { APP_TIME_ZONE, localizePath, useAppLocale } from '@/lib/locale';
+import { routes } from '@/lib/routes';
 import { BRAND } from '@/lib/seo';
 
 const noop = () => () => undefined;
-const currentUrl = () => window.location.href;
-const noUrl = () => '';
+const currentOrigin = () => window.location.origin;
+const noOrigin = () => '';
 
-/** Adres strony raportu (dzialki, uprawa, dzien) - tylko w przegladarce; na serwerze pusty. */
-function useReportUrl(): string {
-  return useSyncExternalStore(noop, currentUrl, noUrl);
+/** Krotki adres zapisanego raportu (`/raport?raport=r-…`) - tylko w przegladarce; na serwerze pusty. */
+function useReportUrl(reportId: string): string {
+  const origin = useSyncExternalStore(noop, currentOrigin, noOrigin);
+  const locale = useAppLocale();
+
+  return origin ? `${origin}${localizePath(routes.report({ raport: reportId }), locale)}` : '';
 }
 
 /**
@@ -21,7 +25,7 @@ function useReportUrl(): string {
 export function PrintHeader({ report }: { report: WaterReport }) {
   const t = useTranslations('report.print');
   const format = useFormatter();
-  const url = useReportUrl();
+  const url = useReportUrl(report.meta.reportId);
 
   return (
     <div

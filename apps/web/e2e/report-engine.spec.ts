@@ -154,3 +154,57 @@ test.describe('miejsca na polu', () => {
     await expect(page.getByTestId('verdict-zones')).toHaveCount(0);
   });
 });
+
+test.describe('raport z zapisu (krótki link)', () => {
+  test('otwiera zapisany raport bez liczenia: kiedy policzono i „Policz ponownie” z parametrami', async ({
+    page,
+  }) => {
+    let analyses = 0;
+
+    await page.route('**/api/analysis', (route) => {
+      analyses += 1;
+
+      return route.fulfill({ json: FIELD_REPORT });
+    });
+    await page.route(`**/api/reports/${FIELD_REPORT.meta.reportId}`, (route) =>
+      route.fulfill({ json: FIELD_REPORT }),
+    );
+    await page.goto(`/raport?raport=${FIELD_REPORT.meta.reportId}`);
+
+    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('report-stored')).toContainText('Policzono 22 listopada 2026, 00:55');
+
+    const recompute = page.getByRole('link', { name: 'Policz ponownie' });
+
+    await expect(recompute).toHaveAttribute(
+      'href',
+      '/raport?dzialki=080904_5.0001.349%2F1&uprawa=winter_wheat&data=2018-06-15',
+    );
+    expect(analyses).toBe(0);
+
+    await recompute.click();
+    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('report-stored')).toHaveCount(0);
+    expect(analyses).toBe(1);
+  });
+
+  test('nieistniejący raport: komunikat i wyjście do mapy', async ({ page }) => {
+    await page.route('**/api/reports/r-00000000', (route) =>
+      route.fulfill({
+        status: 404,
+        contentType: 'application/problem+json',
+        body: JSON.stringify({ type: 'about:blank', title: 'Not found', status: 404, code: 'not_found' }),
+      }),
+    );
+    await page.goto('/raport?raport=r-00000000');
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Nie ma takiego raportu' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Wybierz pole na mapie' })).toHaveAttribute('href', '/');
+  });
+
+  test('zły format identyfikatora: ten sam komunikat bez pytania serwera', async ({ page }) => {
+    await page.goto('/raport?raport=cokolwiek');
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Nie ma takiego raportu' })).toBeVisible();
+  });
+});

@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
+import { localizePath, useAppLocale } from '@/lib/locale';
+import type { AppHref } from '@/lib/routes';
 import { cn } from '@/lib/utils/cn';
 
 type CopyState = 'idle' | 'copied' | 'manual';
@@ -11,10 +13,11 @@ type CopyState = 'idle' | 'copied' | 'manual';
 const COPIED_MS = 3000;
 
 /**
- * "Kopiuj link do raportu": adres strony niesie dzialki, uprawe i dzien, wiec doradca albo sasiad otworzy ten sam
- * raport. Bez dostepu do schowka (stara przegladarka, brak zgody) pokazuje adres w polu do recznego skopiowania.
+ * "Kopiuj link do raportu": krotki adres zapisanego raportu (`path`, `/raport?raport=r-…`) albo adres strony z
+ * dzialkami, uprawa i dniem - doradca albo sasiad otworzy ten sam raport. Bez dostepu do schowka (stara przegladarka,
+ * brak zgody) pokazuje adres w polu do recznego skopiowania.
  */
-export function CopyLinkButton({ className }: { className?: string }) {
+export function CopyLinkButton({ className, path }: { className?: string; path?: AppHref }) {
   const t = useTranslations('report.actions');
   const [state, setState] = useState<CopyState>('idle');
   const [url, setUrl] = useState('');
@@ -27,8 +30,9 @@ export function CopyLinkButton({ className }: { className?: string }) {
     if (state === 'manual') field.current?.select();
   }, [state]);
 
+  const locale = useAppLocale();
   const copy = useCallback(async () => {
-    const href = window.location.href;
+    const href = path ? `${window.location.origin}${localizePath(path, locale)}` : window.location.href;
 
     setUrl(href);
     window.clearTimeout(timer.current);
@@ -40,7 +44,7 @@ export function CopyLinkButton({ className }: { className?: string }) {
     } catch {
       setState('manual');
     }
-  }, []);
+  }, [path, locale]);
   const onClick = useCallback(() => void copy(), [copy]);
 
   return (

@@ -1,3 +1,4 @@
+import { LOW_CONFIDENCE_REPORT } from '../src/features/report/fixtures/low-confidence-report';
 import { expect, test } from './support/test';
 import {
   DROUGHT_REPORT_URL,
@@ -270,14 +271,19 @@ test.describe('mapa pola w raporcie', () => {
 });
 
 test.describe('raport do oddania', () => {
-  test('„Kopiuj link do raportu” wkłada adres raportu do schowka', async ({ page, context }) => {
+  test('„Kopiuj link do raportu” wkłada krótki adres zapisanego raportu do schowka', async ({
+    page,
+    context,
+  }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await mockAnalysisApi(page);
     await page.goto(LOW_CONFIDENCE_REPORT_URL);
 
     await page.getByRole('button', { name: 'Kopiuj link do raportu' }).click();
     await expect(page.getByRole('button', { name: 'Skopiowano link' })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(page.url());
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      `${new URL(page.url()).origin}/raport?raport=${LOW_CONFIDENCE_REPORT.meta.reportId}`,
+    );
   });
 
   test('wydruk: nagłówek z nazwą aplikacji, datą i adresem, stopka ze źródłami', async ({ page }) => {
@@ -293,7 +299,12 @@ test.describe('raport do oddania', () => {
     await expect(header).toBeVisible();
     await expect(header).toContainText('Grunt to Zdrowie');
     await expect(header).toContainText('Wygenerowano 21 listopada 2026');
-    await expect(header).toContainText(`Raport: ${page.url()}`);
+    await expect(header).toContainText(
+      `Raport: ${new URL(page.url()).origin}/raport?raport=${LOW_CONFIDENCE_REPORT.meta.reportId}`,
+    );
+    await expect(page.getByTestId('print-footer')).toContainText(
+      `raport ${LOW_CONFIDENCE_REPORT.meta.reportId}`,
+    );
     await expect(page.getByTestId('print-footer')).toContainText('Rowy, cieki i wody: GUGiK BDOT10k');
   });
 });

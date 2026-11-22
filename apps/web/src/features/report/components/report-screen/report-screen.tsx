@@ -1,6 +1,6 @@
 import type { AnalysisRequest } from '@app/contracts';
-import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect } from 'react';
 import { useTranslations } from 'use-intl';
 
 import {
@@ -8,6 +8,7 @@ import {
   AnalysisProgress,
   analysisReportQuery,
   AnalysisTimeoutError,
+  storedReportQuery,
 } from '@/features/analysis';
 import { toProblem } from '@/lib/problems';
 import type { AppHref } from '@/lib/routes';
@@ -30,6 +31,13 @@ export function ReportScreen({ request, changeHref, mapHref, grasslandHref }: Re
   const t = useTranslations('report');
   const query = useQuery(analysisReportQuery(request));
   const { refetch } = query;
+  const client = useQueryClient();
+  const report = query.data;
+
+  // krotki link do tego raportu (`?raport=`) otworzy sie w tej sesji bez pytania serwera
+  useEffect(() => {
+    if (report) client.setQueryData(storedReportQuery(report.meta.reportId).queryKey, report);
+  }, [client, report]);
   const retry = useCallback(() => {
     void refetch();
   }, [refetch]);

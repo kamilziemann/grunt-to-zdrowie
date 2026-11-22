@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DROUGHT_REPORT } from '../fixtures/drought-report';
+import { FIELD_REPORT } from '../fixtures/field-report';
 import { LOW_CONFIDENCE_REPORT } from '../fixtures/low-confidence-report';
 import { SAMPLE_REPORT } from '../fixtures/sample-report';
 import {
@@ -16,6 +17,7 @@ import {
   needsSampleBanner,
   periodDroughtCount,
   periodMonths,
+  reportSearch,
   sampleParts,
   sampleScope,
   sampleSources,
@@ -229,5 +231,22 @@ describe('wyliczenia raportu', () => {
     expect(rankSide(5, 10).side).toBe('dry');
     expect(rankSide(11, 11)).toEqual({ side: 'wet', rank: 11, wet: 1 });
     expect(rankSide(1, 1).side).toBe('dry');
+  });
+});
+
+describe('parametry raportu z zapisu', () => {
+  it('cala dzialka: dzialki, uprawa i dzien analizy', () => {
+    expect(reportSearch(FIELD_REPORT)).toEqual({
+      dzialki: '080904_5.0001.349/1',
+      uprawa: 'winter_wheat',
+      data: '2018-06-15',
+    });
+  });
+
+  it('narysowane pole: obrys w zwartym zapisie i rodzaj', () => {
+    const search = reportSearch({ ...FIELD_REPORT, field: { ...FIELD_REPORT.field, kind: 'drawn' } });
+
+    expect(search.rodzaj).toBe('drawn');
+    expect(search.obszar).toMatch(/^[\w-]+$/);
   });
 });

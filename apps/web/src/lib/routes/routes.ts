@@ -24,10 +24,11 @@ export const routes = {
     }),
   /**
    * Raport wodny: dzialki (albo wlasny obszar), uprawa i dzien analizy w adresie (link do raportu da sie wyslac
-   * i odswiezyc).
+   * i odswiezyc). `raport` = zapisany raport (krotki link, bez ponownego liczenia).
    */
-  report: (search?: FieldSearch & { dzialki?: string; uprawa?: string; data?: string }) =>
+  report: (search?: FieldSearch & { dzialki?: string; uprawa?: string; data?: string; raport?: string }) =>
     withQuery(routePath('/raport'), {
+      raport: search?.raport,
       dzialki: search?.dzialki,
       obszar: search?.obszar,
       rodzaj: search?.rodzaj,

@@ -671,5 +671,15 @@
       "scattered_parts": "The parcels lie far apart, so we do not split them into spots together – run a report for each parcel."
     },
     "teaser": "{count, plural, one {There is # spot in the field that differs in water from the rest} other {There are # spots in the field that differ in water from the rest}} – see the sketch."
+  },
+  "stored": {
+    "computed": "Computed on {date}, {time}",
+    "recompute": "Compute again",
+    "loading": "Opening the saved report…",
+    "missing": {
+      "title": "There is no such report",
+      "description": "The link points to a report we do not know – it may have been copied with a mistake or come from an older version of the app. Pick the field on the map and compute the report again.",
+      "map": "Pick a field on the map"
+    }
   }
 }

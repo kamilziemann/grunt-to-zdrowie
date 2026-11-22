@@ -28,6 +28,8 @@ export interface ReportViewProps {
   mapHref: AppHref;
   /** ten sam raport z uprawa "laka lub pastwisko" - podpowiedz, gdy ewidencja mowi o samych lakach */
   grasslandHref?: AppHref;
+  /** raport otwarty z zapisu (krotki link): adres z parametrami, pod ktorym policzy sie od nowa */
+  recomputeHref?: AppHref;
 }
 
 /** Na czas wydruku otwiera wszystkie szczegoly (PDF dla doradcy ma komplet liczb), potem przywraca stan. */
@@ -61,7 +63,7 @@ function useOpenDetailsForPrint(root: RefObject<HTMLElement | null>) {
  * agrotechnika -> nawadnianie (ostatnie z zalecen) -> zrodla, daty, ograniczenia i pewnosc. Ekran i wydruk A4
  * maja te sama kolejnosc; grunt nierolny wg ewidencji, dane przykladowe i braki danych sa oznaczone na gorze.
  */
-export function ReportView({ report, changeHref, mapHref, grasslandHref }: ReportViewProps) {
+export function ReportView({ report, changeHref, mapHref, grasslandHref, recomputeHref }: ReportViewProps) {
   const t = useTranslations('report');
   const root = useRef<HTMLElement>(null);
   // bez `sampleParts` caly raport jest przykladowy - mowi o tym baner, znaczniki przy kazdej sekcji bylyby szumem
@@ -78,7 +80,12 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref }: Repor
     <ZoneFocusProvider>
       <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
         <PrintHeader report={report} />
-        <ReportHeader report={report} changeHref={changeHref} mapHref={mapHref} />
+        <ReportHeader
+          report={report}
+          changeHref={changeHref}
+          mapHref={mapHref}
+          recomputeHref={recomputeHref}
+        />
         <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
         <SampleBanner report={report} />
         {report.meta.status !== 'complete' && (

@@ -5,6 +5,7 @@ export {
   AnalysisTimeoutError,
   analysisKeys,
   analysisReportQuery,
+  storedReportQuery,
 } from './api/analysis.queries';
 export { AnalysisFailure, type AnalysisFailureProps } from './components/analysis-failure';
 export { AnalysisForm, type AnalysisFormProps } from './components/analysis-form';
@@ -17,6 +18,7 @@ export {
   analysisSearchOf,
   analysisSearchSchema,
   fieldAreaFromSearch,
+  isReportId,
   parcelNumberOf,
   todayInPoland,
   validateAnalysisDate,

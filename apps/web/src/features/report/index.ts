@@ -6,6 +6,7 @@ export { FarmScreen, type FarmScreenProps } from './components/farm-screen';
 export { ReportMissing, type ReportMissingProps } from './components/report-missing';
 export { ReportScreen, type ReportScreenProps } from './components/report-screen';
 export { ReportView, type ReportViewProps } from './components/report-view';
+export { StoredReportScreen, type StoredReportScreenProps } from './components/stored-report-screen';
 export { RiskCalendar } from './components/risk-calendar';
 export { SampleBanner } from './components/sample-banner';
 export { VerdictSection } from './components/verdict-section';

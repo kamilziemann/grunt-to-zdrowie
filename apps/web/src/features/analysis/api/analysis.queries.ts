@@ -1,8 +1,9 @@
 // Analiza wodna pola (POST /api/analysis) jako zapytanie TanStack Query: wynik zalezy tylko od pola, uprawy i daty,
 // wiec te same parametry z adresu strony (odswiezenie, link) trafiaja w ten sam wpis cache. Liczenie trwa do
 // kilkudziesieciu sekund i odpytuje zewnetrzne zrodla - bez automatycznych ponowien (blad ma przycisk ponowienia).
+// Zapisany raport (GET /api/reports/:id) sie nie zmienia - otwiera sie z linku bez liczenia i bez zrodel.
 import type { AnalysisRequest, WaterReport } from '@app/contracts';
-import { unwrap } from '@app/rpc';
+import { unwrap, unwrapOrNull } from '@app/rpc';
 import { queryOptions } from '@tanstack/react-query';
 
 import { getApi } from '@/lib/api';
@@ -24,6 +25,7 @@ const STALE_MS = 30 * 60_000;
 export const analysisKeys = {
   all: ['analysis'] as const,
   report: (request: AnalysisRequest) => ['analysis', 'report', request] as const,
+  stored: (reportId: string) => ['analysis', 'stored', reportId] as const,
 };
 
 async function fetchReport(request: AnalysisRequest, signal: AbortSignal): Promise<WaterReport> {
@@ -46,6 +48,18 @@ export const analysisReportQuery = (request: AnalysisRequest) =>
     queryKey: analysisKeys.report(request),
     queryFn: ({ signal }): Promise<WaterReport> => fetchReport(request, signal),
     staleTime: STALE_MS,
+    gcTime: STALE_MS,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+/** GET /reports/:id - zapisany raport (`meta.reportId`); null = nie ma takiego raportu (404). */
+export const storedReportQuery = (reportId: string) =>
+  queryOptions({
+    queryKey: analysisKeys.stored(reportId),
+    queryFn: (): Promise<WaterReport | null> =>
+      unwrapOrNull<WaterReport>(getApi().reports[':id'].$get({ param: { id: reportId } })),
+    staleTime: Infinity,
     gcTime: STALE_MS,
     retry: false,
     refetchOnWindowFocus: false,
