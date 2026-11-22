@@ -74,6 +74,11 @@ export interface RootZoneDay {
   stressCoefficient: number;
   potentialEtcMm: number;
   actualEtcMm: number;
+  /** opad dnia ze zrodla; null = luka w danych (w bilansie 0) */
+  precipMm: number | null;
+  /** wyczerpanie po opadzie, na poczatku dnia, i woda, ktora tego dnia przesiakla ponizej korzeni */
+  startDepletionMm: number;
+  deepPercolationMm: number;
 }
 
 export interface RootZoneSimulation {
@@ -137,6 +142,9 @@ export function simulateRootZone(
       stressCoefficient: step.stressCoefficient,
       potentialEtcMm,
       actualEtcMm: step.actualEtcMm,
+      precipMm: day.precipMm,
+      startDepletionMm: step.startDepletionMm,
+      deepPercolationMm: step.deepPercolationMm,
     });
   }
 

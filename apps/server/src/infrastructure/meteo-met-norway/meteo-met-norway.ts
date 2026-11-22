@@ -117,6 +117,13 @@ export function parseForecast(
   });
 }
 
+/** Chwila wydania prognozy (`properties.meta.updated_at`); null, gdy odpowiedz jej nie podaje. */
+export function forecastIssuedAt(body: unknown): string | null {
+  const updated = (body as { properties?: { meta?: { updated_at?: unknown } } }).properties?.meta?.updated_at;
+
+  return typeof updated === 'string' && !Number.isNaN(Date.parse(updated)) ? updated : null;
+}
+
 export function createMetNorwayForecastSource({
   fetch: fetchImpl = (url, init) => fetch(url, init),
   now = () => new Date().toISOString(),
@@ -147,7 +154,9 @@ export function createMetNorwayForecastSource({
         return { data: null, source: { ...base, note: httpFailureNote('MET Norway', response.status) } };
       }
 
-      const series = parseForecast(await response.json(), from, days, point[1]);
+      const body: unknown = await response.json();
+      const series = parseForecast(body, from, days, point[1]);
+      const issuedAt = forecastIssuedAt(body);
       const first = series.at(0)?.date;
       const last = series.at(-1)?.date;
 
@@ -156,7 +165,7 @@ export function createMetNorwayForecastSource({
       }
 
       return {
-        data: { days: series },
+        data: { days: series, ...(issuedAt ? { issuedAt } : {}) },
         source: {
           ...base,
           status: series.length < days ? 'partial' : 'ok',

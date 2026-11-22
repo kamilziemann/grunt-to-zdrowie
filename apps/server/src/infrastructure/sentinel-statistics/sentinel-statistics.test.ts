@@ -11,6 +11,7 @@ import {
   createSentinelStatisticsSource,
   parseRaster,
   fieldPixelCount,
+  classifyStatistics,
   parseStatistics,
   rasterBody,
   rasterSize,
@@ -126,6 +127,31 @@ describe('parseStatistics', () => {
       pixels: 600,
     });
     expect(observations[3]).toMatchObject({ pixels: 507, validShare: 0.84 });
+  });
+});
+
+describe('classifyStatistics', () => {
+  it('sceny odrzucone przez chmury zostaja osobno, z udzialem czystych pikseli; calkiem zachmurzona - bez indeksow', () => {
+    const { used, rejected } = classifyStatistics(BODY);
+    const cloudy = {
+      interval: { from: '2021-06-30T00:00:00Z' },
+      outputs: {
+        indices: {
+          bands: {
+            ndvi: { stats: { mean: Number.NaN, sampleCount: 600, noDataCount: 600 } },
+            ndmi: { stats: { mean: Number.NaN, sampleCount: 600, noDataCount: 600 } },
+          },
+        },
+      },
+    };
+
+    expect(used).toEqual(parseStatistics(BODY));
+    expect(rejected.length).toBeGreaterThan(0);
+    expect(rejected.every((item) => item.validShare < 0.6 || item.pixels < 5)).toBe(true);
+    expect(new Set([...used, ...rejected].map((item) => item.date)).size).toBe(used.length + rejected.length);
+    expect(classifyStatistics({ data: [cloudy] }).rejected).toEqual([
+      { date: '2021-06-30', ndvi: null, ndmi: null, validShare: 0, pixels: 0 },
+    ]);
   });
 });
 
@@ -304,7 +330,13 @@ describe('createSentinelStatisticsSource', () => {
       fetch: cloudy,
     }).series(field, '2021-07-15');
 
-    expect(result.data).toEqual({ observations: [], baseline: [], cellSizeM: 10 });
+    expect(result.data).toEqual({
+      observations: [],
+      baseline: [],
+      cellSizeM: 10,
+      rejected: [],
+      window: { from: '2021-06-16', to: '2021-07-15' },
+    });
     expect(result.source.status).toBe('partial');
     expect(result.source.note).toContain('brak bezchmurnego zdjęcia');
   });

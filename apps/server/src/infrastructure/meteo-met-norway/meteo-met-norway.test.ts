@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   createMetNorwayForecastSource,
+  forecastIssuedAt,
   metNorwayUrl,
   parseForecast,
   type FetchLike,
@@ -96,6 +97,13 @@ describe('createMetNorwayForecastSource', () => {
       dataFrom: '2026-11-22',
     });
     expect(result.data?.days).toHaveLength(7);
+    expect(result.data?.issuedAt).toBe('2026-11-21T19:18:50Z');
+  });
+
+  it('chwila wydania prognozy tylko z poprawnej daty', () => {
+    expect(forecastIssuedAt(BODY)).toBe('2026-11-21T19:18:50Z');
+    expect(forecastIssuedAt({ properties: { meta: { updated_at: 'wczoraj' } } })).toBeNull();
+    expect(forecastIssuedAt({})).toBeNull();
   });
 
   it('za krotka prognoza = partial, blad HTTP = missing', async () => {

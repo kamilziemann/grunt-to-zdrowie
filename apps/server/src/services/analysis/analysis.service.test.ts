@@ -97,6 +97,29 @@ describe('analysis service', () => {
     expect(other.meta.reportId).not.toBe(first.meta.reportId);
   });
 
+  it('pogodynka wody: zrodla na biezaco i wczesniej, zbiornik i rachunek; prognoza tylko na dzis', async () => {
+    const today = await service().analyze(request('2026-11-21'));
+    const summer = await service().analyze(request('2026-07-20'));
+
+    expect(waterReportSchema.safeParse(summer).error).toBeUndefined();
+    expect(summer.meta.engineVersion).toBe('0.8.0');
+    expect(summer.sources.map((source) => [source.id, source.mode])).toEqual([
+      ['parcel', 'live'],
+      ['meteo', 'live'],
+      ['soil', 'live'],
+      ['terrain', 'live'],
+      ['hydro', 'preloaded'],
+      ['vegetation', 'live'],
+    ]);
+    expect(summer.sources.every((source) => source.fetchedAt !== undefined)).toBe(true);
+    expect(summer.waterNow).toMatchObject({ growing: true, horizonDays: 60 });
+    expect(summer.waterLedger).toMatchObject({ from: '2026-03-21', to: '2026-07-20' });
+    expect(summer.dailySeries).toHaveLength(60);
+    expect(summer).not.toHaveProperty('forecast');
+    expect(today.forecast?.days.length).toBeGreaterThan(0);
+    expect(today.waterNow).toMatchObject({ growing: false });
+  });
+
   it('prognoze pobiera tylko dla analizy na dzis', async () => {
     const today = await service().analyze(request('2026-11-21'));
     const past = await service().analyze(request('2026-07-20'));

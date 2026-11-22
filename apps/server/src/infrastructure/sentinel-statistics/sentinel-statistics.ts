@@ -278,36 +278,48 @@ export function statisticsBody(field: FieldArea, window: Window): unknown {
 const round = (value: number, digits = 3): number => Number(value.toFixed(digits));
 
 /**
- * Dni z czysta scena: srednie pola, udzial i liczba czystych pikseli. Udzial liczymy wzgledem pikseli pola
- * (`fieldPixels`), nie calego prostokata rastra; bez tej liczby - wzgledem prostokata (pole prostokatne).
+ * Dni ze scena w oknie, podzielone na uzyte (czyste) i odrzucone przez maske chmur: srednie pola, udzial i liczba
+ * czystych pikseli. Udzial liczymy wzgledem pikseli pola (`fieldPixels`), nie calego prostokata rastra; bez tej
+ * liczby - wzgledem prostokata (pole prostokatne). Scena calkiem zachmurzona ma udzial 0 i indeksy null.
  */
-export function parseStatistics(body: unknown, fieldPixels?: number): VegetationObservation[] {
+export function classifyStatistics(
+  body: unknown,
+  fieldPixels?: number,
+): { used: VegetationObservation[]; rejected: VegetationObservation[] } {
   const data = (body as StatisticsResponse).data ?? [];
+  const used: VegetationObservation[] = [];
+  const rejected: VegetationObservation[] = [];
 
-  return data.flatMap((item) => {
+  for (const item of data) {
     const date = item.interval?.from?.slice(0, 10);
     const bands = item.outputs?.indices?.bands;
     const ndvi = bands?.ndvi?.stats;
     const ndmi = bands?.ndmi?.stats;
     const total = ndvi?.sampleCount ?? 0;
-    const valid = total - (ndvi?.noDataCount ?? total);
+    const valid = Math.max(total - (ndvi?.noDataCount ?? total), 0);
 
-    if (!date || total === 0 || valid <= 0) return [];
+    if (!date || total === 0) continue;
 
     const validShare = Math.min(1, valid / Math.min(total, fieldPixels ?? total));
+    const clear = valid > 0 && validShare >= MIN_VALID_SHARE && valid >= Math.min(MIN_PIXELS, total);
+    const mean = (stats: Stats | undefined) =>
+      valid > 0 && typeof stats?.mean === 'number' && Number.isFinite(stats.mean) ? round(stats.mean) : null;
 
-    if (validShare < MIN_VALID_SHARE || valid < Math.min(MIN_PIXELS, total)) return [];
+    (clear ? used : rejected).push({
+      date,
+      ndvi: mean(ndvi),
+      ndmi: mean(ndmi),
+      validShare: round(validShare, 2),
+      pixels: valid,
+    });
+  }
 
-    return [
-      {
-        date,
-        ndvi: typeof ndvi?.mean === 'number' && Number.isFinite(ndvi.mean) ? round(ndvi.mean) : null,
-        ndmi: typeof ndmi?.mean === 'number' && Number.isFinite(ndmi.mean) ? round(ndmi.mean) : null,
-        validShare: round(validShare, 2),
-        pixels: valid,
-      },
-    ];
-  });
+  return { used, rejected };
+}
+
+/** Dni z czysta scena (zob. `classifyStatistics`). */
+export function parseStatistics(body: unknown, fieldPixels?: number): VegetationObservation[] {
+  return classifyStatistics(body, fieldPixels).used;
 }
 
 /** Najblizsza rocznicy daty analizy czysta obserwacja w danym roku. */
@@ -455,13 +467,11 @@ export function createSentinelStatisticsSource({
           windows.map((window) => async () => {
             const response = await withRetryOn429(request(window));
 
-            return response.ok
-              ? {
-                  window,
-                  observations: parseStatistics(await response.json(), fieldPixelCount(field)),
-                  status: response.status,
-                }
-              : { window, observations: null, status: response.status };
+            if (!response.ok) return { window, observations: null, rejected: [], status: response.status };
+
+            const { used, rejected } = classifyStatistics(await response.json(), fieldPixelCount(field));
+
+            return { window, observations: used, rejected, status: response.status };
           }),
           CONCURRENCY,
         );
@@ -506,6 +516,8 @@ export function createSentinelStatisticsSource({
             observations,
             baseline,
             cellSizeM: CELL_M,
+            rejected: current.rejected.toSorted((a, b) => b.date.localeCompare(a.date)),
+            window: { from: current.window.from, to: current.window.to },
             ...(raster?.raster ? { raster: raster.raster } : {}),
           },
           source: {

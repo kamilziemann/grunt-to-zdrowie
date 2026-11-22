@@ -380,3 +380,24 @@ export function causes(input: StageInput, assessment: Assessment, history?: Hist
 
   return found.toSorted((a, b) => b.weight - a.weight);
 }
+
+/**
+ * Udzial kazdej przyczyny (waga / suma wag, suma = 1) - do wykresu "co najbardziej". To szacunek wagi argumentu, nie
+ * pomiar; przy sumie wag 0 udzialow nie ma. Ostatni udzial domyka sume do 1 mimo zaokraglen.
+ */
+export function withCauseShares(found: readonly Cause[]): Cause[] {
+  const total = found.reduce((sum, cause) => sum + cause.weight, 0);
+
+  if (total <= 0) return [...found];
+
+  let assigned = 0;
+
+  return found.map((cause, index) => {
+    const share =
+      index === found.length - 1 ? Math.max(round(1 - assigned, 3), 0) : round(cause.weight / total, 3);
+
+    assigned += share;
+
+    return { ...cause, share };
+  });
+}

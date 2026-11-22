@@ -20,10 +20,12 @@ import {
   parcelsFieldId,
   shortHash,
 } from '../../domain/field-area';
+import { withCauseShares } from '../../domain/causes';
 import { drainedLowland } from '../../domain/drained-lowland';
 import { withHotDays } from '../../domain/hot-days';
 import { addDays, addYears, isoDateInPoland } from '../../domain/iso-date';
 import { summarizeLandUse } from '../../domain/land-use';
+import { waterOutlook } from '../../domain/water-outlook';
 import type {
   AnalysisStages,
   DataSources,
@@ -38,7 +40,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.7.0';
+export const ANALYSIS_ENGINE_VERSION = '0.8.0';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -87,6 +89,18 @@ const PARCEL_PROVIDERS: Record<Parcel['source'], string> = {
   uldk: 'GUGiK ULDK',
   'egib-wfs': 'GUGiK EGiB (WFS)',
 };
+
+/**
+ * Jak zrodlo trafia do analizy: BDOT10k (hydrografia i otoczenie pola, id `hydro`) jest zaimportowany wczesniej do
+ * PostGIS, reszta pobierana przy analizie. Zrodlo bez daty pobrania dostaje chwile analizy.
+ */
+function withMode(source: SourceRef, at: string): SourceRef {
+  return {
+    ...source,
+    mode: source.id === 'hydro' ? 'preloaded' : 'live',
+    ...(source.fetchedAt === undefined && source.status !== 'missing' ? { fetchedAt: at } : {}),
+  };
+}
 
 /** Jedno zdanie do zrodla dzialki, gdy granice pochodza z przeterminowanej pamieci (GUGiK nie odpowiedzial). */
 function staleParcelNote(fetchedAt: string): string {
@@ -372,14 +386,18 @@ export function createAnalysisService({
       const history = stages.history(input);
       // dni upalne tylko objasniaja (upal jest juz w ET0): dowody przy przyczynie albo w ocenie, poziom bez zmian;
       // pogoda z atrapy nie jest dowodem
-      const { assessment, causes } = withHotDays(
+      const { assessment, causes: explained } = withHotDays(
         input.sampleSources?.includes('meteo') ? undefined : input.meteo?.days,
         date,
         assessed,
         stages.causes(input, assessed, history),
       );
+      const causes = withCauseShares(explained);
       const zones = stages.zones(input);
-      const reportSources = [parcelSource, ...fetched, ...(surroundings ? [surroundings.source] : [])];
+      const generatedAt = now();
+      const reportSources = [parcelSource, ...fetched, ...(surroundings ? [surroundings.source] : [])].map(
+        (source) => withMode(source, generatedAt),
+      );
       const missing = fetched.filter((source) => source.status === 'missing');
       const limitations = new Set<LimitationId>(stages.limitations(input, assessment));
 
@@ -405,7 +423,7 @@ export function createAnalysisService({
           reportId: key.id,
           engineVersion: ANALYSIS_ENGINE_VERSION,
           analysisDate: date,
-          generatedAt: now(),
+          generatedAt,
           durationMs: Date.now() - started,
           // bez pogody nie ma bilansu, wiec nie ma oceny; pozostale braki (takze luki w zrodle) tylko ja oslabiaja
           status:
@@ -430,6 +448,7 @@ export function createAnalysisService({
         zones,
         sources: reportSources,
         limitations: [...limitations],
+        ...waterOutlook(input, forecast?.source ?? null),
       };
 
       // zapis nie moze zepsuc odpowiedzi: raport bez zapisu jest nadal poprawny, policzy sie przy powtorce

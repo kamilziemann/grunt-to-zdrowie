@@ -42,6 +42,8 @@ export interface ForecastSeries {
     tMinC: number | null;
     tMaxC: number | null;
   }[];
+  /** kiedy wydano prognoze (ISO 8601), gdy zrodlo to podaje */
+  issuedAt?: string;
 }
 
 export interface SoilProfile {
@@ -166,6 +168,10 @@ export interface VegetationSeries {
   cellSizeM: number;
   /** raster pola do stref (gdy zrodlo go oddalo) */
   raster?: VegetationRaster;
+  /** sceny z okna biezacego odrzucone przez maske chmur (za malo czystych pikseli) - do pokazania wprost */
+  rejected?: VegetationObservation[];
+  /** okno biezace zdjec */
+  window?: { from: string; to: string };
 }
 
 export interface MeteoSource {

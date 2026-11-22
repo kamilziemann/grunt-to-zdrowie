@@ -1,4 +1,4 @@
-import type { Assessment, CropId, FieldArea, History } from '@app/contracts';
+import type { Assessment, Cause, CropId, FieldArea, History } from '@app/contracts';
 import { describe, expect, it } from 'vitest';
 
 import type { DailyWeather, HydroContext, MeteoSeries, SoilProfile } from '../analysis-ports';
@@ -8,7 +8,7 @@ import { cropAtDate } from '../crop-calendar';
 import { history } from '../history';
 import { addDays, addYears, daysBetween } from '../iso-date';
 import { deficitSeasons } from '../history';
-import { causes, recurrentDeficit } from './causes';
+import { causes, recurrentDeficit, withCauseShares } from './causes';
 
 const FIELD: FieldArea = {
   id: 'area:test',
@@ -271,5 +271,31 @@ describe('causes', () => {
     const input = stageInput('2018-07-15', 70, { meteo: null, soil: SAND });
 
     expect(ids(input)).toEqual([]);
+  });
+});
+
+describe('withCauseShares', () => {
+  const cause = (id: Cause['id'], weight: number): Cause => ({
+    id,
+    weight,
+    evidence: [{ metric: 'precip_30d', value: 1, unit: 'mm', source: 'meteo' }],
+  });
+
+  it('udzial = waga / suma wag, suma dokladnie 1', () => {
+    const shared = withCauseShares([
+      cause('precipitation_deficit', 0.6),
+      cause('low_soil_retention', 0.3),
+      cause('crop_sensitivity', 0.3),
+    ]);
+
+    expect(shared.map((item) => item.share)).toEqual([0.5, 0.25, 0.25]);
+    expect(
+      withCauseShares([cause('surface_runoff', 1), cause('fast_drainage', 2)]).map((item) => item.share),
+    ).toEqual([0.333, 0.667]);
+  });
+
+  it('wagi zerowe albo brak przyczyn - bez udzialow', () => {
+    expect(withCauseShares([cause('crop_sensitivity', 0)])[0]).not.toHaveProperty('share');
+    expect(withCauseShares([])).toEqual([]);
   });
 });
