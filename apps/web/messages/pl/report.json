@@ -531,7 +531,8 @@
       "water": "Zapas wody",
       "stress": "Dni bez wody (30)",
       "confidence": "Pewność",
-      "report": "Raport"
+      "report": "Raport",
+      "zones": "Miejsca na polu"
     },
     "waiting": "w kolejce",
     "running": "liczę…",
@@ -546,7 +547,11 @@
     "sample": "Wyniki częściowo z danych przykładowych – szczegóły w raporcie każdej działki.",
     "missing": "Wybierz co najmniej dwie działki, uprawę i dzień.",
     "change": "Zmień uprawę lub datę",
-    "map": "Wróć do mapy"
+    "map": "Wróć do mapy",
+    "zonesValue": "{count, plural, one {# miejsce} few {# miejsca} other {# miejsc}}",
+    "zonesNone": "brak",
+    "missingParcel": "nie ma takiej działki",
+    "same": "Działki mają tę samą ocenę i zapas wody – leżą blisko, więc pogoda i gleba z mapy są dla nich wspólne. Różnią je miejsca na polu i rowy: zajrzyj do raportu każdej działki."
   },
   "export": {
     "title": "Dane dla doradcy",

@@ -8,10 +8,11 @@ import { analysisReportQuery, parcelNumberOf } from '@/features/analysis';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/navigation';
+import { toProblem } from '@/lib/problems';
 import type { AppHref } from '@/lib/routes';
 
 import { canStart, farmOrder } from '../../utils/farm';
-import { isSampleReport, soilWater } from '../../utils/report-data';
+import { fieldZones, isSampleReport, soilWater } from '../../utils/report-data';
 import { LevelBadge } from '../verdict-section';
 
 export interface FarmScreenProps {
@@ -24,7 +25,8 @@ export interface FarmScreenProps {
   mapHref: AppHref;
 }
 
-type RowState = 'waiting' | 'running' | 'failed' | 'done';
+/** `missing` = nie ma takiej dzialki (404) - ponowienie nic nie da. */
+type RowState = 'waiting' | 'running' | 'failed' | 'missing' | 'done';
 
 interface Row {
   id: string;
@@ -63,7 +65,7 @@ export function FarmScreen({ parcelIds, cropId, date, reportHref, changeHref, ma
         let state: RowState = 'waiting';
 
         if (report) state = 'done';
-        else if (query?.isError) state = 'failed';
+        else if (query?.isError) state = toProblem(query.error).code === 'not_found' ? 'missing' : 'failed';
         else if (query?.isFetching) state = 'running';
 
         return {
@@ -79,6 +81,16 @@ export function FarmScreen({ parcelIds, cropId, date, reportHref, changeHref, ma
   const ordered = farmOrder(rows);
   const done = rows.filter((row) => row.state === 'done').length;
   const sample = rows.some((row) => row.report && isSampleReport(row.report));
+  // sasiednie dzialki maja zwykle te sama pogode i glebe z modelu - wtedy kolejnosc nic nie mowi i trzeba to napisac
+  const reports = rows.flatMap((row) => (row.report ? [row.report] : []));
+  const sameResult =
+    reports.length >= 2 &&
+    new Set(
+      reports.map(
+        (report) =>
+          `${report.assessment.level}|${report.assessment.rootZone ? soilWater(report.assessment.rootZone).percent : ''}`,
+      ),
+    ).size === 1;
 
   return (
     <div className="flex flex-col gap-section">
@@ -99,6 +111,11 @@ export function FarmScreen({ parcelIds, cropId, date, reportHref, changeHref, ma
           </output>
         </div>
         {sample && <p className="text-sm text-muted-foreground">{t('sample')}</p>}
+        {sameResult && (
+          <p className="max-w-prose text-base" data-testid="farm-same">
+            {t('same')}
+          </p>
+        )}
 
         {/* telefon: karty */}
         <ol className="flex flex-col gap-3 md:hidden" data-testid="farm-cards">
@@ -128,13 +145,13 @@ export function FarmScreen({ parcelIds, cropId, date, reportHref, changeHref, ma
           <table className="w-full text-left text-sm" data-testid="farm-table">
             <thead className="bg-muted/50">
               <tr>
-                {(['rank', 'parcel', 'level', 'water', 'stress', 'confidence', 'report'] as const).map(
-                  (key) => (
-                    <th key={key} scope="col" className="px-3 py-2 font-medium">
-                      {t(`headers.${key}`)}
-                    </th>
-                  ),
-                )}
+                {(
+                  ['rank', 'parcel', 'level', 'water', 'stress', 'zones', 'confidence', 'report'] as const
+                ).map((key) => (
+                  <th key={key} scope="col" className="px-3 py-2 font-medium">
+                    {t(`headers.${key}`)}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -156,6 +173,9 @@ export function FarmScreen({ parcelIds, cropId, date, reportHref, changeHref, ma
                     {row.report?.assessment.rootZone
                       ? t('stressValue', { days: row.report.assessment.rootZone.stressDays30 })
                       : t('none')}
+                  </td>
+                  <td className="px-3 py-2 tabular-nums">
+                    {row.report ? <ZoneCount report={row.report} /> : t('none')}
                   </td>
                   <td className="px-3 py-2">{row.report ? <Confidence report={row.report} /> : t('none')}</td>
                   <td className="px-3 py-1">
@@ -193,8 +213,14 @@ function RowStatus({ row }: { row: Row }) {
   }
 
   return (
-    <span className={row.state === 'failed' ? 'text-sm text-destructive' : 'text-sm text-muted-foreground'}>
-      {t(row.state === 'failed' ? 'failed' : 'waiting')}
+    <span
+      className={
+        row.state === 'failed' || row.state === 'missing'
+          ? 'text-sm text-destructive'
+          : 'text-sm text-muted-foreground'
+      }
+    >
+      {t(row.state === 'missing' ? 'missingParcel' : row.state === 'failed' ? 'failed' : 'waiting')}
     </span>
   );
 }
@@ -204,6 +230,14 @@ function WaterValue({ report }: { report: WaterReport }) {
   const rootZone = report.assessment.rootZone;
 
   return rootZone ? t('waterValue', { percent: soilWater(rootZone).percent }) : t('none');
+}
+
+/** Ile miejsc na polu rozni sie woda - to rozroznia sasiednie dzialki o tej samej ocenie. */
+function ZoneCount({ report }: { report: WaterReport }) {
+  const t = useTranslations('report.farm');
+  const count = fieldZones(report).length;
+
+  return count > 0 ? t('zonesValue', { count }) : t('zonesNone');
 }
 
 function Confidence({ report }: { report: WaterReport }) {
@@ -216,7 +250,7 @@ function RowFacts({ report }: { report: WaterReport }) {
   const t = useTranslations('report.farm');
 
   return (
-    <dl className="grid grid-cols-3 gap-2 text-sm">
+    <dl className="grid grid-cols-2 gap-2 text-sm">
       <div className="flex flex-col">
         <dt className="text-muted-foreground">{t('headers.water')}</dt>
         <dd className="font-medium tabular-nums">
@@ -229,6 +263,12 @@ function RowFacts({ report }: { report: WaterReport }) {
           {report.assessment.rootZone
             ? t('stressValue', { days: report.assessment.rootZone.stressDays30 })
             : t('none')}
+        </dd>
+      </div>
+      <div className="flex flex-col">
+        <dt className="text-muted-foreground">{t('headers.zones')}</dt>
+        <dd className="font-medium tabular-nums">
+          <ZoneCount report={report} />
         </dd>
       </div>
       <div className="flex flex-col">

@@ -531,7 +531,8 @@
       "water": "Water reserve",
       "stress": "Days without water (30)",
       "confidence": "Confidence",
-      "report": "Report"
+      "report": "Report",
+      "zones": "Spots in the field"
     },
     "waiting": "queued",
     "running": "computing…",
@@ -546,7 +547,11 @@
     "sample": "Results partly from sample data – see each parcel's report for details.",
     "missing": "Choose at least two parcels, a crop and a day.",
     "change": "Change crop or date",
-    "map": "Back to the map"
+    "map": "Back to the map",
+    "zonesValue": "{count, plural, one {# spot} other {# spots}}",
+    "zonesNone": "none",
+    "missingParcel": "no such parcel",
+    "same": "The parcels have the same verdict and water stock – they lie close, so weather and mapped soil are shared. Spots in the field and ditches tell them apart: open each parcel's report."
   },
   "export": {
     "title": "Data for the advisor",
