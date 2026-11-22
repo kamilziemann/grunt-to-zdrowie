@@ -13,9 +13,11 @@ import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/toast';
 import { localizePath, useAppLocale } from '@/lib/locale';
 import { useRouter } from '@/lib/navigation';
 import { routes, type FieldSearch } from '@/lib/routes';
+import { revealField } from '@/lib/utils/reveal-field';
 
 import {
   analysisDateBounds,
@@ -57,6 +59,9 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
   const dateHintId = `${ids}-date-hint`;
   const dateErrorId = `${ids}-date-error`;
   const formRef = useRef<HTMLFormElement>(null);
+  const cropAreaRef = useRef<HTMLDivElement>(null);
+  const dateAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   const [cropId, setCropId] = useState<CropId | null>(initialCropId ?? null);
   // null = "dzis" (data przychodzi z przegladarki po hydratacji)
   const [date, setDate] = useState<string | null>(initialDate ?? null);
@@ -104,14 +109,25 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
       setCropMissing(!cropId);
       setDateError(error);
 
+      // pole z bledem bywa pod przyklejonym przyciskiem albo poza panelem - przewijamy do niego, fokus i powiadomienie
       if (!cropId) {
-        formRef.current?.querySelector<HTMLInputElement>('input[type="radio"]')?.focus();
+        if (cropAreaRef.current) {
+          revealField(cropAreaRef.current, cropAreaRef.current.querySelector('input[type="radio"]'));
+        }
+
+        toast({ title: t('cropMissingToast'), variant: 'error' });
 
         return;
       }
 
       if (error) {
-        formRef.current?.querySelector<HTMLInputElement>('input[type="date"]')?.focus();
+        if (dateAreaRef.current) {
+          revealField(dateAreaRef.current, dateAreaRef.current.querySelector('input[type="date"]'), {
+            block: 'center',
+          });
+        }
+
+        toast({ title: t('dateErrorToast'), variant: 'error' });
 
         return;
       }
@@ -120,7 +136,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
 
       router.push(canSeparate && separate ? routes.farm(search) : routes.report(search));
     },
-    [area, canSeparate, cropId, date, parcelIds, router, separate, today],
+    [area, canSeparate, cropId, date, parcelIds, router, separate, t, toast, today],
   );
 
   return (
@@ -137,19 +153,15 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
       {parcelIds.length > 0 && <input type="hidden" name="dzialki" value={parcelIds.join(',')} />}
       {area?.obszar && <input type="hidden" name="obszar" value={area.obszar} />}
       {area?.obszar && area.rodzaj && <input type="hidden" name="rodzaj" value={area.rodzaj} />}
-      <div className="flex flex-col gap-2">
+      <div ref={cropAreaRef} className="scroll-mt-4">
         <CropPicker
           name="uprawa"
           value={cropId}
           onChange={chooseCrop}
           invalid={cropMissing}
           errorId={cropErrorId}
+          error={cropMissing ? t('cropMissing') : null}
         />
-        {cropMissing && (
-          <p id={cropErrorId} className="text-base font-medium text-destructive">
-            {t('cropMissing')}
-          </p>
-        )}
       </div>
       {canSeparate && (
         <fieldset className="flex flex-col gap-2" data-testid="analysis-mode">
@@ -189,7 +201,10 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
           />
           {today ? t('todayOption', { date: todayLabel }) : t('today')}
         </label>
-        <div className="flex flex-col gap-2 rounded-xl border-2 border-input px-4 py-3 has-checked:border-accent">
+        <div
+          ref={dateAreaRef}
+          className="flex flex-col gap-2 rounded-xl border-2 border-input px-4 py-3 has-checked:border-accent"
+        >
           <label className="flex min-h-11 cursor-pointer items-center gap-3 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring">
             <input
               type="radio"

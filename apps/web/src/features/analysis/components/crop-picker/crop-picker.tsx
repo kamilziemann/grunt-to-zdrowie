@@ -13,6 +13,8 @@ export interface CropPickerProps {
   /** id komunikatu bledu pod lista (aria-describedby) */
   errorId?: string;
   invalid?: boolean;
+  /** komunikat bledu - zaraz pod pytaniem, zeby po przewinieciu do grupy bylo go widac nad pigulkami */
+  error?: string | null;
 }
 
 /** Najczestsze uprawy w Polsce najpierw (zboza, kukurydza, rzepak, laki), potem rzadsze. */
@@ -41,7 +43,14 @@ const ORDER: readonly CropId[] = [...COMMON_FIRST, ...CROP_IDS.filter((id) => !C
  * "Co rosnie na dzialce?": wszystkie uprawy z katalogu jako pigulki 48 px (najczestsze pierwsze), pod spodem
  * przyklady wybranej uprawy. Natywne radio - klawiatura (strzalki) i czytnik ekranu dzialaja bez dodatkowego kodu.
  */
-export function CropPicker({ value, onChange, name, errorId, invalid = false }: CropPickerProps) {
+export function CropPicker({
+  value,
+  onChange,
+  name,
+  errorId,
+  invalid = false,
+  error = null,
+}: CropPickerProps) {
   const t = useTranslations('analysis');
   const examplesId = useId();
   const handleChange = useCallback(
@@ -60,6 +69,11 @@ export function CropPicker({ value, onChange, name, errorId, invalid = false }: 
       aria-invalid={invalid || undefined}
     >
       <legend className="mb-3 text-lg font-medium">{t('form.cropLegend')}</legend>
+      {error && (
+        <p id={errorId} className="-mt-1 text-base font-medium text-destructive">
+          {error}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         {ORDER.map((cropId) => {
           const checked = value === cropId;
@@ -69,7 +83,7 @@ export function CropPicker({ value, onChange, name, errorId, invalid = false }: 
               key={cropId}
               data-crop={cropId}
               className={cn(
-                'inline-flex min-h-12 cursor-pointer items-center gap-1.5 rounded-full border-2 px-4 py-1.5 text-base transition-colors select-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
+                'relative inline-flex min-h-12 cursor-pointer items-center gap-1.5 rounded-full border-2 px-4 py-1.5 text-base transition-colors select-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
                 checked
                   ? 'border-accent bg-accent font-semibold text-accent-foreground'
                   : 'border-input hover:border-foreground',

@@ -4,6 +4,8 @@
     "description": "Wybierz uprawę i dzień, dla którego sprawdzimy wodę na polu.",
     "cropLegend": "Co rośnie na działce?",
     "cropMissing": "Wybierz uprawę, żeby przejść dalej.",
+    "cropMissingToast": "Wybierz uprawę, żeby policzyć wynik",
+    "dateErrorToast": "Popraw dzień analizy, żeby policzyć wynik",
     "dateLabel": "Dzień analizy",
     "dateHint": "Domyślnie dziś. Możesz wybrać dowolny dzień od {min}.",
     "today": "Dziś",

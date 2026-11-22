@@ -13,3 +13,22 @@ afterEach(() => {
 
 // Komponenty renderuja sie w testach bez routera TanStack: nawigacja aplikacji to dubel (src/test/navigation-double).
 vi.mock('@/lib/navigation', () => import('./src/test/navigation-double'));
+
+// jsdom nie ma `matchMedia` ani `scrollIntoView` - komponenty wolaja je w przegladarce (uklad, przewiniecie do bledu).
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }),
+  });
+  Element.prototype.scrollIntoView = () => undefined;
+}

@@ -1,7 +1,9 @@
 import { fireEvent, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithIntl, translator } from '@/test/render-intl';
+import { ToastProvider } from '@/components/ui/toast';
+import { renderWithIntl as renderIntl, translator } from '@/test/render-intl';
 
 import { AnalysisForm } from './analysis-form';
 
@@ -13,6 +15,12 @@ vi.mock('@/lib/navigation', async () => ({
 }));
 
 const t = translator('analysis');
+
+// formularz zglasza blad tez powiadomieniem - jak w powloce aplikacji, dostawca powiadomien nad formularzem
+function renderWithIntl(ui: ReactElement) {
+  return renderIntl(<ToastProvider>{ui}</ToastProvider>);
+}
+
 const ID = '141201_1.0001.6509';
 const IDS = [ID];
 
@@ -33,6 +41,20 @@ describe('AnalysisForm', () => {
 
     expect(screen.getByText(t('form.cropMissing'))).toBeInTheDocument();
     expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it('bez uprawy: fokus w grupie upraw, komunikat powiazany z grupa i powiadomienie', () => {
+    renderWithIntl(<AnalysisForm parcelIds={IDS} />);
+    fireEvent.click(screen.getByRole('button', { name: t('form.submit') }));
+
+    const group = screen.getByRole('group', { name: t('form.cropLegend') });
+    const message = screen.getByText(t('form.cropMissing'));
+
+    expect(group).toContainElement(
+      document.activeElement instanceof HTMLElement ? document.activeElement : null,
+    );
+    expect(group).toHaveAttribute('aria-describedby', expect.stringContaining(message.id));
+    expect(screen.getByText(t('form.cropMissingToast'))).toBeInTheDocument();
   });
 
   it('domyslnie dzis; uprawa + Analizuj prowadzi do raportu z parametrami w adresie', () => {

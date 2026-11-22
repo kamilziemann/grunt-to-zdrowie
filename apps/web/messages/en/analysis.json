@@ -4,6 +4,8 @@
     "description": "Choose the crop and the day for which we check water on the field.",
     "cropLegend": "What grows on the parcel?",
     "cropMissing": "Choose a crop to continue.",
+    "cropMissingToast": "Choose a crop to get the result",
+    "dateErrorToast": "Fix the analysis day to get the result",
     "dateLabel": "Analysis day",
     "dateHint": "Today by default. You can choose any day from {min}.",
     "today": "Today",

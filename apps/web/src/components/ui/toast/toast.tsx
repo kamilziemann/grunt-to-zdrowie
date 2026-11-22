@@ -1,4 +1,6 @@
-// Prosty toaster w duchu sonner: kontekst + lista komunikatow znikajacych po kilku sekundach.
+// Prosty toaster w duchu sonner: kontekst + lista komunikatow znikajacych po kilku sekundach. Jeden region
+// `aria-live` w powloce (zawsze w DOM, zeby czytniki ogloszaly nowe wpisy), bez przejmowania fokusu. Na telefonie
+// u gory ekranu - na dole stoja przyklejone glowne przyciski, ktorych powiadomienie nie moze zaslonic.
 import { CircleCheck, CircleX, Info, X } from 'lucide-react';
 import { useTranslations } from 'use-intl';
 import {
@@ -50,15 +52,35 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
+  const itemsRef = useRef(items);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
   const toast = useCallback(
     (input: ToastInput) => {
+      const variant = input.variant ?? 'default';
+      const duration = input.duration ?? (variant === 'error' ? 8000 : 5000);
+      // ten sam komunikat drugi raz (np. ponowne "Analizuj" bez uprawy) nie dokleja kopii - tylko wydluza czas
+      const same = itemsRef.current.find((item) => item.title === input.title && item.variant === variant);
+
+      if (same) {
+        clearTimeout(timers.current.get(same.id));
+        timers.current.set(
+          same.id,
+          setTimeout(() => dismiss(same.id), duration),
+        );
+
+        return same.id;
+      }
+
       counter += 1;
       const id = counter;
-      const variant = input.variant ?? 'default';
+      const item = { ...input, id, variant };
 
-      setItems((prev) => [...prev, { ...input, id, variant }]);
-      const duration = input.duration ?? (variant === 'error' ? 8000 : 5000);
-
+      itemsRef.current = [...itemsRef.current, item];
+      setItems((prev) => [...prev, item]);
       timers.current.set(
         id,
         setTimeout(() => dismiss(id), duration),
@@ -99,17 +121,20 @@ export function useToast(): ToastApi {
 const ICONS = { default: Info, success: CircleCheck, error: CircleX } as const;
 
 function ToastViewport({ items, onDismiss }: { items: ToastItem[]; onDismiss: (id: number) => void }) {
-  if (items.length === 0) return null;
+  const t = useTranslations('common');
 
+  // region jest zawsze w DOM (pusty tez): czytnik oglasza tylko zmiany w regionie, ktory juz istnial
   return (
-    <div
+    <ol
       aria-live="polite"
-      className="pointer-events-none fixed right-4 bottom-4 z-100 flex w-full max-w-sm flex-col gap-2"
+      aria-label={t('notifications')}
+      className="pointer-events-none fixed inset-x-4 top-[max(0.75rem,env(safe-area-inset-top))] z-100 flex flex-col gap-2 md:top-auto md:right-4 md:bottom-4 md:left-auto md:w-full md:max-w-sm"
+      data-testid="toasts"
     >
       {items.map((item) => (
         <ToastCard key={item.id} item={item} onDismiss={onDismiss} />
       ))}
-    </div>
+    </ol>
   );
 }
 
@@ -119,22 +144,23 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
   const close = useCallback(() => onDismiss(item.id), [onDismiss, item.id]);
 
   return (
-    <output
+    <li
       className={cn(
-        'pointer-events-auto flex items-start gap-3 rounded-lg border bg-popover p-3 text-sm text-popover-foreground shadow-md animate-in fade-in-0 slide-in-from-bottom-2',
+        'pointer-events-auto flex items-start gap-3 rounded-lg border bg-popover py-1 pr-1 pl-3 text-sm text-popover-foreground shadow-md animate-in fade-in-0 slide-in-from-top-2 motion-reduce:animate-none md:slide-in-from-bottom-2',
         item.variant === 'error' && 'border-destructive/40',
         item.variant === 'success' && 'border-success/40',
       )}
     >
       <Icon
+        aria-hidden="true"
         className={cn(
-          'mt-0.5 size-4 shrink-0',
+          'mt-3.5 size-4 shrink-0',
           item.variant === 'error' && 'text-destructive',
           item.variant === 'success' && 'text-success',
           item.variant === 'default' && 'text-primary',
         )}
       />
-      <div className="flex-1">
+      <div className="flex-1 py-2.5">
         <p className="font-medium">{item.title}</p>
         {item.description && <p className="mt-0.5 text-muted-foreground">{item.description}</p>}
       </div>
@@ -142,10 +168,10 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
         type="button"
         onClick={close}
         aria-label={t('closeNotification')}
-        className="rounded-sm opacity-60 hover:opacity-100"
+        className="grid size-11 shrink-0 place-items-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-3 focus-visible:outline-solid focus-visible:outline-ring"
       >
-        <X className="size-4" />
+        <X aria-hidden="true" className="size-4" />
       </button>
-    </output>
+    </li>
   );
 }
