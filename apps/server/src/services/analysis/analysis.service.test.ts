@@ -55,6 +55,25 @@ describe('analysis service', () => {
     ]);
   });
 
+  it('dzialka z przeterminowanej pamieci: zrodlo ma date zapisu i jedno zdanie o tym', async () => {
+    const remembered = {
+      ...referenceParcelSource,
+      byId: async (id: string) => {
+        const record = await referenceParcelSource.byId(id);
+
+        return record && { ...record, fetchedAt: '2026-09-30T06:00:00.000Z', stale: true };
+      },
+    };
+    const parcels = createParcelsService({ source: remembered, outlines: emptyOutlineSource, now });
+    const report = await service({}, { parcels }).analyze(request('2026-07-20'));
+    const parcel = report.sources.find((source) => source.id === 'parcel');
+
+    expect(parcel).toMatchObject({ status: 'ok', fetchedAt: '2026-09-30T06:00:00.000Z' });
+    expect(parcel?.note).toBe(
+      'Granice działki z zapisu z 2026-09-30: GUGiK nie odpowiedział, więc mogły się od tego czasu zmienić.',
+    );
+  });
+
   it('wlasciwe etapy: ocena i historia z danych, raport mowi, ktore czesci i zrodla sa przykladowe', async () => {
     const report = await service({}, { stages: engineStages }).analyze(request('2026-07-20'));
 

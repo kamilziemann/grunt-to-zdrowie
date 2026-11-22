@@ -50,7 +50,9 @@ export function createParcelsService({ source, outlines, now }: ParcelsServiceDe
       // 4 miejsca po przecinku = 1 m2; dalsze cyfry bylyby pozorna precyzja
       areaHa: Math.round(areaSquareMeters(record.geometry)) / SQUARE_METERS_PER_HECTARE,
       source: record.origin,
-      fetchedAt: now(),
+      // data z pamieci dzialek mowi, kiedy GUGiK naprawde oddal granice; rekord prosto ze zrodla = teraz
+      fetchedAt: record.fetchedAt ?? now(),
+      ...(record.stale ? { stale: true } : {}),
       // klasouzytki i powierzchnia ewidencyjna sa tylko w rekordzie z WFS ewidencji (ULDK ich nie podaje)
       ...(record.registryAreaHa === undefined ? {} : { registryAreaHa: record.registryAreaHa }),
       ...(record.landUse === undefined ? {} : { landUse: record.landUse }),

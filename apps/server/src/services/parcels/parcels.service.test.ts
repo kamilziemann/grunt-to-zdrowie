@@ -64,6 +64,17 @@ describe('parcels service', () => {
     expect(parcel.centroid[0]).toBeCloseTo(21.000728, 5);
   });
 
+  it('dzialka z pamieci niesie date pobrania z GUGiK i znacznik przeterminowania', async () => {
+    const remembered = { ...RECORD, fetchedAt: '2026-10-01T08:00:00.000Z', stale: true };
+    const source = fakeSource({ byId: () => Promise.resolve(remembered) });
+    const parcel = await createParcelsService({ source, outlines, now }).get(RECORD.id);
+
+    expect(parcel).toMatchObject({ fetchedAt: '2026-10-01T08:00:00.000Z', stale: true });
+    expect((await createParcelsService({ source: fakeSource(), outlines, now }).get(RECORD.id)).stale).toBe(
+      undefined,
+    );
+  });
+
   it('brak dzialki = not_found', async () => {
     const service = createParcelsService({ source: fakeSource(), outlines, now });
 

@@ -53,7 +53,10 @@ export const parcelSchema = parcelCandidateSchema.extend({
   areaHa: z.number(),
   /** skad pochodzi geometria: ULDK (podstawowe) albo zbiorcza usluga WFS ewidencji gruntow (zapasowe) */
   source: z.enum(['uldk', 'egib-wfs']),
+  /** kiedy GUGiK oddal te granice (ISO 8601); dla dzialki z pamieci - data zapisu, nie biezacego zapytania */
   fetchedAt: z.string(),
+  /** granice z pamieci po terminie waznosci, oddane, bo GUGiK nie odpowiedzial */
+  stale: z.boolean().optional(),
   /** powierzchnia ewidencyjna z EGiB (ha), gdy zrodlo ja podaje (WFS ewidencji; ULDK nie) */
   registryAreaHa: z.number().optional(),
   /** klasouzytki EGiB, np. ["RIVb", "ŁV"] albo ["dr"], gdy zrodlo je podaje (WFS ewidencji; ULDK nie) */

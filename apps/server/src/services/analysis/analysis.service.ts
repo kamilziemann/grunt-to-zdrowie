@@ -88,6 +88,11 @@ const PARCEL_PROVIDERS: Record<Parcel['source'], string> = {
   'egib-wfs': 'GUGiK EGiB (WFS)',
 };
 
+/** Jedno zdanie do zrodla dzialki, gdy granice pochodza z przeterminowanej pamieci (GUGiK nie odpowiedzial). */
+function staleParcelNote(fetchedAt: string): string {
+  return `Granice działki z zapisu z ${fetchedAt.slice(0, 10)}: GUGiK nie odpowiedział, więc mogły się od tego czasu zmienić.`;
+}
+
 export interface AnalysisServiceDeps {
   parcels: ParcelLookup;
   sources: DataSources;
@@ -230,6 +235,7 @@ export function createAnalysisService({
 
     const found = await Promise.all([...new Set(input.parcelIds)].map((id) => parcels.get(id)));
     const [first] = found;
+    const stale = found.find((parcel) => parcel.stale);
 
     return {
       parcels: found,
@@ -240,6 +246,7 @@ export function createAnalysisService({
         status: 'ok',
         sample: false,
         ...(first ? { fetchedAt: first.fetchedAt } : {}),
+        ...(stale ? { note: staleParcelNote(stale.fetchedAt) } : {}),
       },
     };
   }
