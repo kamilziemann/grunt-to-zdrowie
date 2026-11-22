@@ -105,7 +105,7 @@ ostatnie dni 3 godziny), raport „na dziś” liczy się od nowa po dobie. Meto
 - **Porównanie z ogłoszeniami IUNG** ([`docs/validation.md`](docs/validation.md)): 21 przypadków z Systemu
   Monitoringu Suszy Rolniczej IUNG-PIB (8 z suszą, 13 bez), liczone przez prawdziwe API skryptem
   `apps/server/scripts/validate-iung.ts`. Zgodność poziomu 21/21, zgodność KBW 20/21, werdykty dla czterech kategorii
-  gleby 60/64. Ostatnia powtórka na silniku 0.8.5 (22.11.2026): tabela bez zmian. Wersje 0.8.1–0.8.5 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
+  gleby 60/64. Ostatnia powtórka na silniku 0.8.8 (22.11.2026): tabela bez zmian. Wersje 0.8.1–0.8.8 zmieniły pewność, zaokrąglenia, odczyt satelity wg uprawy, przyczyny i
   zalecenia poza sezonem, nie rachunek oceny.
 - **Progi i wzory ze źródłem**: 784 wartości progów KBW porównane ze stroną IUNG; bilans FAO-56 odtwarza przykłady
   37 i 38 z publikacji FAO-56 (test jednostkowy).
