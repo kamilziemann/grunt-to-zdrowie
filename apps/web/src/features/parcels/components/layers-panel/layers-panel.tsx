@@ -1,16 +1,5 @@
-import {
-  Bird,
-  Dam,
-  Grid2x2,
-  Layers,
-  Map as MapIcon,
-  Satellite,
-  Trees,
-  Waves,
-  X,
-  type LucideIcon,
-} from 'lucide-react';
-import { useCallback, useEffect, useId, useRef, type ChangeEvent, type ReactNode } from 'react';
+import { Bird, Dam, Grid2x2, Layers, Trees, Waves, X, type LucideIcon } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, type ChangeEvent } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { cn } from '@/lib/utils/cn';
@@ -26,11 +15,6 @@ const WATER_ITEMS: readonly { layer: ToggleLayer; Icon: LucideIcon }[] = [
   { layer: 'waterworks', Icon: Dam },
   { layer: 'protected', Icon: Bird },
 ];
-
-const BASEMAPS = [
-  { basemap: 'map', Icon: MapIcon },
-  { basemap: 'ortho', Icon: Satellite },
-] as const;
 
 const ROW =
   'flex min-h-11 cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors has-focus-visible:ring-2 has-focus-visible:ring-ring/60 [@media(hover:hover)]:hover:bg-muted';
@@ -91,70 +75,36 @@ function ToggleItem({ layer, Icon, checked, onChange, className }: ToggleItemPro
   );
 }
 
-interface BasemapItemProps {
-  basemap: MapLayers['basemap'];
-  Icon: LucideIcon;
-  name: string;
-  checked: boolean;
-  onChange: (patch: Partial<MapLayers>) => void;
-}
-
-function BasemapItem({ basemap, Icon, name, checked, onChange }: BasemapItemProps) {
-  const t = useTranslations('parcels.map.layers.items');
-  const id = useId();
-  const choose = useCallback(() => onChange({ basemap }), [onChange, basemap]);
-
-  return (
-    <label className={ROW}>
-      <input
-        type="radio"
-        name={name}
-        value={basemap}
-        checked={checked}
-        onChange={choose}
-        aria-labelledby={`${id}-label`}
-        aria-describedby={`${id}-hint`}
-        className={INPUT}
-      />
-      <ItemText Icon={Icon} label={t(`${basemap}.label`)} hint={t(`${basemap}.hint`)} id={id} />
-    </label>
-  );
-}
-
 export interface LayersPanelProps {
-  /** panel rozwiniety (stan w ekranie: wybor zdjecia z satelity na telefonie zamyka panel, zeby bylo widac pole) */
+  /** panel rozwiniety (stan w ekranie mapy) */
   open: boolean;
   onOpenChange: (open: boolean) => void;
   layers: MapLayers;
   onChange: (patch: Partial<MapLayers>) => void;
-  /** grupa "Zdjecie z satelity" (przelacznik obrazu z wlasnym stanem i wyborem miesiaca) */
-  children?: ReactNode;
   className?: string;
 }
 
-/** Wspolny wyglad tytulu grupy (takze w przelaczniku zdjecia z satelity). */
-export const LAYER_GROUP_LEGEND =
-  'mb-1 px-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase';
+/** Wspolny wyglad tytulu grupy. */
+const LAYER_GROUP_LEGEND = 'mb-1 px-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase';
 
 /** Ile warstw nad podkladem jest wlaczonych (liczba na przycisku). */
 export function activeLayerCount(layers: MapLayers): number {
   const toggles: ToggleLayer[] = ['boundaries', 'hydro', 'cover', 'waterworks', 'protected'];
 
-  return toggles.filter((layer) => layers[layer]).length + (layers.imagery === 'none' ? 0 : 1);
+  return toggles.filter((layer) => layers[layer]).length;
 }
 
 /**
- * Jedno miejsce na warstwy mapy: przycisk "Warstwy" przy mapie rozwija panel z grupami Podklad, Woda i otoczenie,
- * Zdjecie z satelity; kazda pozycja ma jedno zdanie "co tu zobacze". Panel nie jest modalny - zmiana warstwy od
- * razu widac na mapie pod nim. Zamyka go Escape (fokus wraca na przycisk), klikniecie poza panelem albo krzyzyk.
+ * Warstwy nakladane na mape: przycisk "Warstwy" przy mapie rozwija panel z grupami Dzialki oraz Woda i otoczenie;
+ * kazda pozycja ma jedno zdanie "co tu zobacze". Podklad (mapa / zdjecie lotnicze) i zdjecie z satelity maja
+ * wlasne przyciski obok. Panel nie jest modalny - zmiane warstwy od razu widac na mapie pod nim. Zamyka go Escape (fokus wraca na przycisk), klikniecie poza panelem albo krzyzyk.
  */
-export function LayersPanel({ open, onOpenChange, layers, onChange, children, className }: LayersPanelProps) {
+export function LayersPanel({ open, onOpenChange, layers, onChange, className }: LayersPanelProps) {
   const t = useTranslations('parcels.map.layers');
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const titleId = useId();
-  const basemapName = useId();
   const count = activeLayerCount(layers);
 
   const toggleOpen = useCallback(() => onOpenChange(!open), [onOpenChange, open]);
@@ -228,24 +178,8 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, children, cl
         </header>
         <div className="flex flex-col gap-4 overflow-y-auto overscroll-contain p-3">
           <fieldset className="flex min-w-0 flex-col gap-0.5">
-            <legend className={LAYER_GROUP_LEGEND}>{t('groups.base')}</legend>
-            {BASEMAPS.map(({ basemap, Icon }) => (
-              <BasemapItem
-                key={basemap}
-                basemap={basemap}
-                Icon={Icon}
-                name={basemapName}
-                checked={layers.basemap === basemap}
-                onChange={onChange}
-              />
-            ))}
-            <ToggleItem
-              layer="boundaries"
-              Icon={Grid2x2}
-              checked={layers.boundaries}
-              onChange={onChange}
-              className="mt-1 border-t pt-3"
-            />
+            <legend className={LAYER_GROUP_LEGEND}>{t('groups.parcels')}</legend>
+            <ToggleItem layer="boundaries" Icon={Grid2x2} checked={layers.boundaries} onChange={onChange} />
           </fieldset>
           <fieldset className="flex min-w-0 flex-col gap-0.5">
             <legend className={LAYER_GROUP_LEGEND}>{t('groups.water')}</legend>
@@ -253,7 +187,6 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, children, cl
               <ToggleItem key={layer} layer={layer} Icon={Icon} checked={layers[layer]} onChange={onChange} />
             ))}
           </fieldset>
-          <div className="px-2 pb-1">{children}</div>
         </div>
       </section>
     </div>

@@ -149,9 +149,8 @@
       "title": "Warstwy mapy",
       "close": "Zamknij warstwy",
       "groups": {
-        "base": "Podkład",
-        "water": "Woda i otoczenie",
-        "satellite": "Zdjęcie z satelity"
+        "parcels": "Działki",
+        "water": "Woda i otoczenie"
       },
       "items": {
         "map": {
@@ -183,7 +182,11 @@
           "hint": "Natura 2000, parki i rezerwaty – tu obowiązują dodatkowe zasady."
         }
       }
-    }
+    },
+    "basemap": {
+      "label": "Podkład mapy"
+    },
+    "legends": "Legendy mapy"
   },
   "sheet": {
     "expand": "Rozwiń panel",
@@ -342,7 +345,10 @@
         "condition": "Dla doradcy: NDVI z Sentinel-2 (pasma B04 i B08, piksel 10 m), skala {low}–{high}.",
         "moisture": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
       }
-    }
+    },
+    "button": "Satelita",
+    "buttonLabel": "Zdjęcie z satelity: {choice}",
+    "close": "Zamknij wybór zdjęcia"
   },
   "home": {
     "metaTitle": "Ocena suszy dla działki rolnej",

@@ -40,7 +40,11 @@ import { useFieldDraw, type FieldDrawMode, type SplitTarget } from '../../hooks/
 import { useMapLayers } from '../../hooks/use-map-layers';
 import { useContextKindLabels, useMapLabels } from '../../hooks/use-map-labels';
 import { useSelectedParcels, type SelectedParcel } from '../../hooks/use-selected-parcels';
-import { useVegetationImagery, type ImageryChoice } from '../../hooks/use-vegetation-imagery';
+import {
+  useVegetationImagery,
+  type ImageryChoice,
+  type ImageryState,
+} from '../../hooks/use-vegetation-imagery';
 import { validateParcelSearch, type ParcelSearchError } from '../../schemas/parcel-search.schema';
 import { todayInPoland } from '../../utils/imagery-months';
 import {
@@ -55,9 +59,11 @@ import { ContextLegend } from '../context-legend';
 import { FieldDrawEntry, FieldDrawHint, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
 import { MapIntro } from '../map-intro';
 import { HydroLegend } from '../hydro-legend';
+import { BasemapSwitch } from '../basemap-switch';
 import { ImageryLegend } from '../imagery-legend';
+import { ImageryPanel } from '../imagery-panel';
 import { ImagerySwitch } from '../imagery-switch';
-import { LAYER_GROUP_LEGEND, LayersPanel } from '../layers-panel';
+import { LayersPanel } from '../layers-panel';
 import { ParcelCandidates } from '../parcel-candidates';
 import { ParcelList } from '../parcel-list';
 import {
@@ -160,6 +166,7 @@ export function ParcelsScreen({
   const [hydroStatus, setHydroStatus] = useState<HydroStatus>(HYDRO_OFF);
   const [contextStatuses, setContextStatuses] = useState(CONTEXT_OFF);
   const [layersOpen, setLayersOpen] = useState(false);
+  const [imageryOpen, setImageryOpen] = useState(false);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
   const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 && !initialView ? 'half' : 'peek');
   const [hint, setHint] = useState<MapHint | null>(initialView ? 'pickHint' : null);
@@ -369,17 +376,22 @@ export function ParcelsScreen({
     [updateLayers],
   );
 
+  const hydroLegendShown = layers.hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom';
+  const imageryLegendShown = imageryChoice !== 'none' && imagery.state !== 'off';
+  const legendsShown = hydroLegendShown || contextShown || imageryLegendShown;
+  const imageryStatus = IMAGERY_BUTTON_STATUS[imagery.state];
+
   const onZoomTooLow = useCallback(() => showHint('zoomHint'), [showHint]);
 
   const chooseImagery = useCallback(
     (choice: ImageryChoice) => {
       updateLayers({ imagery: choice });
 
-      // na telefonie arkusz i panel warstw zaslaniaja mape - po wyborze chowamy oba, zeby bylo widac kolory na polu
+      // na telefonie arkusz i panel wyboru zaslaniaja mape - po wyborze chowamy oba, zeby bylo widac kolory na polu
       if (choice === 'none' || window.matchMedia(DESKTOP_QUERY).matches) return;
 
       setSnap('peek');
-      setLayersOpen(false);
+      setImageryOpen(false);
 
       // dojazd do pol: kolory maja stanac nad arkuszem i pod legenda, a nie pod nimi
       const box = unionBbox(selected.parcels);
@@ -491,32 +503,55 @@ export function ParcelsScreen({
           drawing && 'hidden',
         )}
       >
-        <LayersPanel open={layersOpen} onOpenChange={setLayersOpen} layers={layers} onChange={updateLayers}>
-          <ImagerySwitch
-            value={imageryChoice}
-            onChange={chooseImagery}
-            month={imageryMonth}
-            onMonthChange={setImageryMonth}
-            today={todayInPoland()}
-            enabled={ids.length > 0}
-            legendClassName={cn(LAYER_GROUP_LEGEND, 'px-0')}
+        {/* podklad i zdjecie z satelity maja wlasne przyciski - to najczestsze zmiany, nie chowamy ich w warstwach */}
+        <div className="flex flex-wrap items-start gap-2">
+          <BasemapSwitch value={layers.basemap} onChange={updateLayers} />
+          <LayersPanel
+            open={layersOpen}
+            onOpenChange={setLayersOpen}
+            layers={layers}
+            onChange={updateLayers}
           />
-        </LayersPanel>
-        {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
-        {layers.hydro && hydroStatus.state !== 'off' && hydroStatus.state !== 'zoom' && (
-          <HydroLegend status={hydroStatus} />
-        )}
-        {contextShown && <ContextLegend enabled={context} statuses={contextStatuses} />}
-        {imageryChoice !== 'none' && imagery.state !== 'off' && (
-          <ImageryLegend
-            layer={imageryChoice}
-            state={imagery.state}
-            data={imagery.data}
-            requestedDate={imagery.requestedDate}
-            onRetry={imagery.retry}
-          />
-        )}
+          <ImageryPanel
+            open={imageryOpen}
+            onOpenChange={setImageryOpen}
+            value={ids.length > 0 ? imageryChoice : 'none'}
+            status={imageryStatus}
+          >
+            <ImagerySwitch
+              value={imageryChoice}
+              onChange={chooseImagery}
+              month={imageryMonth}
+              onMonthChange={setImageryMonth}
+              today={todayInPoland()}
+              enabled={ids.length > 0}
+              legendClassName="sr-only"
+            />
+          </ImageryPanel>
+        </div>
       </div>
+
+      {/* legendy stoja osobno od przyciskow, w przewijanej kolumnie: rozwiniete wszystkie naraz dalej widac w calosci */}
+      {legendsShown && !drawing && (
+        <aside
+          aria-label={t('map.legends')}
+          className="absolute top-31 left-3 z-10 flex max-h-[calc(100cqh-22rem)] w-72 max-w-[calc(100%-4.5rem)] flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg p-0.5 md:top-auto md:bottom-10 md:left-106 md:max-h-[calc(100cqh-8rem)]"
+          data-testid="map-legends"
+        >
+          {/* przy oddalonej mapie warstwa nic nie pokazuje - legenda tylko by zaslaniala (podpowiedz ma przelacznik) */}
+          {hydroLegendShown && <HydroLegend status={hydroStatus} />}
+          {contextShown && <ContextLegend enabled={context} statuses={contextStatuses} />}
+          {imageryLegendShown && (
+            <ImageryLegend
+              layer={imageryChoice}
+              state={imagery.state}
+              data={imagery.data}
+              requestedDate={imagery.requestedDate}
+              onRetry={imagery.retry}
+            />
+          )}
+        </aside>
+      )}
 
       {drawing && (
         // podpowiedz "co teraz" u gory mapy (obok przyciskow przyblizenia) - rysowane miejsce zostaje odsloniete
@@ -696,3 +731,14 @@ export function ParcelsScreen({
     </div>
   );
 }
+
+/** Stan pobierania obrazu z satelity pokazany na przycisku "Satelita" (legenda bywa zwinieta albo poza ekranem). */
+const IMAGERY_BUTTON_STATUS: Record<ImageryState, 'idle' | 'loading' | 'problem'> = {
+  off: 'idle',
+  ready: 'idle',
+  loading: 'loading',
+  noClearScene: 'problem',
+  notConfigured: 'problem',
+  busy: 'problem',
+  failed: 'problem',
+};

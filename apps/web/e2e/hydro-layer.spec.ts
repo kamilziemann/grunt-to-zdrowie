@@ -52,9 +52,7 @@ test.describe('rowy i cieki na mapie', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('jeden przycisk „Warstwy” nad legendą, legenda zwinięta, bez poziomego przewijania', async ({
-      page,
-    }) => {
+    test('przyciski mapy nad legendą, legenda zwinięta, bez poziomego przewijania', async ({ page }) => {
       await mockHydroApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
 

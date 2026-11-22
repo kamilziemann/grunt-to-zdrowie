@@ -2,7 +2,7 @@ import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { CONTEXT_TILES, mockContextApi } from './support/context-api';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
-import { openLayers, setLayer, waitForMap } from './support/map-services';
+import { basemapButton, openLayers, setLayer, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
 
@@ -32,12 +32,11 @@ test.describe('warstwy otoczenia pola', () => {
 
     const panel = page.getByTestId('layers-panel');
 
-    // grupy panelu i domyslny zestaw: mapa, granice i rowy wlaczone, reszta wylaczona
-    await expect(panel.getByRole('group')).toHaveText([
-      /^Podkład/,
-      /^Woda i otoczenie/,
-      /^Zdjęcie z satelity/,
-    ]);
+    // grupy panelu i domyslny zestaw: granice i rowy wlaczone, reszta wylaczona; podklad i zdjecie z satelity
+    // maja wlasne przyciski przy mapie
+    await expect(panel.getByRole('group')).toHaveText([/^Działki/, /^Woda i otoczenie/]);
+    await expect(page.getByTestId('basemap-switch')).toBeVisible();
+    await expect(page.getByTestId('imagery-button')).toBeVisible();
     await expect(panel.getByRole('checkbox', { name: 'Granice działek' })).toBeChecked();
     await expect(panel.getByRole('checkbox', { name: 'Rowy i cieki' })).toBeChecked();
     await expect(panel.getByRole('checkbox', { name: 'Drzewa' })).not.toBeChecked();
@@ -105,8 +104,8 @@ test.describe('warstwy otoczenia pola', () => {
     await waitForMap(page);
     await setLayer(page, 'Obszary chronione', true);
     await setLayer(page, 'Rowy i cieki', false);
-    await page.getByTestId('layers-panel').getByRole('radio', { name: 'Zdjęcie lotnicze' }).check();
     await page.keyboard.press('Escape');
+    await basemapButton(page, 'Zdjęcie lotnicze').click();
 
     await page.getByRole('link', { name: /Analizuj/ }).click();
     await expect(page).toHaveURL(/\/analiza/);
@@ -118,7 +117,7 @@ test.describe('warstwy otoczenia pola', () => {
 
     await expect(panel.getByRole('checkbox', { name: 'Obszary chronione' })).toBeChecked();
     await expect(panel.getByRole('checkbox', { name: 'Rowy i cieki' })).not.toBeChecked();
-    await expect(panel.getByRole('radio', { name: 'Zdjęcie lotnicze' })).toBeChecked();
+    await expect(basemapButton(page, 'Zdjęcie lotnicze')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByTestId('hydro-legend')).toHaveCount(0);
   });
 

@@ -149,9 +149,8 @@
       "title": "Map layers",
       "close": "Close layers",
       "groups": {
-        "base": "Base map",
-        "water": "Water and surroundings",
-        "satellite": "Satellite image"
+        "parcels": "Parcels",
+        "water": "Water and surroundings"
       },
       "items": {
         "map": {
@@ -183,7 +182,11 @@
           "hint": "Natura 2000, parks and reserves – extra rules apply here."
         }
       }
-    }
+    },
+    "basemap": {
+      "label": "Base map"
+    },
+    "legends": "Map legends"
   },
   "sheet": {
     "expand": "Expand panel",
@@ -342,7 +345,10 @@
         "condition": "For advisors: NDVI from Sentinel-2 (bands B04 and B08, 10 m pixel), scale {low}–{high}.",
         "moisture": "For advisors: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
       }
-    }
+    },
+    "button": "Satellite",
+    "buttonLabel": "Satellite image: {choice}",
+    "close": "Close image choice"
   },
   "home": {
     "metaTitle": "Drought check for a farm parcel",

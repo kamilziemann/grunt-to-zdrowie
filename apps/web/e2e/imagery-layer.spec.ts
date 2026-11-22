@@ -4,12 +4,12 @@ import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
 import { mockImageryApi } from './support/imagery-api';
-import { openLayers } from './support/map-services';
+import { openImagery } from './support/map-services';
 import { expect, test } from './support/test';
 
-/** Wybor warstwy w panelu "Warstwy" klikiem w etykiete (radio jest ukryte wizualnie, jak w grupie przelacznikow). */
+/** Wybor obrazu w panelu "Satelita" klikiem w etykiete (radio jest ukryte wizualnie, jak w grupie przelacznikow). */
 async function chooseLayer(page: Page, name: string) {
-  await openLayers(page);
+  await openImagery(page);
   await page.getByTestId('imagery-switch').getByText(name, { exact: true }).click();
   await expect(page.getByRole('radio', { name })).toBeChecked();
   // panel lezy nad legendami - zamykamy go jak rolnik (Escape), zeby siegnac legendy
@@ -30,7 +30,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
     const imagery = await mockImageryApi(page);
 
     await page.goto('/mapa');
-    await openLayers(page);
+    await openImagery(page);
 
     const group = page.getByRole('group', { name: 'Zdjęcie z satelity' });
 
@@ -79,7 +79,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
 
     // wybrany miesiac = ostatni dzien miesiaca w zapytaniu
     await chooseLayer(page, 'Kondycja roślin');
-    await openLayers(page);
+    await openImagery(page);
     await page.getByLabel('Z kiedy').selectOption({ label: 'czerwiec 2018' });
     await page.keyboard.press('Escape');
     await expect(legend).toHaveAttribute('data-imagery-state', 'ready');
@@ -108,7 +108,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
     await expect(legend.getByRole('status')).toContainText('Brak czystego zdjęcia');
 
     imagery.respondWith({ kind: 'problem', status: 502, code: 'upstream_failed' });
-    await openLayers(page);
+    await openImagery(page);
     await page.getByLabel('Z kiedy').selectOption({ label: 'czerwiec 2018' });
     await page.keyboard.press('Escape');
     await expect(legend).toHaveAttribute('data-imagery-state', 'busy');
@@ -122,14 +122,14 @@ test.describe('zdjęcie z satelity na mapie', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('wybór w panelu warstw chowa panel, legenda mieści się na mapie, bez poziomego przewijania', async ({
+    test('wybór zdjęcia chowa panel, legenda mieści się na mapie, bez poziomego przewijania', async ({
       page,
     }) => {
       await mockImageryApi(page);
       await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
-      await openLayers(page);
+      await openImagery(page);
       await page.getByTestId('imagery-switch').getByText('Woda w roślinach', { exact: true }).click();
-      await expect(page.getByTestId('layers-panel')).toBeHidden();
+      await expect(page.getByTestId('imagery-panel')).toBeHidden();
 
       const legend = page.getByTestId('imagery-legend');
 

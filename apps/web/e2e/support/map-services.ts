@@ -32,6 +32,19 @@ export async function openLayers(page: Page): Promise<void> {
   await expect(page.getByTestId('layers-panel')).toBeVisible();
 }
 
+/** Otwiera panel wyboru zdjecia z satelity (przycisk "Satelita" przy mapie), jesli jest zamkniety. */
+export async function openImagery(page: Page): Promise<void> {
+  const button = page.getByTestId('imagery-button');
+
+  if ((await button.getAttribute('aria-expanded')) !== 'true') await button.click();
+  await expect(page.getByTestId('imagery-panel')).toBeVisible();
+}
+
+/** Przycisk podkladu mapy ("Mapa" albo "Zdjęcie lotnicze") w przelaczniku przy mapie. */
+export function basemapButton(page: Page, name: 'Mapa' | 'Zdjęcie lotnicze') {
+  return page.getByTestId('basemap-switch').getByRole('button', { name, exact: true });
+}
+
 /** Ustawia pole wyboru warstwy w panelu "Warstwy" (otwiera panel, jesli trzeba). */
 export async function setLayer(page: Page, name: string, on: boolean): Promise<void> {
   await openLayers(page);

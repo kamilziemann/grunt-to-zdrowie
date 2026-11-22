@@ -1,5 +1,5 @@
 import { mockAnalysisApi } from './support/analysis-api';
-import { mockMapServices, openLayers, waitForMap } from './support/map-services';
+import { basemapButton, mockMapServices, waitForMap } from './support/map-services';
 import { expectTouchTargets } from './support/touch-targets';
 import { expect, test } from './support/test';
 import { expectNoZoomFont } from './support/font-size';
@@ -88,18 +88,17 @@ test.describe('działki', () => {
     expect(requests).toEqual([]);
   });
 
-  test('podkład w panelu warstw: zdjęcie lotnicze zamiast mapy', async ({ page }) => {
+  test('podkład przy mapie: zdjęcie lotnicze zamiast mapy', async ({ page }) => {
     await page.goto('/mapa');
     await waitForMap(page);
-    await openLayers(page);
 
-    const base = page.getByRole('group', { name: 'Podkład' });
-    const photo = base.getByRole('radio', { name: 'Zdjęcie lotnicze' });
+    const map = basemapButton(page, 'Mapa');
+    const photo = basemapButton(page, 'Zdjęcie lotnicze');
 
-    await expect(base.getByRole('radio', { name: 'Mapa' })).toBeChecked();
-    await photo.check();
-    await expect(photo).toBeChecked();
-    await expect(base.getByRole('radio', { name: 'Mapa' })).not.toBeChecked();
+    await expect(map).toHaveAttribute('aria-pressed', 'true');
+    await photo.click();
+    await expect(photo).toHaveAttribute('aria-pressed', 'true');
+    await expect(map).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('pusta lista na ekranie analizy odsyła do mapy', async ({ page }) => {
