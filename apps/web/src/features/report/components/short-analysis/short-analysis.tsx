@@ -111,7 +111,7 @@ function useNumberSentence(report: WaterReport): string | null {
 }
 
 /**
- * Werdykt widoku prostego: jedno slowo z ikona, skala od mokro do bardzo sucho, zdanie z liczba i zdanie oceny.
+ * Werdykt na gorze raportu: jedno slowo z ikona, skala od mokro do bardzo sucho, zdanie z liczba i zdanie oceny.
  * Na komputerze ciemny panel na cala szerokosc: werdykt po lewej, krotka analiza w pieciu zdaniach po prawej (teraz,
  * 10 lat, dlaczego, co najpierw, pewnosc); na telefonie jasna karta - te same tresci sa w klockach ponizej. Na wydruku jasny panel z ramka i piecioma zdaniami.
  */

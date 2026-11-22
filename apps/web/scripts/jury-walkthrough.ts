@@ -1,5 +1,5 @@
 // Przejscie sciezki jury w Chromium, Firefoksie i WebKit (silnik Safari), na komputerze i telefonie: strona glowna ->
-// numer dzialki -> "Czy to Twoja dzialka?" -> uprawa i dzien -> liczenie -> raport (prosto, szczegolowo) -> wydruk;
+// numer dzialki -> "Czy to Twoja dzialka?" -> uprawa i dzien -> liczenie -> raport (jedna strona, potem rozwiniete szczegoly) -> wydruk;
 // do tego mapa (klik w dzialke), "Tylko czesc" (podzial linia) i panel "Warstwy". Na kazdym kroku zrzut ekranu
 // i notatka: blad strony, przewijanie w poziomie, stan mapy. Nie jest czescia e2e: woła prawdziwe uslugi (GUGiK ma
 // limit zapytan), wiec kombinacje ida jedna po drugiej, z przerwa. Raport policzony raz wraca z zapisu.
@@ -126,7 +126,7 @@ async function numberFlow(page: Page, combo: string, errors: string[]) {
     await page.waitForTimeout(500);
     await shot(page, combo, '08-copy-link', errors);
   });
-  await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+  await page.getByTestId('show-details').click();
   await page.getByTestId('report-details').waitFor();
   await page.waitForTimeout(2000);
   await shot(page, combo, '09-report-detailed-full', errors, true);

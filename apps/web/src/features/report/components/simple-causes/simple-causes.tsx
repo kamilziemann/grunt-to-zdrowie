@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn';
 import { byWeight, percentOf } from '../../utils/report-data';
 import { causeShare } from '../../utils/report-extras';
 
-/** Najwyzej tyle przyczyn w widoku prostym - reszta w szczegolach. */
+/** Najwyzej tyle przyczyn na gorze raportu - reszta w szczegolach. */
 const MAX_CAUSES = 4;
 
 /** Znacznik przyczyny: wielkosc kropki rosnie z udzialem (kolor tylko wzmacnia), obok slowo "glowna". */
@@ -18,7 +18,7 @@ const DOT = [
 ];
 
 /**
- * "Dlaczego" w widoku prostym: 2-4 przyczyny, kazda tytulem i jednym zdaniem, pierwsza oznaczona jako glowna; przy
+ * "Dlaczego" na gorze raportu: 2-4 przyczyny, kazda tytulem i jednym zdaniem, pierwsza oznaczona jako glowna; przy
  * udziale - "ok. N%". Przy nadmiarze wody bez przyczyn sekcja znika (fakty sa w szczegolach).
  */
 export function SimpleCauses({ report }: { report: WaterReport }) {

@@ -1,4 +1,4 @@
-// Zdjecia z satelity w raporcie pobieramy na zadanie: po rozwinieciu sekcji "Pole z satelity" albo przed wydrukiem.
+// Zdjecia z satelity do wydruku pobieramy na zadanie: przed wydrukiem (na ekranie pobiera je wybor trybu karty).
 // "Zapisz PDF" najpierw pobiera oba obrazy (pierwsze pobranie trwa do kilkunastu sekund), czeka, az sie narysuja,
 // i dopiero wtedy otwiera okno wydruku - PDF nie ma pustych ramek. Bez dostawcy (testy pojedynczych komponentow)
 // wydruk rusza od razu.
@@ -47,9 +47,8 @@ async function fetchImage(
 }
 
 interface SatellitePrint {
-  /** obrazy maja sie pobrac (sekcja rozwinieta albo wydruk) */
+  /** obrazy maja sie pobrac do bloku na wydruku */
   requested: boolean;
-  request: () => void;
   /** trwa pobieranie przed wydrukiem */
   preparing: boolean;
   /** pobiera obrazy, czeka na ich narysowanie i otwiera okno wydruku */
@@ -58,7 +57,6 @@ interface SatellitePrint {
 
 const SatellitePrintContext = createContext<SatellitePrint>({
   requested: false,
-  request: () => undefined,
   preparing: false,
   print: () => window.print(),
 });
@@ -81,7 +79,6 @@ export function SatellitePrintProvider({ report, children }: { report: WaterRepo
   const queryClient = useQueryClient();
   const [requested, setRequested] = useState(false);
   const [preparing, setPreparing] = useState(false);
-  const request = useCallback(() => setRequested(true), []);
   const print = useCallback(() => {
     const target = imageryRequest(report);
 
@@ -109,10 +106,7 @@ export function SatellitePrintProvider({ report, children }: { report: WaterRepo
         window.print();
       });
   }, [queryClient, report]);
-  const value = useMemo(
-    () => ({ requested, request, preparing, print }),
-    [requested, request, preparing, print],
-  );
+  const value = useMemo(() => ({ requested, preparing, print }), [requested, preparing, print]);
 
   return <SatellitePrintContext value={value}>{children}</SatellitePrintContext>;
 }

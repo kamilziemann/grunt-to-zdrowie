@@ -1,5 +1,5 @@
-// Widok prosty raportu ("Pogodynka wody"): skala pieciu poziomow, "sucho w N z 10", pierwszy krok z plakietka
-// i podsumowania wykresow. Tylko liczby z raportu - zdania powstaja w komponentach z tlumaczen.
+// Pierwsza czesc raportu ("Pogodynka wody", nad szczegolami): skala pieciu poziomow, "sucho w N z 10", pierwszy
+// krok z plakietka i podsumowania wykresow. Tylko liczby z raportu - zdania powstaja w komponentach z tlumaczen.
 import type { AssessmentLevel, Evidence, Recommendation, WaterReport } from '@app/contracts';
 
 import type { DailyWater, ForecastDay, VegetationObservation, WaterLedger } from './report-extras';
