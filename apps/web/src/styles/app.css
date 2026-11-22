@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './report-viz.css';
 
 /*
  * Jedyne zrodlo tokenow designu (ADR 0007). Warstwy:

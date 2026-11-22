@@ -1,4 +1,4 @@
-import { Check, Link2 } from 'lucide-react';
+import { Check, Link2, Share2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'use-intl';
 
@@ -15,9 +15,20 @@ const COPIED_MS = 3000;
 /**
  * "Kopiuj link do raportu": krotki adres zapisanego raportu (`path`, `/raport?raport=r-…`) albo adres strony z
  * dzialkami, uprawa i dniem - doradca albo sasiad otworzy ten sam raport. Bez dostepu do schowka (stara przegladarka,
- * brak zgody) pokazuje adres w polu do recznego skopiowania.
+ * brak zgody) pokazuje adres w polu do recznego skopiowania. `share` (pasek na dole telefonu): "Udostepnij" otwiera
+ * systemowe okno udostepniania (SMS, komunikator), a bez niego kopiuje link jak zwykle.
  */
-export function CopyLinkButton({ className, path }: { className?: string; path?: AppHref }) {
+export function CopyLinkButton({
+  className,
+  path,
+  share = false,
+  buttonClassName,
+}: {
+  className?: string;
+  path?: AppHref;
+  share?: boolean;
+  buttonClassName?: string;
+}) {
   const t = useTranslations('report.actions');
   const [state, setState] = useState<CopyState>('idle');
   const [url, setUrl] = useState('');
@@ -37,6 +48,17 @@ export function CopyLinkButton({ className, path }: { className?: string; path?:
     setUrl(href);
     window.clearTimeout(timer.current);
 
+    if (share && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: document.title, url: href });
+
+        return;
+      } catch (error) {
+        // zamkniete okno udostepniania to nie blad - nic nie kopiujemy
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+
     try {
       await navigator.clipboard.writeText(href);
       setState('copied');
@@ -44,7 +66,7 @@ export function CopyLinkButton({ className, path }: { className?: string; path?:
     } catch {
       setState('manual');
     }
-  }, [path, locale]);
+  }, [path, locale, share]);
   const onClick = useCallback(() => void copy(), [copy]);
 
   return (
@@ -53,10 +75,19 @@ export function CopyLinkButton({ className, path }: { className?: string; path?:
         size="xl"
         variant="outline"
         onClick={onClick}
-        className="h-auto min-h-12 w-full py-2 leading-tight whitespace-normal max-sm:px-3 max-sm:text-sm"
+        className={cn(
+          'h-auto min-h-12 w-full py-2 leading-tight whitespace-normal max-sm:px-3 max-sm:text-sm',
+          buttonClassName,
+        )}
       >
-        {state === 'copied' ? <Check aria-hidden="true" /> : <Link2 aria-hidden="true" />}
-        {state === 'copied' ? t('copied') : t('copyLink')}
+        {state === 'copied' ? (
+          <Check aria-hidden="true" />
+        ) : share ? (
+          <Share2 aria-hidden="true" />
+        ) : (
+          <Link2 aria-hidden="true" />
+        )}
+        {state === 'copied' ? t('copied') : share ? t('share') : t('copyLink')}
       </Button>
       {/* komunikat dla czytnika ekranu - przycisk zmienia tekst, ale fokus zostaje na nim */}
       <output className="sr-only">{state === 'copied' ? t('copied') : ''}</output>

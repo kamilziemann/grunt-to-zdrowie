@@ -18,7 +18,9 @@
     "map": "Wróć do mapy",
     "copyLink": "Kopiuj link do raportu",
     "copied": "Skopiowano link",
-    "copyManual": "Skopiuj adres raportu:"
+    "copyManual": "Skopiuj adres raportu:",
+    "share": "Udostępnij",
+    "savePdf": "Zapisz PDF"
   },
   "missing": {
     "title": "Brakuje danych do raportu",
@@ -658,7 +660,8 @@
       },
       "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
       "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki, wody i otoczenie pola: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK."
-    }
+    },
+    "above": "Szkic pola z rowami i miejscami na polu jest na górze raportu, obok oceny."
   },
   "print": {
     "header": "{app} · raport wodny pola",
@@ -670,7 +673,9 @@
     "pageHeader": "{app} · raport wodny pola · {field} · stan na {date}",
     "pageId": "raport {id}",
     "pageFooter": "Źródła danych: {sources}. Licencje – sekcja 7.",
-    "pageNumber": "strona "
+    "pageNumber": "strona ",
+    "notes": "Notatki doradcy",
+    "notesHint": "Miejsce na uwagi z wizyty na polu i ustalenia z rolnikiem."
   },
   "landUse": {
     "label": "Użytki w ewidencji",
@@ -791,5 +796,172 @@
     "radiusM": "{value} m",
     "radiusKm": "{value} km",
     "source": "Z mapy topograficznej BDOT10k (GUGiK). Zastawek i przepustów na rowach ta mapa nie pokazuje – sprawdź je na miejscu."
+  },
+  "view": {
+    "label": "Poziom szczegółów raportu",
+    "simple": "Prosto",
+    "detailed": "Szczegółowo",
+    "sections": "Sekcje pełnej analizy",
+    "fullTitle": "Pełna analiza"
+  },
+  "simple": {
+    "title": "Krótka analiza",
+    "field": "Twoje pole",
+    "waterTitle": "Woda teraz i w tym tygodniu",
+    "waterEmpty": "Nie mamy bilansu wody w glebie dla tego dnia, więc nie pokazujemy zapasu ani prognozy. Ocena i historia są niżej.",
+    "historyTitle": "10 lat na tym polu i dlaczego",
+    "todoTitle": "Co robić",
+    "showDetails": "Pokaż pełną analizę",
+    "showDetailsNote": "Liczby z odniesieniem, kalendarz 10 lat, satelita, miejsca na polu, wszystkie zalecenia i źródła.",
+    "asOf": "Stan na {date}",
+    "scale": {
+      "label": "Na skali od mokro do bardzo sucho: {step}.",
+      "wet": "Mokro",
+      "good": "Dobrze",
+      "slightlyDry": "Trochę sucho",
+      "dry": "Sucho",
+      "veryDry": "Bardzo sucho"
+    },
+    "verdict": {
+      "excess": "W ostatnich {days} dniach spadło {sum} l/m² deszczu – zwykle ok. {median} l/m².",
+      "resting": "W glebie jest {percent}% wody, którą mogą wziąć rośliny.",
+      "ok": "Zbiornik wody w glebie jest pełny w {percent}%.",
+      "missing": "Brakuje ok. {mm} l/m² wody – zbiornik w glebie jest pełny tylko w {percent}%."
+    },
+    "lines": {
+      "now": "Teraz",
+      "history": "10 lat",
+      "historyText": "Wody brakowało w {dry} z {total} sezonów.",
+      "historyMonths": "Wody brakowało w {dry} z {total} sezonów, najczęściej: {months}.",
+      "why": "Dlaczego",
+      "first": "Co zrobić najpierw",
+      "confidence": "Pewność"
+    },
+    "causes": {
+      "title": "Dlaczego brakuje wody",
+      "titleExcess": "Skąd ten wynik",
+      "main": "główna",
+      "share": "ok. {percent}%"
+    },
+    "first": {
+      "title": "Zrób najpierw",
+      "badges": {
+        "now": "Możesz od razu",
+        "check": "Najpierw sprawdź na miejscu",
+        "protected": "Najpierw uzgodnij – obszar chroniony",
+        "notification": "Najpierw zgłoś do Wód Polskich",
+        "permit": "Najpierw uzyskaj pozwolenie wodnoprawne"
+      },
+      "before": "Zanim zaczniesz",
+      "then": "Potem:",
+      "irrigation": "Podlewanie:",
+      "all": "{count, plural, one {Szczegóły zalecenia} other {Wszystkie zalecenia ({count})}}"
+    },
+    "limits": {
+      "title": "Czego ta ocena nie wie",
+      "advice": "To porada z ogólnodostępnych danych, nie ekspertyza. Przed inwestycją porozmawiaj z doradcą ODR.",
+      "method": "Jak liczymy"
+    }
+  },
+  "viz": {
+    "tank": {
+      "title": "Ile wody mają teraz rośliny?",
+      "answerOk": "Zbiornik jest pełny w {percent}% – rośliny biorą wodę bez wysiłku.",
+      "answerStressed": "Zbiornik jest pełny tylko w {percent}% – poniżej progu, rośliny piją z ostatniej rezerwy i rosną wolniej.",
+      "answerResting": "W glebie jest {percent}% wody, którą mogą wziąć rośliny. Uprawa teraz nie rośnie, więc nie liczymy progu suszy.",
+      "typical": "Zwykle tego dnia: {percent}%.",
+      "source": "Bilans wody w strefie korzeni (metoda FAO-56) z pogody i gleby z map – model, nie pomiar na polu.",
+      "description": "Woda dostępna dla roślin: {percent}% zbiornika, {mm} z {capacity} l/m².",
+      "now": "Teraz",
+      "percent": "{percent}%",
+      "mm": "{mm} z {capacity} l/m²",
+      "typicalLabel": "Zwykle",
+      "typicalLegend": "zwykle tego dnia: {percent}%",
+      "stressLabel": "Próg",
+      "stressLegend": "poniżej {percent}% rośliny cierpią"
+    },
+    "countdown": {
+      "title": "Ile dni zostało, zanim uprawa przestanie rosnąć?",
+      "lead": "dni bez deszczu, zanim rośliny zaczną cierpieć z braku wody",
+      "unit": "{days, plural, one {dzień zapasu} other {dni zapasu}}",
+      "answer": "Bez deszczu zapas spadnie poniżej progu za {days, plural, one {# dzień} other {# dni}}.",
+      "answerForecast": "Bez deszczu zapas spadnie poniżej progu za {days, plural, one {# dzień} other {# dni}}, z deszczem z prognozy – za {withRain, plural, one {# dzień} other {# dni}}.",
+      "beyond": "{days}+",
+      "beyondAnswer": "Zapasu wody wystarczy na ponad {days} dni nawet bez deszczu.",
+      "stressedUnit": "{days, plural, one {dzień z rzędu} other {dni z rzędu}}",
+      "stressedLead": "roślinom brakuje wody w glebie – rosną wolniej",
+      "stressedAnswer": "Zapas wody jest poniżej progu od {days, plural, one {# dnia} other {# dni}} – rośliny już cierpią, a plon może spaść.",
+      "noRain": "Jeśli nie spadnie deszcz",
+      "withRain": "Z deszczem z prognozy",
+      "source": "Zużycie wody przez uprawę ze średniego parowania z ostatnich 7 dni (FAO-56); wariant z prognozą bierze deszcz z prognozy."
+    },
+    "forecast": {
+      "title": "Czy w tym tygodniu będzie lżej?",
+      "answer": "W najbliższych {days} dniach spadnie ok. {total} l/m² deszczu, najwięcej w {day} ({max} l/m²).",
+      "answerDry": "W najbliższych {days} dniach deszczu prawie nie będzie.",
+      "tooLittle": "To za mało, żeby uzupełnić zapas w glebie (brakuje ok. {missing} l/m²).",
+      "source": "Prognoza: {source}.",
+      "sourceIssued": "Prognoza: {source}, wydana {date}.",
+      "dayDescription": "{day}: {mm} l/m², do {temp}°C",
+      "temp": "{temp}°",
+      "legend": "Górny wiersz: najwyższa temperatura, dolny: deszcz w l/m² (= mm)."
+    },
+    "ledger": {
+      "title": "Gdzie podziała się woda od wiosny?",
+      "start": "Zapas {date}",
+      "rain": "Deszcz",
+      "use": "Zużyły rośliny i słońce",
+      "lost": "Przesiąkło poniżej korzeni",
+      "end": "Zapas {date}",
+      "shortfall": "Zabrakło roślinom",
+      "answerMore": "Rośliny i słońce zabrały {ratio} razy więcej wody, niż spadło deszczu.",
+      "answerLess": "Spadło więcej deszczu, niż zużyły rośliny – zapas w glebie się odbudował.",
+      "answerEven": "Deszczu spadło mniej więcej tyle, ile zużyły rośliny.",
+      "answerNoRain": "Nie spadł deszcz, a rośliny zużyły {use} l/m² wody z zapasu.",
+      "source": "Bilans wody w strefie korzeni (FAO-56). Model nie liczy spływu po powierzchni.",
+      "missingDays": "{days, plural, one {# dzień} other {# dni}} bez danych pogodowych liczymy bez deszczu.",
+      "unit": "Liczby w l/m² (= mm). „Zabrakło roślinom” – ile wody potrzebowały ponad to, co miały."
+    },
+    "seasons": {
+      "title": "Jak było przez 10 lat?",
+      "headline": "{dry} z {total}",
+      "headlineNote": "sezonów z niedoborem wody",
+      "answer": "Wody brakowało w {dry} z {total} poprzednich sezonów.",
+      "answerMonths": "Wody brakowało w {dry} z {total} poprzednich sezonów – najczęściej: {months}.",
+      "source": "Dni z niedoborem wody wg bilansu w strefie korzeni; susza rolnicza wg progów IUNG.",
+      "barDescription": "{year}: {days} dni z niedoborem wody{drought, select, yes {, susza rolnicza} other {}}",
+      "barMissing": "{year}: brak danych",
+      "legendDays": "dni z niedoborem wody",
+      "legendDrought": "sezon z suszą rolniczą (znak !)",
+      "legendCurrent": "bieżący sezon do dnia analizy"
+    },
+    "rainUse": {
+      "title": "Ile padało, a ile wypiły rośliny?",
+      "answer": "W ostatnich {days} dniach spadło {rain} l/m² deszczu, a uprawa potrzebowała {use} l/m².",
+      "dryStreak": "Od {days} dni nie padało.",
+      "source": "Deszcz z danych pogodowych; potrzeby uprawy = parowanie × współczynnik uprawy (FAO-56).",
+      "gaps": "{days, plural, one {# dzień} other {# dni}} bez danych o deszczu (kwadracik na osi).",
+      "legendRain": "deszcz",
+      "legendUse": "potrzeby uprawy",
+      "unit": "l/m² na dobę"
+    },
+    "vegetation": {
+      "title": "Co widzi satelita?",
+      "answer": "Ostatnie czyste zdjęcie ({date}): wilgotność roślin {value}.",
+      "position": {
+        "below": "To poniżej zakresu z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max}) – rośliny mają mniej wody niż zwykle.",
+        "within": "To w zakresie z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max}).",
+        "above": "To powyżej zakresu z {years, plural, one {# roku} other {# lat}} o tej porze ({min} – {max})."
+      },
+      "answerNone": "Chmury zasłoniły pole na wszystkich zdjęciach z tego okresu – satelita nic nie pokaże.",
+      "source": "Zdjęcia Sentinel-2 (Copernicus), wskaźnik wilgotności roślin NDMI dla całego pola.",
+      "counts": "Zdjęcia użyte: {used}, pominięte przez chmury: {skipped}.",
+      "band": "Szary pas – zakres z poprzednich {years, plural, one {# roku} other {# lat}}, linia przerywana – środek."
+    },
+    "shares": {
+      "title": "Udział przyczyn",
+      "percent": "{percent}%",
+      "note": "Szacunek wagi każdej przyczyny w wyjaśnieniu wyniku, a nie pomiar, ile wody zabrała."
+    }
   }
 }

@@ -8,6 +8,7 @@ import {
   REPORT_URL,
 } from './support/analysis-api';
 import { DITCH_THROUGH_TILES, mockBasemap, mockHydroApi } from './support/hydro-api';
+import { detailed, openSections } from './support/report-view';
 import { expectTouchTargets } from './support/touch-targets';
 
 // Formularz analizy i raport. Dzialka i raport sa podstawione (`mockAnalysisApi`): API pobiera je z ULDK i
@@ -42,17 +43,30 @@ test.describe('analiza i raport', () => {
       ),
     );
     await expect(page.getByRole('heading', { level: 1, name: 'Raport wodny pola' })).toBeVisible();
-    await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
+    // widok prosty: jedno slowo na skali, pelna analiza ukryta
+    await expect(page.getByTestId('verdict-word')).toHaveText('Sucho');
     await expect(page.getByTestId('sample-banner')).toContainText('nie podejmuj na ich podstawie decyzji');
-    await expect(page.getByRole('heading', { level: 2 })).toHaveText(SECTIONS);
+    await expect(page.getByTestId('report-details')).toBeHidden();
+
+    // "Szczegolowo": parametr w adresie (link dla doradcy), sekcje w kolejnosci z zadania
+    await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+    await expect(page).toHaveURL(/widok=szczegoly/);
+    await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
+    await expect(page.locator('[data-report-section] h2')).toHaveText(SECTIONS);
 
     await page.reload();
     await expect(page.getByTestId('verdict')).toBeVisible();
+
+    // wybor zapamietany w przegladarce: ten sam raport bez parametru wraca do szczegolow
+    await page.goto(REPORT_URL.replace('2026-06-15', new URL(page.url()).searchParams.get('data') ?? ''));
+    await expect(page).toHaveURL(/widok=szczegoly/);
+    await page.getByTestId('view-switch').getByRole('link', { name: 'Prosto' }).click();
+    await expect(page.getByTestId('report-details')).toBeHidden();
   });
 
   test('brak danych źródła i ograniczenia są nazwane wprost', async ({ page }) => {
     await mockAnalysisApi(page);
-    await page.goto(REPORT_URL);
+    await page.goto(detailed(REPORT_URL));
 
     await expect(page.locator('[data-source="forecast"]')).toContainText('Brak danych');
     await expect(page.locator('[data-limitation="sample_data"]')).toBeVisible();
@@ -62,8 +76,9 @@ test.describe('analiza i raport', () => {
     page,
   }) => {
     await mockAnalysisApi(page);
-    await page.goto(LOW_CONFIDENCE_REPORT_URL);
+    await page.goto(detailed(LOW_CONFIDENCE_REPORT_URL));
 
+    await expect(page.getByTestId('verdict-caveat-short')).toContainText('Ostrożnie: ta ocena jest niepewna');
     await expect(page.getByTestId('verdict-caveat')).toContainText('Ostrożnie: ta ocena jest niepewna');
     await expect(page.getByTestId('sample-banner')).toHaveAttribute('data-scope', 'some');
 
@@ -83,7 +98,7 @@ test.describe('analiza i raport', () => {
     await page.unroute('**/api/analysis');
     await mockAnalysisApi(page);
     await page.getByRole('button', { name: 'Spróbuj ponownie' }).click();
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
   });
 
   test('link bez uprawy i daty prowadzi z powrotem do formularza', async ({ page }) => {
@@ -98,13 +113,18 @@ test.describe('analiza i raport', () => {
 
   test('wydruk: bez nawigacji i przycisków, szczegóły dla doradcy rozwinięte', async ({ page }) => {
     await mockAnalysisApi(page);
+    // widok prosty na ekranie - wydruk i tak ma pelna analize po stronie pierwszej
     await page.goto(REPORT_URL);
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
     await page.emulateMedia({ media: 'print' });
 
     await expect(page.getByRole('button', { name: 'Drukuj / zapisz PDF' })).toBeHidden();
     await expect(page.locator('header').filter({ has: page.getByRole('navigation') })).toBeHidden();
+    await expect(page.getByTestId('view-switch')).toBeHidden();
+    await expect(page.getByTestId('share-bar')).toBeHidden();
+    await expect(page.getByTestId('report-details')).toBeVisible();
     await expect(page.getByText(/Klimatyczny bilans wodny/)).toBeVisible();
+    await expect(page.getByTestId('advisor-notes')).toBeVisible();
   });
 
   test.describe('telefon', () => {
@@ -130,10 +150,21 @@ test.describe('analiza i raport', () => {
     test('raport mieści się na szerokość telefonu', async ({ page }) => {
       await mockAnalysisApi(page);
       await page.goto(REPORT_URL);
-      await expect(page.getByTestId('verdict')).toBeVisible();
+      await expect(page.getByTestId('short-analysis')).toBeVisible();
 
       await expectTouchTargets(page.getByTestId('report-header').getByRole('button'));
       await expectTouchTargets(page.getByTestId('report-header').getByRole('link'));
+      // "Zapisz PDF" i "Udostepnij" przyklejone do dolu ekranu, zawsze pod kciukiem
+      await expect(page.getByTestId('share-bar')).toBeInViewport();
+      await expectTouchTargets(page.getByTestId('share-bar').getByRole('button'));
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
+
+      // szczegoly na telefonie: sekcje zwiniete, naglowek rozwija sekcje
+      await page.getByTestId('view-switch').getByRole('link', { name: 'Szczegółowo' }).click();
+      await expect(page.locator('#przyczyny > details')).not.toHaveAttribute('open');
+      await page.locator('#przyczyny > details > summary').click();
+      await expect(page.locator('#przyczyny > details')).toHaveAttribute('open');
+      await expectTouchTargets(page.locator('[data-report-section] summary'));
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
     });
   });
@@ -143,7 +174,8 @@ test.describe('analiza i raport', () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockAnalysisApi(page);
-    await page.goto(DROUGHT_REPORT_URL);
+    await page.goto(detailed(DROUGHT_REPORT_URL));
+    await openSections(page);
 
     await expect(page.getByTestId('verdict')).toContainText('Susza');
     await expect(page.getByTestId('history-summary')).toContainText('najsuchszy taki okres z 11 lat');
@@ -165,7 +197,7 @@ test.describe('analiza i raport', () => {
 
 test('eksport dla doradcy: CSV i JSON z danymi raportu', async ({ page }) => {
   await mockAnalysisApi(page);
-  await page.goto(DROUGHT_REPORT_URL);
+  await page.goto(detailed(DROUGHT_REPORT_URL));
   await expect(page.getByTestId('verdict')).toBeVisible();
 
   const [csv] = await Promise.all([
@@ -291,7 +323,7 @@ test.describe('raport do oddania', () => {
   test('wydruk: nagłówek z nazwą aplikacji, datą i adresem, stopka ze źródłami', async ({ page }) => {
     await mockAnalysisApi(page);
     await page.goto(LOW_CONFIDENCE_REPORT_URL);
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
     await expect(page.getByTestId('print-header')).toBeHidden();
 
     await page.emulateMedia({ media: 'print' });

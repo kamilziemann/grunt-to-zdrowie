@@ -7,13 +7,19 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { useTranslations } from 'use-intl';
 
-import { analysisRequestFromSearch, analysisSearchSchema } from '@/features/analysis';
-import { ReportMissing, ReportScreen, StoredReportScreen } from '@/features/report';
+import { analysisRequestFromSearch } from '@/features/analysis';
+import {
+  ReportMissing,
+  ReportScreen,
+  reportSearchSchema,
+  StoredReportScreen,
+  type ReportViewMode,
+} from '@/features/report';
 import { routes } from '@/lib/routes';
 import { headLocale, headTranslator, pageHead } from '@/lib/seo';
 
 export const Route = createFileRoute('/{-$locale}/_app/raport')({
-  validateSearch: analysisSearchSchema,
+  validateSearch: reportSearchSchema,
   headers: routeCache('static'),
   head: ({ matches }) =>
     pageHead({
@@ -46,6 +52,24 @@ function ReportPage() {
     data: search.data,
   });
   const mapHref = routes.parcels(dzialki);
+  const view = useMemo((): ReportViewMode => {
+    const fieldSearch = search.raport
+      ? { raport: search.raport }
+      : {
+          dzialki,
+          obszar: search.obszar,
+          rodzaj: search.obszar ? search.rodzaj : undefined,
+          uprawa: search.uprawa,
+          data: search.data,
+        };
+
+    return {
+      detailed: search.widok === 'szczegoly',
+      explicit: search.widok !== undefined,
+      simpleHref: routes.report(fieldSearch),
+      detailedHref: routes.report({ ...fieldSearch, widok: 'szczegoly' }),
+    };
+  }, [dzialki, search.raport, search.obszar, search.rodzaj, search.uprawa, search.data, search.widok]);
   const grasslandHref =
     search.uprawa === 'grassland'
       ? undefined
@@ -57,13 +81,19 @@ function ReportPage() {
           data: search.data,
         });
 
-  if (search.raport) return <StoredReportScreen reportId={search.raport} />;
+  if (search.raport) return <StoredReportScreen reportId={search.raport} view={view} />;
 
   if (!request) {
     return <ReportMissing changeHref={dzialki || search.obszar ? changeHref : null} mapHref={mapHref} />;
   }
 
   return (
-    <ReportScreen request={request} changeHref={changeHref} mapHref={mapHref} grasslandHref={grasslandHref} />
+    <ReportScreen
+      request={request}
+      changeHref={changeHref}
+      mapHref={mapHref}
+      grasslandHref={grasslandHref}
+      view={view}
+    />
   );
 }

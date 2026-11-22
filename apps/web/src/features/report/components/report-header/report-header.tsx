@@ -13,6 +13,7 @@ import { isoDay } from '../../utils/report-data';
 import { CopyLinkButton } from '../copy-link-button';
 import { useLandUseWords } from '../land-use-notice';
 import { PrintButton } from '../print-button';
+import { ViewSwitch, type ReportViewMode } from '../view-switch';
 
 // na telefonie dwa przyciski obok siebie: tekst moze sie zawinac, cel dotykowy zostaje >= 48 px
 const COMPACT = 'h-auto min-h-12 py-2 leading-tight whitespace-normal max-sm:px-3 max-sm:text-sm';
@@ -34,6 +35,7 @@ export interface ReportHeaderProps {
   mapHref: AppHref;
   /** raport z zapisu (krotki link): adres z parametrami - przycisk "Policz ponownie" */
   recomputeHref?: AppHref;
+  view: ReportViewMode;
 }
 
 /**
@@ -41,7 +43,7 @@ export interface ReportHeaderProps {
  * z ewidencji slowami, a na ekranie akcje - wydruk/PDF, zmiana uprawy lub daty, link do raportu, powrot do mapy
  * (na wydruku ukryte). Raport z zapisu mowi dyskretnie, kiedy go policzono; z krotkiego linku ma "Policz ponownie".
  */
-export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: ReportHeaderProps) {
+export function ReportHeader({ report, changeHref, mapHref, recomputeHref, view }: ReportHeaderProps) {
   const t = useTranslations('report');
   const tCrops = useTranslations('analysis.crops');
   const format = useFormatter();
@@ -81,10 +83,13 @@ export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: Rep
   ];
 
   return (
-    <header className="flex flex-col gap-4" data-testid="report-header">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl leading-tight font-bold text-primary print:text-2xl">{t('title')}</h1>
-        {field.label && <p className="text-lg font-medium">{field.label}</p>}
+    <header className="flex flex-col gap-5" data-testid="report-header">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl leading-tight font-bold text-primary print:text-2xl">{t('title')}</h1>
+          {field.label && <p className="text-lg font-medium">{field.label}</p>}
+        </div>
+        <ViewSwitch mode={view} className="w-full sm:w-auto sm:min-w-80" />
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 print:grid-cols-4">
         {items
@@ -122,18 +127,16 @@ export function ReportHeader({ report, changeHref, mapHref, recomputeHref }: Rep
         </div>
       )}
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap print:hidden">
-        <PrintButton className={COMPACT} />
+        {/* na telefonie PDF i link sa w pasku na dole ekranu */}
+        <PrintButton className={cn(COMPACT, 'max-sm:hidden')} />
         <Button asChild size="xl" variant="outline" className={COMPACT}>
           <Link href={changeHref}>
             <ArrowLeft aria-hidden="true" />
             {t('actions.change')}
           </Link>
         </Button>
-        <CopyLinkButton
-          className="max-sm:col-span-2"
-          path={routes.report({ raport: report.meta.reportId })}
-        />
-        <Button asChild size="xl" variant="ghost" className="max-sm:hidden">
+        <CopyLinkButton className="max-sm:hidden" path={routes.report({ raport: report.meta.reportId })} />
+        <Button asChild size="xl" variant="outline" className={COMPACT}>
           <Link href={mapHref}>
             <MapPinned aria-hidden="true" />
             {t('actions.map')}

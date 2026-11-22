@@ -80,6 +80,8 @@ export interface FieldMapProps {
   ditchInFieldM?: number | null;
   /** miejsca na polu z numerami (strefy inne niz tlo) - na szkicu wzorem, na zdjeciu lotniczym obrysem */
   zones?: readonly NumberedZone[];
+  /** szkic na cala szerokosc kontenera (raport: mapa obok krotkiej analizy) zamiast do 36 rem */
+  wide?: boolean;
 }
 
 const NO_ZONES: readonly NumberedZone[] = [];
@@ -91,7 +93,7 @@ const ZONES_RADIUS_M = 100;
  * fakt, legenda, zrodla); ten szkic idzie na wydruk. Mapa na zdjeciu lotniczym (MapLibre, osobny chunk) laduje sie
  * dopiero po kliknieciu "Pokaz na zdjeciu lotniczym". Pod spodem zdania o najblizszym rowie i cieku w 500 m.
  */
-export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: FieldMapProps) {
+export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES, wide = false }: FieldMapProps) {
   const t = useTranslations('report.fieldMap');
   const format = useFormatter();
   const [aerial, setAerial] = useState(false);
@@ -173,8 +175,11 @@ export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: Fiel
       data-testid="field-map"
       data-hydro={state}
     >
-      <div className={cn('flex max-w-xl flex-col gap-3', aerial && 'hidden print:flex')}>
-        <div ref={sketchRef} className="w-full max-w-xl scroll-mt-4 overflow-hidden rounded-lg border">
+      <div className={cn('flex flex-col gap-3', !wide && 'max-w-xl', aerial && 'hidden print:flex')}>
+        <div
+          ref={sketchRef}
+          className={cn('w-full scroll-mt-4 overflow-hidden rounded-lg border', !wide && 'max-w-xl')}
+        >
           <FieldSketch
             model={sketch}
             fieldName={fieldName}

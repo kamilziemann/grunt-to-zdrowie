@@ -24,9 +24,18 @@ export const routes = {
     }),
   /**
    * Raport wodny: dzialki (albo wlasny obszar), uprawa i dzien analizy w adresie (link do raportu da sie wyslac
-   * i odswiezyc). `raport` = zapisany raport (krotki link, bez ponownego liczenia).
+   * i odswiezyc). `raport` = zapisany raport (krotki link, bez ponownego liczenia); `widok: 'szczegoly'` otwiera
+   * widok szczegolowy (link dla doradcy).
    */
-  report: (search?: FieldSearch & { dzialki?: string; uprawa?: string; data?: string; raport?: string }) =>
+  report: (
+    search?: FieldSearch & {
+      dzialki?: string;
+      uprawa?: string;
+      data?: string;
+      raport?: string;
+      widok?: 'szczegoly';
+    },
+  ) =>
     withQuery(routePath('/raport'), {
       raport: search?.raport,
       dzialki: search?.dzialki,
@@ -34,6 +43,7 @@ export const routes = {
       rodzaj: search?.rodzaj,
       uprawa: search?.uprawa,
       data: search?.data,
+      widok: search?.widok,
     }),
   /** Gospodarstwo: kazda dzialka analizowana osobno, tabela "gdzie dzialac najpierw" (I2). */
   farm: (search?: { dzialki?: string; uprawa?: string; data?: string }) =>

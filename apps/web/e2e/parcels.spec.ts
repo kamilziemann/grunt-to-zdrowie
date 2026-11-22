@@ -65,7 +65,7 @@ test.describe('działki', () => {
     await expect(page).toHaveURL(
       /\/raport\?dzialki=080904_5\.0001\.349%2F1&uprawa=winter_wheat&data=2018-06-15/,
     );
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
   });
 
   test('za krótki tekst pokazuje podpowiedź zamiast wysyłać zapytanie', async ({ page }) => {

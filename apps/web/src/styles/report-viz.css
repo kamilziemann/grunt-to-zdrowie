@@ -1,0 +1,44 @@
+/*
+ * Tokeny wykresow raportu ("Pogodynka wody"): kolory danych - niebieski = woda, piaskowy -> pomaranczowy = coraz
+ * suszej - oraz ciemny panel krotkiej analizy. Tymczasowo osobno od app.css (sesja "wejscie" dodaje tokeny
+ * `--data-*`); integrator polaczy oba pliki. Rozroznienie nigdy samym kolorem: wzor, znak albo podpis.
+ */
+:root {
+  --viz-water: light-dark(#1f5fae, #8fc0ec);
+  --viz-water-soft: light-dark(#8fc0ec, #2f5f91);
+  --viz-sand: light-dark(#f6d2a4, #6e5330);
+  --viz-orange: light-dark(#e3893b, #e3893b);
+  --viz-orange-strong: light-dark(#c2560b, #f2a462);
+  --viz-orange-deep: light-dark(#8f3b06, #ffc58f);
+  --viz-grid: light-dark(#d8dde3, #3a433e);
+  --viz-track: light-dark(#eef1f4, #222a26);
+  --viz-panel: light-dark(#142019, #18241d);
+  --viz-panel-foreground: #eef4ef;
+  --viz-panel-muted: #a9bcb0;
+  --viz-panel-accent: #8ee6b4;
+}
+
+@theme inline {
+  --color-viz-water: var(--viz-water);
+  --color-viz-water-soft: var(--viz-water-soft);
+  --color-viz-sand: var(--viz-sand);
+  --color-viz-orange: var(--viz-orange);
+  --color-viz-orange-strong: var(--viz-orange-strong);
+  --color-viz-orange-deep: var(--viz-orange-deep);
+  --color-viz-grid: var(--viz-grid);
+  --color-viz-track: var(--viz-track);
+  --color-viz-panel: var(--viz-panel);
+  --color-viz-panel-foreground: var(--viz-panel-foreground);
+  --color-viz-panel-muted: var(--viz-panel-muted);
+  --color-viz-panel-accent: var(--viz-panel-accent);
+}
+
+/* Wydruk: papier jest jasny, wiec ciemny panel drukujemy jako jasny z ramka (oszczedza toner, czytelny w cz.-b.). */
+@media print {
+  :root {
+    --viz-panel: #ffffff;
+    --viz-panel-foreground: #1b1d1a;
+    --viz-panel-muted: #4a4f48;
+    --viz-panel-accent: #1d6b3b;
+  }
+}

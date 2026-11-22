@@ -6,6 +6,7 @@ import { HEAT_REPORT } from '../src/features/report/fixtures/heat-report';
 import { mockReport, reportUrl } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
+import { detailed, openSections } from './support/report-view';
 import { expect, test } from './support/test';
 
 // Raport z pelnego silnika (runda 3 + uzytek z ewidencji): raporty z prawdziwego API zapisane w fixtures, bez
@@ -41,7 +42,7 @@ test.describe('użytek gruntu z ewidencji', () => {
     page,
   }) => {
     await mockReport(page, FIELD_REPORT);
-    await page.goto(reportUrl(FIELD_REPORT));
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
 
     await expect(page.getByTestId('report-header')).toContainText(
       'grunty orne klasy IVb–VI, łąka klasy V i rów',
@@ -88,7 +89,7 @@ test.describe('raport z pełnego silnika', () => {
     page,
   }) => {
     await mockReport(page, FIELD_REPORT);
-    await page.goto(reportUrl(FIELD_REPORT));
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
 
     await expect(page.getByTestId('irrigation-plan')).toContainText('4 podlania po 30 l/m² co 6 dni');
     await expect(page.getByTestId('deficit-seasons')).toContainText('w 9 z 10 poprzednich sezonów');
@@ -106,6 +107,11 @@ test.describe('raport z pełnego silnika', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockReport(page, FIELD_REPORT);
     await page.goto(reportUrl(FIELD_REPORT));
+    await expect(page.getByTestId('first-step')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+    await openSections(page);
     await expect(page.getByTestId('irrigation-plan')).toBeVisible();
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
@@ -118,7 +124,8 @@ test.describe('miejsca na polu', () => {
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockReport(page, FIELD_REPORT);
-    await page.goto(reportUrl(FIELD_REPORT));
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+    await openSections(page);
 
     await expect(page.getByTestId('verdict-zones')).toContainText('Na polu są 4 miejsca');
     await expect(page.getByTestId('field-sketch-zone-number')).toHaveCount(4);
@@ -138,8 +145,9 @@ test.describe('miejsca na polu', () => {
 
   test('wydruk: numery miejsc na szkicu i lista bez przycisków „Pokaż na szkicu”', async ({ page }) => {
     await mockReport(page, FIELD_REPORT);
+    // widok prosty: lista miejsc jest w pelnej analizie, ktora wydruk ma zawsze
     await page.goto(reportUrl(FIELD_REPORT));
-    await expect(page.getByTestId('zone-list')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
     await page.emulateMedia({ media: 'print' });
 
     await expect(page.getByTestId('field-sketch-zone-number').first()).toBeVisible();
@@ -149,7 +157,7 @@ test.describe('miejsca na polu', () => {
 
   test('pole za małe: jedno zdanie z powodem zamiast pustej ramki', async ({ page }) => {
     await mockReport(page, FOREST_REPORT);
-    await page.goto(reportUrl(FOREST_REPORT));
+    await page.goto(detailed(reportUrl(FOREST_REPORT)));
 
     await expect(page.getByTestId('zone-list-empty')).toContainText('satelita widzi kwadraty 10 × 10 m');
     await expect(page.getByTestId('field-sketch-zone-number')).toHaveCount(0);
@@ -173,7 +181,7 @@ test.describe('raport z zapisu (krótki link)', () => {
     );
     await page.goto(`/raport?raport=${FIELD_REPORT.meta.reportId}`);
 
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
     await expect(page.getByTestId('report-stored')).toContainText('Policzono 22 listopada 2026, 00:55');
 
     const recompute = page.getByRole('link', { name: 'Policz ponownie' });
@@ -185,7 +193,7 @@ test.describe('raport z zapisu (krótki link)', () => {
     expect(analyses).toBe(0);
 
     await recompute.click();
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
     await expect(page.getByTestId('report-stored')).toHaveCount(0);
     expect(analyses).toBe(1);
   });
@@ -227,7 +235,7 @@ test.describe('otoczenie pola', () => {
     page,
   }) => {
     await mockReport(page, PROTECTED);
-    await page.goto(reportUrl(PROTECTED));
+    await page.goto(detailed(reportUrl(PROTECTED)));
 
     await expect(page.getByTestId('protected-area-notice')).toContainText(
       'Pole leży w obszarze chronionym: Biebrzański Park Narodowy; Natura 2000: Dolina Biebrzy.',
@@ -245,7 +253,8 @@ test.describe('otoczenie pola', () => {
   test('telefon: karta otoczenia i dopiski bez przewijania w poziomie', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await mockReport(page, HEAT_REPORT);
-    await page.goto(reportUrl(HEAT_REPORT));
+    await page.goto(detailed(reportUrl(HEAT_REPORT)));
+    await openSections(page);
     await expect(page.getByTestId('surroundings-card')).toBeVisible();
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);

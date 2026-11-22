@@ -12,20 +12,39 @@ import { FOREST_REPORT } from '../../fixtures/forest-report';
 import { HEAT_REPORT } from '../../fixtures/heat-report';
 import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
 import { MEADOW_REPORT } from '../../fixtures/meadow-report';
+import { AUTUMN_REPORT } from '../../fixtures/autumn-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
+import { WEATHER_REPORT } from '../../fixtures/weather-report';
+import type { ReportViewMode } from '../view-switch';
 import { ReportView } from './report-view';
 
 const t = translator('report');
 const CHANGE = '/analiza' as AppHref;
 const MAP = '/' as AppHref;
+const VIEW: ReportViewMode = {
+  detailed: true,
+  explicit: true,
+  simpleHref: '/raport' as AppHref,
+  detailedHref: '/raport?widok=szczegoly' as AppHref,
+};
 
-function renderReport(report: WaterReport = SAMPLE_REPORT, grasslandHref?: AppHref) {
+function renderReport(
+  report: WaterReport = SAMPLE_REPORT,
+  grasslandHref?: AppHref,
+  view: ReportViewMode = VIEW,
+) {
   // mapa pola pobiera kafle hydrografii przez TanStack Query (w jsdom bez sieci - warstwa "niedostepna")
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   return renderWithIntl(
     <QueryClientProvider client={client}>
-      <ReportView report={report} changeHref={CHANGE} mapHref={MAP} grasslandHref={grasslandHref} />
+      <ReportView
+        report={report}
+        changeHref={CHANGE}
+        mapHref={MAP}
+        grasslandHref={grasslandHref}
+        view={view}
+      />
     </QueryClientProvider>,
   );
 }
@@ -40,7 +59,9 @@ describe('ReportView', () => {
   it('sekcje w kolejnosci konkursowej: ocena, historia, przyczyny, retencja, agrotechnika, nawadnianie, zrodla', () => {
     renderReport();
 
-    const headings = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent);
+    const headings = [...document.querySelectorAll('[data-report-section] h2')].map(
+      (heading) => heading.textContent,
+    );
 
     expect(headings).toEqual(
       ['verdict', 'history', 'causes', 'retention', 'agrotech', 'irrigation', 'sources'].map(
@@ -131,7 +152,11 @@ describe('ReportView', () => {
 
     expect(screen.getByTestId('irrigation-deficit')).toHaveTextContent('brakuje ok. 136 l/m²');
     expect(screen.getByText(t('irrigation.deficitNote'))).toBeInTheDocument();
-    expect(screen.getByText(t('irrigation.advisablePast.yes'))).toBeInTheDocument();
+    expect(
+      within(document.getElementById('nawadnianie') as HTMLElement).getByText(
+        t('irrigation.advisablePast.yes'),
+      ),
+    ).toBeInTheDocument();
   });
 
   it('jedna atrapa: ograniczenie nie mowi, ze wyniki nie opisuja pola; numer dzialki w pelnej szerokosci', () => {
@@ -273,6 +298,8 @@ describe('ReportView', () => {
     ['laka z nadmiarem wody i zaglebieniami (silnik)', MEADOW_REPORT],
     ['susza (silnik)', DROUGHT_REPORT],
     ['niska pewnosc', LOW_CONFIDENCE_REPORT],
+    ['pogodynka 0.8.0 (susza)', WEATHER_REPORT],
+    ['pogodynka 0.8.0 (poza sezonem, prognoza)', AUTUMN_REPORT],
   ])('%s: zaden surowy identyfikator (snake_case) nie trafia na ekran, takze w szczegolach', (_, report) => {
     renderReport(report);
 
@@ -337,12 +364,20 @@ describe('ReportView', () => {
       limitations: [...FIELD_REPORT.limitations, 'vegetation_missing'],
     });
 
-    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(7);
+    expect(document.querySelectorAll('[data-report-section] h2')).toHaveLength(7);
     expect(screen.getByTestId('report').querySelector('[data-source="vegetation"]')).toHaveAttribute(
       'data-status',
       'missing',
     );
-    expect(screen.getByText(t('sources.limitationItems.vegetation_missing'))).toBeInTheDocument();
+    expect(
+      within(document.getElementById('zrodla') as HTMLElement).getByText(
+        t('sources.limitationItems.vegetation_missing'),
+      ),
+    ).toBeInTheDocument();
+    // to samo ograniczenie rolnik widzi w "Czego ta ocena nie wie"
+    expect(screen.getByTestId('known-limits')).toHaveTextContent(
+      t('sources.limitationItems.vegetation_missing'),
+    );
   });
 
   describe('miejsca na polu', () => {
@@ -373,15 +408,16 @@ describe('ReportView', () => {
     it('zalecenie dla miejsca ma jego numer; fokus na zaleceniu wyroznia miejsce na szkicu i odwrotnie', () => {
       renderReport(FIELD_REPORT);
 
-      const trees = screen.getByText(t('recommendations.measures.field_margin_trees.name')).closest('li');
+      const retention = within(document.getElementById('retencja') as HTMLElement);
+      const trees = retention.getByText(t('recommendations.measures.field_margin_trees.name')).closest('li');
 
       expect(trees).toHaveTextContent(
         'Dotyczy miejsca 1: suchsze miejsce, w zachodniej części pola, przy rowie, ok. 0,5 ha',
       );
       // zastawka na rowie dotyczy reszty pola - bez numeru
-      expect(screen.getByText(t('recommendations.measures.ditch_weir.name')).closest('li')).toHaveTextContent(
-        t('recommendations.zoneRest'),
-      );
+      expect(
+        retention.getByText(t('recommendations.measures.ditch_weir.name')).closest('li'),
+      ).toHaveTextContent(t('recommendations.zoneRest'));
       expect(screen.queryByTestId('field-sketch-zone-active')).not.toBeInTheDocument();
 
       fireEvent.focus(
@@ -634,6 +670,62 @@ describe('ReportView', () => {
       expect(container.querySelector('#retencja')).toHaveTextContent('Woda na polu i wokół niego');
       expect(container.querySelector('#retencja')).toHaveTextContent('Teraz wody jest za dużo');
       expect(screen.getByTestId('verdict-section-facts')).not.toHaveTextContent(t('verdict.stress'));
+    });
+  });
+
+  describe('pogodynka wody (silnik 0.8.0)', () => {
+    const SIMPLE: ReportViewMode = { ...VIEW, detailed: false, explicit: false };
+
+    it('widok prosty: werdykt ze skala, zbiornik, odliczanie, rachunek wody, 10 lat, pierwszy krok; pelna analiza ukryta', () => {
+      renderReport(WEATHER_REPORT, undefined, SIMPLE);
+
+      expect(screen.getByTestId('report')).toHaveAttribute('data-view', 'simple');
+      expect(screen.getByTestId('report-details')).toHaveClass('hidden');
+      expect(screen.getByTestId('verdict-word')).toHaveTextContent('Sucho');
+      expect(screen.getByTestId('verdict-scale')).toHaveAttribute('data-step', 'dry');
+      expect(screen.getByTestId('verdict-number')).toHaveTextContent('Brakuje ok. 114 l/m² wody');
+      expect(screen.getByTestId('tank-percent')).toHaveTextContent('4%');
+      expect(screen.getByTestId('chart-tank')).toHaveTextContent('Zwykle tego dnia: 24%.');
+      expect(screen.getByTestId('chart-countdown')).toHaveTextContent('od 39 dni');
+      expect(screen.getByTestId('chart-ledger')).toHaveTextContent('1,8 razy więcej wody');
+      expect(screen.getByTestId('chart-ledger')).toHaveTextContent('126');
+      expect(screen.getByTestId('chart-seasons')).toHaveTextContent('9 z 10');
+      // data historyczna: bez prognozy
+      expect(screen.queryByTestId('chart-forecast')).toBeNull();
+      expect(screen.getByTestId('first-step')).toHaveTextContent('Zastawka na rowie');
+      expect(screen.getByTestId('first-step-badge')).toHaveTextContent('Najpierw zgłoś do Wód Polskich');
+      expect(screen.getByTestId('simple-causes')).toHaveTextContent('ok. 31%');
+      expect(screen.getByTestId('show-details')).toBeInTheDocument();
+    });
+
+    it('szczegoly: deszcz dzien po dniu, satelita z pominietymi zdjeciami, udzial przyczyn', () => {
+      renderReport(WEATHER_REPORT);
+
+      expect(screen.getByTestId('report-details')).not.toHaveClass('hidden');
+      expect(screen.queryByTestId('show-details')).toBeNull();
+      expect(screen.getByTestId('chart-rain-use')).toHaveTextContent('W ostatnich 60 dniach spadło');
+      expect(screen.getByTestId('chart-vegetation')).toHaveTextContent('pominięte przez chmury: 4');
+      expect(screen.getByTestId('cause-shares')).toHaveTextContent('31%');
+    });
+
+    it('poza sezonem: prognoza 7 dni, zbiornik bez progu, bez odliczania', () => {
+      renderReport(AUTUMN_REPORT, undefined, SIMPLE);
+
+      expect(screen.getByTestId('verdict-word')).toHaveTextContent(t('verdict.levels.out_of_season'));
+      expect(screen.queryByTestId('verdict-scale')).toBeNull();
+      expect(screen.getByTestId('chart-tank')).toHaveTextContent('Uprawa teraz nie rośnie');
+      expect(screen.queryByTestId('chart-countdown')).toBeNull();
+      expect(screen.getByTestId('chart-forecast').querySelectorAll('li')).toHaveLength(7);
+      expect(screen.getByTestId('chart-forecast')).toHaveTextContent('MET Norway');
+    });
+
+    it('stary raport (0.7.0): zbiornik z bilansu strefy korzeni, bez kart nowych pol', () => {
+      renderReport(HEAT_REPORT, undefined, SIMPLE);
+
+      expect(screen.getByTestId('tank-percent')).toHaveTextContent('4%');
+      expect(screen.queryByTestId('chart-countdown')).toBeNull();
+      expect(screen.queryByTestId('chart-ledger')).toBeNull();
+      expect(screen.queryByTestId('chart-forecast')).toBeNull();
     });
   });
 });

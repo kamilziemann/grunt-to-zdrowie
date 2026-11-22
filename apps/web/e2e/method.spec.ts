@@ -3,6 +3,7 @@
 import { LOW_CONFIDENCE_REPORT_URL, mockAnalysisApi } from './support/analysis-api';
 
 import { expect, test } from './support/test';
+import { detailed } from './support/report-view';
 
 test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z licencją', async ({ page }) => {
   await page.goto('/analiza');
@@ -25,8 +26,13 @@ test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z 
 
 test('raport linkuje do metodyki w sekcji źródeł', async ({ page }) => {
   await mockAnalysisApi(page);
-  await page.goto(LOW_CONFIDENCE_REPORT_URL);
+  await page.goto(detailed(LOW_CONFIDENCE_REPORT_URL));
   await page.getByTestId('method-link').click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeVisible();
+
+  // widok prosty: link w "Czego ta ocena nie wie"
+  await page.goto(LOW_CONFIDENCE_REPORT_URL);
+  await page.getByTestId('known-limits').getByRole('link', { name: 'Jak liczymy' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeVisible();
 });
 

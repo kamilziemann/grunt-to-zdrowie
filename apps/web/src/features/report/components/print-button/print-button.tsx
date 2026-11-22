@@ -5,7 +5,7 @@ import { useTranslations } from 'use-intl';
 import { Button } from '@/components/ui/button';
 
 /** "Drukuj / zapisz PDF": okno wydruku przegladarki (A4 z `@media print`); zapis do PDF to opcja tego okna. */
-export function PrintButton({ className }: { className?: string }) {
+export function PrintButton({ className, short = false }: { className?: string; short?: boolean }) {
   const t = useTranslations('report.actions');
   const print = useCallback(() => {
     window.print();
@@ -14,7 +14,7 @@ export function PrintButton({ className }: { className?: string }) {
   return (
     <Button size="xl" onClick={print} className={className}>
       <Printer aria-hidden="true" />
-      {t('print')}
+      {short ? t('savePdf') : t('print')}
     </Button>
   );
 }

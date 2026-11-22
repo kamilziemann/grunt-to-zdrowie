@@ -55,7 +55,7 @@ test.describe('własne pole', () => {
       label: 'Część działki 6509',
       geometry: { type: 'Polygon' },
     });
-    await expect(page.getByTestId('verdict')).toBeVisible();
+    await expect(page.getByTestId('short-analysis')).toBeVisible();
   });
 
   test('uszkodzony obszar w linku raportu prosi o ponowny wybór', async ({ page }) => {

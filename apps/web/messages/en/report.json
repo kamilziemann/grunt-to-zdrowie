@@ -18,7 +18,9 @@
     "map": "Back to the map",
     "copyLink": "Copy report link",
     "copied": "Link copied",
-    "copyManual": "Copy the report address:"
+    "copyManual": "Copy the report address:",
+    "share": "Share",
+    "savePdf": "Save PDF"
   },
   "missing": {
     "title": "The report is missing data",
@@ -658,7 +660,8 @@
       },
       "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
       "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams, water and surroundings: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
-    }
+    },
+    "above": "The field sketch with ditches and spots on the field is at the top of the report, next to the assessment."
   },
   "print": {
     "header": "{app} · field water report",
@@ -670,7 +673,9 @@
     "pageHeader": "{app} · field water report · {field} · as of {date}",
     "pageId": "report {id}",
     "pageFooter": "Data sources: {sources}. Licences – section 7.",
-    "pageNumber": "page "
+    "pageNumber": "page ",
+    "notes": "Adviser notes",
+    "notesHint": "Space for remarks from the field visit and agreements with the farmer."
   },
   "landUse": {
     "label": "Land use in the register",
@@ -791,5 +796,172 @@
     "radiusM": "{value} m",
     "radiusKm": "{value} km",
     "source": "From the BDOT10k topographic map (GUGiK). The map does not show weirs or culverts on ditches – check them on site."
+  },
+  "view": {
+    "label": "Report detail level",
+    "simple": "Simple",
+    "detailed": "Detailed",
+    "sections": "Full analysis sections",
+    "fullTitle": "Full analysis"
+  },
+  "simple": {
+    "title": "Short analysis",
+    "field": "Your field",
+    "waterTitle": "Water now and this week",
+    "waterEmpty": "We have no soil water balance for this day, so we do not show the reserve or the forecast. The assessment and history are below.",
+    "historyTitle": "10 years on this field and why",
+    "todoTitle": "What to do",
+    "showDetails": "Show the full analysis",
+    "showDetailsNote": "Numbers with references, 10-year calendar, satellite, spots on the field, all recommendations and sources.",
+    "asOf": "As of {date}",
+    "scale": {
+      "label": "On the scale from wet to very dry: {step}.",
+      "wet": "Wet",
+      "good": "Good",
+      "slightlyDry": "Slightly dry",
+      "dry": "Dry",
+      "veryDry": "Very dry"
+    },
+    "verdict": {
+      "excess": "In the last {days} days {sum} l/m² of rain fell – usually about {median} l/m².",
+      "resting": "The soil holds {percent}% of the water plants can take.",
+      "ok": "The soil water tank is {percent}% full.",
+      "missing": "About {mm} l/m² of water is missing – the soil tank is only {percent}% full."
+    },
+    "lines": {
+      "now": "Now",
+      "history": "10 years",
+      "historyText": "Water was short in {dry} of {total} seasons.",
+      "historyMonths": "Water was short in {dry} of {total} seasons, most often: {months}.",
+      "why": "Why",
+      "first": "What to do first",
+      "confidence": "Confidence"
+    },
+    "causes": {
+      "title": "Why water is short",
+      "titleExcess": "Where this result comes from",
+      "main": "main",
+      "share": "about {percent}%"
+    },
+    "first": {
+      "title": "Do this first",
+      "badges": {
+        "now": "You can start now",
+        "check": "Check on site first",
+        "protected": "Agree first – protected area",
+        "notification": "Notify the water authority first",
+        "permit": "Get a water permit first"
+      },
+      "before": "Before you start",
+      "then": "Then:",
+      "irrigation": "Irrigation:",
+      "all": "{count, plural, one {Recommendation details} other {All recommendations ({count})}}"
+    },
+    "limits": {
+      "title": "What this assessment does not know",
+      "advice": "This is advice from open data, not an expert opinion. Talk to an agricultural adviser before investing.",
+      "method": "How we calculate"
+    }
+  },
+  "viz": {
+    "tank": {
+      "title": "How much water do the plants have now?",
+      "answerOk": "The tank is {percent}% full – plants take water without effort.",
+      "answerStressed": "The tank is only {percent}% full – below the threshold, plants drink from the last reserve and grow slower.",
+      "answerResting": "The soil holds {percent}% of the water plants can take. The crop is not growing now, so we do not count the drought threshold.",
+      "typical": "Usually on this day: {percent}%.",
+      "source": "Root-zone water balance (FAO-56) from weather and soil maps – a model, not a field measurement.",
+      "description": "Water available to plants: {percent}% of the tank, {mm} of {capacity} l/m².",
+      "now": "Now",
+      "percent": "{percent}%",
+      "mm": "{mm} of {capacity} l/m²",
+      "typicalLabel": "Usually",
+      "typicalLegend": "usually on this day: {percent}%",
+      "stressLabel": "Threshold",
+      "stressLegend": "below {percent}% plants suffer"
+    },
+    "countdown": {
+      "title": "How many days until the crop stops growing?",
+      "lead": "days without rain before the plants start to suffer",
+      "unit": "{days, plural, one {day of reserve} other {days of reserve}}",
+      "answer": "Without rain the reserve drops below the threshold in {days, plural, one {# day} other {# days}}.",
+      "answerForecast": "Without rain the reserve drops below the threshold in {days, plural, one {# day} other {# days}}, with the forecast rain – in {withRain, plural, one {# day} other {# days}}.",
+      "beyond": "{days}+",
+      "beyondAnswer": "The water reserve will last more than {days} days even without rain.",
+      "stressedUnit": "{days, plural, one {day in a row} other {days in a row}}",
+      "stressedLead": "the plants have been short of soil water – they grow slower",
+      "stressedAnswer": "The water reserve has been below the threshold for {days, plural, one {# day} other {# days}} – plants are suffering and the yield may drop.",
+      "noRain": "If no rain falls",
+      "withRain": "With the forecast rain",
+      "source": "Crop water use from the average evaporation of the last 7 days (FAO-56); the forecast variant uses the forecast rain."
+    },
+    "forecast": {
+      "title": "Will this week bring relief?",
+      "answer": "In the next {days} days about {total} l/m² of rain will fall, most on {day} ({max} l/m²).",
+      "answerDry": "Almost no rain in the next {days} days.",
+      "tooLittle": "That is too little to refill the soil (about {missing} l/m² missing).",
+      "source": "Forecast: {source}.",
+      "sourceIssued": "Forecast: {source}, issued {date}.",
+      "dayDescription": "{day}: {mm} l/m², up to {temp}°C",
+      "temp": "{temp}°",
+      "legend": "Top row: highest temperature, bottom: rain in l/m² (= mm)."
+    },
+    "ledger": {
+      "title": "Where did the water go since spring?",
+      "start": "Reserve {date}",
+      "rain": "Rain",
+      "use": "Used by plants and sun",
+      "lost": "Seeped below the roots",
+      "end": "Reserve {date}",
+      "shortfall": "Plants were short",
+      "answerMore": "Plants and sun took {ratio} times more water than the rain brought.",
+      "answerLess": "More rain fell than the plants used – the soil reserve recovered.",
+      "answerEven": "About as much rain fell as the plants used.",
+      "answerNoRain": "No rain fell, and the plants used {use} l/m² from the reserve.",
+      "source": "Root-zone water balance (FAO-56). The model does not count surface runoff.",
+      "missingDays": "{days, plural, one {# day} other {# days}} without weather data are counted without rain.",
+      "unit": "Numbers in l/m² (= mm). “Plants were short” – how much more water they needed than they had."
+    },
+    "seasons": {
+      "title": "How was it over 10 years?",
+      "headline": "{dry} of {total}",
+      "headlineNote": "seasons short of water",
+      "answer": "Water was short in {dry} of {total} previous seasons.",
+      "answerMonths": "Water was short in {dry} of {total} previous seasons – most often: {months}.",
+      "source": "Days short of water from the root-zone balance; agricultural drought by IUNG thresholds.",
+      "barDescription": "{year}: {days} days short of water{drought, select, yes {, agricultural drought} other {}}",
+      "barMissing": "{year}: no data",
+      "legendDays": "days short of water",
+      "legendDrought": "season with agricultural drought (mark !)",
+      "legendCurrent": "current season up to the analysis day"
+    },
+    "rainUse": {
+      "title": "How much rain fell and how much did the plants drink?",
+      "answer": "In the last {days} days {rain} l/m² of rain fell, while the crop needed {use} l/m².",
+      "dryStreak": "No rain for {days} days.",
+      "source": "Rain from weather data; crop needs = evaporation × crop coefficient (FAO-56).",
+      "gaps": "{days, plural, one {# day} other {# days}} without rain data (small square on the axis).",
+      "legendRain": "rain",
+      "legendUse": "crop needs",
+      "unit": "l/m² per day"
+    },
+    "vegetation": {
+      "title": "What does the satellite see?",
+      "answer": "Last clear image ({date}): plant moisture {value}.",
+      "position": {
+        "below": "That is below the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max}) – plants have less water than usual.",
+        "within": "That is within the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max}).",
+        "above": "That is above the range of {years, plural, one {# year} other {# years}} at this time ({min} – {max})."
+      },
+      "answerNone": "Clouds covered the field on all images from this period – the satellite shows nothing.",
+      "source": "Sentinel-2 images (Copernicus), plant moisture index NDMI for the whole field.",
+      "counts": "Images used: {used}, skipped because of clouds: {skipped}.",
+      "band": "Grey band – range from the previous {years, plural, one {# year} other {# years}}, dashed line – middle."
+    },
+    "shares": {
+      "title": "Share of causes",
+      "percent": "{percent}%",
+      "note": "An estimate of each cause's weight in explaining the result, not a measure of how much water it took."
+    }
   }
 }
