@@ -93,16 +93,15 @@ Unlicense, BlueOak-1.0.0, Python-2.0, CC-BY-4.0 dla `caniuse-lite`). Licencje z 
 
 ## Usługi zewnętrzne (infrastruktura)
 
-| Usługa                          | Do czego                                   | Warunki                                                                                                |
-| ------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Cloudflare Workers              | jeden Worker: strony i API                 | regulamin Cloudflare; plan konta wdrożenia (Free/Paid) **do potwierdzenia**                            |
-| Cloudflare D1                   | zapisane raporty, pamięć działek (30 dni)  | jak wyżej                                                                                              |
-| Cloudflare Workers Cache        | pamięć odpowiedzi źródeł i stron           | jak wyżej                                                                                              |
-| Cloudflare Observability        | logi i ślady                               | jak wyżej                                                                                              |
-| Neon (Postgres 18, PostGIS 3.6) | BDOT10k: wody i otoczenie pola             | regulamin Neon, plan Launch; PostGIS na licencji GPL-2.0 działa po stronie Neon (nie dystrybuujemy go) |
-| Copernicus Data Space Ecosystem | API statystyk i Process API Sentinel-2     | darmowe konto, limity konta ogólnego (README konkursowe, pkt 5.4)                                      |
-| Sentry                          | raportowanie błędów                        | w kodzie, domyślnie wyłączone                                                                          |
-| GitHub Actions                  | wdrożenie (`.github/workflows/deploy.yml`) | regulamin GitHub                                                                                       |
+| Usługa                          | Do czego                                  | Warunki                                                                                                |
+| ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Cloudflare Workers              | jeden Worker: strony i API                | regulamin Cloudflare; plan konta wdrożenia (Free/Paid) **do potwierdzenia**                            |
+| Cloudflare D1                   | zapisane raporty, pamięć działek (30 dni) | jak wyżej                                                                                              |
+| Cloudflare Workers Cache        | pamięć odpowiedzi źródeł i stron          | jak wyżej                                                                                              |
+| Cloudflare Observability        | logi i ślady                              | jak wyżej                                                                                              |
+| Neon (Postgres 18, PostGIS 3.6) | BDOT10k: wody i otoczenie pola            | regulamin Neon, plan Launch; PostGIS na licencji GPL-2.0 działa po stronie Neon (nie dystrybuujemy go) |
+| Copernicus Data Space Ecosystem | API statystyk i Process API Sentinel-2    | darmowe konto, limity konta ogólnego (README konkursowe, pkt 5.4)                                      |
+| Sentry                          | raportowanie błędów                       | w kodzie, domyślnie wyłączone                                                                          |
 
 Ceny i limity: [README konkursowe, „Infrastruktura i koszty”](README-konkursowe.md#infrastruktura-i-koszty-pkt-54).
 
