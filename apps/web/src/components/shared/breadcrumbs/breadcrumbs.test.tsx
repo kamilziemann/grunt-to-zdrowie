@@ -27,6 +27,7 @@ describe('Breadcrumbs', () => {
   it('bez elementów nic nie renderuje', () => {
     const { container } = renderWithIntl(<Breadcrumbs items={NONE} />);
 
-    expect(container).toBeEmptyDOMElement();
+    // pomocnik testow dokleja staly region powiadomien - sprawdzamy sama nawigacje
+    expect(within(container).queryByRole('navigation')).toBeNull();
   });
 });
