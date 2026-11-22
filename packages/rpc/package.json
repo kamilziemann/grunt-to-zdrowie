@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@app/tsconfig": "workspace:*",
-    "hono": "^4.13.13",
+    "hono": "^4.13.19",
     "typescript": "5.9.3",
     "vitest": "4.1.11"
   },
