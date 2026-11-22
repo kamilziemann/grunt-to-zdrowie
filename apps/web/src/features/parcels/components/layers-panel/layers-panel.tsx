@@ -157,8 +157,8 @@ export function LayersPanel({ open, onOpenChange, layers, onChange, className }:
         hidden={!open}
         // komputer: rozwijany panel pod przyciskiem; telefon: arkusz od dolu ekranu mapy nad panelem dzialek (korzen
         // ekranu ma `container-type: size`, wiec `fixed` liczy sie od niego), mapa zostaje widoczna nad arkuszem, a szyna
-        // przyciskow obok niego (arkusz konczy sie przed nia)
-        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-88 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
+        // przyciskow obok niego (arkusz konczy sie przed nia; na niskim ekranie szyna stoi u gory w kilku kolumnach)
+        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-88 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:[@media(height<30rem)]:right-52 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
         data-testid="layers-panel"
       >
         <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4">

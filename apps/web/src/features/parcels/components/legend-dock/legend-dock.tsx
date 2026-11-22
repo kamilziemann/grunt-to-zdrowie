@@ -117,7 +117,7 @@ export function LegendDock({
           'flex flex-col',
           'lg:absolute lg:bottom-10 lg:left-106 lg:z-10 lg:max-h-[calc(100cqh-8rem)] lg:w-72',
           // telefon: arkusz od dolu ekranu mapy nad panelem dzialek (korzen ekranu ma `container-type: size`)
-          'max-lg:fixed max-lg:bottom-0 max-lg:left-0 max-lg:right-19 max-lg:z-30 max-lg:max-h-[72cqh] max-lg:rounded-t-xl max-lg:border-t max-lg:border-r max-lg:bg-card max-lg:pb-[env(safe-area-inset-bottom)] max-lg:text-card-foreground max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]',
+          'max-lg:fixed max-lg:bottom-0 max-lg:left-0 max-lg:right-19 max-lg:z-30 max-lg:max-h-[72cqh] max-lg:rounded-t-xl max-lg:border-t max-lg:border-r max-lg:[@media(height<30rem)]:right-52 max-lg:bg-card max-lg:pb-[env(safe-area-inset-bottom)] max-lg:text-card-foreground max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]',
           !open && 'max-lg:hidden',
         )}
         data-testid="map-legends"

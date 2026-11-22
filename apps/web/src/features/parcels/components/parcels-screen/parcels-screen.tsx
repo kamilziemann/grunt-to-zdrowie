@@ -102,6 +102,10 @@ const DESKTOP_QUERY = '(min-width: 64rem)';
 const PANEL_WIDTH_REM = 25;
 const MAP_MARGIN_PX = 56;
 const RAIL_WIDTH_PX = 68;
+// Niski ekran (wysokosc ponizej 30rem, np. telefon poziomo): szyna u gory obok wyszukiwarki, w kolumnach po dwa kafle.
+const SHORT_SCREEN_SEARCH = 'max-lg:[@media(height<30rem)]:right-52';
+const SHORT_SCREEN_RAIL =
+  'max-lg:[@media(height<30rem)]:top-3 max-lg:[@media(height<30rem)]:[--rail-top:0.75rem]';
 const HINT_MS = 4000;
 const NO_PARCELS: readonly Parcel[] = [];
 
@@ -548,7 +552,11 @@ export function ParcelsScreen({
     <div ref={rootRef} style={rootStyle} className="@container-[size] relative min-h-0 flex-1 overflow-clip">
       {/* telefon i waski tablet: wyszukiwarka na gorze mapy (klawiatura jej nie zaslania); od `lg` stoi w panelu bocznym;
           w trybie "wlasne pole" ustepuje miejsca podpowiedzi (rysowane miejsce ma byc odsloniete) */}
-      <div ref={controlsRef} className={cn('absolute inset-x-3 top-3 z-20 lg:hidden', drawing && 'hidden')}>
+      <div
+        ref={controlsRef}
+        // niski ekran (telefon poziomo): szyna stoi obok pola, nie pod nim - pole robi jej miejsce po prawej
+        className={cn('absolute inset-x-3 top-3 z-20 lg:hidden', SHORT_SCREEN_SEARCH, drawing && 'hidden')}
+      >
         <ParcelSearch
           variant="map"
           value={text}
@@ -568,7 +576,9 @@ export function ParcelsScreen({
         className={cn(
           'pointer-events-none absolute z-10 *:pointer-events-auto has-aria-expanded:z-30',
           'max-lg:right-3 max-lg:grid max-lg:max-h-[calc(100cqh-var(--sheet-peek,7.75rem)-var(--rail-top)-0.75rem)] max-lg:grid-flow-col-dense max-lg:auto-rows-[3.5rem] max-lg:[grid-template-rows:repeat(auto-fill,3.5rem)] max-lg:gap-2 max-lg:[direction:rtl] max-lg:*:[direction:ltr]',
-          drawing ? 'max-lg:top-3 max-lg:[--rail-top:0.75rem]' : 'max-lg:top-19 max-lg:[--rail-top:4.75rem]',
+          drawing
+            ? 'max-lg:top-3 max-lg:[--rail-top:0.75rem]'
+            : cn('max-lg:top-19 max-lg:[--rail-top:4.75rem]', SHORT_SCREEN_RAIL),
           'lg:top-3 lg:right-3 lg:left-106 lg:flex lg:items-start lg:gap-2',
         )}
         data-testid="map-controls-row"
@@ -673,7 +683,7 @@ export function ParcelsScreen({
 
       {hint && !drawing && (
         // telefon: pod wyszukiwarka, z lewej - szyna przyciskow po prawej zostaje odslonieta; komputer: pod rzedem pigulek
-        <output className="absolute z-10 block w-max rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-lg:top-19 max-lg:left-3 max-lg:max-w-[calc(100%-6.5rem)] lg:top-18 lg:left-[calc(50%+12.5rem)] lg:max-w-[calc(100%-32rem)] lg:-translate-x-1/2">
+        <output className="absolute z-10 block w-max rounded-2xl bg-foreground px-4 py-2 text-sm font-medium text-background shadow-lg max-lg:top-19 max-lg:left-3 max-lg:max-w-[calc(100%-6.5rem)] max-lg:[@media(height<30rem)]:max-w-[calc(100%-14rem)] lg:top-18 lg:left-[calc(50%+12.5rem)] lg:max-w-[calc(100%-32rem)] lg:-translate-x-1/2">
           {t(`map.${hint}`)}
         </output>
       )}

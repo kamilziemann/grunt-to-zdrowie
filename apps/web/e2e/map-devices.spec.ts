@@ -1,6 +1,6 @@
 // Ekran mapy na tabletach i telefonie poziomo (emulacja w Chromium): ponizej 1024 px uklad telefonu (mapa na caly
 // ekran, szyna kafli, arkusz), od 1024 px panel boczny. Naglowek w jednej linii, bez przewijania w poziomie, przyciski
-// mapy odsloniete takze przy otwartym panelu warstw.
+// mapy odsloniete takze przy otwartym panelu warstw; na niskim ekranie glowny przycisk kroku widoczny.
 import type { Page } from '@playwright/test';
 
 import { mockAnalysisApi, PARCEL_ID } from './support/analysis-api';
@@ -102,4 +102,35 @@ test.describe('mapa na tabletach', () => {
       });
     });
   }
+});
+
+test.describe('telefon poziomo', () => {
+  test.use({ viewport: { width: 812, height: 375 }, hasTouch: true, isMobile: true });
+
+  test('szyna obok wyszukiwarki mieści się nad arkuszem, główny przycisk widoczny', async ({ page }) => {
+    await openParcelMap(page);
+
+    await expectNoHorizontalScroll(page);
+    await expect(page.getByRole('link', { name: /Analizuj/ })).toBeInViewport({ ratio: 1 });
+
+    const sheetTop = (await boxOf(page.getByTestId('parcels-panel'))).y;
+    const rail = page.getByTestId('map-controls-row').getByRole('button');
+
+    for (const button of await rail.all()) {
+      await expect(button).toBeInViewport({ ratio: 1 });
+      const box = await boxOf(button);
+
+      expect(box.y + box.height).toBeLessThanOrEqual(sheetTop);
+    }
+
+    await expectMapButtonsUncovered(page, [page.getByRole('searchbox'), page.getByTestId('legend-button')]);
+
+    // panel warstw miesci sie i przewija, szyna zostaje odslonieta
+    await page.getByTestId('layers-button').click();
+
+    const panel = page.getByTestId('layers-panel');
+
+    await expect(panel).toBeInViewport();
+    await expectMapButtonsUncovered(page, [panel]);
+  });
 });

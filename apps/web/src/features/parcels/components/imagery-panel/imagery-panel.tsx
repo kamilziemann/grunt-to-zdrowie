@@ -103,7 +103,7 @@ export function ImageryPanel({ open, onOpenChange, value, status, children, clas
         id={panelId}
         aria-labelledby={titleId}
         hidden={!open}
-        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-80 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
+        className="absolute top-full left-0 z-20 mt-2 flex max-h-[calc(100cqh-9rem)] w-80 max-w-[calc(100cqw-1.5rem)] flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-lg max-lg:fixed max-lg:left-0 max-lg:right-19 max-lg:[@media(height<30rem)]:right-52 max-lg:top-auto max-lg:bottom-0 max-lg:mt-0 max-lg:max-h-[72cqh] max-lg:w-auto max-lg:max-w-none max-lg:rounded-b-none max-lg:border-l-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:shadow-[0_-8px_24px_rgb(0_0_0/0.18)]"
         data-testid="imagery-panel"
       >
         <header className="flex items-center justify-between gap-2 border-b py-1 pr-1 pl-4">
