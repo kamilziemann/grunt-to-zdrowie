@@ -291,7 +291,7 @@ describe('createSentinelStatisticsSource', () => {
     expect(offline.source.note).toContain('network down');
   });
 
-  it('HTTP 429: jedna ponowna proba; odmowa dla czesci lat zostawia reszte (status `partial`)', async () => {
+  it('HTTP 429: do dwoch ponownych prob; odmowa dla czesci lat zostawia reszte (status `partial`)', async () => {
     let statistics = 0;
     const limited: FetchLike = (url, init) => {
       if (url === CDSE_TOKEN_URL) return Promise.resolve(Response.json({ access_token: 't' }));

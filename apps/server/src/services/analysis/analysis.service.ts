@@ -40,7 +40,7 @@ import type {
 import { failureNote } from '../../lib/source-note';
 
 /** Wersja silnika wchodzi do identyfikatora raportu: zmiana obliczen = nowy raport dla tych samych danych. */
-export const ANALYSIS_ENGINE_VERSION = '0.8.3';
+export const ANALYSIS_ENGINE_VERSION = '0.8.4';
 
 /**
  * Limity czasu zrodel (ms) - razem z obliczeniami mieszcza sie w 30 s na analize. Meteo ma najdluzszy, bo bez
@@ -420,6 +420,13 @@ export function createAnalysisService({
 
       // granice dzialek i hydrografia sa biezace - dla dawnej daty to wspolczesne przyblizenie
       if (date < addDays(today, -BOUNDARIES_STALE_DAYS)) limitations.add('current_boundaries');
+
+      // dzialka bez uzytku z ewidencji (WFS EGiB nie odpowiedzial albo go nie zna): nie wiemy, czy to pole uprawne
+      if (field.parcelIds.length > 0 && (!field.landUse || field.landUse.length === 0))
+        limitations.add('land_use_unknown');
+
+      // satelita porownany z poprzednimi latami - nie wiemy, co wtedy roslo na polu
+      if ((assessment.vegetation?.baselineYears ?? 0) > 0) limitations.add('vegetation_rotation_unknown');
 
       const report: WaterReport = {
         meta: {

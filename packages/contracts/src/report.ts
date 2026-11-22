@@ -129,7 +129,20 @@ export const vegetationSignalSchema = z.object({
   baselineYears: z.number().int().min(0),
   ndviAnomaly: z.number().nullable(),
   ndmiAnomaly: z.number().nullable(),
-  interpretation: z.enum(['confirms_deficit', 'no_signal', 'not_comparable', 'possible_other_stress']),
+  interpretation: z.enum([
+    'confirms_deficit',
+    'no_signal',
+    'not_comparable',
+    'possible_other_stress',
+    // spadek zwykly dla tej uprawy i fazy (dojrzewanie zboz, pokos laki) - nie stres wodny
+    'expected_seasonal',
+  ]),
+  /** faza uprawy w dniu analizy - od niej zalezy, czy i jak czytamy satelite (od silnika 0.8.4) */
+  stage: cropStageSchema.optional(),
+  /** prog spadku NDMI dla tej uprawy i fazy (gesty lan -0,05, szerokie rzedy -0,07, dojrzewanie -0,15) */
+  thresholdNdmi: z.number().optional(),
+  /** dlaczego satelita nie mowi o stresie: rzadka okrywa (wschody), dojrzewanie, pokos */
+  reason: z.enum(['sparse_canopy', 'ripening', 'mowing']).optional(),
 });
 
 export type VegetationSignal = z.infer<typeof vegetationSignalSchema>;
@@ -556,6 +569,10 @@ export const LIMITATION_IDS = [
   'no_in_situ_measurement',
   'field_verification_needed',
   'drainage_structures_unknown',
+  // ewidencja (EGiB) nie podala uzytku dzialki - raport zaklada pole uprawne
+  'land_use_unknown',
+  // porownanie satelity z ta sama pora roku nie zna upraw z lat poprzednich (plodozmian)
+  'vegetation_rotation_unknown',
 ] as const;
 
 export const limitationIdSchema = z.enum(LIMITATION_IDS);

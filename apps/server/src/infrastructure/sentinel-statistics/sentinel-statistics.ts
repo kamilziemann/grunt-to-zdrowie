@@ -43,9 +43,14 @@ const MAX_SIDE_PX = 2000;
 const MIN_VALID_SHARE = 0.6;
 const MIN_PIXELS = 5;
 const TIMEOUT_MS = 9000;
-/** CDSE odrzuca serie wielu jednoczesnych zapytan (HTTP 429) - po 3 naraz i jedna ponowna proba */
+/**
+ * CDSE odrzuca serie wielu jednoczesnych zapytan (HTTP 429) - po 3 naraz i do dwoch ponownych prob z rosnacym
+ * odstepem (0,8 s, potem 1,6 s z rozrzutem, zeby rownolegle zapytania nie wracaly w tej samej chwili). Laczne
+ * czekanie miesci sie w limicie zrodla (10 s); odpowiedzi 200 trafiaja do pamieci, wiec powtorka nie pyta CDSE.
+ */
 const CONCURRENCY = 3;
-const RETRY_AFTER_MS = 1000;
+const RETRY_DELAYS_MS = [800, 1600] as const;
+const RETRY_MAX_WAIT_MS = 2500;
 
 export const EVALSCRIPT = `//VERSION=3
 function setup() {
@@ -352,18 +357,28 @@ async function pooled<T>(jobs: (() => Promise<T>)[], limit: number): Promise<T[]
   return results;
 }
 
-/** Jedna ponowna proba po HTTP 429 (limit chwilowy), po czasie z `Retry-After`, najwyzej 2 s. */
-async function withRetryOn429(send: () => Promise<Response>): Promise<Response> {
-  const response = await send();
+/** Ponowne proby po HTTP 429 (limit chwilowy): czas z `Retry-After` albo rosnacy odstep z rozrzutem. */
+export async function withRetryOn429(
+  send: () => Promise<Response>,
+  delaysMs: readonly number[] = RETRY_DELAYS_MS,
+): Promise<Response> {
+  let response = await send();
 
-  if (response.status !== 429) return response;
+  for (const delay of delaysMs) {
+    if (response.status !== 429) return response;
 
-  const seconds = Number(response.headers.get('retry-after'));
-  const waitMs = Number.isFinite(seconds) && seconds > 0 ? Math.min(seconds * 1000, 2000) : RETRY_AFTER_MS;
+    const seconds = Number(response.headers.get('retry-after'));
+    const jitter = Math.round(Math.random() * delay * 0.25);
+    const waitMs = Math.min(
+      Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : delay + jitter,
+      RETRY_MAX_WAIT_MS,
+    );
 
-  await new Promise((resolve) => setTimeout(resolve, waitMs));
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
+    response = await send();
+  }
 
-  return send();
+  return response;
 }
 
 export function createSentinelStatisticsSource({

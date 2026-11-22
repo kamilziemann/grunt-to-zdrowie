@@ -13,7 +13,6 @@ import type {
   Recommendation,
   RootZone,
   SoilCategory,
-  VegetationSignal,
   ZoneMap,
 } from '@app/contracts';
 
@@ -24,6 +23,7 @@ import { cropProfile } from '../crops';
 import { addDays, daysBetween, monthOf, withYear, yearOf } from '../iso-date';
 import { iungPeriodEndingBy, iungPeriods, type IungPeriod } from '../iung-periods';
 import { terrainTooCoarse } from '../terrain';
+import { vegetationSignal } from '../vegetation-signal';
 
 /** Uproszczone progi suszy dla kategorii gleby (mm); wlasciwa tabela IUNG zalezy tez od uprawy i okresu (P2). */
 const SAMPLE_THRESHOLD_MM: Record<SoilCategory, number> = { 1: -150, 2: -170, 3: -205, 4: -230 };
@@ -140,45 +140,8 @@ function rootZone(input: StageInput): RootZone | null {
   };
 }
 
-function mean(values: (number | null)[]): number | null {
-  const known = values.filter((value): value is number => value !== null);
-
-  return known.length === 0 ? null : known.reduce((sum, value) => sum + value, 0) / known.length;
-}
-
-/** Sygnal satelitarny wzgledem tej samej pory roku w latach poprzednich - uzywa go tez wlasciwa ocena. */
-export function vegetationSignal(input: StageInput, deficit: boolean): VegetationSignal | null {
-  const [latest] = input.vegetation?.observations ?? [];
-
-  if (!input.vegetation || !latest) return null;
-
-  const { baseline } = input.vegetation;
-  const ndviBase = mean(baseline.map((item) => item.ndvi));
-  const ndmiBase = mean(baseline.map((item) => item.ndmi));
-  const ndviAnomaly = latest.ndvi === null || ndviBase === null ? null : round(latest.ndvi - ndviBase, 2);
-  const ndmiAnomaly = latest.ndmi === null || ndmiBase === null ? null : round(latest.ndmi - ndmiBase, 2);
-  // poza okresem wzrostu (siew, zbior, spoczynek) niska zielonosc nic nie mowi o wodzie
-  const comparable = input.crop.kc !== null && baseline.length > 0 && ndmiAnomaly !== null;
-  const drier = (ndmiAnomaly ?? 0) < -0.05;
-
-  return {
-    observedOn: latest.date,
-    ndvi: latest.ndvi,
-    ndmi: latest.ndmi,
-    validShare: latest.validShare,
-    pixels: latest.pixels,
-    baselineYears: baseline.length,
-    ndviAnomaly,
-    ndmiAnomaly,
-    interpretation: !comparable
-      ? 'not_comparable'
-      : drier && deficit
-        ? 'confirms_deficit'
-        : drier
-          ? 'possible_other_stress'
-          : 'no_signal',
-  };
-}
+/** Sygnal satelitarny wzgledem uprawy i fazy - jedna definicja w domain/vegetation-signal (uzywa jej tez ocena). */
+export { vegetationSignal };
 
 /** Opad z ostatnich 30 dni na tle tych samych dni w 10 latach poprzednich. */
 export function precipitationContext(input: StageInput): Assessment['precipitation'] {
