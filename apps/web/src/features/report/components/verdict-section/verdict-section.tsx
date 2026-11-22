@@ -114,6 +114,10 @@ export function VerdictSection({ report }: { report: WaterReport }) {
           ? t('soilBasis.nearbyUnknown')
           : t('soilBasis.nearby', { distance: number(assessment.soilDistanceM, 0) })
         : t(`soilBasis.${assessment.soilBasis}`);
+  // zakres kategorii z modelu gleby (uziarnienie, woda w profilu); do progu silnik bierze lzejszy koniec
+  const range = assessment.soilCategoryRange;
+  const soilRange =
+    range && range[0] !== range[1] ? t('soilRange', { from: roman(range[0]), to: roman(range[1]) }) : null;
   const verdictBasis = assessment.verdictBasis ? t(`verdictBasis.${assessment.verdictBasis}`) : null;
   // w karcie werdyktu tylko to, co zmienia odbior wyniku (gleba spoza pola, wynik zalezny od gleby); reszta w szczegolach
   const basisInCard = [
@@ -214,6 +218,20 @@ export function VerdictSection({ report }: { report: WaterReport }) {
                     })}
             </Fact>
           )}
+          {rootZone?.etDeficitShare60d !== undefined && (
+            <Fact
+              label={t('etDeficit')}
+              value={
+                percentOf(rootZone.etDeficitShare60d) > 0
+                  ? t('etDeficitValue', { percent: percentOf(rootZone.etDeficitShare60d) })
+                  : t('etDeficitNone')
+              }
+            >
+              {percentOf(rootZone.etDeficitShare60d) > 0
+                ? t('etDeficitNote', { percent: percentOf(rootZone.etDeficitShare60d) })
+                : null}
+            </Fact>
+          )}
           {vegetation && (
             <Fact
               label={t('plants')}
@@ -227,11 +245,12 @@ export function VerdictSection({ report }: { report: WaterReport }) {
 
       <ReportDetails summary={tReport('details')}>
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[minmax(10rem,auto)_1fr]">
-          {(soilBasis || verdictBasis) && (
+          {(soilBasis || verdictBasis || soilRange) && (
             <>
               <dt className="font-medium">{t('basis')}</dt>
               <dd className="flex flex-col">
                 {soilBasis && <span>{soilBasis}</span>}
+                {soilRange && <span data-testid="soil-range">{soilRange}</span>}
                 {verdictBasis && <span>{verdictBasis}</span>}
               </dd>
             </>

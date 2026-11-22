@@ -197,7 +197,12 @@
       "soil_category": "Drought threshold chosen for this field's soil category.",
       "scenarios_agree": "The soil type is uncertain, but the result is the same on every soil.",
       "scenarios_disagree": "The result depends on the soil: a lighter soil would be in drought, a heavier one not. Check the soil in the field."
-    }
+    },
+    "etDeficit": "Water the plants went short of",
+    "etDeficitValue": "{percent}% in the last 60 days",
+    "etDeficitNone": "none in the last 60 days",
+    "etDeficitNote": "The plants got {percent}% less water than they needed in the last 60 days. At 20% or more the yield usually drops.",
+    "soilRange": "The soil model points to category {from} to {to}; for the drought threshold we take the lighter one ({from})."
   },
   "history": {
     "noData": "There is no historical data for this field.",
@@ -674,7 +679,26 @@
       "no_spatial_data": "We could not point out spots in the field – there was no satellite image and no terrain model for it.",
       "scattered_parts": "The parcels lie far apart, so we do not split them into spots together – run a report for each parcel."
     },
-    "teaser": "{count, plural, one {There is # spot in the field that differs in water from the rest} other {There are # spots in the field that differ in water from the rest}} – see the sketch."
+    "teaser": "{count, plural, one {There is # spot in the field that differs in water from the rest} other {There are # spots in the field that differ in water from the rest}} – see the sketch.",
+    "measures": {
+      "grid": "Grid of {size} m ({cells} cells in the field); data: {basis}.",
+      "basis": {
+        "vegetation": "Sentinel-2 image (NDMI, NDVI)",
+        "terrain": "terrain model",
+        "hydro": "BDOT10k ditches and streams"
+      },
+      "item": "Spot {number}: {measures}",
+      "ndmi": "NDMI {value} vs the field",
+      "ndvi": "NDVI {value}",
+      "elevation": "elevation {value} m a.s.l.",
+      "slope": "slope {value}%",
+      "twi": "wetness index (TWI) {value}",
+      "ditch": "ditch or stream {value} m",
+      "volume": "hollow capacity about {value} m³",
+      "segment": "section {from}–{to} m",
+      "none": "no figures",
+      "note": "NDMI and NDVI come from one scene – a big difference may also mean another land use or sowing date, not only moisture."
+    }
   },
   "stored": {
     "computed": "Computed on {date}, {time}",

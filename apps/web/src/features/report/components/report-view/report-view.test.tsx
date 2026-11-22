@@ -427,4 +427,27 @@ describe('ReportView', () => {
       expect(screen.queryAllByTestId('field-sketch-zone-number')).toHaveLength(0);
     });
   });
+
+  describe('nowe pola oceny (silnik 0.5.0)', () => {
+    it('niedobor wody w 60 dniach jezykiem rolnika i zakres kategorii gleby w szczegolach', () => {
+      renderReport(FIELD_REPORT);
+
+      expect(screen.getByTestId('verdict').parentElement).toHaveTextContent(
+        'Rośliny dostały o 32% mniej wody, niż potrzebowały, w ostatnich 60 dniach.',
+      );
+      expect(screen.getByTestId('soil-range')).toHaveTextContent(
+        'Model gleby wskazuje kategorię od I do III; do progu suszy bierzemy lżejszą (I).',
+      );
+    });
+
+    it('liczby miejsc dla doradcy: NDMI wzgledem pola, wysokosc, row, pojemnosc zaglebienia', () => {
+      renderReport(MEADOW_REPORT);
+
+      const measures = screen.getByTestId('zone-measures');
+
+      expect(measures).toHaveTextContent('Siatka 10 m');
+      expect(measures).toHaveTextContent('pojemność zagłębienia ok. 5301 m³');
+      expect(measures).toHaveTextContent('NDMI');
+    });
+  });
 });

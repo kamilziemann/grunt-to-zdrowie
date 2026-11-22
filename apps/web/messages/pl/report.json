@@ -197,7 +197,12 @@
       "soil_category": "Próg suszy dobrany do kategorii gleby tego pola.",
       "scenarios_agree": "Rodzaj gleby jest niepewny, ale na każdej glebie wynik wychodzi ten sam.",
       "scenarios_disagree": "Wynik zależy od gleby: na lżejszej byłaby susza, na cięższej nie. Sprawdź glebę na polu."
-    }
+    },
+    "etDeficit": "Woda, której zabrakło roślinom",
+    "etDeficitValue": "{percent}% w ostatnich 60 dniach",
+    "etDeficitNone": "nie zabrakło w ostatnich 60 dniach",
+    "etDeficitNote": "Rośliny dostały o {percent}% mniej wody, niż potrzebowały, w ostatnich 60 dniach. Przy 20% i więcej plon zwykle spada.",
+    "soilRange": "Model gleby wskazuje kategorię od {from} do {to}; do progu suszy bierzemy lżejszą ({from})."
   },
   "history": {
     "noData": "Brak danych historycznych dla tego pola.",
@@ -674,7 +679,26 @@
       "no_spatial_data": "Miejsc na polu nie udało się wskazać – zabrakło zdjęcia satelitarnego i modelu terenu dla tego pola.",
       "scattered_parts": "Działki leżą daleko od siebie, więc nie dzielimy ich na miejsca razem – policz raport dla każdej działki osobno."
     },
-    "teaser": "{count, plural, one {Na polu jest # miejsce, które różni się wodą od reszty} few {Na polu są # miejsca, które różnią się wodą od reszty} other {Na polu jest # miejsc, które różnią się wodą od reszty}} – zobacz szkic."
+    "teaser": "{count, plural, one {Na polu jest # miejsce, które różni się wodą od reszty} few {Na polu są # miejsca, które różnią się wodą od reszty} other {Na polu jest # miejsc, które różnią się wodą od reszty}} – zobacz szkic.",
+    "measures": {
+      "grid": "Siatka {size} m ({cells} komórek w polu); dane: {basis}.",
+      "basis": {
+        "vegetation": "zdjęcie Sentinel-2 (NDMI, NDVI)",
+        "terrain": "model terenu",
+        "hydro": "rowy i cieki BDOT10k"
+      },
+      "item": "Miejsce {number}: {measures}",
+      "ndmi": "NDMI {value} względem pola",
+      "ndvi": "NDVI {value}",
+      "elevation": "wysokość {value} m n.p.m.",
+      "slope": "spadek {value}%",
+      "twi": "wskaźnik gromadzenia wody (TWI) {value}",
+      "ditch": "rów lub ciek {value} m",
+      "volume": "pojemność zagłębienia ok. {value} m³",
+      "segment": "odcinek {from}–{to} m",
+      "none": "brak liczb",
+      "note": "NDMI i NDVI z jednej sceny – duża różnica może też oznaczać inny użytek albo inny termin siewu, nie tylko wilgotność."
+    }
   },
   "stored": {
     "computed": "Policzono {date}, {time}",

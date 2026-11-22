@@ -6,6 +6,7 @@ import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
 import { fieldZones, type NumberedZone } from '../../utils/report-data';
+import { ReportDetails } from '../report-section';
 import { useZoneFocus } from '../zone-focus';
 
 /** Opis miejsca: gotowe zdanie z serwera (po polsku) albo rodzaj i powierzchnia z tlumaczen. */
@@ -80,6 +81,7 @@ export function ZoneButton({
 export function ZoneList({ report }: { report: WaterReport }) {
   const t = useTranslations('report.zones');
   const format = useFormatter();
+  const tReport = useTranslations('report');
   const describe = useZoneDescription();
   const { active } = useZoneFocus();
   const zones = fieldZones(report);
@@ -141,6 +143,60 @@ export function ZoneList({ report }: { report: WaterReport }) {
       <p className="text-sm text-muted-foreground" data-testid="zone-list-basis">
         {vegetation ? imageText : t('terrainOnly')} {t('verify')}
       </p>
+      <ReportDetails summary={tReport('details')}>
+        <ZoneMeasures zones={zones} report={report} />
+      </ReportDetails>
+    </div>
+  );
+}
+
+/** Liczby stref dla doradcy: roznica wilgotnosci i zieleni roslin wzgledem pola, wysokosc, spadek, TWI, row. */
+function ZoneMeasures({ zones, report }: { zones: readonly NumberedZone[]; report: WaterReport }) {
+  const t = useTranslations('report.zones.measures');
+  const format = useFormatter();
+  const number = (value: number, digits: number) =>
+    format.number(value, { maximumFractionDigits: digits, signDisplay: 'auto' });
+  const signed = (value: number) =>
+    format.number(value, { maximumFractionDigits: 2, signDisplay: 'exceptZero' });
+  const map = report.zones;
+
+  return (
+    <div className="flex flex-col gap-2" data-testid="zone-measures">
+      {map && (
+        <p>
+          {t('grid', {
+            size: number(map.cellSizeM, 0),
+            cells: number(map.cells, 0),
+            basis: format.list(
+              (map.basis ?? []).map((item) => t(`basis.${item}`)),
+              { type: 'conjunction' },
+            ),
+          })}
+        </p>
+      )}
+      <ul className="flex flex-col gap-1">
+        {zones.map(({ zone, number: zoneNumber }) => {
+          const parts = [
+            zone.ndmiDelta === undefined ? null : t('ndmi', { value: signed(zone.ndmiDelta) }),
+            zone.ndviDelta === undefined ? null : t('ndvi', { value: signed(zone.ndviDelta) }),
+            zone.elevationM === undefined ? null : t('elevation', { value: number(zone.elevationM, 1) }),
+            zone.slopePct === undefined ? null : t('slope', { value: number(zone.slopePct, 1) }),
+            zone.wetnessIndex === undefined ? null : t('twi', { value: number(zone.wetnessIndex, 1) }),
+            zone.ditchDistanceM === undefined ? null : t('ditch', { value: number(zone.ditchDistanceM, 0) }),
+            zone.volumeM3 === undefined ? null : t('volume', { value: number(zone.volumeM3, 0) }),
+            zone.fromM === undefined || zone.toM === undefined
+              ? null
+              : t('segment', { from: number(zone.fromM, 0), to: number(zone.toM, 0) }),
+          ].filter((part): part is string => part !== null);
+
+          return (
+            <li key={zone.id}>
+              {t('item', { number: zoneNumber, measures: parts.join('; ') || t('none') })}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="text-muted-foreground">{t('note')}</p>
     </div>
   );
 }
