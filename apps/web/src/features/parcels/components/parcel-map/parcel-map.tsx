@@ -3,11 +3,32 @@
 // przelaczana widocznoscia, a nie `setStyle` - dzieki temu zaznaczone dzialki nie znikaja przy zmianie podkladu.
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import type { HydroTile, ParcelBoundaries, ParcelBoundaryTileZoom, ParcelOutline } from '@app/contracts';
+import {
+  CONTEXT_LAYERS,
+  type ContextLayer,
+  type ContextTile,
+  type HydroTile,
+  type ParcelBoundaries,
+  type ParcelBoundaryTileZoom,
+  type ParcelOutline,
+} from '@app/contracts';
 import { LoaderCircle } from 'lucide-react';
 import type * as MapLibre from 'maplibre-gl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import {
+  addContextLayers,
+  areaLabels,
+  CONTEXT_TILE_CACHE,
+  contextCollections,
+  contextColors,
+  ContextUnavailableError,
+  latestContextImport,
+  setContextData,
+  setContextLabels,
+  setContextVisible,
+  type ContextKindLabels,
+} from '@/lib/context-map';
 import {
   addHydroLayers,
   HYDRO_MIN_ZOOM,
@@ -23,6 +44,7 @@ import {
   setHydroVisible,
 } from '@/lib/hydro-map';
 import { BASEMAP_STYLE_URL, loadMapLibre, ORTHO_LAYER, ORTHO_SOURCE } from '@/lib/map-base';
+import { createTileLayer, type TileLayer, type TileLayerState, type TileView } from '@/lib/map-tiles';
 import { cn } from '@/lib/utils/cn';
 
 import {
@@ -88,21 +110,28 @@ export interface ParcelMapLabels {
   loadingBoundaries: string;
   /** wskaznik, gdy dociagaja sie rowy i cieki */
   loadingHydro: string;
+  /** wskaznik, gdy dociagaja sie warstwy otoczenia pola */
+  loadingContext: string;
   /** podpowiedz, gdy kafel granic byl obciety przez usluge (miasto, gesta szachownica) */
   zoomForBoundaries: string;
 }
 
 /**
- * Stan warstwy "Rowy i cieki" dla legendy: `zoom` = za male przyblizenie (nic nie pobieramy), `unavailable` = API
- * odpowiada 404/503 (trasa jeszcze nie wdrozona albo baza nie odpowiada).
+ * Stan warstwy z kafli BDOT10k (rowy i cieki, otoczenie pola) dla legendy: `zoom` = za male przyblizenie (nic nie
+ * pobieramy), `unavailable` = API odpowiada 404/502/503 (trasa jeszcze nie wdrozona albo baza nie odpowiada).
  */
-export interface HydroStatus {
-  state: 'off' | 'zoom' | 'loading' | 'ready' | 'unavailable';
+export interface LayerStatus {
+  state: TileLayerState;
   /** data importu BDOT10k z pobranych kafli */
   importedAt: string | null;
   /** ktorys kafel byl przyciety do limitu obiektow */
   truncated: boolean;
 }
+
+export type HydroStatus = LayerStatus;
+
+/** Wlaczone warstwy otoczenia pola. */
+export type ContextVisibility = Readonly<Record<ContextLayer, boolean>>;
 
 export interface ParcelMapProps {
   /** dzialki z listy "moje dzialki" */
@@ -122,6 +151,13 @@ export interface ParcelMapProps {
   loadHydro?: (x: number, y: number) => Promise<HydroTile>;
   /** zmiana stanu warstwy hydrografii (legenda, komunikat o niedostepnosci) */
   onHydroStatus?: (status: HydroStatus) => void;
+  /** warstwy otoczenia pola: drzewa, budowle wodne i waly, obszary chronione (pobierane dopiero po wlaczeniu) */
+  context?: ContextVisibility;
+  /** kafel warstwy otoczenia; brak = mapa bez tych warstw */
+  loadContext?: (layer: ContextLayer, x: number, y: number) => Promise<ContextTile>;
+  onContextStatus?: (layer: ContextLayer, status: LayerStatus) => void;
+  /** podpisy na mapie: rodzaj budowli ("jaz") i rodzaj obszaru chronionego */
+  contextLabels?: ContextKindLabels;
   /** obrazy z satelity (kondycja roslin, woda w roslinach) pod rowami i obrysem dzialek; pusta lista = brak */
   imagery?: readonly ImageryOverlay[];
   focus?: MapFocus | null;
@@ -152,6 +188,29 @@ type MapState = 'loading' | 'ready' | 'failed';
 const DEFAULT_PADDING: MapPadding = { top: 48, right: 48, bottom: 48, left: 48 };
 const defaultPadding = () => DEFAULT_PADDING;
 const NO_IMAGERY: readonly ImageryOverlay[] = [];
+const NO_CONTEXT: ContextVisibility = { cover: false, waterworks: false, protected: false };
+const NO_LABELS: ContextKindLabels = {};
+
+function viewOf(map: MapLibre.Map): TileView {
+  const bounds = map.getBounds();
+
+  return {
+    west: bounds.getWest(),
+    south: bounds.getSouth(),
+    east: bounds.getEast(),
+    north: bounds.getNorth(),
+    zoom: map.getZoom(),
+  };
+}
+
+interface TileLayers {
+  hydro: TileLayer<HydroTile>;
+  context: ReadonlyMap<ContextLayer, TileLayer<ContextTile>>;
+}
+
+function statusKey(status: LayerStatus): string {
+  return `${status.state}|${status.importedAt ?? ''}|${String(status.truncated)}`;
+}
 
 function token(element: HTMLElement, name: string): string {
   return getComputedStyle(element).getPropertyValue(name).trim();
@@ -183,6 +242,8 @@ function addAppLayers(map: MapLibre.Map, container: HTMLElement): void {
 
   // Rowy i cieki nad podkladem i zdjeciem, pod granicami dzialek (obrys pola zostaje na wierzchu).
   addHydroLayers(map, hydroColors(container), { minzoom: HYDRO_MIN_ZOOM - 1 });
+  // Otoczenie pola: wypelnienia (lasy, obszary chronione) pod rowami, budowle i waly nad nimi, pod granicami.
+  addContextLayers(map, contextColors(container), { below: HYDRO_LAYER_IDS[0], minzoom: HYDRO_MIN_ZOOM - 1 });
 
   // Granice i numery wszystkich dzialek nad podkladem i zdjeciem, pod zaznaczeniami uzytkownika.
   map.addSource(BOUNDARIES_SOURCE, {
@@ -328,6 +389,10 @@ export function ParcelMap({
   hydro = false,
   loadHydro,
   onHydroStatus,
+  context = NO_CONTEXT,
+  loadContext,
+  onContextStatus,
+  contextLabels = NO_LABELS,
   imagery = NO_IMAGERY,
   focus = null,
   getPadding = defaultPadding,
@@ -347,7 +412,8 @@ export function ParcelMap({
   const [boundariesLoading, setBoundariesLoading] = useState(false);
   // w widoku jest kafel z14 obciety przez usluge - granic tam nie rysujemy, prosimy o przyblizenie
   const [boundariesTruncated, setBoundariesTruncated] = useState(false);
-  const [hydroLoading, setHydroLoading] = useState(false);
+  // warstwy z kafli BDOT10k w trakcie pobierania (wskaznik na dole mapy)
+  const [tilesLoading, setTilesLoading] = useState<ReadonlySet<string>>(() => new Set());
   // Najnowsze wartosci dla zdarzen mapy, ktora powstaje raz - bez przepinania sluchaczy przy kazdym renderze.
   const latest = useRef({
     onPick,
@@ -359,17 +425,17 @@ export function ParcelMap({
     hydro,
     loadHydro,
     onHydroStatus,
+    context,
+    loadContext,
+    onContextStatus,
+    contextLabels,
   });
   // Obrysy pobrane kaflami siatki granic: klucz "z/x/y" -> kafel; kolejnosc wpisow = kolejnosc pobrania.
   const boundaryTilesRef = useRef(new Map<string, ParcelBoundaries>());
   const pendingTilesRef = useRef(new Set<string>());
-  // Kafle hydrografii: klucz "x/y" -> kafel; `unavailable` = ostatnia odpowiedz 404/503 (ponowimy przy ruchu mapy).
-  const hydroRef = useRef({
-    tiles: new Map<string, HydroTile>(),
-    pending: new Set<string>(),
-    unavailable: false,
-    reported: '',
-  });
+  // ostatnio zgloszony stan kazdej warstwy z kafli - zglaszamy tylko zmiany
+  const reportedRef = useRef(new Map<string, string>());
+  const tileLayersRef = useRef<TileLayers | null>(null);
 
   useEffect(() => {
     latest.current = {
@@ -382,101 +448,141 @@ export function ParcelMap({
       hydro,
       loadHydro,
       onHydroStatus,
+      context,
+      loadContext,
+      onContextStatus,
+      contextLabels,
     };
   });
 
-  /** Zglasza stan warstwy hydrografii, tylko gdy sie zmienil. */
-  const reportHydro = useCallback((layerState: HydroStatus['state']) => {
-    const cache = hydroRef.current;
-    const tiles = [...cache.tiles.values()];
-    const next: HydroStatus = {
-      state: layerState,
-      importedAt: latestImport(tiles),
-      truncated: tiles.some((tile) => tile.truncated),
-    };
-    const key = JSON.stringify(next);
+  /** Stan warstwy z kafli: zglasza go wywolujacemu (tylko zmiany) i prowadzi wskaznik ladowania. */
+  const report = useCallback(
+    (
+      name: string,
+      layerState: TileLayerState,
+      tiles: readonly (HydroTile | ContextTile)[],
+      importedAt: string | null,
+      notify: (next: LayerStatus) => void,
+    ) => {
+      const next: LayerStatus = {
+        state: layerState,
+        importedAt,
+        truncated: tiles.some((tile) => tile.truncated),
+      };
+      const key = statusKey(next);
 
-    if (key === cache.reported) return;
+      setTilesLoading((current) => {
+        if (current.has(name) === (layerState === 'loading')) return current;
 
-    cache.reported = key;
-    latest.current.onHydroStatus?.(next);
+        const loading = new Set(current);
+
+        if (layerState === 'loading') loading.add(name);
+        else loading.delete(name);
+
+        return loading;
+      });
+
+      if (reportedRef.current.get(name) === key) return;
+
+      reportedRef.current.set(name, key);
+      notify(next);
+    },
+    [],
+  );
+
+  /** Podpisy obszarow chronionych dla widoku: jeden na obszar, w kawalku, ktory zajmuje najwiecej widoku. */
+  const relabelProtected = useCallback((tiles: readonly ContextTile[]) => {
+    const map = mapRef.current;
+
+    if (!map || !latest.current.context.protected) return;
+
+    // podpis ma stanac w czesci mapy widocznej obok paneli (na komputerze panel zaslania lewa strone)
+    const { top = 0, right = 0, bottom = 0, left = 0 } = latest.current.getPadding();
+    const canvas = map.getCanvas();
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const inset = (from: number, size: number) => Math.min(Math.max(from, 0), size / 2);
+    const corner = map.unproject([inset(left, width), inset(top, height)]);
+    const opposite = map.unproject([width - inset(right, width), height - inset(bottom, height)]);
+
+    setContextLabels(
+      map,
+      areaLabels(tiles, [corner.lng, opposite.lat, opposite.lng, corner.lat], latest.current.contextLabels),
+    );
   }, []);
+
+  /** Warstwy z kafli tworzone przy pierwszym uzyciu (w efekcie albo zdarzeniu mapy, nigdy w renderze). */
+  const tileLayers = useCallback((): TileLayers => {
+    if (tileLayersRef.current) return tileLayersRef.current;
+
+    const hydroLayer = createTileLayer<HydroTile>({
+      tilesFor: hydroTiles,
+      load: (x, y) => latest.current.loadHydro?.(x, y) ?? Promise.reject(new HydroUnavailableError(404)),
+      minZoom: HYDRO_MIN_ZOOM,
+      maxTiles: MAX_HYDRO_TILES,
+      cacheSize: HYDRO_TILE_CACHE,
+      isUnavailable: (error) => error instanceof HydroUnavailableError,
+      onData: (tiles) => {
+        if (mapRef.current)
+          setHydroData(mapRef.current, hydroCollections(tiles.map((tile) => tile.features)));
+      },
+      onState: (layerState, tiles) =>
+        report('hydro', layerState, tiles, latestImport(tiles), (next) =>
+          latest.current.onHydroStatus?.(next),
+        ),
+    });
+    const contextLayers = new Map(
+      CONTEXT_LAYERS.map((layer) => {
+        const tileLayer = createTileLayer<ContextTile>({
+          tilesFor: hydroTiles,
+          load: (x, y) =>
+            latest.current.loadContext?.(layer, x, y) ?? Promise.reject(new ContextUnavailableError(404)),
+          minZoom: HYDRO_MIN_ZOOM,
+          maxTiles: MAX_HYDRO_TILES,
+          cacheSize: CONTEXT_TILE_CACHE,
+          isUnavailable: (error) => error instanceof ContextUnavailableError,
+          onData: (tiles) => {
+            if (!mapRef.current) return;
+
+            setContextData(mapRef.current, layer, contextCollections(tiles, latest.current.contextLabels));
+
+            if (layer === 'protected') relabelProtected(tiles);
+          },
+          onState: (layerState, tiles) =>
+            report(`context-${layer}`, layerState, tiles, latestContextImport(tiles), (next) =>
+              latest.current.onContextStatus?.(layer, next),
+            ),
+        });
+
+        return [layer, tileLayer] as const;
+      }),
+    );
+
+    tileLayersRef.current = { hydro: hydroLayer, context: contextLayers };
+
+    return tileLayersRef.current;
+  }, [report, relabelProtected]);
 
   /** Dociaga rowy i cieki dla widoku: tylko przy wlaczonej warstwie i od przyblizenia, przy ktorym widac pola. */
   const refreshHydro = useCallback(() => {
     const map = mapRef.current;
     const { hydro: enabled, loadHydro: load } = latest.current;
-    const cache = hydroRef.current;
 
-    if (!map || !enabled || !load) {
-      reportHydro('off');
+    tileLayers().hydro.refresh(map && enabled && load ? viewOf(map) : null);
+  }, [tileLayers]);
 
-      return;
+  /** Dociaga wlaczone warstwy otoczenia dla widoku i przelicza podpisy obszarow chronionych. */
+  const refreshContext = useCallback(() => {
+    const map = mapRef.current;
+    const { context: enabled, loadContext: load } = latest.current;
+    const { context: layers } = tileLayers();
+
+    for (const [layer, tileLayer] of layers) {
+      tileLayer.refresh(map && enabled[layer] && load ? viewOf(map) : null);
     }
 
-    const view = map.getBounds();
-    const tiles = hydroTiles(view.getWest(), view.getSouth(), view.getEast(), view.getNorth());
-
-    if (map.getZoom() < HYDRO_MIN_ZOOM || tiles.length > MAX_HYDRO_TILES) {
-      reportHydro('zoom');
-
-      return;
-    }
-
-    const visible = new Set(tiles.map((tile) => `${tile.x}/${tile.y}`));
-    const missing = tiles.filter((tile) => {
-      const key = `${tile.x}/${tile.y}`;
-
-      return !cache.tiles.has(key) && !cache.pending.has(key);
-    });
-
-    if (missing.length === 0) {
-      reportHydro(cache.pending.size > 0 ? 'loading' : cache.unavailable ? 'unavailable' : 'ready');
-
-      return;
-    }
-
-    cache.unavailable = false;
-    reportHydro('loading');
-    setHydroLoading(true);
-
-    for (const tile of missing) {
-      const key = `${tile.x}/${tile.y}`;
-
-      cache.pending.add(key);
-      load(tile.x, tile.y)
-        .then((data) => {
-          cache.tiles.set(key, data);
-
-          for (const old of cache.tiles.keys()) {
-            if (cache.tiles.size <= HYDRO_TILE_CACHE) break;
-
-            if (!visible.has(old)) cache.tiles.delete(old);
-          }
-
-          const current = mapRef.current;
-
-          if (current)
-            setHydroData(current, hydroCollections([...cache.tiles.values()].map((t) => t.features)));
-
-          return data.features.length;
-        })
-        // brak warstwy nie blokuje pracy z mapa; kafel sprobuje sie pobrac przy nastepnym ruchu
-        .catch((error: unknown) => {
-          if (error instanceof HydroUnavailableError) cache.unavailable = true;
-
-          return 0;
-        })
-        .finally(() => {
-          cache.pending.delete(key);
-
-          if (cache.pending.size > 0) return;
-
-          setHydroLoading(false);
-          reportHydro(cache.unavailable ? 'unavailable' : 'ready');
-        });
-    }
-  }, [reportHydro]);
+    relabelProtected(layers.get('protected')?.tiles() ?? []);
+  }, [tileLayers, relabelProtected]);
 
   /**
    * Dociaga granice dla widoku - tylko gdy warstwa jest wlaczona i od przyblizenia 14. Ponizej 16 grube kafle z14;
@@ -561,7 +667,7 @@ export function ParcelMap({
   useEffect(() => {
     const container = containerRef.current;
     const boundaryCache = boundaryTilesRef.current;
-    const hydroCache = hydroRef.current;
+    const reported = reportedRef.current;
     let cancelled = false;
     let map: MapLibre.Map | null = null;
 
@@ -654,6 +760,7 @@ export function ParcelMap({
         addAppLayers(created, target);
         created.on('moveend', refreshBoundaries);
         created.on('moveend', refreshHydro);
+        created.on('moveend', refreshContext);
         mapRef.current = created;
         setState('ready');
       });
@@ -671,11 +778,14 @@ export function ParcelMap({
       focusedKeyRef.current = null;
       imageryCountRef.current = 0;
       boundaryCache.clear();
-      hydroCache.tiles.clear();
-      hydroCache.reported = '';
+      tileLayers().hydro.clear();
+
+      for (const tileLayer of tileLayers().context.values()) tileLayer.clear();
+
+      reported.clear();
       map?.remove();
     };
-  }, [interactive, refreshBoundaries, refreshHydro]);
+  }, [interactive, refreshBoundaries, refreshHydro, refreshContext, tileLayers]);
 
   useEffect(() => {
     if (state !== 'ready') return;
@@ -754,16 +864,35 @@ export function ParcelMap({
     refreshHydro();
   }, [state, hydro, refreshHydro]);
 
-  const loadingAny = status !== null || boundariesLoading || (hydro && hydroLoading);
+  const { cover, waterworks, protected: protectedAreas } = context;
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (state !== 'ready' || !map) return;
+
+    setContextVisible(map, 'cover', cover);
+    setContextVisible(map, 'waterworks', waterworks);
+    setContextVisible(map, 'protected', protectedAreas);
+    refreshContext();
+  }, [state, cover, waterworks, protectedAreas, refreshContext]);
+
+  const hydroLoading = hydro && tilesLoading.has('hydro');
+  const contextLoading = CONTEXT_LAYERS.some(
+    (layer) => context[layer] && tilesLoading.has(`context-${layer}`),
+  );
+  const loadingAny = status !== null || boundariesLoading || hydroLoading || contextLoading;
   const message =
     status ??
     (boundariesLoading
       ? labels.loadingBoundaries
-      : hydro && hydroLoading
+      : hydroLoading
         ? labels.loadingHydro
-        : boundaries && boundariesTruncated
-          ? labels.zoomForBoundaries
-          : null);
+        : contextLoading
+          ? labels.loadingContext
+          : boundaries && boundariesTruncated
+            ? labels.zoomForBoundaries
+            : null);
   const focusKey = focus?.key ?? null;
   const [west, south, east, north] = focus?.bbox ?? [0, 0, 0, 0];
 

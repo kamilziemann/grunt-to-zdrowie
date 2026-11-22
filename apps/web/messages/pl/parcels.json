@@ -104,7 +104,86 @@
       "unavailable": "Warstwa rowów i cieków jest chwilowo niedostępna. Reszta mapy działa normalnie."
     },
     "boundariesShort": "Granice",
-    "zoomForBoundaries": "Przybliż, żeby zobaczyć granice działek."
+    "zoomForBoundaries": "Przybliż, żeby zobaczyć granice działek.",
+    "loadingContext": "Wczytuję otoczenie pola…",
+    "contextKinds": {
+      "weir": "jaz",
+      "dam": "zapora",
+      "lock": "śluza",
+      "spring": "źródło",
+      "intake": "ujęcie wody",
+      "natura2000": "Natura 2000",
+      "landscape_park": "park krajobrazowy",
+      "national_park": "park narodowy",
+      "nature_reserve": "rezerwat przyrody"
+    },
+    "contextLegend": {
+      "title": "Legenda: otoczenie pola",
+      "groups": {
+        "cover": "Drzewa",
+        "waterworks": "Budowle wodne i wały",
+        "protected": "Obszary chronione"
+      },
+      "kinds": {
+        "forest": "Las, zagajnik, zadrzewienie",
+        "treeRow": "Rząd drzew",
+        "hedge": "Żywopłot, pas krzewów",
+        "structure": "Jaz, zapora, śluza",
+        "levee": "Wał przeciwpowodziowy, grobla",
+        "piped": "Rów lub ciek poprowadzony rurą",
+        "spring": "Źródło",
+        "intake": "Ujęcie wody",
+        "park": "Park narodowy lub krajobrazowy, rezerwat",
+        "natura": "Obszar Natura 2000"
+      },
+      "source": "Źródło: BDOT10k, GUGiK",
+      "sourceDated": "Źródło: BDOT10k, GUGiK · dane z {date}",
+      "truncated": "W tym miejscu pokazujemy część obiektów – przybliż, żeby zobaczyć wszystko.",
+      "loading": "Wczytuję otoczenie pola…",
+      "unavailable": "Baza otoczenia pola chwilowo nie odpowiada. Reszta mapy działa normalnie.",
+      "zoom": "Przybliż mapę, żeby zobaczyć otoczenie pola."
+    },
+    "layers": {
+      "button": "Warstwy",
+      "buttonLabel": "Warstwy mapy, włączone: {count}",
+      "title": "Warstwy mapy",
+      "close": "Zamknij warstwy",
+      "groups": {
+        "base": "Podkład",
+        "water": "Woda i otoczenie",
+        "satellite": "Zdjęcie z satelity"
+      },
+      "items": {
+        "map": {
+          "label": "Mapa",
+          "hint": "Drogi, miejscowości, lasy i rzeki – łatwo się zorientować."
+        },
+        "ortho": {
+          "label": "Zdjęcie lotnicze",
+          "hint": "Zdjęcie z samolotu – poznasz swoje pole po kształcie i kolorze."
+        },
+        "boundaries": {
+          "label": "Granice działek",
+          "hint": "Granice i numery działek z ewidencji gruntów. Widać je po przybliżeniu."
+        },
+        "hydro": {
+          "label": "Rowy i cieki",
+          "hint": "Rowy melioracyjne, rzeki, strumienie, stawy i mokradła wokół pola."
+        },
+        "cover": {
+          "label": "Drzewa",
+          "hint": "Lasy, zadrzewienia, rzędy drzew i żywopłoty – osłaniają pole od wiatru."
+        },
+        "waterworks": {
+          "label": "Budowle wodne i wały",
+          "hint": "Jazy, zapory, śluzy, wały, źródła i rowy poprowadzone rurą."
+        },
+        "protected": {
+          "label": "Obszary chronione",
+          "hint": "Natura 2000, parki i rezerwaty – tu obowiązują dodatkowe zasady."
+        }
+      }
+    }
   },
   "sheet": {
     "expand": "Rozwiń panel",

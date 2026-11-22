@@ -104,7 +104,86 @@
       "unavailable": "The ditches and streams layer is temporarily unavailable. The rest of the map works normally."
     },
     "boundariesShort": "Boundaries",
-    "zoomForBoundaries": "Zoom in to see parcel boundaries."
+    "zoomForBoundaries": "Zoom in to see parcel boundaries.",
+    "loadingContext": "Loading field surroundings…",
+    "contextKinds": {
+      "weir": "weir",
+      "dam": "dam",
+      "lock": "lock",
+      "spring": "spring",
+      "intake": "water intake",
+      "natura2000": "Natura 2000",
+      "landscape_park": "landscape park",
+      "national_park": "national park",
+      "nature_reserve": "nature reserve"
+    },
+    "contextLegend": {
+      "title": "Legend: field surroundings",
+      "groups": {
+        "cover": "Trees",
+        "waterworks": "Water structures and levees",
+        "protected": "Protected areas"
+      },
+      "kinds": {
+        "forest": "Forest, copse, woodland",
+        "treeRow": "Row of trees",
+        "hedge": "Hedge, shrub belt",
+        "structure": "Weir, dam, lock",
+        "levee": "Flood levee, dike",
+        "piped": "Ditch or stream in a pipe",
+        "spring": "Spring",
+        "intake": "Water intake",
+        "park": "National or landscape park, reserve",
+        "natura": "Natura 2000 site"
+      },
+      "source": "Source: BDOT10k, GUGiK",
+      "sourceDated": "Source: BDOT10k, GUGiK · data from {date}",
+      "truncated": "Only some objects are shown here – zoom in to see everything.",
+      "loading": "Loading field surroundings…",
+      "unavailable": "The field surroundings database is not responding right now. The rest of the map works normally.",
+      "zoom": "Zoom in to see the field surroundings."
+    },
+    "layers": {
+      "button": "Layers",
+      "buttonLabel": "Map layers, {count} on",
+      "title": "Map layers",
+      "close": "Close layers",
+      "groups": {
+        "base": "Base map",
+        "water": "Water and surroundings",
+        "satellite": "Satellite image"
+      },
+      "items": {
+        "map": {
+          "label": "Map",
+          "hint": "Roads, villages, forests and rivers – easy to find your way."
+        },
+        "ortho": {
+          "label": "Aerial photo",
+          "hint": "Photo taken from a plane – recognise your field by its shape and colour."
+        },
+        "boundaries": {
+          "label": "Parcel boundaries",
+          "hint": "Parcel boundaries and numbers from the land register. Visible when zoomed in."
+        },
+        "hydro": {
+          "label": "Ditches and streams",
+          "hint": "Drainage ditches, rivers, streams, ponds and wetlands around the field."
+        },
+        "cover": {
+          "label": "Trees",
+          "hint": "Forests, woodland, tree rows and hedges – they shelter the field from wind."
+        },
+        "waterworks": {
+          "label": "Water structures and levees",
+          "hint": "Weirs, dams, locks, levees, springs and ditches running through pipes."
+        },
+        "protected": {
+          "label": "Protected areas",
+          "hint": "Natura 2000, parks and reserves – extra rules apply here."
+        }
+      }
+    }
   },
   "sheet": {
     "expand": "Expand panel",

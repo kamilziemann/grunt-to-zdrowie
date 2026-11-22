@@ -2,6 +2,8 @@
 // /api/parcels. Dzialka zmienia sie rzadko, wiec odpowiedz jest swieza przez kilka minut (mniej zapytan do ULDK).
 // Brak dzialki (404 z API) = null - komponent pokazuje wtedy wlasny komunikat zamiast bledu.
 import type {
+  ContextLayer,
+  ContextTile,
   HydroTile,
   Parcel,
   ParcelBoundaries,
@@ -13,6 +15,7 @@ import { unwrap, unwrapOrNull } from '@app/rpc';
 import { queryOptions } from '@tanstack/react-query';
 
 import { getApi } from '@/lib/api';
+import { fetchContextTile } from '@/lib/context-map';
 import { fetchHydroTile } from '@/lib/hydro-map';
 
 /** Co uzytkownik wskazal: identyfikator (z wyszukiwania) albo punkt na mapie. */
@@ -31,6 +34,7 @@ export const parcelsKeys = {
   boundaries: (x: number, y: number, z: ParcelBoundaryTileZoom) =>
     ['parcels', 'boundaries', z, x, y] as const,
   hydro: (x: number, y: number) => ['parcels', 'hydro', x, y] as const,
+  context: (layer: ContextLayer, x: number, y: number) => ['parcels', 'context', layer, x, y] as const,
 };
 
 /** Punkt klikniecia zaokraglony do ok. 10 cm - stabilny klucz cache i adres bez szumu. */
@@ -117,6 +121,18 @@ export const hydroTileQuery = (x: number, y: number) =>
     queryKey: parcelsKeys.hydro(x, y),
     queryFn: ({ signal }): Promise<HydroTile> => fetchHydroTile(x, y, signal),
     // dane BDOT10k zmieniaja sie przy imporcie (raz na jakis czas) - kafel trzymamy dlugo
+    staleTime: 6 * STALE_MS,
+    retry: false,
+  });
+
+/**
+ * GET /context/tile - otoczenie pola z BDOT10k w kaflu (drzewa, budowle wodne i waly, obszary chronione).
+ * Typowany klient z walidacja kontraktu i rozpoznaniem warstwy niedostepnej (zob. `fetchContextTile`).
+ */
+export const contextTileQuery = (layer: ContextLayer, x: number, y: number) =>
+  queryOptions({
+    queryKey: parcelsKeys.context(layer, x, y),
+    queryFn: ({ signal }): Promise<ContextTile> => fetchContextTile(layer, x, y, signal),
     staleTime: 6 * STALE_MS,
     retry: false,
   });

@@ -59,6 +59,16 @@
   --map-wetland: #0f766e;
   --map-water-label: #0b4a5e;
   --map-highlight: #d9480f;
+  /* Otoczenie pola (BDOT10k): drzewa zielenia, waly braz, budowle grafit, obszary chronione fiolet (nie myli sie z
+     niebieskimi granicami ani zielonym zaznaczeniem pola). */
+  --map-forest: #4d7c2a;
+  --map-tree-row: #2f5a17;
+  --map-levee: #8a5a2b;
+  --map-piped: #0e6f8f;
+  --map-structure: #1f2a33;
+  --map-spring: #0891b2;
+  --map-protected: #8e3fb0;
+  --map-protected-label: #5a2474;
   /* Obrazy z satelity (kondycja roslin, woda w roslinach): te same kolory co PNG z API - legenda musi sie zgadzac. */
   --vegetation-low: #d73027;
   --vegetation-mid: #fee08b;
