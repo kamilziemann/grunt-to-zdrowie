@@ -30,10 +30,13 @@ export function RainUseChart({ report }: { report: WaterReport }) {
     format.dateTime(isoDay(date), { day: 'numeric', month: 'short', timeZone: 'UTC' });
   const first = series[0];
   const last = series.at(-1);
-  const gaps = series.filter((item) => item.precipitationMm === undefined).length;
-  const answer = `${t('answer', { days: summary.days, rain: mm(summary.rainMm), use: mm(summary.useMm) })}${
-    summary.dryStreak >= 5 ? ` ${t('dryStreak', { days: summary.dryStreak })}` : ''
-  }`;
+  const gaps = summary.gaps;
+  const answer = `${t(gaps > 0 ? 'answerGaps' : 'answer', {
+    days: summary.days,
+    rain: mm(summary.rainMm),
+    use: mm(summary.useMm),
+    gaps,
+  })}${summary.dryStreak >= 5 ? ` ${t('dryStreak', { days: summary.dryStreak })}` : ''}`;
 
   return (
     <ChartCard
@@ -76,14 +79,19 @@ export function RainUseChart({ report }: { report: WaterReport }) {
             {series.map((item, index) => {
               const rain = item.precipitationMm;
 
+              // dzien bez danych o deszczu: pusta, przerywana kolumna na cala wysokosc - luka, a nie zero
               return rain === undefined ? (
                 <rect
                   key={item.date}
-                  x={index * 10 + 3}
-                  y={HEIGHT - 4}
-                  width="4"
-                  height="4"
-                  className="fill-muted-foreground"
+                  x={index * 10 + 1.5}
+                  y="1"
+                  width="7"
+                  height={HEIGHT - 2}
+                  className="fill-muted stroke-muted-foreground"
+                  strokeWidth="1"
+                  strokeDasharray="3 2"
+                  vectorEffect="non-scaling-stroke"
+                  data-gap="true"
                 />
               ) : (
                 <rect
@@ -119,6 +127,12 @@ export function RainUseChart({ report }: { report: WaterReport }) {
           <span className="w-5 border-t-[3px] border-data-orange-strong" />
           {t('legendUse')}
         </li>
+        {gaps > 0 && (
+          <li className="flex items-center gap-1.5">
+            <span className="h-3.5 w-2.5 rounded-sm border border-dashed border-muted-foreground bg-muted" />
+            {t('legendGap')}
+          </li>
+        )}
         <li>{t('unit')}</li>
       </ul>
     </ChartCard>

@@ -128,7 +128,12 @@ export interface RainUseSummary {
   rainMm: number;
   useMm: number;
   days: number;
-  /** najdluzsza seria dni bez deszczu (< 1 mm) konczaca sie w dniu analizy */
+  /** dni bez danych o deszczu (zwykle ostatnie - opoznienie danych); suma deszczu jest wtedy dolna granica */
+  gaps: number;
+  /**
+   * seria dni bez deszczu (< 1 mm) konczaca sie na ostatnim dniu z danymi - luka na koncu to "nie wiemy", nie
+   * "nie padalo"
+   */
   dryStreak: number;
 }
 
@@ -142,13 +147,17 @@ export function rainUseSummary(series: readonly DailyWater[]): RainUseSummary {
   }
 
   let dryStreak = 0;
+  const known = series.filter((day) => day.precipitationMm !== undefined);
+  const lastKnown = known.at(-1);
+  const trailing = lastKnown ? series.slice(series.indexOf(lastKnown) + 1) : series;
 
-  for (const day of series.toReversed()) {
-    if ((day.precipitationMm ?? 0) >= RAIN_DAY_MM) break;
+  for (const day of series.slice(0, series.length - trailing.length).toReversed()) {
+    // luka w srodku przerywa serie - nie wiemy, czy wtedy padalo
+    if (day.precipitationMm === undefined || day.precipitationMm >= RAIN_DAY_MM) break;
     dryStreak += 1;
   }
 
-  return { rainMm, useMm, days: series.length, dryStreak };
+  return { rainMm, useMm, days: series.length, gaps: series.length - known.length, dryStreak };
 }
 
 /** Ostatnie uzyte zdjecie z NDMI (wilgotnosc roslin) i liczba pominietych przez chmury. */

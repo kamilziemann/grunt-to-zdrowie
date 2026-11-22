@@ -74,7 +74,17 @@ describe('report-summary', () => {
         { date: '2019-06-29', precipitationMm: 0, etcMm: 6, availablePct: 8 },
         { date: '2019-06-30', etcMm: 7, availablePct: 4 },
       ]),
-    ).toEqual({ rainMm: 3, useMm: 18, days: 3, dryStreak: 2 });
+    ).toEqual({ rainMm: 3, useMm: 18, days: 3, gaps: 1, dryStreak: 1 });
+
+    // ostatnie dni bez danych (opoznienie) nie licza sie jako "nie padalo"
+    expect(
+      rainUseSummary([
+        { date: '2019-06-27', precipitationMm: 0, etcMm: 5, availablePct: 12 },
+        { date: '2019-06-28', precipitationMm: 0.2, etcMm: 5, availablePct: 10 },
+        { date: '2019-06-29', etcMm: 6, availablePct: 8 },
+        { date: '2019-06-30', etcMm: 7, availablePct: 4 },
+      ]).dryStreak,
+    ).toBe(2);
 
     const vegetation = vegetationSummary(WEATHER_REPORT.vegetationSeries?.observations ?? []);
 

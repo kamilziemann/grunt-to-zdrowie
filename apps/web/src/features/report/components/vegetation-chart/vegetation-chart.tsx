@@ -135,7 +135,7 @@ export function VegetationChart({ report }: { report: WaterReport }) {
         </ol>
       </div>
       <p className="text-base text-muted-foreground">
-        {t('counts', { used, skipped })}{' '}
+        {t('window', { from: day(series.from), to: day(series.to) })} {t('counts', { used, skipped })}{' '}
         {range && series.baseline ? t('band', { years: series.baseline.years }) : null}
       </p>
     </ChartCard>

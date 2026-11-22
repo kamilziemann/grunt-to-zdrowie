@@ -962,10 +962,12 @@
       "answer": "W ostatnich {days} dniach spadło {rain} l/m² deszczu, a uprawa potrzebowała {use} l/m².",
       "dryStreak": "Od {days} dni nie padało.",
       "source": "Deszcz z danych pogodowych; potrzeby uprawy = parowanie × współczynnik uprawy (FAO-56).",
-      "gaps": "{days, plural, one {# dzień} other {# dni}} bez danych o deszczu (kwadracik na osi).",
+      "gaps": "{days, plural, one {# dzień} other {# dni}} bez danych o deszczu (pusta kolumna) – to luka w danych, nie dzień bez deszczu.",
       "legendRain": "deszcz",
       "legendUse": "potrzeby uprawy",
-      "unit": "l/m² na dobę"
+      "unit": "l/m² na dobę",
+      "answerGaps": "W ostatnich {days} dniach spadło co najmniej {rain} l/m² deszczu (z {gaps, plural, one {# dnia} other {# dni}} nie ma jeszcze danych), a uprawa potrzebowała {use} l/m².",
+      "legendGap": "brak danych o deszczu"
     },
     "vegetation": {
       "title": "Co widzi satelita?",
@@ -978,7 +980,8 @@
       "answerNone": "Chmury zasłoniły pole na wszystkich zdjęciach z tego okresu – satelita nic nie pokaże.",
       "source": "Zdjęcia Sentinel-2 (Copernicus), wskaźnik wilgotności roślin NDMI dla całego pola.",
       "counts": "Zdjęcia użyte: {used}, pominięte przez chmury: {skipped}.",
-      "band": "Szary pas – zakres z poprzednich {years, plural, one {# roku} other {# lat}}, linia przerywana – środek."
+      "band": "Szary pas – zakres z poprzednich {years, plural, one {# roku} other {# lat}}, linia przerywana – środek.",
+      "window": "Zdjęcia z 30 dni przed dniem analizy ({from} – {to}), nie z całego sezonu."
     },
     "shares": {
       "title": "Udział przyczyn",

@@ -962,10 +962,12 @@
       "answer": "In the last {days} days {rain} l/m² of rain fell, while the crop needed {use} l/m².",
       "dryStreak": "No rain for {days} days.",
       "source": "Rain from weather data; crop needs = evaporation × crop coefficient (FAO-56).",
-      "gaps": "{days, plural, one {# day} other {# days}} without rain data (small square on the axis).",
+      "gaps": "{days, plural, one {# day} other {# days}} without rain data (empty column) – a gap in the data, not a day without rain.",
       "legendRain": "rain",
       "legendUse": "crop needs",
-      "unit": "l/m² per day"
+      "unit": "l/m² per day",
+      "answerGaps": "In the last {days} days at least {rain} l/m² of rain fell (no data yet for {gaps, plural, one {# day} other {# days}}), while the crop needed {use} l/m².",
+      "legendGap": "no rain data"
     },
     "vegetation": {
       "title": "What does the satellite see?",
@@ -978,7 +980,8 @@
       "answerNone": "Clouds covered the field on all images from this period – the satellite shows nothing.",
       "source": "Sentinel-2 images (Copernicus), plant moisture index NDMI for the whole field.",
       "counts": "Images used: {used}, skipped because of clouds: {skipped}.",
-      "band": "Grey band – range from the previous {years, plural, one {# year} other {# years}}, dashed line – middle."
+      "band": "Grey band – range from the previous {years, plural, one {# year} other {# years}}, dashed line – middle.",
+      "window": "Images from the 30 days before the analysis day ({from} – {to}), not the whole season."
     },
     "shares": {
       "title": "Share of causes",
