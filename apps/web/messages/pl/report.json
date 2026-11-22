@@ -20,7 +20,8 @@
     "copied": "Skopiowano link",
     "copyManual": "Skopiuj adres raportu:",
     "share": "Udostępnij",
-    "savePdf": "Zapisz PDF"
+    "savePdf": "Zapisz PDF",
+    "preparingPdf": "Ładuję zdjęcia z satelity…"
   },
   "missing": {
     "title": "Brakuje danych do raportu",
@@ -1002,6 +1003,47 @@
       "heat": "Dni upału > 30°C, ostatnie {window} dni",
       "heatNormal": "zwykle ok. {normal}",
       "heatNoNormal": "bez normy z poprzednich lat"
+    }
+  },
+  "satellite": {
+    "title": "Pole z satelity",
+    "summary": "Kondycja roślin i woda w roślinach na zdjęciu z satelity – rozwiń, żeby pobrać obrazy.",
+    "noParcels": "Zdjęć z satelity nie pokazujemy dla pola narysowanego bez działek ewidencyjnych – obraz pobieramy dla całych działek.",
+    "notLoaded": "Obrazy pola z satelity nie zostały pobrane. Żeby były w PDF, użyj przycisku „Zapisz PDF” w raporcie.",
+    "intro": "Dwa obrazy działki z jednego zdjęcia satelitarnego sprzed dnia analizy. Pokazują, gdzie rośliny mają się lepiej, a gdzie gorzej – i gdzie mają w sobie więcej wody.",
+    "loading": "Pobieram zdjęcie satelitarne… Za pierwszym razem trwa to do kilkunastu sekund.",
+    "scene": "Zdjęcie satelitarne z {date}.",
+    "clouds": "Część pola była tego dnia pod chmurą – tam nie ma koloru.",
+    "problem": {
+      "noClearScene": "Brak czystego zdjęcia z satelity: przez 30 dni przed {date} nad polem były chmury albo śnieg.",
+      "notConfigured": "Zdjęcia satelitarne nie są włączone na tym serwerze – reszta raportu jest pełna.",
+      "busy": "Usługa zdjęć satelitarnych (Copernicus) teraz nie odpowiada. Spróbuj ponownie za chwilę.",
+      "failed": "Nie udało się pobrać zdjęcia satelitarnego – reszta raportu jest pełna."
+    },
+    "layers": {
+      "condition": {
+        "title": "Kondycja roślin",
+        "what": "Zieleń i gęstość roślin: czerwone miejsca rosną słabiej, zielone lepiej.",
+        "low": "słabiej",
+        "high": "lepiej",
+        "alt": "Kondycja roślin na działce – obraz z satelity z obrysem pola",
+        "advisor": "Dla doradcy: NDVI z Sentinel-2 (pasma B04 i B08, piksel 10 m), skala {low}–{high}."
+      },
+      "moisture": {
+        "title": "Woda w roślinach",
+        "what": "Ile wody mają w sobie rośliny: brązowe miejsca są suchsze, niebieskie wilgotniejsze.",
+        "low": "sucho",
+        "high": "wilgotno",
+        "alt": "Woda w roślinach na działce – obraz z satelity z obrysem pola",
+        "advisor": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
+      }
+    },
+    "limits": {
+      "pixel": "Jeden kwadrat to 10–20 m w terenie, więc na małej działce widać tylko kilkadziesiąt kwadratów.",
+      "oneDay": "To zdjęcie z jednego dnia – po deszczu, upale albo koszeniu obraz będzie inny.",
+      "plantsNotSoil": "„Woda w roślinach” to wilgotność roślin, nie gleby.",
+      "relative": "Kolory porównują miejsca w obrębie pola, a nie pola między sobą.",
+      "colour": "Kolory wymagają druku kolorowego – w czerni i bieli oba końce skali wyglądają podobnie."
     }
   }
 }

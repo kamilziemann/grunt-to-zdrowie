@@ -48,7 +48,7 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start print:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] print:gap-3">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start print:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] print:gap-3">
         <ShortAnalysis report={report} />
         <section
           aria-labelledby="pole-title"

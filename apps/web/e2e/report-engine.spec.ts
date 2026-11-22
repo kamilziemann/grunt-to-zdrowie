@@ -7,6 +7,7 @@ import { HEAT_REPORT } from '../src/features/report/fixtures/heat-report';
 import { mockReport, reportUrl } from './support/analysis-api';
 import { expectNoViolations } from './support/axe';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
+import { mockImageryApi } from './support/imagery-api';
 import { detailed, openSections } from './support/report-view';
 import { expect, test } from './support/test';
 
@@ -221,6 +222,68 @@ test.describe('miejsca na polu', () => {
     await expect(page.getByTestId('zone-list-empty')).toContainText('satelita widzi kwadraty 10 × 10 m');
     await expect(page.getByTestId('field-sketch-zone-number')).toHaveCount(0);
     await expect(page.getByTestId('verdict-zones')).toHaveCount(0);
+  });
+});
+
+test.describe('pole z satelity', () => {
+  test('zwinięte do rozwinięcia: dopiero wtedy pobiera oba obrazy z dniem analizy; skala słowami i data zdjęcia', async ({
+    page,
+  }) => {
+    const imagery = await mockImageryApi(page);
+
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(detailed(reportUrl(FIELD_REPORT)));
+
+    const section = page.getByTestId('satellite-section');
+
+    await expect(section).not.toHaveAttribute('open');
+    expect(imagery.requests).toHaveLength(0);
+
+    await section.locator('summary').click();
+    await expect(page.getByTestId('satellite-condition')).toHaveAttribute('data-state', 'ready');
+    await expect(page.getByTestId('satellite-moisture')).toHaveAttribute('data-state', 'ready');
+    expect(imagery.requests.every((url) => url.includes('data=2018-06-15'))).toBe(true);
+    await expect(page.getByTestId('satellite-condition')).toContainText('słabiej');
+    await expect(page.getByTestId('satellite-moisture')).toContainText('wilgotno');
+    await expect(page.getByTestId('satellite-moisture')).toContainText('Zdjęcie satelitarne z 29 maja 2018.');
+    await expect(section).toContainText('wilgotność roślin, nie gleby');
+    await expect(section).toContainText('Kolory wymagają druku kolorowego');
+    await expectNoViolations(page);
+  });
+
+  test('„Zapisz PDF” czeka na zdjęcia, potem otwiera wydruk', async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as unknown as { printed: number }).printed = 0;
+      window.print = () => {
+        (window as unknown as { printed: number }).printed += 1;
+      };
+    });
+    await mockImageryApi(page);
+    // pierwsze pobranie trwa - przycisk mowi, ze laduje (trasa dodana pozniej dziala pierwsza)
+    await page.route('**/api/imagery/vegetation**', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.fallback();
+    });
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+
+    await page.getByRole('button', { name: 'Drukuj / zapisz PDF' }).click();
+    await expect(page.getByRole('button', { name: 'Ładuję zdjęcia z satelity…' })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => (window as unknown as { printed: number }).printed)).toBe(1);
+    await expect(page.getByTestId('satellite-condition')).toHaveAttribute('data-state', 'ready');
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.getByTestId('satellite-moisture').locator('img')).toBeVisible();
+  });
+
+  test('brak czystego zdjęcia: jedno zdanie zamiast dwóch pustych ramek', async ({ page }) => {
+    await mockImageryApi(page, { kind: 'problem', status: 404, code: 'not_found', reason: 'no_clear_scene' });
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(`${detailed(reportUrl(FIELD_REPORT))}#satelita`);
+
+    await expect(page.getByTestId('satellite-problem')).toContainText(
+      'Brak czystego zdjęcia z satelity: przez 30 dni przed 15 czerwca 2018',
+    );
+    await expect(page.getByTestId('satellite-condition')).toHaveCount(0);
   });
 });
 

@@ -25,6 +25,7 @@ import { ReportOverview } from '../report-overview';
 import { sampleParts } from '../../utils/report-data';
 import { reportExtras } from '../../utils/report-extras';
 import { ReportSection } from '../report-section';
+import { SatellitePrintProvider, SatelliteSection } from '../satellite-section';
 import { ShareBar } from '../share-bar';
 import { SampleBanner } from '../sample-banner';
 import { SourcesSection } from '../sources-section';
@@ -123,94 +124,97 @@ export function ReportView({
 
   return (
     <ZoneFocusProvider>
-      <article
-        ref={root}
-        className="report flex flex-col gap-section pb-24 sm:pb-0 print:block print:space-y-6 print:pb-0"
-        data-testid="report"
-        data-view={view.detailed ? 'detailed' : 'simple'}
-      >
-        <PrintPageMargins report={report} />
-        <PrintHeader report={report} />
-        <ReportHeader
-          report={report}
-          changeHref={changeHref}
-          mapHref={mapHref}
-          recomputeHref={recomputeHref}
-          view={view}
-        />
-        <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
-        <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
-        <SampleBanner report={report} />
-        {report.meta.status !== 'complete' && (
-          <Alert variant="warning" className="text-base" data-testid="report-status">
-            <CircleAlert aria-hidden="true" />
-            <AlertDescription className="flex flex-col gap-1 text-base text-foreground">
-              <span>{t(`status.${report.meta.status}`)}</span>
-              {missingSources.length > 0 && (
-                <span data-testid="report-status-missing">
-                  {t('status.missing', { sources: missingSources.join(', ') })}
-                </span>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-        <ReportOverview report={report} detailedHref={view.detailedHref} detailed={view.detailed} />
-        <div
-          id="analiza"
-          className={cn(
-            'flex scroll-mt-4 flex-col gap-4 print:block print:space-y-6',
-            !view.detailed && 'hidden print:block',
-          )}
-          data-testid="report-details"
+      <SatellitePrintProvider report={report}>
+        <article
+          ref={root}
+          className="report flex flex-col gap-section pb-24 sm:pb-0 print:block print:space-y-6 print:pb-0"
+          data-testid="report"
+          data-view={view.detailed ? 'detailed' : 'simple'}
         >
-          <h2 className="text-3xl leading-tight font-bold print:text-2xl">{t('view.fullTitle')}</h2>
-          <KeyNumbers report={report} />
-          <AnalysisNav items={sections} />
-          <ReportSection id="ocena" number={1} title={title(0)} sample={samples.has('assessment')}>
-            <VerdictSection report={report} />
-            {(extras.dailySeries || extras.vegetationSeries) && (
-              <div className="grid gap-4 xl:grid-cols-2 print:grid-cols-1">
-                <RainUseChart report={report} />
-                <VegetationChart report={report} />
-              </div>
+          <PrintPageMargins report={report} />
+          <PrintHeader report={report} />
+          <ReportHeader
+            report={report}
+            changeHref={changeHref}
+            mapHref={mapHref}
+            recomputeHref={recomputeHref}
+            view={view}
+          />
+          <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
+          <ProtectedAreaNotice areas={report.surroundings?.protectedAreas} />
+          <SampleBanner report={report} />
+          {report.meta.status !== 'complete' && (
+            <Alert variant="warning" className="text-base" data-testid="report-status">
+              <CircleAlert aria-hidden="true" />
+              <AlertDescription className="flex flex-col gap-1 text-base text-foreground">
+                <span>{t(`status.${report.meta.status}`)}</span>
+                {missingSources.length > 0 && (
+                  <span data-testid="report-status-missing">
+                    {t('status.missing', { sources: missingSources.join(', ') })}
+                  </span>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          <ReportOverview report={report} detailedHref={view.detailedHref} detailed={view.detailed} />
+          <div
+            id="analiza"
+            className={cn(
+              'flex scroll-mt-4 flex-col gap-4 print:block print:space-y-6',
+              !view.detailed && 'hidden print:block',
             )}
-          </ReportSection>
-          <ReportSection id="historia" number={2} title={title(1)} sample={samples.has('history')}>
-            <HistorySection report={report} />
-          </ReportSection>
-          <ReportSection id="przyczyny" number={3} title={title(2)} sample={samples.has('causes')}>
-            {excess ? <ExcessCauses report={report} /> : null}
-            {excess && report.causes.length === 0 ? null : <CauseShares report={report} />}
-            {excess && report.causes.length === 0 ? null : <CausesSection causes={report.causes} />}
-          </ReportSection>
-          <ReportSection id="retencja" number={4} title={title(3)} sample={sampleRecommendations}>
-            <p className="text-base text-muted-foreground print:hidden">{t('fieldMap.above')}</p>
-            <SurroundingsCard surroundings={report.surroundings} />
-            <ZoneList report={report} />
-            <RecommendationList
-              category="retention"
-              recommendations={report.recommendations.retention}
-              report={report}
-            />
-          </ReportSection>
-          <ReportSection id="agrotechnika" number={5} title={title(4)} sample={sampleRecommendations}>
-            <RecommendationList
-              category="agrotech"
-              recommendations={report.recommendations.agrotech}
-              report={report}
-            />
-          </ReportSection>
-          <ReportSection id="nawadnianie" number={6} title={title(5)} sample={sampleRecommendations}>
-            <IrrigationSection report={report} />
-          </ReportSection>
-          <ReportSection id="zrodla" number={7} title={title(6)}>
-            <SourcesSection report={report} />
-          </ReportSection>
-        </div>
-        <AdvisorNotes />
-        <PrintFooter report={report} />
-        <ShareBar report={report} />
-      </article>
+            data-testid="report-details"
+          >
+            <h2 className="text-3xl leading-tight font-bold print:text-2xl">{t('view.fullTitle')}</h2>
+            <KeyNumbers report={report} />
+            <AnalysisNav items={sections} />
+            <ReportSection id="ocena" number={1} title={title(0)} sample={samples.has('assessment')}>
+              <VerdictSection report={report} />
+              {(extras.dailySeries || extras.vegetationSeries) && (
+                <div className="grid gap-4 xl:grid-cols-2 print:grid-cols-1">
+                  <RainUseChart report={report} />
+                  <VegetationChart report={report} />
+                </div>
+              )}
+              <SatelliteSection report={report} />
+            </ReportSection>
+            <ReportSection id="historia" number={2} title={title(1)} sample={samples.has('history')}>
+              <HistorySection report={report} />
+            </ReportSection>
+            <ReportSection id="przyczyny" number={3} title={title(2)} sample={samples.has('causes')}>
+              {excess ? <ExcessCauses report={report} /> : null}
+              {excess && report.causes.length === 0 ? null : <CauseShares report={report} />}
+              {excess && report.causes.length === 0 ? null : <CausesSection causes={report.causes} />}
+            </ReportSection>
+            <ReportSection id="retencja" number={4} title={title(3)} sample={sampleRecommendations}>
+              <p className="text-base text-muted-foreground print:hidden">{t('fieldMap.above')}</p>
+              <SurroundingsCard surroundings={report.surroundings} />
+              <ZoneList report={report} />
+              <RecommendationList
+                category="retention"
+                recommendations={report.recommendations.retention}
+                report={report}
+              />
+            </ReportSection>
+            <ReportSection id="agrotechnika" number={5} title={title(4)} sample={sampleRecommendations}>
+              <RecommendationList
+                category="agrotech"
+                recommendations={report.recommendations.agrotech}
+                report={report}
+              />
+            </ReportSection>
+            <ReportSection id="nawadnianie" number={6} title={title(5)} sample={sampleRecommendations}>
+              <IrrigationSection report={report} />
+            </ReportSection>
+            <ReportSection id="zrodla" number={7} title={title(6)}>
+              <SourcesSection report={report} />
+            </ReportSection>
+          </div>
+          <AdvisorNotes />
+          <PrintFooter report={report} />
+          <ShareBar report={report} />
+        </article>
+      </SatellitePrintProvider>
     </ZoneFocusProvider>
   );
 }

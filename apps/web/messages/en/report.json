@@ -20,7 +20,8 @@
     "copied": "Link copied",
     "copyManual": "Copy the report address:",
     "share": "Share",
-    "savePdf": "Save PDF"
+    "savePdf": "Save PDF",
+    "preparingPdf": "Loading satellite images…"
   },
   "missing": {
     "title": "The report is missing data",
@@ -1002,6 +1003,47 @@
       "heat": "Heat days > 30°C, last {window} days",
       "heatNormal": "usually about {normal}",
       "heatNoNormal": "no normal from previous years"
+    }
+  },
+  "satellite": {
+    "title": "Field from satellite",
+    "summary": "Crop condition and water in plants on a satellite image – expand to fetch the images.",
+    "noParcels": "We do not show satellite images for a field drawn without cadastral parcels – images are fetched for whole parcels.",
+    "notLoaded": "Satellite images of the field were not loaded. To include them in the PDF, use the “Save PDF” button in the report.",
+    "intro": "Two images of the parcel from one satellite picture taken before the analysis day. They show where plants do better or worse – and where they hold more water.",
+    "loading": "Fetching the satellite image… The first time this takes up to a dozen seconds or so.",
+    "scene": "Satellite image from {date}.",
+    "clouds": "Part of the field was under cloud that day – it has no colour there.",
+    "problem": {
+      "noClearScene": "No clear satellite image: for 30 days before {date} the field was under cloud or snow.",
+      "notConfigured": "Satellite images are not enabled on this server – the rest of the report is complete.",
+      "busy": "The satellite image service (Copernicus) is not responding right now. Try again in a moment.",
+      "failed": "Could not fetch the satellite image – the rest of the report is complete."
+    },
+    "layers": {
+      "condition": {
+        "title": "Crop condition",
+        "what": "Greenness and density of plants: red spots grow worse, green ones better.",
+        "low": "worse",
+        "high": "better",
+        "alt": "Crop condition on the parcel – satellite image with the field outline",
+        "advisor": "For advisers: NDVI from Sentinel-2 (bands B04 and B08, 10 m pixel), scale {low}–{high}."
+      },
+      "moisture": {
+        "title": "Water in plants",
+        "what": "How much water plants hold: brown spots are drier, blue ones wetter.",
+        "low": "dry",
+        "high": "wet",
+        "alt": "Water in plants on the parcel – satellite image with the field outline",
+        "advisor": "For advisers: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
+      }
+    },
+    "limits": {
+      "pixel": "One square is 10–20 m on the ground, so a small parcel shows only a few dozen squares.",
+      "oneDay": "This is a picture from one day – after rain, heat or mowing it will look different.",
+      "plantsNotSoil": "“Water in plants” is the moisture of plants, not of the soil.",
+      "relative": "Colours compare places within the field, not fields with each other.",
+      "colour": "Colours need colour printing – in black and white both ends of the scale look alike."
     }
   }
 }
