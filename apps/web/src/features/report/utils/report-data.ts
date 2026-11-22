@@ -260,6 +260,24 @@ export function periodDroughtCount(
   return { drought: cells.filter((cell) => cell.status === 'drought').length, years: cells.length };
 }
 
+/** Miejsce na polu z numerem: ten sam numer na szkicu, na mapie, na liscie miejsc i przy zaleceniach. */
+export interface NumberedZone {
+  zone: Zone;
+  number: number;
+}
+
+/**
+ * Miejsca na polu warte pokazania: strefy inne niz "pozostala czesc pola" (tlo bez wypelnienia), numerowane od 1
+ * w kolejnosci z raportu. Jedna strefa na cale pole (pole jednorodne) to nie jest miejsce.
+ */
+export function fieldZones(report: WaterReport): NumberedZone[] {
+  const zones = report.zones?.zones ?? [];
+
+  return zones
+    .filter((zone) => zone.kind !== 'typical' && zone.areaHa < report.field.areaHa * 0.95)
+    .map((zone, index) => ({ zone, number: index + 1 }));
+}
+
 /** Strefa, ktorej dotyczy zalecenie (null = cale pole, brak mapy stref albo strefa obejmujaca prawie cale pole). */
 export function zoneOf(report: WaterReport, zoneId: string | null): Zone | null {
   if (!zoneId) return null;

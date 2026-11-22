@@ -1,7 +1,10 @@
-import type { ReactNode } from 'react';
+import type { Zone } from '@app/contracts';
+import { useId, type ReactNode } from 'react';
 import { useTranslations } from 'use-intl';
 
 import type { FieldSketchModel } from '@/lib/field-sketch';
+
+import { hasPattern, ZonePatternDefs, zoneFill, zoneStroke } from './zone-patterns';
 
 /** Probka znaku z legendy - te same grubosci i wzory co na szkicu (czytelne bez koloru). */
 function Sample({ children }: { children: ReactNode }) {
@@ -75,9 +78,51 @@ const SAMPLES = {
   ),
 };
 
-/** Legenda pod szkicem: granica pola i tylko te rodzaje wody, ktore sa na rysunku. */
-export function SketchLegend({ model }: { model: FieldSketchModel }) {
+/** Probka miejsca na polu: ten sam wzor (kropki, fale, kreski) i obrys co na szkicu. */
+function ZoneSample({ kind, prefix }: { kind: Zone['kind']; prefix: string }) {
+  return (
+    <Sample>
+      {hasPattern(kind) && (
+        <defs>
+          <ZonePatternDefs prefix={prefix} unit={1} />
+        </defs>
+      )}
+      {kind === 'flow_path' ? (
+        <path d="M2 8H30" stroke={zoneStroke(kind)} strokeWidth="3" strokeDasharray="5 3" />
+      ) : (
+        <rect
+          x="2"
+          y="2"
+          width="28"
+          height="12"
+          fill={zoneFill(prefix, kind)}
+          stroke={zoneStroke(kind)}
+          strokeWidth="1.2"
+          strokeDasharray={kind === 'segment' ? '5 3' : undefined}
+        />
+      )}
+    </Sample>
+  );
+}
+
+const NO_KINDS: readonly Zone['kind'][] = [];
+
+/** Kolejnosc rodzajow miejsc w legendzie. */
+const ZONE_LEGEND_ORDER = ['drying', 'collecting', 'depression', 'flow_path', 'segment'] as const;
+
+/**
+ * Legenda pod szkicem: granica pola, rodzaje miejsc na polu (wzory) i tylko te rodzaje wody, ktore sa na rysunku.
+ */
+export function SketchLegend({
+  model,
+  zoneKinds = NO_KINDS,
+}: {
+  model: FieldSketchModel;
+  /** rodzaje narysowanych miejsc na polu */
+  zoneKinds?: readonly Zone['kind'][];
+}) {
   const t = useTranslations('report.fieldMap.sketch.legend');
+  const prefix = useId();
   const names = model.names.map((name) => name.text);
   const items: { key: string; sample: ReactNode; text: string }[] = [
     { key: 'field', sample: SAMPLES.field, text: t('field') },
@@ -93,6 +138,16 @@ export function SketchLegend({ model }: { model: FieldSketchModel }) {
           : model.fact.alongEdge
             ? t('highlightAlongEdge')
             : t('highlightThrough'),
+    });
+  }
+
+  for (const kind of ZONE_LEGEND_ORDER) {
+    if (!zoneKinds.includes(kind)) continue;
+
+    items.push({
+      key: `zone-${kind}`,
+      sample: <ZoneSample kind={kind} prefix={`${prefix}-${kind}`} />,
+      text: t(`zones.${kind}`),
     });
   }
 

@@ -1,7 +1,7 @@
 import type { AppHref } from '@/lib/routes';
 import type { WaterReport } from '@app/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { renderWithIntl, translator } from '@/test/render-intl';
@@ -10,6 +10,7 @@ import { DROUGHT_REPORT } from '../../fixtures/drought-report';
 import { FIELD_REPORT } from '../../fixtures/field-report';
 import { FOREST_REPORT } from '../../fixtures/forest-report';
 import { LOW_CONFIDENCE_REPORT } from '../../fixtures/low-confidence-report';
+import { MEADOW_REPORT } from '../../fixtures/meadow-report';
 import { SAMPLE_REPORT } from '../../fixtures/sample-report';
 import { ReportView } from './report-view';
 
@@ -268,6 +269,7 @@ describe('ReportView', () => {
   it.each([
     ['pole z rowem (silnik)', FIELD_REPORT],
     ['las (silnik)', FOREST_REPORT],
+    ['laka z nadmiarem wody i zaglebieniami (silnik)', MEADOW_REPORT],
     ['susza (silnik)', DROUGHT_REPORT],
     ['niska pewnosc', LOW_CONFIDENCE_REPORT],
   ])('%s: zaden surowy identyfikator (snake_case) nie trafia na ekran, takze w szczegolach', (_, report) => {
@@ -304,7 +306,9 @@ describe('ReportView', () => {
       const current = calendar.querySelector('tr[data-current]');
 
       expect(calendar.querySelectorAll('td[data-status="excess"]').length).toBeGreaterThan(0);
-      expect(current?.querySelectorAll('td[data-status="ok"]')).toHaveLength(3);
+      // silnik 0.5.0: gleba kategorii I (lzejszy koniec zakresu) - w 2018 dwa okresy z susza przed data analizy
+      expect(current?.querySelectorAll('td[data-status="ok"]')).toHaveLength(1);
+      expect(current?.querySelectorAll('td[data-status="drought"]')).toHaveLength(2);
       expect(within(calendar).getByText('nadmiar wody', { selector: 'li' })).toBeInTheDocument();
     });
 
@@ -338,5 +342,89 @@ describe('ReportView', () => {
       'missing',
     );
     expect(screen.getByText(t('sources.limitationItems.vegetation_missing'))).toBeInTheDocument();
+  });
+
+  describe('miejsca na polu', () => {
+    it('szkic ma miejsca z numerami, lista pod nim ma zdania z serwera i skad sa miejsca', () => {
+      renderReport(FIELD_REPORT);
+
+      const list = screen.getByTestId('zone-list');
+      const items = within(list).getAllByRole('button');
+
+      // 4 miejsca; "pozostala czesc pola" (17,9 ha) to tlo bez numeru
+      expect(items).toHaveLength(4);
+      expect(items[0]).toHaveTextContent(
+        'Miejsce 1: Suchsze miejsce, w zachodniej części pola, przy rowie, ok. 0,5 ha',
+      );
+      expect(within(list).getByTestId('zone-list-basis')).toHaveTextContent(
+        'jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu 17 maja 2018 – 15 czerwca 2018)',
+      );
+      expect(screen.getAllByTestId('field-sketch-zone-number').map((badge) => badge.textContent)).toEqual([
+        '1',
+        '2',
+        '3',
+        '4',
+      ]);
+      expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Kropki – miejsce suchsze');
+      expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Fale – tu zbiera się woda');
+    });
+
+    it('zalecenie dla miejsca ma jego numer; fokus na zaleceniu wyroznia miejsce na szkicu i odwrotnie', () => {
+      renderReport(FIELD_REPORT);
+
+      const trees = screen.getByText(t('recommendations.measures.field_margin_trees.name')).closest('li');
+
+      expect(trees).toHaveTextContent(
+        'Dotyczy miejsca 1: suchsze miejsce, w zachodniej części pola, przy rowie, ok. 0,5 ha',
+      );
+      // zastawka na rowie dotyczy reszty pola - bez numeru
+      expect(screen.getByText(t('recommendations.measures.ditch_weir.name')).closest('li')).toHaveTextContent(
+        t('recommendations.zoneRest'),
+      );
+      expect(screen.queryByTestId('field-sketch-zone-active')).not.toBeInTheDocument();
+
+      fireEvent.focus(
+        within(trees as HTMLElement).getByRole('button', { name: 'Pokaż miejsce 1 na szkicu' }),
+      );
+
+      expect(screen.getByTestId('field-sketch-zone-active')).toBeInTheDocument();
+
+      fireEvent.blur(within(trees as HTMLElement).getByRole('button', { name: 'Pokaż miejsce 1 na szkicu' }));
+      fireEvent.click(screen.getAllByTestId('field-sketch-zone-number')[0] as Element);
+
+      expect(trees).toHaveClass('ring-2');
+    });
+
+    it('zaglebienie bez odplywu ma wlasny wzor w legendzie', () => {
+      renderReport(MEADOW_REPORT);
+
+      expect(within(screen.getByTestId('zone-list')).getAllByRole('button')).toHaveLength(4);
+      expect(screen.getByTestId('field-sketch-legend')).toHaveTextContent('Kreski – zagłębienie bez odpływu');
+    });
+
+    it.each([
+      ['field_too_small', FOREST_REPORT, 'satelita widzi kwadraty 10 × 10 m'],
+      [
+        'uniform',
+        {
+          ...FIELD_REPORT,
+          zones: {
+            layout: 'zones',
+            cellSizeM: 10,
+            cells: 168,
+            reason: 'uniform',
+            zones: [{ ...FIELD_REPORT.zones?.zones.at(-1), id: 'zone-1', areaHa: FIELD_REPORT.field.areaHa }],
+          },
+        } as WaterReport,
+        'nie widać miejsc wyraźnie suchszych',
+      ],
+      ['brak mapy stref', { ...FIELD_REPORT, zones: null }, 'zabrakło zdjęcia satelitarnego'],
+    ])('bez miejsc (%s): jedno zdanie z powodem, bez numerow na szkicu', (_, report, text) => {
+      renderReport(report);
+
+      expect(screen.getByTestId('zone-list-empty')).toHaveTextContent(text);
+      expect(screen.queryByTestId('zone-list')).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId('field-sketch-zone-number')).toHaveLength(0);
+    });
   });
 });

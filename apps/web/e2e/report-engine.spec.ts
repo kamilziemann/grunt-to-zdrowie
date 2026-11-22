@@ -94,7 +94,9 @@ test.describe('raport z pełnego silnika', () => {
     const calendar = page.getByTestId('risk-calendar');
 
     await expect(calendar.locator('td[data-status="excess"]').first()).toBeAttached();
-    await expect(calendar.locator('tr[data-current] td[data-status="ok"]')).toHaveCount(3);
+    // silnik 0.5.0: gleba kategorii I - w 2018 dwa okresy z susza przed data analizy
+    await expect(calendar.locator('tr[data-current] td[data-status="ok"]')).toHaveCount(1);
+    await expect(calendar.locator('tr[data-current] td[data-status="drought"]')).toHaveCount(2);
     await expect(calendar.getByRole('listitem').filter({ hasText: 'nadmiar wody' })).toBeVisible();
   });
 
@@ -105,5 +107,50 @@ test.describe('raport z pełnego silnika', () => {
     await expect(page.getByTestId('irrigation-plan')).toBeVisible();
 
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+});
+
+test.describe('miejsca na polu', () => {
+  test('telefon: numery na szkicu, lista miejsc, zalecenie wyróżnia swoje miejsce na szkicu', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+
+    await expect(page.getByTestId('verdict-zones')).toContainText('Na polu są 4 miejsca');
+    await expect(page.getByTestId('field-sketch-zone-number')).toHaveCount(4);
+    await expect(page.getByTestId('zone-list').getByRole('button')).toHaveCount(4);
+    await expect(page.getByTestId('field-sketch-zone-active')).toHaveCount(0);
+
+    const show = page
+      .locator('[data-measure="field_margin_trees"]')
+      .getByRole('button', { name: 'Pokaż miejsce 1 na szkicu' });
+
+    expect((await show.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await show.click();
+    await expect(page.getByTestId('field-sketch-zone-active')).toHaveCount(1);
+    await expect(page.getByTestId('field-sketch')).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+  });
+
+  test('wydruk: numery miejsc na szkicu i lista bez przycisków „Pokaż na szkicu”', async ({ page }) => {
+    await mockReport(page, FIELD_REPORT);
+    await page.goto(reportUrl(FIELD_REPORT));
+    await expect(page.getByTestId('zone-list')).toBeVisible();
+    await page.emulateMedia({ media: 'print' });
+
+    await expect(page.getByTestId('field-sketch-zone-number').first()).toBeVisible();
+    await expect(page.getByTestId('zone-list')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Pokaż miejsce 1 na szkicu' })).toBeHidden();
+  });
+
+  test('pole za małe: jedno zdanie z powodem zamiast pustej ramki', async ({ page }) => {
+    await mockReport(page, FOREST_REPORT);
+    await page.goto(reportUrl(FOREST_REPORT));
+
+    await expect(page.getByTestId('zone-list-empty')).toContainText('satelita widzi kwadraty 10 × 10 m');
+    await expect(page.getByTestId('field-sketch-zone-number')).toHaveCount(0);
+    await expect(page.getByTestId('verdict-zones')).toHaveCount(0);
   });
 });

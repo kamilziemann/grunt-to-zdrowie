@@ -420,7 +420,10 @@
         "name": "Inna uprawa albo odmiana",
         "description": "Gatunek lub odmiana mniej wrażliwa na suszę zmniejszy ryzyko strat."
       }
-    }
+    },
+    "zoneNumbered": "Dotyczy miejsca {number}: {description}",
+    "zoneRest": "Dotyczy reszty pola, poza zaznaczonymi miejscami",
+    "showOnSketch": "Pokaż miejsce {number} na szkicu"
   },
   "irrigation": {
     "first": "Nawadnianie rozważ dopiero po działaniach opisanych wyżej. Woda zatrzymana na polu jest tańsza.",
@@ -598,7 +601,14 @@
         "highlightThrough": "Rów płynący przez pole",
         "highlightNearest": "Najbliższy rów albo ciek",
         "scale": "Podziałka",
-        "highlightAlongEdge": "Rów na skraju pola (odcinek w granicach działki)"
+        "highlightAlongEdge": "Rów na skraju pola (odcinek w granicach działki)",
+        "zones": {
+          "drying": "Kropki – miejsce suchsze, przesycha pierwsze",
+          "collecting": "Fale – tu zbiera się woda",
+          "depression": "Kreski – zagłębienie bez odpływu",
+          "flow_path": "Linia przerywana – droga spływu wody",
+          "segment": "Odcinek pola (obrys przerywany)"
+        }
       },
       "sources": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK. Granice działek: ULDK, GUGiK.",
       "sourcesDated": "Szkic w skali, północ u góry, okolica {radius} m od pola. Rowy, cieki i wody: BDOT10k, GUGiK (dane z {date}). Granice działek: ULDK, GUGiK."
@@ -644,5 +654,22 @@
     "advisorClasses": "Klasy bonitacyjne gruntów rolnych: {classes}.",
     "areas": "Powierzchnia w ewidencji: {registry} ha, z obrysu działki: {geometry} ha.",
     "sourceNote": "Rodzaj gruntu i klasy gleby z ewidencji gruntów i budynków (EGiB)."
+  },
+  "zones": {
+    "title": "Miejsca na polu",
+    "number": "Miejsce {number}:",
+    "fallback": "{kind}, ok. {area} ha",
+    "share": "{percent} pola",
+    "image": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego (najmniej zachmurzonego z okresu {from} – {to}) i z modelu terenu o oczkach ok. 30 m.",
+    "imageUnknown": "Miejsca wskazaliśmy z jednego zdjęcia satelitarnego i z modelu terenu o oczkach ok. 30 m.",
+    "terrainOnly": "Zdjęcia satelitarne z tego okresu były zachmurzone, więc miejsca wskazaliśmy z samego ukształtowania terenu (model ok. 30 m) i rowów.",
+    "verify": "To podpowiedź, gdzie iść: obejrzyj te miejsca na polu, zanim coś w nich zmienisz.",
+    "reason": {
+      "field_too_small": "Pole jest za małe, żeby wskazać w nim różne miejsca – satelita widzi kwadraty 10 × 10 m.",
+      "uniform": "Na polu nie widać miejsc wyraźnie suchszych ani wilgotniejszych od reszty – całe pole zachowuje się podobnie.",
+      "no_spatial_data": "Miejsc na polu nie udało się wskazać – zabrakło zdjęcia satelitarnego i modelu terenu dla tego pola.",
+      "scattered_parts": "Działki leżą daleko od siebie, więc nie dzielimy ich na miejsca razem – policz raport dla każdej działki osobno."
+    },
+    "teaser": "{count, plural, one {Na polu jest # miejsce, które różni się wodą od reszty} few {Na polu są # miejsca, które różnią się wodą od reszty} other {Na polu jest # miejsc, które różnią się wodą od reszty}} – zobacz szkic."
   }
 }

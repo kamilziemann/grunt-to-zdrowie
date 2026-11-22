@@ -1,6 +1,6 @@
 import type { ReportPart, WaterReport } from '@app/contracts';
 import { CircleAlert } from 'lucide-react';
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, type RefObject } from 'react';
 import { useTranslations } from 'use-intl';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -14,11 +14,13 @@ import { LandUseNotice } from '../land-use-notice';
 import { PrintFooter, PrintHeader } from '../print-frame';
 import { RecommendationList } from '../recommendation-list';
 import { ReportHeader } from '../report-header';
-import { ditchInFieldM, sampleParts } from '../../utils/report-data';
+import { ditchInFieldM, fieldZones, sampleParts } from '../../utils/report-data';
 import { ReportSection } from '../report-section';
 import { SampleBanner } from '../sample-banner';
 import { SourcesSection } from '../sources-section';
 import { VerdictSection } from '../verdict-section';
+import { ZoneFocusProvider } from '../zone-focus';
+import { ZoneList } from '../zone-list';
 
 export interface ReportViewProps {
   report: WaterReport;
@@ -68,66 +70,76 @@ export function ReportView({ report, changeHref, mapHref, grasslandHref }: Repor
   // inaczej raport podwazalby wlasne zalecenia. O przykladowych strefach mowi baner na gorze.
   const sampleRecommendations = samples.has('recommendations');
 
+  const zones = useMemo(() => fieldZones(report), [report]);
+
   useOpenDetailsForPrint(root);
 
   return (
-    <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
-      <PrintHeader report={report} />
-      <ReportHeader report={report} changeHref={changeHref} mapHref={mapHref} />
-      <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
-      <SampleBanner report={report} />
-      {report.meta.status !== 'complete' && (
-        <Alert variant="warning" className="text-base" data-testid="report-status">
-          <CircleAlert aria-hidden="true" />
-          <AlertDescription className="text-sm text-foreground">
-            {t(`status.${report.meta.status}`)}
-          </AlertDescription>
-        </Alert>
-      )}
-      <ReportSection id="ocena" number={1} title={t('sections.verdict')} sample={samples.has('assessment')}>
-        <VerdictSection report={report} />
-      </ReportSection>
-      <ReportSection id="historia" number={2} title={t('sections.history')} sample={samples.has('history')}>
-        <HistorySection report={report} />
-      </ReportSection>
-      <ReportSection id="przyczyny" number={3} title={t('sections.causes')} sample={samples.has('causes')}>
-        <CausesSection causes={report.causes} />
-      </ReportSection>
-      <ReportSection id="retencja" number={4} title={t('sections.retention')} sample={sampleRecommendations}>
-        <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold">{t('fieldMap.title')}</h3>
-          <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} />
-        </div>
-        <RecommendationList
-          category="retention"
-          recommendations={report.recommendations.retention}
-          report={report}
-        />
-      </ReportSection>
-      <ReportSection
-        id="agrotechnika"
-        number={5}
-        title={t('sections.agrotech')}
-        sample={sampleRecommendations}
-      >
-        <RecommendationList
-          category="agrotech"
-          recommendations={report.recommendations.agrotech}
-          report={report}
-        />
-      </ReportSection>
-      <ReportSection
-        id="nawadnianie"
-        number={6}
-        title={t('sections.irrigation')}
-        sample={sampleRecommendations}
-      >
-        <IrrigationSection report={report} />
-      </ReportSection>
-      <ReportSection id="zrodla" number={7} title={t('sections.sources')}>
-        <SourcesSection report={report} />
-      </ReportSection>
-      <PrintFooter report={report} />
-    </article>
+    <ZoneFocusProvider>
+      <article ref={root} className="report flex flex-col gap-section print:gap-6" data-testid="report">
+        <PrintHeader report={report} />
+        <ReportHeader report={report} changeHref={changeHref} mapHref={mapHref} />
+        <LandUseNotice landUse={report.landUse} grasslandHref={grasslandHref} mapHref={mapHref} />
+        <SampleBanner report={report} />
+        {report.meta.status !== 'complete' && (
+          <Alert variant="warning" className="text-base" data-testid="report-status">
+            <CircleAlert aria-hidden="true" />
+            <AlertDescription className="text-sm text-foreground">
+              {t(`status.${report.meta.status}`)}
+            </AlertDescription>
+          </Alert>
+        )}
+        <ReportSection id="ocena" number={1} title={t('sections.verdict')} sample={samples.has('assessment')}>
+          <VerdictSection report={report} />
+        </ReportSection>
+        <ReportSection id="historia" number={2} title={t('sections.history')} sample={samples.has('history')}>
+          <HistorySection report={report} />
+        </ReportSection>
+        <ReportSection id="przyczyny" number={3} title={t('sections.causes')} sample={samples.has('causes')}>
+          <CausesSection causes={report.causes} />
+        </ReportSection>
+        <ReportSection
+          id="retencja"
+          number={4}
+          title={t('sections.retention')}
+          sample={sampleRecommendations}
+        >
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">{t('fieldMap.title')}</h3>
+            <FieldMap field={report.field} ditchInFieldM={ditchInFieldM(report)} zones={zones} />
+          </div>
+          <ZoneList report={report} />
+          <RecommendationList
+            category="retention"
+            recommendations={report.recommendations.retention}
+            report={report}
+          />
+        </ReportSection>
+        <ReportSection
+          id="agrotechnika"
+          number={5}
+          title={t('sections.agrotech')}
+          sample={sampleRecommendations}
+        >
+          <RecommendationList
+            category="agrotech"
+            recommendations={report.recommendations.agrotech}
+            report={report}
+          />
+        </ReportSection>
+        <ReportSection
+          id="nawadnianie"
+          number={6}
+          title={t('sections.irrigation')}
+          sample={sampleRecommendations}
+        >
+          <IrrigationSection report={report} />
+        </ReportSection>
+        <ReportSection id="zrodla" number={7} title={t('sections.sources')}>
+          <SourcesSection report={report} />
+        </ReportSection>
+        <PrintFooter report={report} />
+      </article>
+    </ZoneFocusProvider>
   );
 }

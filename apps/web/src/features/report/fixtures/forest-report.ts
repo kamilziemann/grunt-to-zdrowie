@@ -1,18 +1,18 @@
-// Raport z prawdziwego silnika (POST /api/analysis, 21.11.2026): dzialka 141201_1.0001.6509, pszenica ozima,
-// 10.07.2024 - wedlug ewidencji to las (`landUse.mismatch: 'non_agricultural'`), gleba z sasiedztwa (250 m).
-// Testy i e2e ostrzezenia "to nie pole uprawne"; bez aliasow `@/` (Playwright).
+// Raport z prawdziwego silnika 0.5.0 (POST /api/analysis, 22.11.2026): dzialka 141201_1.0001.6509, pszenica ozima,
+// 10.07.2024 - wedlug ewidencji to las (`landUse.mismatch: 'non_agricultural'`), 0,27 ha, wiec bez miejsc na polu
+// (`zones.reason: 'field_too_small'`). Testy i e2e ostrzezenia "to nie pole uprawne"; bez aliasow `@/` (Playwright).
 import type { WaterReport } from '@app/contracts';
 
 export const FOREST_REPORT: WaterReport = {
   meta: {
-    reportId: 'r-f20a76e9',
-    engineVersion: '0.3.0',
+    reportId: 'r-9bbc009f',
+    engineVersion: '0.5.0',
     analysisDate: '2024-07-10',
-    generatedAt: '2026-11-21T22:38:41.775Z',
-    durationMs: 5001,
+    generatedAt: '2026-11-22T00:01:22.760Z',
+    durationMs: 1446,
     status: 'partial',
     sample: false,
-    sampleParts: ['zones'],
+    sampleParts: [],
   },
   field: {
     id: 'parcels:0591ffb7',
@@ -67,8 +67,8 @@ export const FOREST_REPORT: WaterReport = {
       precipMm: 123.5,
       evapotranspirationMm: 258.8,
       balanceMm: -135.3,
-      thresholdMm: -224,
-      soilCategory: 3,
+      thresholdMm: -165,
+      soilCategory: 1,
       belowThreshold: false,
       method: 'iung_dg95',
       coverage: 1,
@@ -108,6 +108,7 @@ export const FOREST_REPORT: WaterReport = {
       stressDays30: 30,
       seasonStressDays: 60,
       seasonEtDeficitMm: 126.5,
+      etDeficitShare60d: 0.45,
     },
     vegetation: {
       observedOn: '2024-07-05',
@@ -130,10 +131,11 @@ export const FOREST_REPORT: WaterReport = {
     soilBasis: 'nearby',
     soilDistanceM: 250,
     verdictBasis: 'soil_category',
+    soilCategoryRange: [1, 3],
   },
   history: {
     seasonsWithData: 10,
-    droughtSeasons: 0,
+    droughtSeasons: 5,
     deficitSeasons: 8,
     seasons: [
       {
@@ -154,7 +156,7 @@ export const FOREST_REPORT: WaterReport = {
       },
       {
         year: 2016,
-        droughtPeriods: 0,
+        droughtPeriods: 1,
         monitoredPeriods: 9,
         minBalanceMm: -160.8,
         stressDays: 46,
@@ -170,7 +172,7 @@ export const FOREST_REPORT: WaterReport = {
       },
       {
         year: 2018,
-        droughtPeriods: 0,
+        droughtPeriods: 5,
         monitoredPeriods: 9,
         minBalanceMm: -197.3,
         stressDays: 72,
@@ -178,7 +180,7 @@ export const FOREST_REPORT: WaterReport = {
       },
       {
         year: 2019,
-        droughtPeriods: 0,
+        droughtPeriods: 2,
         monitoredPeriods: 9,
         minBalanceMm: -201.5,
         stressDays: 68,
@@ -202,7 +204,7 @@ export const FOREST_REPORT: WaterReport = {
       },
       {
         year: 2022,
-        droughtPeriods: 0,
+        droughtPeriods: 1,
         monitoredPeriods: 9,
         minBalanceMm: -155.6,
         stressDays: 59,
@@ -210,7 +212,7 @@ export const FOREST_REPORT: WaterReport = {
       },
       {
         year: 2023,
-        droughtPeriods: 0,
+        droughtPeriods: 1,
         monitoredPeriods: 9,
         minBalanceMm: -181,
         stressDays: 53,
@@ -413,7 +415,7 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2016,
         periodNo: 5,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -160.8,
       },
       {
@@ -563,31 +565,31 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2018,
         periodNo: 2,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -138.5,
       },
       {
         year: 2018,
         periodNo: 3,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -188.4,
       },
       {
         year: 2018,
         periodNo: 4,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -197.3,
       },
       {
         year: 2018,
         periodNo: 5,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -178.1,
       },
       {
         year: 2018,
         periodNo: 6,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -167.3,
       },
       {
@@ -677,13 +679,13 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2019,
         periodNo: 7,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -180.2,
       },
       {
         year: 2019,
         periodNo: 8,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -201.5,
       },
       {
@@ -919,7 +921,7 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2022,
         periodNo: 5,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -155.6,
       },
       {
@@ -1015,7 +1017,7 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2023,
         periodNo: 7,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -181,
       },
       {
@@ -1071,7 +1073,7 @@ export const FOREST_REPORT: WaterReport = {
       {
         year: 2024,
         periodNo: 2,
-        status: 'ok',
+        status: 'drought',
         balanceMm: -132.8,
       },
       {
@@ -1099,7 +1101,7 @@ export const FOREST_REPORT: WaterReport = {
         balanceMm: -135.3,
       },
     ],
-    riskMonths: [],
+    riskMonths: [6, 7],
   },
   causes: [
     {
@@ -1115,7 +1117,7 @@ export const FOREST_REPORT: WaterReport = {
         },
         {
           metric: 'soil_category',
-          value: 3,
+          value: 1,
           unit: 'category',
           source: 'soil',
         },
@@ -1134,7 +1136,7 @@ export const FOREST_REPORT: WaterReport = {
         },
         {
           metric: 'drought_seasons',
-          value: 0,
+          value: 5,
           unit: 'seasons',
           reference: 10,
           source: 'meteo',
@@ -1234,7 +1236,7 @@ export const FOREST_REPORT: WaterReport = {
           },
           {
             metric: 'soil_category',
-            value: 3,
+            value: 1,
             unit: 'category',
             source: 'soil',
           },
@@ -1265,7 +1267,7 @@ export const FOREST_REPORT: WaterReport = {
           },
           {
             metric: 'soil_category',
-            value: 3,
+            value: 1,
             unit: 'category',
             source: 'soil',
           },
@@ -1278,7 +1280,7 @@ export const FOREST_REPORT: WaterReport = {
           },
           {
             metric: 'drought_seasons',
-            value: 0,
+            value: 5,
             unit: 'seasons',
             reference: 10,
             source: 'meteo',
@@ -1310,7 +1312,7 @@ export const FOREST_REPORT: WaterReport = {
           },
           {
             metric: 'drought_seasons',
-            value: 0,
+            value: 5,
             unit: 'seasons',
             reference: 10,
             source: 'meteo',
@@ -1339,29 +1341,8 @@ export const FOREST_REPORT: WaterReport = {
     layout: 'zones',
     cellSizeM: 10,
     cells: 27,
-    zones: [
-      {
-        id: 'zone-1',
-        kind: 'typical',
-        areaHa: 0.2658,
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [21.589876, 52.17167],
-              [21.590427, 52.172262],
-              [21.59034, 52.172275],
-              [21.59013, 52.17227],
-              [21.589882, 52.172266],
-              [21.589704, 52.172208],
-              [21.589332, 52.171852],
-              [21.589876, 52.17167],
-            ],
-          ],
-        },
-        slopePct: 1.6,
-      },
-    ],
+    zones: [],
+    reason: 'field_too_small',
   },
   sources: [
     {
@@ -1369,7 +1350,7 @@ export const FOREST_REPORT: WaterReport = {
       provider: 'GUGiK EGiB (WFS)',
       status: 'ok',
       sample: false,
-      fetchedAt: '2026-11-21T22:38:38.217Z',
+      fetchedAt: '2026-11-22T00:01:21.982Z',
     },
     {
       id: 'meteo',
@@ -1379,7 +1360,7 @@ export const FOREST_REPORT: WaterReport = {
       licence: 'CC BY 4.0 (NASA Langley Research Center POWER Project)',
       url: 'https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR%2CT2M%2CT2M_MAX%2CT2M_MIN%2CALLSKY_SFC_SW_DWN%2CRH2M%2CWS2M&community=AG&longitude=21.5899&latitude=52.1720&start=20140312&end=20240710&format=JSON&time-standard=LST',
       resolution: 'meteo 0,5° × 0,625° (ok. 55 × 43 km), promieniowanie 1°',
-      fetchedAt: '2026-11-21T22:38:38.217Z',
+      fetchedAt: '2026-11-22T00:01:21.983Z',
       dataFrom: '2014-03-12',
       dataTo: '2024-07-10',
     },
@@ -1391,7 +1372,7 @@ export const FOREST_REPORT: WaterReport = {
       licence: 'CC BY 4.0 (ISRIC - World Soil Information)',
       url: 'https://maps.isric.org/mapserv?map=/map/sand.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=sand_0-5cm_mean&FORMAT=image/tiff&SUBSETTINGCRS=http://www.opengis.net/def/crs/EPSG/0/4326&SUBSET=long(21.56004,21.61972)&SUBSET=lat(52.15370,52.19024)',
       resolution: '250 m (model globalny)',
-      fetchedAt: '2026-11-21T22:38:38.217Z',
+      fetchedAt: '2026-11-22T00:01:21.983Z',
       note: 'w polu SoilGrids nie ma predykcji (zabudowa albo woda); gleba z najbliższego obszaru z predykcją, ok. 250 m od pola (10 pikseli); globalny model uczenia maszynowego 250 m, nie mapa glebowa; grupa granulometryczna gp',
     },
     {
@@ -1402,7 +1383,7 @@ export const FOREST_REPORT: WaterReport = {
       licence:
         'dane otwarte; podać: EU-DEM (Copernicus), SRTM (NASA), opracowanie kafli: Mapzen / AWS Terrain Tiles',
       url: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/15/18348/10798.png',
-      fetchedAt: '2026-11-21T22:38:38.217Z',
+      fetchedAt: '2026-11-22T00:01:21.983Z',
       resolution: 'model ok. 30 m (EU-DEM / SRTM), siatka obliczeń 2,9 m',
       note: 'pole to ok. 3 komórki modelu 30 m — spadek to przybliżenie, małe zagłębienia i krótkie stoki mogą być niewidoczne; sprawdź w terenie',
     },
@@ -1413,8 +1394,8 @@ export const FOREST_REPORT: WaterReport = {
       sample: false,
       licence: 'dane publiczne GUGiK, bezpłatne (podać źródło: BDOT10k, GUGiK)',
       resolution: 'wektor 1:10 000 (uproszczenie 2 m)',
-      fetchedAt: '2026-11-21T20:40:36.816Z',
-      note: 'BDOT10k zaimportowany 2026-11-21 (stan obecny rowów i wód); odległości od granicy pola, promień 500 m; odczyt 2026-11-21',
+      fetchedAt: '2026-11-21T23:06:49.150Z',
+      note: 'BDOT10k zaimportowany 2026-11-21 (stan obecny rowów i wód); odległości od granicy pola, promień 500 m; odczyt 2026-11-22',
     },
     {
       id: 'vegetation',
@@ -1424,10 +1405,10 @@ export const FOREST_REPORT: WaterReport = {
       licence: 'dane Copernicus Sentinel, otwarte (podać: "Contains modified Copernicus Sentinel data")',
       url: 'https://sh.dataspace.copernicus.eu/api/v1/statistics',
       resolution: '10 m (NDMI z pasma B11 20 m)',
-      fetchedAt: '2026-11-21T22:38:38.217Z',
+      fetchedAt: '2026-11-22T00:01:21.983Z',
       dataFrom: '2019-06-30',
       dataTo: '2024-07-10',
-      note: 'porównanie z tą samą porą roku w 5 z 5 wcześniejszych lat',
+      note: 'porównanie z tą samą porą roku w 5 z 5 wcześniejszych lat; mapa wilgotności roślin na polu: najmniej zachmurzona scena z 2024-06-11 – 2024-07-10',
     },
   ],
   limitations: [

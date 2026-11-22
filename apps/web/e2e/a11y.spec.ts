@@ -3,12 +3,15 @@
 // Nowa strona = nowa pozycja w PAGES. Dzialka i raport sa podstawione (bez ULDK i zrodel danych), podklad mapy
 // i kafle hydrografii tez: z prawdziwym podkladem (OpenFreeMap) axe ruszal czasem w polowie ladowania mapy, gdy
 // MapLibre jeszcze przebudowywal DOM - wynik zalezal od sieci. Mape sprawdzamy w stanie koncowym (`ready`).
+import { FIELD_REPORT } from '../src/features/report/fixtures/field-report';
 import {
   DROUGHT_REPORT_URL,
   LOW_CONFIDENCE_REPORT_URL,
   mockAnalysisApi,
+  mockReport,
   PARCEL_ID,
   REPORT_URL,
+  reportUrl,
 } from './support/analysis-api';
 import { expectHeadingOrder, expectNoViolations } from './support/axe';
 import { mockBasemap, mockHydroApi } from './support/hydro-api';
@@ -66,5 +69,16 @@ for (const colorScheme of SCHEMES) {
         await expectHeadingOrder(page);
       });
     }
+
+    test('raport z miejscami na polu (szkic ze strefami, wyróżnione miejsce)', async ({ page }) => {
+      await mockReport(page, FIELD_REPORT);
+      await mockBasemap(page);
+      await mockHydroApi(page, { tiles: {} });
+      await page.goto(reportUrl(FIELD_REPORT));
+      await expect(page.getByTestId('zone-list')).toBeVisible();
+      await page.getByTestId('zone-list').getByRole('button').first().focus();
+      await expectNoViolations(page);
+      await expectHeadingOrder(page);
+    });
   });
 }

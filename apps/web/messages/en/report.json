@@ -420,7 +420,10 @@
         "name": "A different crop or variety",
         "description": "A species or variety less sensitive to drought lowers the risk of losses."
       }
-    }
+    },
+    "zoneNumbered": "Applies to spot {number}: {description}",
+    "zoneRest": "Applies to the rest of the field, outside the marked spots",
+    "showOnSketch": "Show spot {number} on the sketch"
   },
   "irrigation": {
     "first": "Consider irrigation only after the measures described above. Water kept on the field is cheaper.",
@@ -598,7 +601,14 @@
         "highlightThrough": "Ditch running through the field",
         "highlightNearest": "Nearest ditch or watercourse",
         "scale": "Scale",
-        "highlightAlongEdge": "Ditch along the field edge (section within the parcel)"
+        "highlightAlongEdge": "Ditch along the field edge (section within the parcel)",
+        "zones": {
+          "drying": "Dots – drier spot, dries out first",
+          "collecting": "Waves – water collects here",
+          "depression": "Lines – hollow without outflow",
+          "flow_path": "Dashed line – where water runs off",
+          "segment": "Section of the field (dashed outline)"
+        }
       },
       "sources": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK. Parcel boundaries: ULDK, GUGiK.",
       "sourcesDated": "Drawn to scale, north up, area within {radius} m of the field. Ditches, streams and water: BDOT10k, GUGiK (data from {date}). Parcel boundaries: ULDK, GUGiK."
@@ -644,5 +654,22 @@
     "advisorClasses": "Soil quality classes of agricultural land: {classes}.",
     "areas": "Area in the register: {registry} ha, from the parcel outline: {geometry} ha.",
     "sourceNote": "Land use and soil classes from the land and building register (EGiB)."
+  },
+  "zones": {
+    "title": "Spots in the field",
+    "number": "Spot {number}:",
+    "fallback": "{kind}, about {area} ha",
+    "share": "{percent} of the field",
+    "image": "We marked these spots from one satellite image (the least cloudy one between {from} and {to}) and a terrain model with a grid of about 30 m.",
+    "imageUnknown": "We marked these spots from one satellite image and a terrain model with a grid of about 30 m.",
+    "terrainOnly": "Satellite images from this period were cloudy, so we marked the spots from the terrain alone (a model of about 30 m) and the ditches.",
+    "verify": "Treat it as a hint where to look: check these spots in the field before changing anything there.",
+    "reason": {
+      "field_too_small": "The field is too small to point out different spots in it – the satellite sees squares of 10 × 10 m.",
+      "uniform": "No spot in the field is clearly drier or wetter than the rest – the whole field behaves alike.",
+      "no_spatial_data": "We could not point out spots in the field – there was no satellite image and no terrain model for it.",
+      "scattered_parts": "The parcels lie far apart, so we do not split them into spots together – run a report for each parcel."
+    },
+    "teaser": "{count, plural, one {There is # spot in the field that differs in water from the rest} other {There are # spots in the field that differ in water from the rest}} – see the sketch."
   }
 }

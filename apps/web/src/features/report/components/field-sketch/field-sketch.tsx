@@ -1,7 +1,17 @@
-import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import type { Zone } from '@app/contracts';
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useTranslations } from 'use-intl';
 
 import type { FieldSketchModel, SketchGroup, SketchPoint } from '@/lib/field-sketch';
+
+import { ZonePatternDefs, zoneFill, zoneStroke } from './zone-patterns';
+
+/** Miejsce na polu do narysowania: rodzaj (wzor) i numer zgodny z lista miejsc i zaleceniami. */
+export interface SketchZoneMark {
+  id: string;
+  kind: Zone['kind'];
+  number: number;
+}
 
 export interface FieldSketchProps {
   model: FieldSketchModel;
@@ -11,7 +21,15 @@ export interface FieldSketchProps {
   factText: string | null;
   /** pelny opis dla czytnika ekranu */
   label: string;
+  /** miejsca na polu (strefy inne niz tlo) - geometria z `model.zones`, wzor i numer stad */
+  zones?: readonly SketchZoneMark[];
+  /** wyrozniona strefa (zalecenie albo pozycja listy pod fokusem) */
+  activeZone?: string | null;
+  /** klikniecie strefy na rysunku */
+  onZoneSelect?: (zoneId: string) => void;
 }
+
+const NO_MARKS: readonly SketchZoneMark[] = [];
 
 /** Szerokosc szkicu w px, dla ktorej liczymy rozmiar napisow przed pomiarem (SSR, pierwsza klatka). */
 const DEFAULT_WIDTH_PX = 576;
@@ -86,6 +104,7 @@ function placeFact({
   avoidY,
   fieldTop,
   fieldBottom,
+  avoid = [],
 }: {
   fact: NonNullable<FieldSketchModel['fact']>;
   text: string;
@@ -96,6 +115,8 @@ function placeFact({
   avoidY: number;
   fieldTop: number;
   fieldBottom: number;
+  /** zajete miejsca (numery miejsc na polu) - ramka ich nie zaslania, gdy jest gdzie indziej miejsce */
+  avoid?: readonly Rect[];
 }): FactPlacement {
   const pad = 10 * unit;
   const boxWidth = textWidth(text, font) + pad * 1.6;
@@ -111,23 +132,37 @@ function placeFact({
     ];
   };
 
+  // pierwsza propozycja bez kolizji z numerami miejsc; gdy kazda koliduje - pierwsza
+  const pick = (candidates: SketchPoint[]): FactPlacement => {
+    const free = candidates.find(
+      ([x, y]) => !avoid.some((rect) => overlaps([x, y, boxWidth, boxHeight], rect)),
+    );
+    const [x, y] = free ?? candidates[0] ?? [pad, pad];
+
+    return { x, y, boxWidth, boxHeight };
+  };
+
   if (fact.kind === 'ditch_through') {
     const nameBelow = avoidY > fact.anchor[1];
     const outside = nameBelow ? fieldTop - boxHeight - pad * 1.5 : fieldBottom + pad * 1.5;
     const fits = outside > pad && outside + boxHeight < height - pad * 3.5;
     const near = placeBox(fact.anchor, nameBelow);
+    const x = clamp(fact.anchor[0] - boxWidth / 2, pad, width - boxWidth - pad * 4);
 
-    return {
-      x: fits ? clamp(fact.anchor[0] - boxWidth / 2, pad, width - boxWidth - pad * 4) : near[0],
-      y: fits ? outside : near[1],
-      boxWidth,
-      boxHeight,
-    };
+    return pick([
+      ...(fits ? [[x, outside] as SketchPoint] : []),
+      near,
+      placeBox(fact.anchor, !nameBelow),
+      [x, pad],
+      [x, height - boxHeight - pad * 3.5],
+      [width - boxWidth - pad * 4, height - boxHeight - pad * 3.5],
+      [pad, pad],
+    ]);
   }
 
-  const [x, y] = placeBox([(fact.from[0] + fact.to[0]) / 2, (fact.from[1] + fact.to[1]) / 2], true);
+  const middle: SketchPoint = [(fact.from[0] + fact.to[0]) / 2, (fact.from[1] + fact.to[1]) / 2];
 
-  return { x, y, boxWidth, boxHeight };
+  return pick([placeBox(middle, true), placeBox(middle, false)]);
 }
 
 /** Napis z obwodka w kolorze tla - czytelny na liniach i wypelnieniach, takze w czerni i bieli. */
@@ -182,7 +217,15 @@ const LINE_STYLE: Record<
  * mokradla kreskowaniem z przerywanym obrysem, podzialka, strzalka polnocy, podpis pola i jeden wyrozniony fakt
  * (linia odniesienia albo linia wymiarowa). Czysty SVG: ostry na wydruku, tokeny koloru dzialaja w obu motywach.
  */
-export function FieldSketch({ model, fieldName, factText, label }: FieldSketchProps) {
+export function FieldSketch({
+  model,
+  fieldName,
+  factText,
+  label,
+  zones = NO_MARKS,
+  activeZone = null,
+  onZoneSelect,
+}: FieldSketchProps) {
   const t = useTranslations('report.fieldMap.sketch');
   const id = useId();
   const [ref, unit] = useUnitsPerPixel(model.width);
@@ -193,6 +236,13 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
   const pad = 10 * unit;
   const clipId = `${id}-clip`;
   const hatchId = `${id}-hatch`;
+  const patternId = `${id}-zone`;
+  const marks = new Map(zones.map((zone) => [zone.id, zone]));
+  const drawnZones = model.zones.flatMap((shape) => {
+    const mark = marks.get(shape.id);
+
+    return mark ? [{ ...shape, ...mark }] : [];
+  });
 
   // podpis pola pod polem (nad nim, gdy pole siega dolu rysunku)
   const fieldBottom = model.fieldCenter[1] + model.fieldSize[1] / 2;
@@ -216,6 +266,10 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
           avoidY: nameAt[1],
           fieldTop,
           fieldBottom,
+          avoid: [
+            textRect(fieldName, nameAt, labelFont),
+            ...drawnZones.map((zone) => badgeRect(zone.labelAt, unit)),
+          ],
         })
       : null;
   // nazwy ciekow ustepuja podpisowi pola, ramce faktu, podzialce, polnocy i sobie nawzajem - pominieta nazwa
@@ -268,6 +322,7 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
               strokeWidth={stroke(1.4)}
             />
           </pattern>
+          <ZonePatternDefs prefix={patternId} unit={unit} />
         </defs>
         <rect width={width} height={height} fill="var(--card)" />
         <g clipPath={`url(#${clipId})`} aria-hidden="true">
@@ -296,6 +351,16 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
             ),
           )}
           <path d={model.field} fill="var(--sketch-field-fill)" fillRule="evenodd" stroke="none" />
+          {drawnZones.map((zone) => (
+            <ZoneShape
+              key={zone.id}
+              zone={zone}
+              fill={zone.line ? 'none' : zoneFill(patternId, zone.kind)}
+              unit={unit}
+              dimmed={activeZone !== null && activeZone !== zone.id}
+              onSelect={onZoneSelect}
+            />
+          ))}
           {model.lines.map((line, index) => {
             const style =
               LINE_STYLE[line.group === 'ditch' || line.group === 'canal' ? line.group : 'watercourse'];
@@ -341,6 +406,20 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
             strokeLinejoin="round"
             data-testid="field-sketch-field"
           />
+          {drawnZones
+            .filter((zone) => zone.id === activeZone)
+            .map((zone) => (
+              <path
+                key={zone.id}
+                d={zone.d}
+                fill="none"
+                stroke="var(--sketch-highlight)"
+                strokeWidth={stroke(3.5)}
+                strokeLinejoin="round"
+                pointerEvents="none"
+                data-testid="field-sketch-zone-active"
+              />
+            ))}
           {names.map((name) => (
             <Halo key={name.text} x={name.at[0]} y={name.at[1]} size={font} weight={500} italic>
               {name.text}
@@ -362,9 +441,110 @@ export function FieldSketch({ model, fieldName, factText, label }: FieldSketchPr
             font={font}
           />
           <NorthArrow x={width - pad * 2.4} y={pad * 1.6} unit={unit} font={font} label={t('north')} />
+          {drawnZones.map((zone) => (
+            <ZoneBadge
+              key={zone.id}
+              zoneId={zone.id}
+              at={zone.labelAt}
+              number={zone.number}
+              unit={unit}
+              active={zone.id === activeZone}
+              onSelect={onZoneSelect}
+            />
+          ))}
         </g>
       </svg>
     </>
+  );
+}
+
+/** Obszar (albo linia splywu) miejsca na polu: wzor rodzaju, obrys; przygaszony, gdy wyrozniono inne miejsce. */
+function ZoneShape({
+  zone,
+  fill,
+  unit,
+  dimmed,
+  onSelect,
+}: {
+  zone: SketchZoneMark & { d: string; line: boolean };
+  fill: string;
+  unit: number;
+  dimmed: boolean;
+  onSelect?: (zoneId: string) => void;
+}) {
+  const select = useCallback(() => onSelect?.(zone.id), [onSelect, zone.id]);
+  const dashed = zone.line || zone.kind === 'segment';
+
+  return (
+    <path
+      d={zone.d}
+      fill={fill}
+      fillRule="evenodd"
+      stroke={zoneStroke(zone.kind)}
+      strokeWidth={(zone.line ? 3 : 1.2) * unit}
+      strokeDasharray={dashed ? `${String(5 * unit)} ${String(3 * unit)}` : undefined}
+      strokeLinejoin="round"
+      opacity={dimmed ? 0.45 : 1}
+      className={onSelect ? 'cursor-pointer' : undefined}
+      onClick={onSelect ? select : undefined}
+      data-zone={zone.id}
+      data-kind={zone.kind}
+    />
+  );
+}
+
+/** Prostokat numeru miejsca (kolko z obwodka) z zapasem. */
+function badgeRect(at: SketchPoint, unit: number): Rect {
+  const size = 12 * unit;
+
+  return [at[0] - size, at[1] - size, size * 2, size * 2];
+}
+
+/** Numer miejsca w kolku - staly rozmiar na ekranie, czytelny na kazdym wzorze i w czerni i bieli. */
+function ZoneBadge({
+  zoneId,
+  at,
+  number,
+  unit,
+  active,
+  onSelect,
+}: {
+  zoneId: string;
+  at: SketchPoint;
+  number: number;
+  unit: number;
+  active: boolean;
+  onSelect?: (zoneId: string) => void;
+}) {
+  const radius = 9 * unit;
+  const select = useCallback(() => onSelect?.(zoneId), [onSelect, zoneId]);
+
+  return (
+    <g
+      className={onSelect ? 'cursor-pointer' : undefined}
+      onClick={onSelect ? select : undefined}
+      data-testid="field-sketch-zone-number"
+    >
+      <circle
+        cx={at[0]}
+        cy={at[1]}
+        r={radius}
+        fill={active ? 'var(--sketch-highlight)' : 'var(--foreground)'}
+        stroke="var(--card)"
+        strokeWidth={2 * unit}
+      />
+      <text
+        x={at[0]}
+        y={at[1]}
+        fontSize={12 * unit}
+        fontWeight={700}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--card)"
+      >
+        {number}
+      </text>
+    </g>
   );
 }
 

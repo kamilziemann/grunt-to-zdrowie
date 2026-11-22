@@ -18,7 +18,9 @@ import {
 import { APP_TIME_ZONE } from '@/lib/locale';
 import { cn } from '@/lib/utils/cn';
 
+import type { NumberedZone } from '../../utils/report-data';
 import { FieldSketch, SketchLegend } from '../field-sketch';
+import { useZoneFocus } from '../zone-focus';
 
 /** Promien okolicy pola - ten sam, w ktorym silnik szuka rowow, wod i mokradel. */
 const RADIUS_M = 500;
@@ -66,14 +68,20 @@ export interface FieldMapProps {
   field: FieldArea;
   /** dlugosc rowow w polu z raportu (m) - szkic podaje te sama liczbe co przyczyny */
   ditchInFieldM?: number | null;
+  /** miejsca na polu z numerami (strefy inne niz tlo) - na szkicu wzorem, na zdjeciu lotniczym obrysem */
+  zones?: readonly NumberedZone[];
 }
 
+const NO_ZONES: readonly NumberedZone[] = [];
+/** Okolica szkicu pola z miejscami: blizej, zeby miejsca byly czytelne (rowy i cieki w 500 m opisuja zdania nizej). */
+const ZONES_RADIUS_M = 100;
+
 /**
- * "Woda wokol pola": domyslnie szkic w skali (SVG - pole, rowy, cieki, wody i mokradla w promieniu 250 m, wyrozniony
+ * "Woda wokol pola": domyslnie szkic w skali (SVG - pole, rowy, cieki, wody i mokradla w promieniu 250 m (100 m, gdy sa miejsca na polu), wyrozniony
  * fakt, legenda, zrodla); ten szkic idzie na wydruk. Mapa na zdjeciu lotniczym (MapLibre, osobny chunk) laduje sie
  * dopiero po kliknieciu "Pokaz na zdjeciu lotniczym". Pod spodem zdania o najblizszym rowie i cieku w 500 m.
  */
-export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
+export function FieldMap({ field, ditchInFieldM = null, zones = NO_ZONES }: FieldMapProps) {
   const t = useTranslations('report.fieldMap');
   const format = useFormatter();
   const [aerial, setAerial] = useState(false);
@@ -85,10 +93,23 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
     combine: combineTiles,
   });
   const hydro = useMemo(() => summarize(field, loaded), [field, loaded]);
-  const sketch = useMemo(
-    () => buildFieldSketch(field.geometry, field.centroid, hydro.features, { ditchInFieldM }),
-    [field, hydro, ditchInFieldM],
+  const zoneShapes = useMemo(() => zones.map((item) => item.zone), [zones]);
+  const zoneMarks = useMemo(
+    () => zones.map(({ zone, number }) => ({ id: zone.id, kind: zone.kind, number })),
+    [zones],
   );
+  const radius = zoneShapes.length > 0 ? ZONES_RADIUS_M : SKETCH_RADIUS_M;
+  const zoneKinds = useMemo(() => zoneMarks.map((zone) => zone.kind), [zoneMarks]);
+  const sketch = useMemo(
+    () =>
+      buildFieldSketch(field.geometry, field.centroid, hydro.features, {
+        ditchInFieldM,
+        zones: zoneShapes,
+        radiusM: radius,
+      }),
+    [field, hydro, ditchInFieldM, zoneShapes, radius],
+  );
+  const { active, setActive, sketchRef } = useZoneFocus();
   const fail = useCallback(() => setFailed(true), []);
   const toggleAerial = useCallback(() => setAerial((value) => !value), []);
   const fallback = useMemo(() => <MapPlaceholder text={t('loading')} />, [t]);
@@ -126,17 +147,18 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
       data-hydro={state}
     >
       <div className={cn('flex max-w-xl flex-col gap-3', aerial && 'hidden print:flex')}>
-        <div className="w-full max-w-xl overflow-hidden rounded-lg border">
+        <div ref={sketchRef} className="w-full max-w-xl scroll-mt-4 overflow-hidden rounded-lg border">
           <FieldSketch
             model={sketch}
             fieldName={fieldName}
             factText={state === 'ready' ? factText : null}
-            label={[t('sketch.label', { field: fieldName, radius: SKETCH_RADIUS_M }), factText]
-              .filter(Boolean)
-              .join(' ')}
+            label={[t('sketch.label', { field: fieldName, radius }), factText].filter(Boolean).join(' ')}
+            zones={zoneMarks}
+            activeZone={active}
+            onZoneSelect={setActive}
           />
         </div>
-        <SketchLegend model={sketch} />
+        <SketchLegend model={sketch} zoneKinds={zoneKinds} />
       </div>
       {aerial && (
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted sm:aspect-[16/9] print:hidden">
@@ -149,6 +171,8 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
                 bbox={view}
                 features={hydro.features}
                 nearest={hydro.highlighted}
+                zones={zoneMarks}
+                zoneShapes={zoneShapes}
                 onFailed={fail}
               />
             </Suspense>
@@ -192,7 +216,7 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
                     })
                   : t('noWatercourse', { radius: RADIUS_M })}
             </span>
-            {sketch.groups.length === 0 && <span>{t('sketch.noWater', { radius: SKETCH_RADIUS_M })}</span>}
+            {sketch.groups.length === 0 && <span>{t('sketch.noWater', { radius })}</span>}
           </span>
         )}
         {state === 'unavailable' && <span>{t('sketch.unavailable')}</span>}
@@ -203,9 +227,9 @@ export function FieldMap({ field, ditchInFieldM = null }: FieldMapProps) {
               {hydro.highlighted.length > 0 ? ` ${t('highlight')}` : ''}
             </>
           ) : date ? (
-            t('sketch.sourcesDated', { date, radius: SKETCH_RADIUS_M })
+            t('sketch.sourcesDated', { date, radius })
           ) : (
-            t('sketch.sources', { radius: SKETCH_RADIUS_M })
+            t('sketch.sources', { radius })
           )}
         </span>
       </figcaption>

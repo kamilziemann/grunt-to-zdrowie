@@ -1,7 +1,8 @@
 // Szkic "Pole i woda wokol" bez biblioteki map: rzut lokalny w metrach wokol srodka pola, wybor obiektow BDOT10k
-// w promieniu SKETCH_RADIUS_M, sciezki SVG, podzialka i jeden wyrozniony fakt (row przez pole albo najblizszy row
-// lub ciek z linia wymiarowa). Sam model - rysuje go komponent raportu (`FieldSketch`).
-import type { HydroFeature, HydroFeatureKind, ParcelGeometry } from '@app/contracts';
+// w promieniu SKETCH_RADIUS_M, sciezki SVG, podzialka, jeden wyrozniony fakt (row przez pole albo najblizszy row
+// lub ciek z linia wymiarowa) i miejsca na polu (strefy z raportu) z punktem na numer. Sam model - rysuje go
+// komponent raportu (`FieldSketch`).
+import type { HydroFeature, HydroFeatureKind, ParcelGeometry, Zone } from '@app/contracts';
 import type { Position } from 'geojson';
 
 import { distanceM, WATERCOURSE_KINDS } from '@/lib/hydro-map';
@@ -57,6 +58,16 @@ export type SketchFact =
       to: SketchPoint;
     };
 
+/** Miejsce na polu (strefa z raportu) we wspolrzednych viewBox. */
+export interface SketchZone {
+  id: string;
+  /** sciezka SVG: obrys strefy (pierscienie, evenodd) albo linia (linia splywu) */
+  d: string;
+  line: boolean;
+  /** punkt na numer strefy: w glebi najwiekszej czesci strefy (najdalej od jej brzegow), dla linii - jej srodek */
+  labelAt: SketchPoint;
+}
+
 export interface FieldSketchModel {
   width: number;
   height: number;
@@ -75,6 +86,8 @@ export interface FieldSketchModel {
   names: SketchLabel[];
   groups: SketchGroup[];
   scale: { meters: number; length: number };
+  /** miejsca na polu w kolejnosci z raportu */
+  zones: SketchZone[];
 }
 
 /** Rzut rownoodlegosciowy wokol punktu: [metry na wschod, metry na polnoc]; na kilka kilometrow wystarczy. */
@@ -279,6 +292,79 @@ export function niceScale(widthM: number): number {
   return NICE_SCALES.findLast((value) => value <= target) ?? NICE_SCALES[0] ?? 10;
 }
 
+/** Pole powierzchni pierscienia (wzor Gaussa, wartosc bezwzgledna). */
+function ringArea(ring: readonly Meters[]): number {
+  let sum = 0;
+
+  for (let i = 1; i < ring.length; i += 1) {
+    const [x0 = 0, y0 = 0] = ring[i - 1] ?? [];
+    const [x1 = 0, y1 = 0] = ring[i] ?? [];
+
+    sum += x0 * y1 - x1 * y0;
+  }
+
+  return Math.abs(sum) / 2;
+}
+
+/** Odleglosc punktu od najblizszego brzegu (wszystkie pierscienie). */
+function edgeDistance(point: Meters, rings: readonly Meters[][]): number {
+  let best = Infinity;
+
+  for (const ring of rings) {
+    for (let i = 1; i < ring.length; i += 1) {
+      const a = ring[i - 1];
+      const b = ring[i];
+
+      if (!a || !b) continue;
+      const hit = closestOnSegment(point, a, b);
+
+      best = Math.min(best, Math.hypot(hit[0] - point[0], hit[1] - point[1]));
+    }
+  }
+
+  return best;
+}
+
+/** Siatka probek przy szukaniu miejsca na numer strefy - 24 x 24 wystarcza na wielokaty z siatki 10 m. */
+const LABEL_GRID = 24;
+
+/**
+ * Punkt na numer w wielokacie: z siatki probek w prostokacie najwiekszej czesci wybiera punkt w srodku najdalej od
+ * brzegow (przyblizenie "bieguna niedostepnosci") - srodek ciezkosci litery C lezalby poza nia.
+ */
+export function labelPoint(parts: readonly Meters[][][]): Meters {
+  const largest = parts.reduce<Meters[][] | null>(
+    (best, rings) => (!best || ringArea(rings[0] ?? []) > ringArea(best[0] ?? []) ? rings : best),
+    null,
+  );
+  const outer = largest?.[0] ?? [];
+
+  if (!largest || outer.length === 0) return [0, 0];
+  const xs = outer.map((point) => point[0]);
+  const ys = outer.map((point) => point[1]);
+  const [minX, minY, maxX, maxY] = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+  let best: { point: Meters; distance: number } | null = null;
+
+  for (let i = 0; i < LABEL_GRID; i += 1) {
+    for (let j = 0; j < LABEL_GRID; j += 1) {
+      const point: Meters = [
+        minX + ((i + 0.5) / LABEL_GRID) * (maxX - minX),
+        minY + ((j + 0.5) / LABEL_GRID) * (maxY - minY),
+      ];
+
+      if (!insideRings(point, largest)) continue;
+      const distance = edgeDistance(point, largest);
+
+      if (!best || distance > best.distance) best = { point, distance };
+    }
+  }
+
+  if (best) return best.point;
+
+  // czesc wezsza niz krok siatki: srednia wierzcholkow obrysu
+  return [xs.reduce((a, b) => a + b, 0) / xs.length, ys.reduce((a, b) => a + b, 0) / ys.length];
+}
+
 function featureKey(feature: HydroFeature): string {
   return `${feature.kind}|${JSON.stringify(feature.geometry.coordinates)}`;
 }
@@ -287,6 +373,8 @@ export interface FieldSketchOptions {
   /** dlugosc rowow w polu z raportu (silnik) - szkic podaje te sama liczbe co przyczyny */
   ditchInFieldM?: number | null;
   radiusM?: number;
+  /** miejsca na polu z raportu (`report.zones.zones`) */
+  zones?: readonly Pick<Zone, 'id' | 'geometry'>[];
 }
 
 /**
@@ -297,7 +385,7 @@ export function buildFieldSketch(
   geometry: ParcelGeometry,
   centroid: Position,
   features: readonly HydroFeature[],
-  { ditchInFieldM = null, radiusM = SKETCH_RADIUS_M }: FieldSketchOptions = {},
+  { ditchInFieldM = null, radiusM = SKETCH_RADIUS_M, zones = [] }: FieldSketchOptions = {},
 ): FieldSketchModel {
   const project = localProjection(centroid);
   const rings = paths(geometry).map((ring) => ring.map(project));
@@ -433,6 +521,29 @@ export function buildFieldSketch(
   }
 
   const meters = niceScale(maxX - minX);
+  const sketchZones = zones.map((zone): SketchZone => {
+    const shape = zone.geometry;
+
+    if (shape.type === 'LineString') {
+      const line = shape.coordinates.map(project);
+
+      return { id: zone.id, d: d(line, false), line: true, labelAt: toSvg(midpoint(line)) };
+    }
+
+    const parts = (shape.type === 'Polygon' ? [shape.coordinates] : shape.coordinates).map((part) =>
+      part.map((ring) => ring.map(project)),
+    );
+
+    return {
+      id: zone.id,
+      d: parts
+        .flat()
+        .map((ring) => d(ring, true))
+        .join(''),
+      line: false,
+      labelAt: toSvg(labelPoint(parts)),
+    };
+  });
 
   return {
     width: SKETCH_WIDTH,
@@ -447,5 +558,6 @@ export function buildFieldSketch(
     names: [...names].map(([text, { at }]) => ({ text, at: toSvg(at) })),
     groups: [...groups],
     scale: { meters, length: meters * k },
+    zones: sketchZones,
   };
 }

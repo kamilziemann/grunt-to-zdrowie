@@ -15,6 +15,7 @@ import { useFormatter, useTranslations } from 'use-intl';
 import { cn } from '@/lib/utils/cn';
 
 import {
+  fieldZones,
   isoDay,
   percentOf,
   rankSide,
@@ -119,6 +120,8 @@ export function VerdictSection({ report }: { report: WaterReport }) {
     assessment.soilBasis && assessment.soilBasis !== 'field' ? soilBasis : null,
     assessment.verdictBasis && assessment.verdictBasis !== 'soil_category' ? verdictBasis : null,
   ].filter((text): text is string => text !== null);
+  // miejsca na polu odrozniaja raport od mapy gminnej - zapowiedz ich juz w karcie oceny
+  const zoneCount = fieldZones(report).length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -146,6 +149,13 @@ export function VerdictSection({ report }: { report: WaterReport }) {
         {basisInCard.length > 0 && (
           <p className="text-base" data-testid="verdict-basis">
             {basisInCard.join(' ')}
+          </p>
+        )}
+        {zoneCount > 0 && (
+          <p className="text-base" data-testid="verdict-zones">
+            <a href="#retencja" className="font-medium text-primary underline underline-offset-4">
+              {tReport('zones.teaser', { count: zoneCount })}
+            </a>
           </p>
         )}
         <p className="text-sm text-muted-foreground">

@@ -5,6 +5,7 @@ import {
   buildFieldSketch,
   clipToField,
   closestPair,
+  labelPoint,
   localProjection,
   niceScale,
   SKETCH_WIDTH,
@@ -211,5 +212,56 @@ describe('model szkicu', () => {
 
     expect(sketch.lines).toHaveLength(1);
     expect(sketch.fact).toMatchObject({ lengthM: 68 });
+  });
+});
+
+describe('miejsca na polu', () => {
+  it('numer litery C stoi w jej grzbiecie, nie w pustym srodku', () => {
+    // C: kwadrat 0..90 bez wciecia 30..90 x 30..60
+    const shape: [number, number][][][] = [
+      [
+        [
+          [0, 0],
+          [90, 0],
+          [90, 30],
+          [30, 30],
+          [30, 60],
+          [90, 60],
+          [90, 90],
+          [0, 90],
+          [0, 0],
+        ],
+      ],
+    ];
+    const [x, y] = labelPoint(shape);
+
+    expect(x < 30 || y < 30 || y > 60).toBe(true);
+  });
+
+  it('rzutuje strefy tym samym rzutem co pole, linie splywu jako linie', () => {
+    const model = buildFieldSketch(FIELD, CENTER, [], {
+      zones: [
+        { id: 'zone-1', geometry: FIELD },
+        {
+          id: 'zone-2',
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [21.59, 52.1723],
+              [21.591, 52.1723],
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(model.zones.map((zone) => [zone.id, zone.line])).toEqual([
+      ['zone-1', false],
+      ['zone-2', true],
+    ]);
+    expect(model.zones[0]?.d).toBe(model.field);
+    // numer pola - w jego srodku
+    expect(model.zones[0]?.labelAt[0]).toBeCloseTo(model.fieldCenter[0], -1);
+    expect(model.zones[0]?.labelAt[1]).toBeCloseTo(model.fieldCenter[1], -1);
   });
 });
