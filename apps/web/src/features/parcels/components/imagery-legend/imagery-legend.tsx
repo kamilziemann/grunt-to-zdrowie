@@ -1,5 +1,5 @@
 import type { ImageryLayer } from '@app/contracts';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
+import { ChevronDown, Droplets, Leaf, LoaderCircle, type LucideIcon } from 'lucide-react';
 import { useFormatter, useTranslations } from 'use-intl';
 
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,12 @@ import type { ImageryState } from '../../hooks/use-vegetation-imagery';
 export const IMAGERY_GRADIENTS: Record<ImageryLayer, string> = {
   condition: 'from-(--vegetation-low) via-(--vegetation-mid) to-(--vegetation-high)',
   moisture: 'from-(--moisture-low) via-(--moisture-mid) to-(--moisture-high)',
+};
+
+/** Ikona warstwy: ta sama na przycisku "Satelita", w panelu wyboru i w legendzie (lisc - kondycja, kropla - woda). */
+export const IMAGERY_ICONS: Record<ImageryLayer, LucideIcon> = {
+  condition: Leaf,
+  moisture: Droplets,
 };
 
 const ENDS: Record<ImageryLayer, readonly ['worse' | 'dry', 'better' | 'wet']> = {
@@ -57,6 +63,7 @@ export function ImageryLegend({
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00Z`), { dateStyle: 'long' });
   const value = (number: number) => format.number(number, { maximumFractionDigits: 2 });
   const [start, end] = ENDS[layer];
+  const LayerIcon = IMAGERY_ICONS[layer];
   const note =
     state === 'loading'
       ? t('status.loading')
@@ -75,7 +82,10 @@ export function ImageryLegend({
     >
       <details open={defaultOpen} name={group} className="group">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3 py-1.5 text-sm font-medium select-none [&::-webkit-details-marker]:hidden">
-          <span className="min-w-0 truncate">{t(`legend.${layer}`)}</span>
+          <span className="flex min-w-0 items-center gap-1.5">
+            <LayerIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="truncate">{t(`legend.${layer}`)}</span>
+          </span>
           <span className="flex shrink-0 items-center gap-2">
             <span
               aria-hidden="true"

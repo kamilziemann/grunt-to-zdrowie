@@ -1,4 +1,4 @@
-import { Ban, Droplets, Leaf } from 'lucide-react';
+import { Ban } from 'lucide-react';
 import { useCallback, useId, useMemo, type ChangeEvent } from 'react';
 import { useFormatter, useTranslations } from 'use-intl';
 
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils/cn';
 
 import type { ImageryChoice } from '../../hooks/use-vegetation-imagery';
 import { imageryMonths } from '../../utils/imagery-months';
+import { IMAGERY_ICONS } from '../imagery-legend';
 
 export interface ImagerySwitchProps {
   value: ImageryChoice;
@@ -24,8 +25,8 @@ export interface ImagerySwitchProps {
 
 const CHOICES = [
   { choice: 'none', Icon: Ban },
-  { choice: 'condition', Icon: Leaf },
-  { choice: 'moisture', Icon: Droplets },
+  { choice: 'condition', Icon: IMAGERY_ICONS.condition },
+  { choice: 'moisture', Icon: IMAGERY_ICONS.moisture },
 ] as const;
 
 const LATEST = 'latest';
