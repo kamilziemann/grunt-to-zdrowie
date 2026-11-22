@@ -14,6 +14,7 @@ import { CausesSection } from '../causes-section';
 import { ExcessCauses } from '../excess-causes';
 import { HistorySection } from '../history-section';
 import { IrrigationSection } from '../irrigation-section';
+import { KeyNumbers } from '../key-numbers';
 import { LandUseNotice } from '../land-use-notice';
 import { PrintFooter, PrintHeader, PrintPageMargins } from '../print-frame';
 import { ProtectedAreaNotice } from '../protected-area-notice';
@@ -151,6 +152,7 @@ export function ReportView({
           data-testid="report-details"
         >
           <h2 className="text-3xl leading-tight font-bold print:text-2xl">{t('view.fullTitle')}</h2>
+          <KeyNumbers report={report} />
           <AnalysisNav items={sections} />
           <ReportSection id="ocena" number={1} title={title(0)} sample={samples.has('assessment')}>
             <VerdictSection report={report} />

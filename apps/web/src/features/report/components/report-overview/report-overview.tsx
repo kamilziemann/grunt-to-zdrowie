@@ -5,6 +5,7 @@ import { useTranslations } from 'use-intl';
 
 import { Link } from '@/lib/navigation';
 import { withHash, type AppHref } from '@/lib/routes';
+import { cn } from '@/lib/utils/cn';
 
 import { ditchInFieldM, fieldZones } from '../../utils/report-data';
 import { reportExtras, waterTank } from '../../utils/report-extras';
@@ -36,11 +37,14 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
   const t = useTranslations('report.simple');
   const zones = useMemo(() => fieldZones(report), [report]);
   const extras = reportExtras(report);
-  const hasWater =
-    waterTank(report) !== null ||
-    extras.forecast !== undefined ||
-    extras.waterLedger !== undefined ||
-    extras.waterNow?.growing === true;
+  // ile kart wody sie pokaze (pozostale znikaja same) - przy trzech jeden rzad na komputerze, bez sieroty
+  const waterCards = [
+    waterTank(report) !== null,
+    extras.waterNow?.growing === true,
+    extras.forecast !== undefined,
+    extras.waterLedger !== undefined,
+  ].filter(Boolean).length;
+  const hasWater = waterCards > 0;
 
   return (
     <div className="flex flex-col gap-8 print:block print:space-y-4" data-testid="report-overview">
@@ -65,7 +69,13 @@ export function ReportOverview({ report, detailedHref, detailed }: ReportOvervie
           {t('waterTitle')}
         </h2>
         {hasWater ? (
-          <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2 print:gap-3">
+          <div
+            className={cn(
+              'grid gap-4 print:grid-cols-2 print:gap-3',
+              waterCards > 1 && 'md:grid-cols-2',
+              waterCards === 3 && 'lg:grid-cols-3',
+            )}
+          >
             <WaterTankChart report={report} />
             <StressCountdown report={report} />
             <ForecastWeek report={report} />

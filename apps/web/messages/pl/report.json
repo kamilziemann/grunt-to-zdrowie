@@ -962,6 +962,25 @@
       "title": "Udział przyczyn",
       "percent": "{percent}%",
       "note": "Szacunek wagi każdej przyczyny w wyjaśnieniu wyniku, a nie pomiar, ile wody zabrała."
+    },
+    "numbers": {
+      "balance": "Bilans wody wg metody IUNG, 60 dni",
+      "mm": "{value} mm",
+      "balanceThreshold": "próg suszy dla gleby kat. {category}: {threshold} mm{below, select, yes { – przekroczony} other {}}",
+      "balanceNoThreshold": "w tym okresie uprawa nie ma progu suszy",
+      "rain": "Deszcz, ostatnie {days} dni",
+      "rainPercent": "{percent}% normy (zwykle ok. {median} mm)",
+      "rainMedian": "zwykle ok. {median} mm",
+      "ndmi": "Wilgotność roślin (NDMI)",
+      "ndmiRange": "zwykle o tej porze {min} – {max} (z {years, plural, one {# roku} other {# lat}})",
+      "ndmiAnomaly": "{anomaly} względem tej pory w {years, plural, one {# roku} other {# latach}}",
+      "ndmiNoBaseline": "bez porównania z poprzednimi latami",
+      "dryDays": "Dni bez deszczu z rzędu",
+      "days": "{days, plural, one {# dzień} other {# dni}}",
+      "dryReference": "padało w {rainy} z ostatnich {days} dni (≥ 1 mm)",
+      "heat": "Dni upału > 30°C, ostatnie {window} dni",
+      "heatNormal": "zwykle ok. {normal}",
+      "heatNoNormal": "bez normy z poprzednich lat"
     }
   }
 }

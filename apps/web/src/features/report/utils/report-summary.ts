@@ -1,6 +1,6 @@
 // Widok prosty raportu ("Pogodynka wody"): skala pieciu poziomow, "sucho w N z 10", pierwszy krok z plakietka
 // i podsumowania wykresow. Tylko liczby z raportu - zdania powstaja w komponentach z tlumaczen.
-import type { AssessmentLevel, Recommendation, WaterReport } from '@app/contracts';
+import type { AssessmentLevel, Evidence, Recommendation, WaterReport } from '@app/contracts';
 
 import type { DailyWater, ForecastDay, VegetationObservation, WaterLedger } from './report-extras';
 import { byPriority, seasonRows } from './report-data';
@@ -166,4 +166,14 @@ export function vegetationSummary(observations: readonly VegetationObservation[]
     skipped: observations.filter((item) => !item.used).length,
     used: used.length,
   };
+}
+
+/** Miara z dowodow raportu (ocena, przyczyny, zalecenia) - pierwsza znaleziona; brak = undefined. */
+export function findEvidence(report: WaterReport, metric: string): Evidence | undefined {
+  return [
+    ...(report.assessment.evidence ?? []),
+    ...[...report.causes, ...report.recommendations.retention, ...report.recommendations.agrotech].flatMap(
+      (item) => item.evidence,
+    ),
+  ].find((item) => item.metric === metric);
 }

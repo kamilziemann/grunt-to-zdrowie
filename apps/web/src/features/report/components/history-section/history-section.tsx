@@ -157,7 +157,7 @@ export function HistorySection({ report }: { report: WaterReport }) {
                     <span className="flex items-center gap-1">
                       {row.year}
                       {row.droughtPeriods > 0 && (
-                        <span className="flex size-4 items-center justify-center rounded-sm bg-destructive text-[0.65rem] font-bold text-destructive-foreground">
+                        <span className="flex size-4 items-center justify-center rounded-sm bg-viz-orange-deep text-[0.65rem] font-bold text-background">
                           !
                         </span>
                       )}
@@ -169,7 +169,7 @@ export function HistorySection({ report }: { report: WaterReport }) {
                     <span
                       className={cn(
                         'block h-full rounded-sm print:border print:border-foreground',
-                        row.current ? 'bg-water' : 'bg-warning',
+                        row.current ? 'bg-viz-water' : 'bg-viz-orange',
                         row.stressDays ? barWidth(row.stressDays, scale) : 'w-0',
                       )}
                     />

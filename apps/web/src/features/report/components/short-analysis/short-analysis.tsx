@@ -151,7 +151,12 @@ export function ShortAnalysis({ report }: { report: WaterReport }) {
           {
             key: 'why',
             label: t('lines.why'),
-            text: causes.map((cause) => tCauses(`${cause.id}.title`)).join(', '),
+            // "Gleba slabo trzyma wode, uprawa jest teraz wrazliwa..." - jedno zdanie
+            text: causes
+              .map((cause, index) =>
+                index === 0 ? tCauses(`${cause.id}.title`) : tCauses(`${cause.id}.title`).toLocaleLowerCase(),
+              )
+              .join(', '),
           },
         ]
       : []),

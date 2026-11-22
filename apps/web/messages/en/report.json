@@ -962,6 +962,25 @@
       "title": "Share of causes",
       "percent": "{percent}%",
       "note": "An estimate of each cause's weight in explaining the result, not a measure of how much water it took."
+    },
+    "numbers": {
+      "balance": "Water balance (IUNG method), 60 days",
+      "mm": "{value} mm",
+      "balanceThreshold": "drought threshold for soil cat. {category}: {threshold} mm{below, select, yes { – exceeded} other {}}",
+      "balanceNoThreshold": "the crop has no drought threshold in this period",
+      "rain": "Rain, last {days} days",
+      "rainPercent": "{percent}% of normal (usually about {median} mm)",
+      "rainMedian": "usually about {median} mm",
+      "ndmi": "Plant moisture (NDMI)",
+      "ndmiRange": "usually at this time {min} – {max} (from {years, plural, one {# year} other {# years}})",
+      "ndmiAnomaly": "{anomaly} against this time in {years, plural, one {# year} other {# years}}",
+      "ndmiNoBaseline": "no comparison with previous years",
+      "dryDays": "Days in a row without rain",
+      "days": "{days, plural, one {# day} other {# days}}",
+      "dryReference": "rain on {rainy} of the last {days} days (≥ 1 mm)",
+      "heat": "Heat days > 30°C, last {window} days",
+      "heatNormal": "usually about {normal}",
+      "heatNoNormal": "no normal from previous years"
     }
   }
 }

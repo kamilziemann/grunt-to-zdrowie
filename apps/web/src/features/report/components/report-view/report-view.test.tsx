@@ -706,6 +706,15 @@ describe('ReportView', () => {
       expect(screen.getByTestId('chart-rain-use')).toHaveTextContent('W ostatnich 60 dniach spadło');
       expect(screen.getByTestId('chart-vegetation')).toHaveTextContent('pominięte przez chmury: 4');
       expect(screen.getByTestId('cause-shares')).toHaveTextContent('31%');
+
+      const numbers = screen.getByTestId('key-numbers');
+
+      expect(numbers.querySelector('[data-number="balance"]')).toHaveTextContent(
+        'próg suszy dla gleby kat. I',
+      );
+      expect(numbers.querySelector('[data-number="rain"]')).toHaveTextContent('53% normy');
+      expect(numbers.querySelector('[data-number="dry"]')).toHaveTextContent('9 dni');
+      expect(numbers.querySelector('[data-number="heat"]')).toHaveTextContent('zwykle ok. 1,1');
     });
 
     it('poza sezonem: prognoza 7 dni, zbiornik bez progu, bez odliczania', () => {
