@@ -53,7 +53,7 @@ jobs:
       deploy: ${{ steps.plan.outputs.deploy }}
     steps:
       # PR: checkout merge commitu z rodzicem (pierwszy rodzic = baza), zeby sprawdzic, czy PR zmienia migracje D1.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 2
@@ -106,12 +106,12 @@ jobs:
       # wtyczka Cloudflare dla Vite wybiera blok env z wrangler.jsonc w czasie builda
       CLOUDFLARE_ENV: ${{ needs.plan.outputs.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
 
       # `DB` to nazwa bindingu D1 - ta sama w kazdym srodowisku (nazwy baz sie roznia: grunt-to-zdrowie / grunt-to-zdrowie-preview).
       - name: D1 migrations (${{ env.TARGET_ENV }})
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -124,7 +124,7 @@ jobs:
         run: bun run build
 
       - name: Deploy Worker (${{ env.TARGET_ENV }})
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
