@@ -316,5 +316,131 @@
         "moisture": "For advisors: NDMI from Sentinel-2 (bands B8A and B11, 20 m pixel), scale {low}–{high}."
       }
     }
+  },
+  "home": {
+    "metaTitle": "Drought check for a farm parcel",
+    "metaDescription": "Enter a parcel number and check for free, without an account, how dry the field is now and over the last 10 years, and what to do so rainwater does not run off.",
+    "title": "Drought check for a farm parcel",
+    "lead": "Enter the parcel number. In a few seconds you will see how dry it is now and over the last 10 years, and what to do so rainwater does not run off the field.",
+    "search": {
+      "label": "Parcel number or village name and number",
+      "placeholder": "e.g. Dąbrowa 12",
+      "submit": "Check parcel",
+      "searching": "Looking for the parcel…",
+      "hint": "Full number (e.g. 141201_1.0001.6509), village name and parcel number, or an address.",
+      "whereNumber": "Where do I find the parcel number?",
+      "whereNumberText": "On the land register extract, in the agricultural tax decision or in the subsidy application. The village (cadastral district) name and number are enough, e.g. “Dąbrowa 12”."
+    },
+    "noNumber": "I don't know the number – I'll point on the map",
+    "noNumberShort": "I don't know the number – show the map",
+    "promises": {
+      "free": "Free",
+      "noAccount": "No account needed",
+      "fast": "Result in seconds"
+    },
+    "states": {
+      "notFoundTitle": "We could not find a parcel with this number",
+      "notFoundText": "Check that the number is copied exactly: digits, dots and slash. You can also type the village name and number, e.g. “Dąbrowa 12”, or point to the parcel on the map.",
+      "fixNumber": "Correct the number",
+      "showMap": "Point to the parcel on the map",
+      "serviceTitle": "We cannot fetch parcels right now",
+      "serviceText": "The state parcel map service (GUGiK) is not responding at the moment. Try again in a minute or point to the parcel on the map.",
+      "manyTitle": "We found several parcels “{query}”",
+      "placesTitle": "This looks like an address",
+      "placesText": "An address points to an area, not a parcel. Pick a place – we will show it on the map and you click your parcel."
+    },
+    "examples": {
+      "title": "See an example result",
+      "text": "Real farm parcels on days when something was happening. One click opens a ready result.",
+      "badge": "Example",
+      "open": "Open example: {title}"
+    },
+    "steps": {
+      "title": "Three steps, a few seconds",
+      "find": {
+        "title": "Find",
+        "text": "Enter the parcel number or click it on the map."
+      },
+      "check": {
+        "title": "Check",
+        "text": "Confirm the parcel, pick what grows there and which day to calculate for."
+      },
+      "analyze": {
+        "title": "Analyse",
+        "text": "First a short result, then, if you want, all the details and sources."
+      }
+    },
+    "data": {
+      "title": "Where the data comes from",
+      "text": "Only public, free sources. You do not need to install anything or know maps.",
+      "weather": {
+        "label": "Weather:",
+        "text": "rain, temperature and evaporation over 10 years, 7-day forecast",
+        "source": "NASA POWER, MET Norway"
+      },
+      "satellite": {
+        "label": "Satellite:",
+        "text": "how green and moist the plants in the field are",
+        "source": "Copernicus Sentinel-2"
+      },
+      "soil": {
+        "label": "Soil:",
+        "text": "how much water it can hold within root reach",
+        "source": "ISRIC SoilGrids"
+      },
+      "water": {
+        "label": "Ditches and water:",
+        "text": "drainage ditches, streams, ponds and wetlands around the field",
+        "source": "BDOT10k, GUGiK"
+      },
+      "parcel": {
+        "label": "Parcel:",
+        "text": "boundaries, area and land use from the register",
+        "source": "GUGiK (ULDK, EGiB)"
+      },
+      "honestTitle": "What we don't know, we say plainly",
+      "honestText": "Every result has a date, sources and confidence. When data is missing, e.g. clouds covered the satellite image, we say so instead of guessing.",
+      "methodLink": "How we calculate and what we leave out"
+    },
+    "faq": {
+      "title": "Farmers' questions",
+      "cost": {
+        "q": "How much does it cost?",
+        "a": "Nothing. The parcel check and result are free."
+      },
+      "account": {
+        "q": "Do I need an account?",
+        "a": "No. Parcels and the result are in the page address – save the link or bookmark it to come back."
+      },
+      "number": {
+        "q": "Where do I get the parcel number?",
+        "a": "From the land register extract or the agricultural tax decision. The village name and number are enough. You can also click the parcel on the map."
+      },
+      "accuracy": {
+        "q": "How accurate is the result?",
+        "a": "Satellite images show your field, but not every day (clouds). Weather comes from a model for the area and soil maps are general. With the result we give the confidence and what we don't know."
+      },
+      "phone": {
+        "q": "Does it work on a phone?",
+        "a": "Yes, in a normal browser, nothing to install."
+      },
+      "aid": {
+        "q": "Is this a drought aid application?",
+        "a": "No. It is advice for you and your adviser on what to do with water in the field."
+      }
+    },
+    "cta": {
+      "title": "Check your parcel",
+      "text": "Free, no account, for any parcel in Poland.",
+      "action": "Check parcel"
+    }
+  },
+  "mapIntro": {
+    "title": "How to point to a parcel on the map",
+    "steps": {
+      "zoom": "Zoom the map to your village or type an address in the field above.",
+      "click": "Click your parcel. Parcel boundaries and numbers appear when you zoom in.",
+      "confirm": "Check that it is the right parcel and add it. Several parcels can be calculated as one field."
+    }
   }
 }

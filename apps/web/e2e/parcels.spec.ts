@@ -12,35 +12,38 @@ test.describe('działki', () => {
     await mockMapServices(page);
   });
 
-  test('pokazuje wyszukiwarkę, kroki i zablokowany następny krok', async ({ page }) => {
-    await page.goto('/');
+  test('mapa: pierwsze wejście pokazuje jak wskazać działkę i zablokowany następny krok', async ({
+    page,
+  }) => {
+    await page.goto('/mapa');
     await waitForMap(page);
 
     await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeVisible();
-    // pierwsze wejscie: trzy kroki i przyklad zamiast paska etapow
-    const firstSteps = page.getByTestId('first-steps');
-
-    await expect(firstSteps.locator('ol > li')).toHaveText([
-      /Znajdź działkę/,
-      /Wybierz uprawę i dzień/,
-      /Przeczytaj raport/,
+    // pierwsze wejscie: trzy kroki "jak wskazac dzialke" zamiast paska etapow
+    await expect(page.getByTestId('map-intro').locator('ol > li')).toHaveText([
+      /Przybliż mapę/,
+      /Kliknij swoją działkę/,
+      /Sprawdź, czy to ta działka/,
     ]);
-    await expect(firstSteps.getByRole('list', { name: /Zobacz przykład/ }).getByRole('link')).toHaveCount(4);
     await expect(page.getByRole('list', { name: 'Etapy' })).toBeHidden();
     await expect(page.getByRole('application', { name: /Mapa/ })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeDisabled();
     await expect(page.getByText('Nie masz jeszcze żadnej działki')).toBeVisible();
   });
 
-  test('przykłady: każdy jednym kliknięciem otwiera gotowy raport (działka, uprawa i dzień w adresie)', async ({
-    page,
-  }) => {
+  test('stary adres z listą działek przekierowuje na mapę', async ({ page }) => {
+    await page.goto('/?dzialki=080904_5.0001.349%2F1');
+    await expect(page).toHaveURL(/\/mapa\?dzialki=080904_5\.0001\.349%2F1$/);
+  });
+
+  test('przykłady na stronie głównej: każdy jednym kliknięciem otwiera gotowy raport', async ({ page }) => {
     await mockAnalysisApi(page);
     await page.goto('/');
-    await waitForMap(page);
 
     const examples = page.getByTestId('examples');
 
+    await expect(examples.getByRole('link')).toHaveCount(4);
+    await expect(examples.getByText('Przykład')).toHaveCount(4);
     await expect(examples.locator('[data-example="ditch"]')).toHaveAttribute(
       'href',
       '/raport?dzialki=080904_5.0001.349%2F1&uprawa=winter_wheat&data=2018-06-15',
@@ -76,7 +79,7 @@ test.describe('działki', () => {
       if (new URL(request.url()).pathname.startsWith('/api/parcels')) requests.push(request.url());
     });
 
-    await page.goto('/');
+    await page.goto('/mapa');
     await waitForMap(page);
     await page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' }).fill('12');
     await page.getByRole('button', { name: 'Szukaj' }).click();
@@ -86,7 +89,7 @@ test.describe('działki', () => {
   });
 
   test('podkład w panelu warstw: zdjęcie lotnicze zamiast mapy', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/mapa');
     await waitForMap(page);
     await openLayers(page);
 
@@ -109,19 +112,19 @@ test.describe('działki', () => {
   test.describe('telefon', () => {
     test.use({ viewport: { width: 375, height: 812 }, hasTouch: true });
 
-    test('arkusz od dołu: pierwsze wejście do połowy z przykładem, rozwija się, strona się nie przewija', async ({
+    test('arkusz od dołu: pierwsze wejście do połowy z podpowiedzią, rozwija się, strona się nie przewija', async ({
       page,
     }) => {
-      await page.goto('/');
+      await page.goto('/mapa');
       await waitForMap(page);
 
       const panel = page.getByTestId('parcels-panel');
       const search = page.getByRole('searchbox', { name: 'Numer działki, obręb z numerem albo adres' });
 
-      // pierwsze wejscie: arkusz do polowy, pole wyszukiwania i pierwszy przyklad widoczne bez przewijania
+      // pierwsze wejscie: arkusz do polowy, pole wyszukiwania i podpowiedz widoczne bez przewijania
       await expect(panel).toHaveAttribute('data-snap', 'half');
       await expect(search).toBeInViewport({ ratio: 1 });
-      await expect(page.locator('[data-example="ditch"]')).toBeInViewport();
+      await expect(page.getByTestId('map-intro')).toBeInViewport();
       await expect(page.getByRole('button', { name: 'Analizuj działkę' })).toBeInViewport();
       await expect(page.getByRole('heading', { level: 1, name: 'Znajdź działkę' })).toBeInViewport();
 

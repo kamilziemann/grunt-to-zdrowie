@@ -29,7 +29,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
   test('bez działek przełącznik jest nieaktywny z podpowiedzią', async ({ page }) => {
     const imagery = await mockImageryApi(page);
 
-    await page.goto('/');
+    await page.goto('/mapa');
     await openLayers(page);
 
     const group = page.getByRole('group', { name: 'Zdjęcie z satelity' });
@@ -44,7 +44,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
   }) => {
     const imagery = await mockImageryApi(page);
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await expect(page.getByTestId('parcel-map')).toHaveAttribute('data-map-state', 'ready');
     expect(imagery.requests).toHaveLength(0);
 
@@ -93,7 +93,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
   }) => {
     const imagery = await mockImageryApi(page, { kind: 'problem', status: 503, code: 'not_configured' });
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await chooseLayer(page, 'Kondycja roślin');
 
     const legend = page.getByTestId('imagery-legend');
@@ -126,7 +126,7 @@ test.describe('zdjęcie z satelity na mapie', () => {
       page,
     }) => {
       await mockImageryApi(page);
-      await page.goto(`/?dzialki=${PARCEL_ID}`);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
       await openLayers(page);
       await page.getByTestId('imagery-switch').getByText('Woda w roślinach', { exact: true }).click();
       await expect(page.getByTestId('layers-panel')).toBeHidden();

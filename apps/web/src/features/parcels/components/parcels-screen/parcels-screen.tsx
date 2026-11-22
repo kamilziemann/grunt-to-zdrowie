@@ -53,7 +53,7 @@ import {
 } from '../bottom-sheet';
 import { ContextLegend } from '../context-legend';
 import { FieldDrawEntry, FieldDrawPanel, FieldDrawUndo } from '../field-draw-panel';
-import { FirstSteps } from '../first-steps';
+import { MapIntro } from '../map-intro';
 import { HydroLegend } from '../hydro-legend';
 import { ImageryLegend } from '../imagery-legend';
 import { ImagerySwitch } from '../imagery-switch';
@@ -79,6 +79,10 @@ export interface ParcelsScreenProps {
   onIdsChange: (ids: string[]) => void;
   /** adres nastepnego kroku dla podanej listy dzialek (i wlasnego obszaru narysowanego na mapie) */
   analysisHref: (ids: readonly string[], area?: FieldSearch) => AppHref;
+  /** okolica do pokazania na starcie (adres wybrany na stronie glownej) - rolnik klika swoja dzialke */
+  initialView?: MapFocus['bbox'] | null;
+  /** od razu tryb "wlasne pole" (z kroku "Czy to Twoja dzialka?" -> "Tylko czesc") */
+  initialDraw?: FieldDrawMode | null;
 }
 
 const DESKTOP_QUERY = '(min-width: 48rem)';
@@ -121,7 +125,13 @@ const CONTEXT_OFF: Record<ContextLayer, LayerStatus> = {
   protected: HYDRO_OFF,
 };
 
-export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenProps) {
+export function ParcelsScreen({
+  ids,
+  onIdsChange,
+  analysisHref,
+  initialView = null,
+  initialDraw = null,
+}: ParcelsScreenProps) {
   const t = useTranslations('parcels');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
@@ -139,7 +149,11 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [instant, setInstant] = useState<ParcelOutline | null>(null);
   // Czy mapa ma dojechac do podgladu: tak po wyszukaniu, nie po kliknieciu w dzialke, ktora juz widac.
   const [focusPreview, setFocusPreview] = useState(true);
-  const [shown, setShown] = useState<MapFocus | null>(null);
+  const [shown, setShown] = useState<MapFocus | null>(() =>
+    initialView ? { bbox: initialView, key: `view:${initialView.join(',')}` } : null,
+  );
+  // tryb rysowania z adresu wlaczamy raz - podzial czeka, az dzialka do podzialu sie wczyta
+  const pendingDraw = useRef<FieldDrawMode | null>(initialDraw);
   // warstwy mapy zyja w pamieci przegladarki - wybor wraca po powrocie z raportu
   const { layers, update: updateLayers } = useMapLayers();
   const { imagery: imageryChoice, imageryMonth } = layers;
@@ -147,8 +161,8 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
   const [contextStatuses, setContextStatuses] = useState(CONTEXT_OFF);
   const [layersOpen, setLayersOpen] = useState(false);
   // pierwsze wejscie (pusta lista): arkusz do polowy, zeby na telefonie bylo widac trzy kroki i przyklad
-  const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 ? 'half' : 'peek');
-  const [hint, setHint] = useState<MapHint | null>(null);
+  const [snap, setSnap] = useState<SheetSnap>(ids.length === 0 && !initialView ? 'half' : 'peek');
+  const [hint, setHint] = useState<MapHint | null>(initialView ? 'pickHint' : null);
 
   const search = useQuery({ ...parcelSearchQuery(submitted ?? ''), enabled: submitted !== null });
   const places = useQuery({ ...placeSearchQuery(submitted ?? ''), enabled: submitted !== null });
@@ -306,6 +320,15 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
     },
     [clearSearch, startDraw, onlyParcel],
   );
+
+  useEffect(() => {
+    const mode = pendingDraw.current;
+
+    if (!mode || (mode === 'split' && !onlyParcel)) return;
+
+    pendingDraw.current = null;
+    beginFieldDraw(mode);
+  }, [onlyParcel, beginFieldDraw]);
 
   const loadBoundaries = useCallback(
     (x: number, y: number, z: ParcelBoundaryTileZoom) => queryClient.query(parcelBoundariesQuery(x, y, z)),
@@ -582,7 +605,7 @@ export function ParcelsScreen({ ids, onIdsChange, analysisHref }: ParcelsScreenP
                 />
               )}
 
-              {firstVisit && <FirstSteps />}
+              {firstVisit && <MapIntro />}
 
               <ParcelList
                 items={selected.items}

@@ -23,7 +23,7 @@ test.describe('warstwy otoczenia pola', () => {
   }) => {
     const requested = await mockContextApi(page);
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await waitForMap(page);
     await expect(page.getByTestId('hydro-legend')).toHaveAttribute('data-hydro-state', 'ready');
     expect(requested).toEqual([]);
@@ -73,7 +73,7 @@ test.describe('warstwy otoczenia pola', () => {
 
   test('baza nie odpowiada (503): komunikat w legendzie, mapa i rowy działają dalej', async ({ page }) => {
     await mockContextApi(page, { status: 503 });
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await waitForMap(page);
     await setLayer(page, 'Budowle wodne i wały', true);
     await page.keyboard.press('Escape');
@@ -89,7 +89,7 @@ test.describe('warstwy otoczenia pola', () => {
 
   test('obcięty kafel rysujemy, a legenda prosi o przybliżenie', async ({ page }) => {
     await mockContextApi(page, { tiles: { cover: { ...CONTEXT_TILES.cover, truncated: true } } });
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await waitForMap(page);
     await setLayer(page, 'Drzewa', true);
     await page.keyboard.press('Escape');
@@ -101,7 +101,7 @@ test.describe('warstwy otoczenia pola', () => {
 
   test('wybór warstw zostaje po przejściu do analizy i powrocie', async ({ page }) => {
     await mockContextApi(page);
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await waitForMap(page);
     await setLayer(page, 'Obszary chronione', true);
     await setLayer(page, 'Rowy i cieki', false);
@@ -126,7 +126,7 @@ test.describe('warstwy otoczenia pola', () => {
     page,
   }) => {
     await mockContextApi(page);
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await waitForMap(page);
 
     const button = page.getByTestId('layers-button');
@@ -157,7 +157,7 @@ test.describe('warstwy otoczenia pola', () => {
       page,
     }) => {
       await mockContextApi(page);
-      await page.goto(`/?dzialki=${PARCEL_ID}`);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
       await waitForMap(page);
       await openLayers(page);
 

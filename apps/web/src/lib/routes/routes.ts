@@ -52,8 +52,14 @@ export const routes = {
       uprawa: search?.uprawa,
       data: search?.data,
     }),
-  /** Ekran wyboru dzialek z gotowa lista (powrot z podsumowania). */
-  parcels: (parcelIds?: string) => withQuery(routePath('/'), { dzialki: parcelIds }),
+  /** Ekran mapy z gotowa lista dzialek (powrot z podsumowania i z raportu). */
+  parcels: (parcelIds?: string) => withQuery(routePath('/mapa'), { dzialki: parcelIds }),
+  /**
+   * Ekran mapy: `dzialki` = lista "moje dzialki", `widok` = prostokat do pokazania (adres ze strony glownej),
+   * `rysuj` = od razu tryb wlasnego pola (`podziel` jedyna dzialke linia albo `rysuj` obrys).
+   */
+  map: (search?: { dzialki?: string; widok?: string; rysuj?: 'podziel' | 'rysuj' }) =>
+    withQuery(routePath('/mapa'), { dzialki: search?.dzialki, widok: search?.widok, rysuj: search?.rysuj }),
   /** "Jak liczymy": zrodla danych, metody, ograniczenia (dla jury, doradcy i rolnika). */
   method: () => routePath('/jak-liczymy'),
   /** Katalog systemu designu (tylko development). */

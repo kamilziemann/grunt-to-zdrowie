@@ -56,7 +56,7 @@ test.describe('granice działek od przybliżenia 14', () => {
   test('poniżej 16 kilka kafli z14, bez podpowiedzi przy pełnych kaflach', async ({ page }) => {
     const requested = await mockBoundaries(page, { truncated: false });
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await zoomOutTo14(page, requested);
 
     const coarse = requested.filter((key) => key.startsWith('14/'));
@@ -69,7 +69,7 @@ test.describe('granice działek od przybliżenia 14', () => {
   test('obcięty kafel z14: podpowiedź „przybliż”, po przybliżeniu znika', async ({ page }) => {
     const requested = await mockBoundaries(page, { truncated: true });
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await zoomOutTo14(page, requested);
 
     const hint = page.getByTestId('map-status');
@@ -88,7 +88,7 @@ test.describe('granice działek od przybliżenia 14', () => {
     const hint = page.getByText('Przybliż, żeby zobaczyć granice działek.');
     const asked = (key: string) => requested.filter((entry) => entry === key).length;
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
     await expect.poll(() => requested.some((key) => key.startsWith('16/'))).toBe(true);
 
     const fineBefore = new Set(requested.filter((key) => key.startsWith('16/')));

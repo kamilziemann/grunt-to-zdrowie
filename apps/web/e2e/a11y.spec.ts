@@ -22,7 +22,8 @@ import { expect, test } from './support/test';
 
 const SCHEMES = ['light', 'dark'] as const;
 const PAGES = [
-  ['strona główna (mapa działek)', '/', 'Znajdź działkę'],
+  ['strona główna', '/', 'Ocena suszy dla działki rolnej'],
+  ['mapa działek', '/mapa', 'Znajdź działkę'],
   ['działki do analizy (pusta lista)', '/analiza', 'Nie wybrano żadnej działki'],
   ['formularz analizy (uprawa i dzień)', `/analiza?dzialki=${PARCEL_ID}`, 'Działki do analizy'],
   [

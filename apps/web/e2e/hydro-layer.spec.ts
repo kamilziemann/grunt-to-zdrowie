@@ -17,7 +17,7 @@ test.describe('rowy i cieki na mapie', () => {
   }) => {
     const requested = await mockHydroApi(page);
 
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
 
     const legend = page.getByTestId('hydro-legend');
 
@@ -38,7 +38,7 @@ test.describe('rowy i cieki na mapie', () => {
 
   test('503 z API: spokojny komunikat „chwilowo niedostępna”, mapa działa dalej', async ({ page }) => {
     await mockHydroApi(page, { status: 503 });
-    await page.goto(`/?dzialki=${PARCEL_ID}`);
+    await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
 
     const legend = page.getByTestId('hydro-legend');
 
@@ -56,7 +56,7 @@ test.describe('rowy i cieki na mapie', () => {
       page,
     }) => {
       await mockHydroApi(page);
-      await page.goto(`/?dzialki=${PARCEL_ID}`);
+      await page.goto(`/mapa?dzialki=${PARCEL_ID}`);
 
       const legend = page.getByTestId('hydro-legend');
 

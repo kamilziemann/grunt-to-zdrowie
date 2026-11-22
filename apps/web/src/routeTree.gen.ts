@@ -18,6 +18,7 @@ import { Route as Char123LocaleChar125AppDevRouteRouteImport } from './routes/{-
 import { Route as Char123LocaleChar125AppMethodRouteRouteImport } from './routes/{-$locale}/_app/_method/route'
 import { Route as Char123LocaleChar125AppAnalizaRouteImport } from './routes/{-$locale}/_app/analiza'
 import { Route as Char123LocaleChar125AppGospodarstwoRouteImport } from './routes/{-$locale}/_app/gospodarstwo'
+import { Route as Char123LocaleChar125AppMapaRouteImport } from './routes/{-$locale}/_app/mapa'
 import { Route as Char123LocaleChar125AppRaportRouteImport } from './routes/{-$locale}/_app/raport'
 import { Route as Char123LocaleChar125AppDevDesignRouteImport } from './routes/{-$locale}/_app/_dev/design'
 import { Route as Char123LocaleChar125AppMethodJakLiczymyRouteImport } from './routes/{-$locale}/_app/_method/jak-liczymy'
@@ -72,6 +73,12 @@ const Char123LocaleChar125AppGospodarstwoRoute =
     path: '/gospodarstwo',
     getParentRoute: () => Char123LocaleChar125AppRouteRoute,
   } as any)
+const Char123LocaleChar125AppMapaRoute =
+  Char123LocaleChar125AppMapaRouteImport.update({
+    id: '/mapa',
+    path: '/mapa',
+    getParentRoute: () => Char123LocaleChar125AppRouteRoute,
+  } as any)
 const Char123LocaleChar125AppRaportRoute =
   Char123LocaleChar125AppRaportRouteImport.update({
     id: '/raport',
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
+  '/{-$locale}/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
@@ -108,6 +116,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
+  '/{-$locale}/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/design': typeof Char123LocaleChar125AppDevDesignRoute
   '/{-$locale}/jak-liczymy': typeof Char123LocaleChar125AppMethodJakLiczymyRoute
@@ -122,6 +131,7 @@ export interface FileRoutesById {
   '/{-$locale}/_app/$': typeof Char123LocaleChar125AppSplatRoute
   '/{-$locale}/_app/analiza': typeof Char123LocaleChar125AppAnalizaRoute
   '/{-$locale}/_app/gospodarstwo': typeof Char123LocaleChar125AppGospodarstwoRoute
+  '/{-$locale}/_app/mapa': typeof Char123LocaleChar125AppMapaRoute
   '/{-$locale}/_app/raport': typeof Char123LocaleChar125AppRaportRoute
   '/{-$locale}/_app/': typeof Char123LocaleChar125AppIndexRoute
   '/{-$locale}/_app/_dev/design': typeof Char123LocaleChar125AppDevDesignRoute
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
     | '/{-$locale}/gospodarstwo'
+    | '/{-$locale}/mapa'
     | '/{-$locale}/raport'
     | '/{-$locale}/'
     | '/{-$locale}/design'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/$'
     | '/{-$locale}/analiza'
     | '/{-$locale}/gospodarstwo'
+    | '/{-$locale}/mapa'
     | '/{-$locale}/raport'
     | '/{-$locale}/design'
     | '/{-$locale}/jak-liczymy'
@@ -159,6 +171,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/_app/$'
     | '/{-$locale}/_app/analiza'
     | '/{-$locale}/_app/gospodarstwo'
+    | '/{-$locale}/_app/mapa'
     | '/{-$locale}/_app/raport'
     | '/{-$locale}/_app/'
     | '/{-$locale}/_app/_dev/design'
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125AppGospodarstwoRouteImport
       parentRoute: typeof Char123LocaleChar125AppRouteRoute
     }
+    '/{-$locale}/_app/mapa': {
+      id: '/{-$locale}/_app/mapa'
+      path: '/mapa'
+      fullPath: '/{-$locale}/mapa'
+      preLoaderRoute: typeof Char123LocaleChar125AppMapaRouteImport
+      parentRoute: typeof Char123LocaleChar125AppRouteRoute
+    }
     '/{-$locale}/_app/raport': {
       id: '/{-$locale}/_app/raport'
       path: '/raport'
@@ -295,6 +315,7 @@ interface Char123LocaleChar125AppRouteRouteChildren {
   Char123LocaleChar125AppSplatRoute: typeof Char123LocaleChar125AppSplatRoute
   Char123LocaleChar125AppAnalizaRoute: typeof Char123LocaleChar125AppAnalizaRoute
   Char123LocaleChar125AppGospodarstwoRoute: typeof Char123LocaleChar125AppGospodarstwoRoute
+  Char123LocaleChar125AppMapaRoute: typeof Char123LocaleChar125AppMapaRoute
   Char123LocaleChar125AppRaportRoute: typeof Char123LocaleChar125AppRaportRoute
   Char123LocaleChar125AppIndexRoute: typeof Char123LocaleChar125AppIndexRoute
 }
@@ -309,6 +330,7 @@ const Char123LocaleChar125AppRouteRouteChildren: Char123LocaleChar125AppRouteRou
     Char123LocaleChar125AppAnalizaRoute: Char123LocaleChar125AppAnalizaRoute,
     Char123LocaleChar125AppGospodarstwoRoute:
       Char123LocaleChar125AppGospodarstwoRoute,
+    Char123LocaleChar125AppMapaRoute: Char123LocaleChar125AppMapaRoute,
     Char123LocaleChar125AppRaportRoute: Char123LocaleChar125AppRaportRoute,
     Char123LocaleChar125AppIndexRoute: Char123LocaleChar125AppIndexRoute,
   }

@@ -13,7 +13,7 @@ test.describe('własne pole', () => {
     page,
   }) => {
     await mockAnalysisApi(page);
-    await page.goto('/');
+    await page.goto('/mapa');
 
     await expect(page.getByRole('button', { name: 'Podziel działkę linią' })).toBeDisabled();
     await page.getByRole('button', { name: 'Narysuj własne pole' }).click();
@@ -70,7 +70,7 @@ test.describe('własne pole', () => {
     test('pasek trybu: cofnij i analizuj zawsze widoczne, duże cele, bez poziomego przewijania', async ({
       page,
     }) => {
-      await page.goto('/');
+      await page.goto('/mapa');
       await page.getByRole('button', { name: 'Narysuj własne pole' }).click();
 
       await expect(page.getByRole('button', { name: 'Analizuj ten obszar' })).toBeInViewport();

@@ -7,7 +7,7 @@ test('nagłówek nie ma elementów konta', async ({ page }) => {
 
   const nav = page.getByRole('navigation', { name: 'Nawigacja główna' });
 
-  await expect(nav.getByRole('link', { name: 'Grunt to Zdrowie' })).toBeVisible();
+  await expect(nav.getByRole('link', { name: /^Grunt to Zdrowie/ })).toBeVisible();
   await expect(nav.getByRole('link', { name: /Zaloguj|Załóż konto/ })).toHaveCount(0);
   await expect(nav.getByRole('button', { name: /Wyloguj|Konto/ })).toHaveCount(0);
 });

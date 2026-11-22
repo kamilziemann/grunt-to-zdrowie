@@ -1,6 +1,5 @@
 // Publiczne API feature "parcels": wybor dzialek ewidencyjnych na mapie i po numerze (pierwszy krok analizy wodnej).
-// Dane ida z /api/parcels (zrodlo: ULDK GUGiK). Trasy (`routes/{-$locale}/_app/index.tsx`, `analiza.tsx`) importuja
-// tylko stad.
+// Dane ida z /api/parcels (zrodlo: ULDK GUGiK). Trasy (`index.tsx`, `mapa.tsx`, `analiza.tsx`) importuja tylko stad.
 export {
   hydroTileQuery,
   parcelQuery,
@@ -12,6 +11,14 @@ export {
 } from './api/parcels.queries';
 export { HYDRO_TILES } from './fixtures/hydro-tiles';
 export { AnalysisSummary, type AnalysisSummaryProps } from './components/analysis-summary';
+export { HomeScreen } from './components/home-screen';
 export { ParcelsScreen, type ParcelsScreenProps } from './components/parcels-screen';
 export { useSelectedParcels, type SelectedParcel, type SelectedParcels } from './hooks/use-selected-parcels';
+export {
+  formatMapView,
+  MAP_DRAW_PARAM,
+  mapSearchSchema,
+  parseMapView,
+  type MapSearch,
+} from './schemas/map-search.schema';
 export { validateParcelSearch, type ParcelSearchError } from './schemas/parcel-search.schema';

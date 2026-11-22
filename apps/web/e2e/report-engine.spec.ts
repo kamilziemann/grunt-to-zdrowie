@@ -210,7 +210,7 @@ test.describe('raport z zapisu (krótki link)', () => {
     await page.goto('/raport?raport=r-00000000');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Nie ma takiego raportu' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Wybierz pole na mapie' })).toHaveAttribute('href', '/');
+    await expect(page.getByRole('link', { name: 'Wybierz pole na mapie' })).toHaveAttribute('href', '/mapa');
   });
 
   test('zły format identyfikatora: ten sam komunikat bez pytania serwera', async ({ page }) => {

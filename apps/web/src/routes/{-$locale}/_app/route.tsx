@@ -56,6 +56,10 @@ function AppShell({ children }: { children: ReactNode }) {
     select: (matches) =>
       matches.some((match) => match.staticData.fullBleed === true && match.status !== 'notFound'),
   });
+  const wide = useMatches({
+    select: (matches) =>
+      matches.some((match) => match.staticData.wide === true && match.status !== 'notFound'),
+  });
 
   return (
     <div className={cn('flex flex-col', fullBleed ? 'h-dvh overflow-hidden' : 'min-h-dvh')}>
@@ -83,7 +87,10 @@ function AppShell({ children }: { children: ReactNode }) {
         <>
           <main
             id="main"
-            className="mx-auto w-full max-w-page flex-1 px-gutter py-8 print:max-w-none print:p-0"
+            className={cn(
+              'w-full flex-1',
+              !wide && 'mx-auto max-w-page px-gutter py-8 print:max-w-none print:p-0',
+            )}
           >
             {children}
           </main>

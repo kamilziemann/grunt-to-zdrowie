@@ -316,5 +316,131 @@
         "moisture": "Dla doradcy: NDMI z Sentinel-2 (pasma B8A i B11, piksel 20 m), skala {low}–{high}."
       }
     }
+  },
+  "home": {
+    "metaTitle": "Ocena suszy dla działki rolnej",
+    "metaDescription": "Wpisz numer działki i sprawdź za darmo, bez konta, jak sucho jest na polu teraz i przez ostatnie 10 lat oraz co zrobić, żeby woda z deszczu nie uciekała.",
+    "title": "Ocena suszy dla działki rolnej",
+    "lead": "Wpisz numer działki. W kilkanaście sekund zobaczysz, jak sucho jest na niej teraz i przez ostatnie 10 lat, i co zrobić, żeby woda z deszczu nie uciekała z pola.",
+    "search": {
+      "label": "Numer działki albo nazwa wsi i numer",
+      "placeholder": "np. Dąbrowa 12",
+      "submit": "Sprawdź działkę",
+      "searching": "Szukam działki…",
+      "hint": "Pełny numer (np. 141201_1.0001.6509), nazwa wsi i numer działki albo adres.",
+      "whereNumber": "Gdzie znajdę numer działki?",
+      "whereNumberText": "Na wypisie z rejestru gruntów, w decyzji o podatku rolnym albo we wniosku o dopłaty. Wystarczy nazwa wsi (obrębu) i numer, np. „Dąbrowa 12”."
+    },
+    "noNumber": "Nie znam numeru – wskażę na mapie",
+    "noNumberShort": "Nie znam numeru – pokaż mapę",
+    "promises": {
+      "free": "Bezpłatnie",
+      "noAccount": "Bez zakładania konta",
+      "fast": "Wynik w kilkanaście sekund"
+    },
+    "states": {
+      "notFoundTitle": "Nie znaleźliśmy działki o tym numerze",
+      "notFoundText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Możesz też wpisać nazwę wsi i numer, np. „Dąbrowa 12”, albo wskazać działkę na mapie.",
+      "fixNumber": "Popraw numer",
+      "showMap": "Wskaż działkę na mapie",
+      "serviceTitle": "Nie możemy teraz pobrać działek",
+      "serviceText": "Państwowa usługa z mapą działek (GUGiK) chwilowo nie odpowiada. Spróbuj za minutę albo wskaż działkę na mapie.",
+      "manyTitle": "Znaleźliśmy kilka działek „{query}”",
+      "placesTitle": "To wygląda na adres",
+      "placesText": "Adres wskazuje okolicę, nie działkę. Wybierz miejsce – pokażemy je na mapie, a Ty klikniesz swoją działkę."
+    },
+    "examples": {
+      "title": "Zobacz przykład wyniku",
+      "text": "Prawdziwe działki rolne i dni, w których coś się działo. Jedno kliknięcie otwiera gotowy wynik.",
+      "badge": "Przykład",
+      "open": "Otwórz przykład: {title}"
+    },
+    "steps": {
+      "title": "Trzy kroki, kilkanaście sekund",
+      "find": {
+        "title": "Znajdź",
+        "text": "Wpisz numer działki albo kliknij ją na mapie."
+      },
+      "check": {
+        "title": "Sprawdź",
+        "text": "Potwierdź działkę, wybierz, co rośnie, i na jaki dzień liczyć."
+      },
+      "analyze": {
+        "title": "Analizuj",
+        "text": "Najpierw krótki wynik, a jeśli chcesz, wszystkie szczegóły i źródła."
+      }
+    },
+    "data": {
+      "title": "Skąd bierzemy dane",
+      "text": "Tylko publiczne, bezpłatne źródła. Nie musisz niczego instalować ani znać się na mapach.",
+      "weather": {
+        "label": "Pogoda:",
+        "text": "deszcz, temperatura i parowanie z 10 lat, prognoza na 7 dni",
+        "source": "NASA POWER, MET Norway"
+      },
+      "satellite": {
+        "label": "Satelita:",
+        "text": "jak zielone i wilgotne są rośliny na polu",
+        "source": "Copernicus Sentinel-2"
+      },
+      "soil": {
+        "label": "Gleba:",
+        "text": "ile wody może zatrzymać w zasięgu korzeni",
+        "source": "ISRIC SoilGrids"
+      },
+      "water": {
+        "label": "Rowy i wody:",
+        "text": "rowy melioracyjne, cieki, stawy i mokradła wokół pola",
+        "source": "BDOT10k, GUGiK"
+      },
+      "parcel": {
+        "label": "Działka:",
+        "text": "granice, powierzchnia i użytki z ewidencji",
+        "source": "GUGiK (ULDK, EGiB)"
+      },
+      "honestTitle": "Czego nie wiemy, mówimy wprost",
+      "honestText": "Każdy wynik ma datę, źródła i pewność. Gdy brakuje danych, np. chmury zasłoniły zdjęcie satelitarne, piszemy o tym zamiast zgadywać.",
+      "methodLink": "Jak liczymy i czego nie uwzględniamy"
+    },
+    "faq": {
+      "title": "Pytania rolników",
+      "cost": {
+        "q": "Ile to kosztuje?",
+        "a": "Nic. Ocena działki i wynik są bezpłatne."
+      },
+      "account": {
+        "q": "Czy muszę zakładać konto?",
+        "a": "Nie. Działki i wynik są w adresie strony – zapisz link albo dodaj go do zakładek, żeby wrócić."
+      },
+      "number": {
+        "q": "Skąd wziąć numer działki?",
+        "a": "Z wypisu z rejestru gruntów albo decyzji o podatku rolnym. Wystarczy nazwa wsi i numer. Możesz też kliknąć działkę na mapie."
+      },
+      "accuracy": {
+        "q": "Jak dokładny jest wynik?",
+        "a": "Zdjęcia satelitarne pokazują Twoje pole, ale nie w każdy dzień (chmury). Pogoda pochodzi z modelu dla okolicy, a mapy gleby są ogólne. Przy wyniku podajemy pewność i to, czego nie wiemy."
+      },
+      "phone": {
+        "q": "Czy działa na telefonie?",
+        "a": "Tak, w zwykłej przeglądarce, bez instalowania."
+      },
+      "aid": {
+        "q": "Czy to wniosek o pomoc suszową?",
+        "a": "Nie. To podpowiedź dla Ciebie i Twojego doradcy, co zrobić z wodą na polu."
+      }
+    },
+    "cta": {
+      "title": "Sprawdź swoją działkę",
+      "text": "Bezpłatnie, bez konta, dla każdej działki w Polsce.",
+      "action": "Sprawdź działkę"
+    }
+  },
+  "mapIntro": {
+    "title": "Jak wskazać działkę na mapie",
+    "steps": {
+      "zoom": "Przybliż mapę do swojej wsi albo wpisz adres w polu wyżej.",
+      "click": "Kliknij swoją działkę. Granice i numery działek widać po przybliżeniu.",
+      "confirm": "Sprawdź, czy to ta działka, i dodaj ją. Kilka działek możesz policzyć jako jedno pole."
+    }
   }
 }
