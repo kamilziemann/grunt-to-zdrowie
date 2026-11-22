@@ -79,11 +79,11 @@
   "details": "Szczegóły dla doradcy",
   "verdict": {
     "levels": {
-      "ok": "Woda w normie",
-      "watch": "Uwaga na wodę",
-      "risk": "Ryzyko suszy",
-      "drought": "Susza",
-      "excess": "Nadmiar wody",
+      "ok": "Dobrze – woda w normie",
+      "watch": "Trochę sucho – uwaga na wodę",
+      "risk": "Sucho – ryzyko suszy",
+      "drought": "Bardzo sucho – susza",
+      "excess": "Mokro – nadmiar wody",
       "out_of_season": "Poza sezonem",
       "unknown": "Brak oceny"
     },

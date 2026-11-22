@@ -63,12 +63,12 @@ test.describe('gospodarstwo', () => {
     const rows = page.getByTestId('farm-table').locator('tbody tr');
 
     await expect(rows.first()).toContainText('Działka 2');
-    await expect(rows.first()).toContainText('Susza');
+    await expect(rows.first()).toContainText('Bardzo sucho – susza');
     await expectNoViolations(page);
 
     await rows.first().getByRole('link', { name: 'Pełny raport działki 2' }).click();
     await expect(page).toHaveURL(new RegExp(`/raport\\?dzialki=${IDS[1]?.replaceAll('.', '\\.')}`));
-    await expect(page.getByTestId('verdict')).toContainText('Susza');
+    await expect(page.getByTestId('verdict')).toContainText('Bardzo sucho – susza');
   });
 
   test('nieudana analiza działki ma ponowienie, reszta tabeli działa', async ({ page }) => {

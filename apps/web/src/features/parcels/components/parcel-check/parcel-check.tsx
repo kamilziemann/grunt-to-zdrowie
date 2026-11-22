@@ -66,6 +66,25 @@ function unionBbox(parcels: readonly Parcel[]): MapFocus['bbox'] | null {
   );
 }
 
+/** Dzialki dalej od siebie niz tyle (km) to raczej osobne pola - jeden wynik usrednialby pogode i glebe. */
+const FAR_APART_KM = 3;
+
+/** Najwieksza odleglosc miedzy srodkami dzialek (km, przyblizenie rownoleznikowe - wystarczy do ostrzezenia). */
+function spreadKm(parcels: readonly Parcel[]): number {
+  let max = 0;
+
+  for (const a of parcels) {
+    for (const b of parcels) {
+      const dLat = (a.centroid[1] - b.centroid[1]) * 111.32;
+      const dLng = (a.centroid[0] - b.centroid[0]) * 111.32 * Math.cos((a.centroid[1] * Math.PI) / 180);
+
+      max = Math.max(max, Math.hypot(dLat, dLng));
+    }
+  }
+
+  return max;
+}
+
 /** Opis jednej dzialki: numer, obreb, gmina, powiat, powierzchnia i uzytek z ewidencji (gdy zrodlo go podaje). */
 function ParcelFacts({ parcel }: { parcel: Parcel }) {
   const t = useTranslations('parcels.check');
@@ -185,6 +204,7 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
   const outlineGeometries = useMemo(() => mapSelected.map((parcel) => parcel.geometry), [mapSelected]);
   const outline = useMemo(() => <ParcelOutline geometries={outlineGeometries} />, [outlineGeometries]);
   const nonFarm = single?.parcel && !area ? nonFarmKinds(single.parcel.landUse) : [];
+  const farApartKm = !area && selected.parcels.length > 1 ? spreadKm(selected.parcels) : 0;
   const ready = area !== null || selected.parcels.length > 0;
   const splitHref = useMemo(() => routes.map({ dzialki, rysuj: 'podziel' }), [dzialki]);
   const changeAreaHref = useMemo(
@@ -257,6 +277,20 @@ export function ParcelCheck({ ids, area = null, renderForm }: ParcelCheckProps) 
             {t('nonFarmTitle')}
           </h2>
           <p>{t('nonFarmText', { kinds: nonFarm.map((kind) => t(`landKinds.${kind}`)).join(', ') })}</p>
+        </section>
+      )}
+
+      {farApartKm > FAR_APART_KM && (
+        <section
+          aria-labelledby="far-apart-title"
+          className="flex flex-col gap-2 rounded-xl border border-warning/50 bg-warning/10 p-4"
+          data-testid="far-apart"
+        >
+          <h2 id="far-apart-title" className="flex items-start gap-2 text-lg font-medium">
+            <TriangleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-warning" />
+            {t('farApartTitle', { km: Math.round(farApartKm) })}
+          </h2>
+          <p>{t('farApartText')}</p>
         </section>
       )}
 

@@ -261,7 +261,11 @@ export function ParcelsScreen({
   const showHint = useCallback((next: MapHint) => {
     window.clearTimeout(hintTimer.current);
     setHint(next);
-    hintTimer.current = window.setTimeout(() => setHint(null), HINT_MS);
+    // podpowiedzi polozenia mowia, co zrobic dalej ("stuknij dzialke, na ktorej stoisz") - wisza dwa razy dluzej
+    hintTimer.current = window.setTimeout(
+      () => setHint(null),
+      next.startsWith('locateStatus.') ? HINT_MS * 2 : HINT_MS,
+    );
   }, []);
 
   const clearSearch = useCallback(() => {
@@ -631,8 +635,9 @@ export function ParcelsScreen({
 
       <div className="absolute inset-0 max-lg:bottom-[calc(var(--sheet-peek,7.75rem)-0.5rem)]">
         <ParcelMap
-          // w trybie "wlasne pole" dzialki tylko obrysem (tlo), zeby wybrana czesc odrozniala sie od reszty
-          selected={drawing ? NO_PARCELS : selected.parcels}
+          // podzial linia: dzialka jako podglad (obrys), zeby wybrana czesc odrozniala sie od reszty; obrys narozami:
+          // dzialki z listy zostaja widoczne - rolnik widzi, co obrysowuje
+          selected={drawing && draw.mode === 'split' ? NO_PARCELS : selected.parcels}
           preview={drawing ? (draw.mode === 'split' ? (onlyParcel ?? null) : null) : previewShape}
           drawing={drawing ? draw.overlay : null}
           basemap={layers.basemap}

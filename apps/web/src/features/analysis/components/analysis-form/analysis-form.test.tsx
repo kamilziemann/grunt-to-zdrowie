@@ -67,6 +67,21 @@ describe('AnalysisForm', () => {
     expect(mocks.push).toHaveBeenCalledWith(`/raport?dzialki=${ID}&uprawa=winter_wheat&data=2026-07-01`);
   });
 
+  it('„Inny dzień” zaznacza się od razu i daje fokus polu daty; „Dziś” nie kasuje wpisanej daty', () => {
+    renderWithIntl(<AnalysisForm parcelIds={IDS} />);
+    const other = screen.getByRole('radio', { name: t('form.otherDay') });
+    const dateInput = screen.getByLabelText(t('form.dateLabel'));
+
+    fireEvent.click(other);
+    expect(other).toBeChecked();
+    expect(dateInput).toHaveFocus();
+
+    fireEvent.change(dateInput, { target: { value: '2018-06-15' } });
+    fireEvent.click(screen.getByRole('radio', { name: new RegExp(t('form.today')) }));
+    fireEvent.click(other);
+    expect(dateInput).toHaveValue('2018-06-15');
+  });
+
   it('data sprzed 10 lat = komunikat, bez przejscia', () => {
     renderWithIntl(<AnalysisForm parcelIds={IDS} initialCropId="potato" />);
     fireEvent.change(screen.getByLabelText(t('form.dateLabel')), { target: { value: '2015-06-01' } });

@@ -118,6 +118,8 @@
     "title": "We could not prepare the report",
     "retry": "Try again",
     "change": "Change crop or date",
+    "otherNumber": "Enter another parcel number",
+    "showMap": "Point to the parcel on the map",
     "timeout": "The analysis took longer than a minute, so we stopped waiting. One of the data sources is not responding – try again in a moment.",
     "messages": {
       "upstream_failed": "One of the data sources (e.g. GUGiK or the weather service) did not respond. This is usually temporary – try again in a moment.",

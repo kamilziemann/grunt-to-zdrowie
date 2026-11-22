@@ -59,7 +59,7 @@ test.describe('analiza i raport', () => {
       await toggle.click();
       await expect(page).toHaveURL(/widok=szczegoly/);
       await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-      await expect(page.getByTestId('verdict')).toContainText('Ryzyko suszy');
+      await expect(page.getByTestId('verdict')).toContainText('Sucho – ryzyko suszy');
       await expect(page.locator('[data-report-section] h2')).toHaveText(SECTIONS);
 
       // odswiezenie zostawia szczegoly rozwiniete (stan w adresie) i przewija do nich
@@ -212,7 +212,7 @@ test.describe('analiza i raport', () => {
     await page.goto(detailed(DROUGHT_REPORT_URL));
     await openSections(page);
 
-    await expect(page.getByTestId('verdict')).toContainText('Susza');
+    await expect(page.getByTestId('verdict')).toContainText('Bardzo sucho – susza');
     await expect(page.getByTestId('history-summary')).toContainText('najsuchszy taki okres z 11 lat');
     await expect(page.getByTestId('sample-part')).toHaveCount(4);
     await expect(page.getByTestId('irrigation-deficit')).toContainText('brakuje ok. 136 l/m²');

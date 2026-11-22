@@ -200,7 +200,7 @@
     "locateShort": "Gdzie jestem",
     "locateStatus": {
       "searching": "Szukam Twojego położenia…",
-      "found": "Mapa pokazuje Twoje położenie (niebieska kropka).",
+      "found": "Jesteś tu (niebieska kropka). Stuknij działkę, na której stoisz, żeby ją wybrać.",
       "denied": "Brak dostępu do położenia. Sprawdź zgodę w ustawieniach przeglądarki albo wpisz numer działki.",
       "unavailable": "Nie udało się ustalić położenia na tym urządzeniu. Wpisz numer działki albo adres.",
       "outside": "Twoje położenie jest poza Polską - mapa pokazuje tylko Polskę."
@@ -306,22 +306,22 @@
     "examples": {
       "ditch": {
         "title": "Pole z rowem melioracyjnym",
-        "place": "Chwalim · pszenica ozima · 15.06.2018",
+        "place": "Chwalim · zboża ozime · 15.06.2018",
         "note": "Rów przez pole: ile wody zatrzyma zastawka i plan podlewania."
       },
       "dry": {
         "title": "Sucha wiosna na słabej glebie",
-        "place": "Kurpie · jęczmień jary · 20.06.2023",
+        "place": "Wejdo, gm. Łyse (Kurpie) · zboża jare · 20.06.2023",
         "note": "Piaszczysta gleba klasy V–VI szybko traci wodę – susza."
       },
       "wet": {
         "title": "Mokry rok: za dużo wody",
-        "place": "Kurpie · łąka · 20.09.2017",
+        "place": "Łyse (Kurpie) · łąka lub pastwisko · 20.09.2017",
         "note": "Po deszczowym lecie: ostrzeżenie przed nadmiarem wody, nie suszą."
       },
       "today": {
         "title": "Raport na dziś",
-        "place": "Sterdyń · pszenica ozima · dziś",
+        "place": "Łazówek, gm. Sterdyń · zboża ozime · dziś",
         "note": "Poza sezonem oceny suszy raport mówi to wprost i pokazuje historię."
       }
     }
@@ -396,7 +396,7 @@
       "check": "Sprawdź",
       "analyze": "Analizuj",
       "parcel": "Działka {label}",
-      "place": "{area} ha · pszenica ozima · {date}",
+      "place": "{area} ha · zboża ozime · {date}",
       "verdict": "Bardzo sucho",
       "nowLabel": "Teraz:",
       "now": "brakuje ok. {mm} l/m² wody, zbiornik w glebie pełny w {percent}%",
@@ -408,6 +408,7 @@
       "sketch": "Szkic działki z rowami. Punkt 1: zastawka na rowie w środku pola."
     },
     "states": {
+      "noParcelPlaces": "Nie znaleźliśmy działki „{query}”. Sprawdź nazwę wsi i numer z wypisu z rejestru gruntów. Niżej są adresy o podobnej nazwie – możesz wybrać miejsce i kliknąć działkę na mapie.",
       "notFoundTitle": "Nie znaleźliśmy działki o tym numerze",
       "notFoundText": "Sprawdź, czy numer jest przepisany dokładnie: cyfry, kropki i ukośnik. Możesz też wpisać nazwę wsi i numer, np. „Chwalim 349/1”, albo wskazać działkę na mapie.",
       "fixNumber": "Popraw numer",
@@ -529,7 +530,7 @@
   "mapIntro": {
     "title": "Jak wskazać działkę na mapie",
     "steps": {
-      "zoom": "Przybliż mapę do swojej wsi albo wpisz adres w polu wyżej.",
+      "zoom": "Przybliż mapę do swojej wsi albo wpisz adres w polu wyżej. Stoisz na polu? Stuknij przycisk z celownikiem („Gdzie jestem”).",
       "click": "Kliknij swoją działkę. Granice i numery działek widać po przybliżeniu.",
       "confirm": "Sprawdź, czy to ta działka, i dodaj ją. Kilka działek możesz policzyć jako jedno pole."
     }
@@ -550,6 +551,8 @@
     "areaNote": "Powierzchnię liczymy z granic na mapie, może się różnić od ewidencji.",
     "source": "Granice: {source, select, uldk {GUGiK (ULDK)} other {GUGiK (ewidencja gruntów)}}.",
     "total": "Razem {area} ha",
+    "farApartTitle": "Działki leżą {km} km od siebie",
+    "farApartText": "Jeden wynik uśredni pogodę, glebę i teren z odległych miejsc. Niżej wybierz „Każdą osobno” albo zostaw na liście tylko działki jednego pola.",
     "notThis": "Zmień działkę",
     "loading": "Wczytuję działkę {id}…",
     "missingTitle": "Nie znaleźliśmy takiej działki",
@@ -575,7 +578,7 @@
     "areaCard": {
       "title": "Twoje pole: {area} ha",
       "part": "Część działki {numbers}.",
-      "drawn": "Pole obrysowane na mapie.",
+      "drawn": "Pole obrysowane na mapie. Liczymy dokładnie ten obszar, a nie całe działki z listy.",
       "change": "Zmień na mapie",
       "whole": "Licz całą działkę"
     },

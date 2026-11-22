@@ -17,7 +17,11 @@ export interface ProblemAlertProps {
   className?: string;
 }
 
-/** Blad z API dla uzytkownika: komunikat w jezyku interfejsu wg `code`, lista `issues`, detail techniczny zwiniety. */
+/**
+ * Blad z API dla uzytkownika: komunikat w jezyku interfejsu wg `code`, lista `issues`, detail techniczny zwiniety.
+ * Gdy ekran podaje wlasny komunikat (`message`), lista `issues` (teksty walidacji API, po angielsku) jest tylko w
+ * zwinietych szczegolach - rolnik widzi jedno zdanie po polsku.
+ */
 export function ProblemAlert({ problem, title, message: custom, children, className }: ProblemAlertProps) {
   const t = useTranslations('problems');
   const message = custom ?? problemMessage(t, problem.code);
@@ -28,7 +32,7 @@ export function ProblemAlert({ problem, title, message: custom, children, classN
       <AlertTitle>{title ?? message}</AlertTitle>
       <AlertDescription>
         {title && <p>{message}</p>}
-        {problem.issues && problem.issues.length > 0 && (
+        {!custom && problem.issues && problem.issues.length > 0 && (
           <ul className="list-disc pl-4">
             {problem.issues.map((issue) => (
               <li key={`${issue.path}:${issue.message}`}>

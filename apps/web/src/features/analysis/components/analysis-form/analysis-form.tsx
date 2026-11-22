@@ -61,10 +61,15 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
   const formRef = useRef<HTMLFormElement>(null);
   const cropAreaRef = useRef<HTMLDivElement>(null);
   const dateAreaRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
+  // powiadomienie "wybierz uprawe" znika, gdy rolnik ja wybierze (nie wisi nad mapa jeszcze 8 s)
+  const cropToastRef = useRef<number | null>(null);
   const [cropId, setCropId] = useState<CropId | null>(initialCropId ?? null);
-  // null = "dzis" (data przychodzi z przegladarki po hydratacji)
+  // wybrany dzien w polu daty (null = jeszcze nie wybrano, pole pokazuje dzis) i osobno tryb "dzis / inny dzien":
+  // przelaczenie na "Dzis" nie kasuje wpisanej daty, a "Inny dzien" zaznacza sie od razu, takze przed wpisaniem daty
   const [date, setDate] = useState<string | null>(initialDate ?? null);
+  const [otherDay, setOtherDay] = useState(initialDate !== undefined && initialDate !== null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const [cropMissing, setCropMissing] = useState(false);
   // kilka dzialek: razem jako jedno pole (raport) albo kazda osobno (gospodarstwo, I2)
   const canSeparate = parcelIds.length > 1 && !area?.obszar;
@@ -79,12 +84,20 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
     ? format.dateTime(new Date(`${bounds.min}T12:00:00Z`), { dateStyle: 'long', timeZone: 'UTC' })
     : '';
 
-  const chooseCrop = useCallback((next: CropId) => {
-    setCropId(next);
-    setCropMissing(false);
-  }, []);
+  const chooseCrop = useCallback(
+    (next: CropId) => {
+      setCropId(next);
+      setCropMissing(false);
+
+      if (cropToastRef.current !== null) dismiss(cropToastRef.current);
+
+      cropToastRef.current = null;
+    },
+    [dismiss],
+  );
   const changeDate = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setDate(event.currentTarget.value);
+    setOtherDay(true);
     setDateError(null);
   }, []);
   const changeMode = useCallback(
@@ -92,18 +105,22 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
     [],
   );
   const resetDate = useCallback(() => {
-    setDate(null);
+    setOtherDay(false);
     setDateError(null);
   }, []);
-  // "Inny dzien": pole daty dostaje fokus (na telefonie od razu otwiera sie kalendarz systemowy)
+  // "Inny dzien": zaznaczenie i fokus w polu daty (rolnik od razu wpisuje albo wybiera dzien)
   const pickOtherDay = useCallback(() => {
+    setOtherDay(true);
     setDate((current) => current ?? today ?? todayInPoland());
   }, [today]);
-  const otherDay = date !== null && date !== today;
+  const chooseOtherDay = useCallback(() => {
+    pickOtherDay();
+    dateInputRef.current?.focus();
+  }, [pickOtherDay]);
   const submit = useCallback(
     (event: SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const chosen = date ?? today ?? todayInPoland();
+      const chosen = (otherDay ? date : null) ?? today ?? todayInPoland();
       const error = validateAnalysisDate(chosen, today ?? todayInPoland());
 
       setCropMissing(!cropId);
@@ -115,7 +132,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
           revealField(cropAreaRef.current, cropAreaRef.current.querySelector('input[type="radio"]'));
         }
 
-        toast({ title: t('cropMissingToast'), variant: 'error' });
+        cropToastRef.current = toast({ title: t('cropMissingToast'), variant: 'error' });
 
         return;
       }
@@ -136,7 +153,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
 
       router.push(canSeparate && separate ? routes.farm(search) : routes.report(search));
     },
-    [area, canSeparate, cropId, date, parcelIds, router, separate, t, toast, today],
+    [area, canSeparate, cropId, date, otherDay, parcelIds, router, separate, t, toast, today],
   );
 
   return (
@@ -210,7 +227,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
               type="radio"
               name={`${ids}-day`}
               checked={otherDay}
-              onChange={pickOtherDay}
+              onChange={chooseOtherDay}
               className="size-5 shrink-0 accent-primary"
             />
             {t('otherDay')}
@@ -219,6 +236,7 @@ export function AnalysisForm({ parcelIds, area, initialCropId, initialDate, chil
             {t('dateLabel')}
           </label>
           <Input
+            ref={dateInputRef}
             id={dateId}
             name="data"
             type="date"

@@ -118,6 +118,8 @@
     "title": "Nie udało się przygotować raportu",
     "retry": "Spróbuj ponownie",
     "change": "Zmień uprawę lub datę",
+    "otherNumber": "Wpisz inny numer działki",
+    "showMap": "Wskaż działkę na mapie",
     "timeout": "Analiza trwała dłużej niż minutę, więc przestaliśmy czekać. Któreś źródło danych nie odpowiada – spróbuj ponownie za chwilę.",
     "messages": {
       "upstream_failed": "Jedno ze źródeł danych (np. GUGiK albo serwis pogody) nie odpowiedziało. To zwykle chwilowe – spróbuj ponownie za chwilę.",

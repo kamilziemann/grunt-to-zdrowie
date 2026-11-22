@@ -160,7 +160,7 @@ test.describe('mapa na telefonie', () => {
 
       await locate.click();
       await expect(locate).toHaveAttribute('data-locate-state', 'found');
-      await expect(page.getByText('Mapa pokazuje Twoje położenie')).toBeVisible();
+      await expect(page.getByText('Stuknij działkę, na której stoisz', { exact: false })).toBeVisible();
     });
 
     test('kolejność fokusu: wyszukiwarka, szyna przycisków, mapa, arkusz', async ({ page }) => {

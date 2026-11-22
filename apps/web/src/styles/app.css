@@ -23,9 +23,12 @@
  * Tokeny deklarowane tez na `.surface-panel`: build produkcyjny (Lightning CSS) zamienia light-dark() na zmienne
  * `--lightningcss-light/dark`, a zmienna wlasna rozwiazuje var() tam, gdzie jest zadeklarowana. Bez ponownej
  * deklaracji panel dziedziczylby wartosci jasne z :root (ciemny tekst na ciemnym panelu - tylko po buildzie).
+ * Wariant `lg:surface-panel` (karta wyniku: jasna na telefonie, ciemna od `lg`) potrzebuje tej samej deklaracji -
+ * bez niej karta na komputerze miala po buildzie ciemny tekst na ciemnym tle.
  */
 :root,
-.surface-panel {
+.surface-panel,
+.lg\:surface-panel {
   /* Powierzchnie i tekst. Kazda para (token / token-foreground) ma kontrast WCAG AA (min. 4.5:1). */
   /* Kierunek "jasny z ciemnym panelem" (ADR 0012): biel i grafit, ciemny zielono-czarny panel, mietowy akcent.
      Drugie wartosci light-dark() to paleta panelu (#121814): panel to "wyspa" ciemnych wartosci (`surface-panel`). */

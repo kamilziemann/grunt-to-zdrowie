@@ -247,6 +247,16 @@ export function HomeSearch({ initialQuery }: { initialQuery?: string | undefined
         </div>
       )}
 
+      {/* numer z cyfra, ktorego nie ma w ewidencji: najpierw mowimy to wprost, adresy sa tylko podpowiedzia */}
+      {onlyPlaces && /\d/.test(submitted ?? '') && (
+        <output
+          className="block rounded-2xl bg-muted px-5 py-4 text-left"
+          data-testid="home-search-no-parcel"
+        >
+          {t('states.noParcelPlaces', { query: submitted ?? '' })}
+        </output>
+      )}
+
       {(onlyPlaces || (many && hasPlaces)) && places.data && (
         <div className="rounded-2xl border bg-card p-4 text-left">
           <PlaceResults places={places.data.items} onChoose={choosePlace} />

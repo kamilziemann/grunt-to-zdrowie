@@ -79,11 +79,11 @@
   "details": "Details for the advisor",
   "verdict": {
     "levels": {
-      "ok": "Water is fine",
-      "watch": "Watch the water",
-      "risk": "Drought risk",
-      "drought": "Drought",
-      "excess": "Too much water",
+      "ok": "Good – water is fine",
+      "watch": "A bit dry – watch the water",
+      "risk": "Dry – drought risk",
+      "drought": "Very dry – drought",
+      "excess": "Wet – too much water",
       "out_of_season": "Out of season",
       "unknown": "No assessment"
     },
