@@ -65,7 +65,7 @@ function SearchState({
 /**
  * Pole "numer dzialki" na pierwszym ekranie. Pelny numer prowadzi prosto do kroku "Czy to Twoja dzialka?", "obreb
  * numer" pyta API o kandydatow (jedno trafienie = od razu dalej, kilka = lista do wyboru), a adres pokazuje miejsca,
- * ktore otwieraja mape w tej okolicy. Tekst 19 px, pole i przycisk 60 px.
+ * ktore otwieraja mape w tej okolicy. Tekst 19 px, pole i przycisk 60 px (na telefonie jeden pod drugim).
  */
 export function HomeSearch() {
   const t = useTranslations('parcels.home');
@@ -193,7 +193,7 @@ export function HomeSearch() {
           <p
             id={messageId}
             role={error ? 'alert' : undefined}
-            className={cn('pl-6 text-sm', error ? 'font-medium text-destructive' : 'text-muted-foreground')}
+            className={cn('pl-2 md:pl-6', error ? 'font-medium text-destructive' : 'text-muted-foreground')}
           >
             {error ? tSearch(error) : t('search.hint')}
           </p>

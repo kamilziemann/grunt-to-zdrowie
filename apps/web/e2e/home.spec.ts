@@ -72,8 +72,43 @@ test.describe('strona główna', () => {
     await expect(page.getByRole('link', { name: /Nie znam numeru/ })).toHaveAttribute('href', '/mapa');
     await expect(page.getByText('Bez zakładania konta')).toBeVisible();
 
-    await page.getByText('Gdzie znajdę numer działki?').click();
-    await expect(page.getByText(/wypisie z rejestru gruntów/).first()).toBeVisible();
+    await expect(
+      page.getByText('Numer działki jest na wypisie z rejestru gruntów i w decyzji o podatku rolnym.'),
+    ).toBeVisible();
+  });
+
+  test('nagłówek: kotwice sekcji i „Sprawdź działkę” przewijające do pola', async ({ page }) => {
+    await page.goto('/');
+    const nav = page.getByRole('navigation', { name: 'Nawigacja główna' });
+
+    await expect(nav.getByRole('link', { name: 'Jak to działa' })).toHaveAttribute('href', '#jak');
+    await expect(nav.getByRole('link', { name: 'Co dostaniesz' })).toHaveAttribute('href', '#wynik');
+    await expect(nav.getByRole('link', { name: 'Pytania' })).toHaveAttribute('href', '#pytania');
+    await nav.getByRole('link', { name: 'Pytania' }).click();
+    await expect(page.getByRole('heading', { level: 2, name: 'Pytania rolników' })).toBeInViewport();
+    await nav.getByRole('link', { name: 'Sprawdź działkę' }).click();
+    await expect(
+      page.getByRole('searchbox', { name: 'Numer działki albo nazwa wsi i numer' }),
+    ).toBeInViewport();
+  });
+
+  test('przykład wyniku: prawdziwe liczby z raportu Chwalim 349/1 i link do tego raportu', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const card = page.getByTestId('example-result');
+
+    await expect(card).toContainText('Działka 349/1 · Chwalim');
+    await expect(card).toContainText('Bardzo sucho');
+    await expect(card).toContainText('brakuje ok. 105 l/m² wody');
+    await expect(card).toContainText('wody brakowało w 9 z 10 sezonów');
+    await expect(card).toContainText('zastawka na rowie');
+    await expect(card).toHaveAttribute(
+      'href',
+      '/raport?dzialki=080904_5.0001.349%2F1&uprawa=winter_wheat&data=2018-06-15',
+    );
+    await expect(page.getByRole('heading', { level: 2, name: 'Zobacz inne przykłady' })).toBeVisible();
+    await expect(page.getByTestId('examples').getByRole('link')).toHaveCount(4);
   });
 
   test('za krótki tekst pokazuje podpowiedź zamiast wysyłać zapytanie', async ({ page }) => {
@@ -168,6 +203,7 @@ test.describe('strona główna', () => {
       await expectNoZoomFont(field);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
       await expectTouchTargets(page.getByRole('main').getByRole('button'));
+      await expect(page.getByRole('link', { name: 'Nie znam numeru – pokaż mapę' })).toBeVisible();
       await expectNoViolations(page);
     });
   });

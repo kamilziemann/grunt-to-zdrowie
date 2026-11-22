@@ -360,9 +360,7 @@
       "placeholder": "np. Dąbrowa 12",
       "submit": "Sprawdź działkę",
       "searching": "Szukam działki…",
-      "hint": "Pełny numer (np. 141201_1.0001.6509), nazwa wsi i numer działki albo adres.",
-      "whereNumber": "Gdzie znajdę numer działki?",
-      "whereNumberText": "Na wypisie z rejestru gruntów, w decyzji o podatku rolnym albo we wniosku o dopłaty. Wystarczy nazwa wsi (obrębu) i numer, np. „Dąbrowa 12”."
+      "hint": "Pełny numer (np. 141201_1.0001.6509), nazwa wsi i numer działki albo adres."
     },
     "noNumber": "Nie znam numeru – wskażę na mapie",
     "noNumberShort": "Nie znam numeru – pokaż mapę",
@@ -370,6 +368,26 @@
       "free": "Bezpłatnie",
       "noAccount": "Bez zakładania konta",
       "fast": "Wynik w kilkanaście sekund"
+    },
+    "whereNumber": "Numer działki jest na wypisie z rejestru gruntów i w decyzji o podatku rolnym.",
+    "showcase": {
+      "title": "Przykład wyniku",
+      "badge": "Przykład wyniku",
+      "steps": "Kroki",
+      "find": "Znajdź",
+      "check": "Sprawdź",
+      "analyze": "Analizuj",
+      "parcel": "Działka {label}",
+      "place": "{area} ha · pszenica ozima · {date}",
+      "verdict": "Bardzo sucho",
+      "nowLabel": "Teraz:",
+      "now": "brakuje ok. {mm} l/m² wody, zbiornik w glebie pełny w {percent}%",
+      "historyLabel": "10 lat:",
+      "history": "wody brakowało w {dry} z {seasons} sezonów",
+      "firstLabel": "Co najpierw:",
+      "first": "zastawka na rowie",
+      "open": "Zobacz cały wynik",
+      "sketch": "Szkic działki z rowami. Punkt 1: zastawka na rowie w środku pola."
     },
     "states": {
       "notFoundTitle": "Nie znaleźliśmy działki o tym numerze",
@@ -383,7 +401,7 @@
       "placesText": "Adres wskazuje okolicę, nie działkę. Wybierz miejsce – pokażemy je na mapie, a Ty klikniesz swoją działkę."
     },
     "examples": {
-      "title": "Zobacz przykład wyniku",
+      "title": "Zobacz inne przykłady",
       "text": "Prawdziwe działki rolne i dni, w których coś się działo. Jedno kliknięcie otwiera gotowy wynik.",
       "badge": "Przykład",
       "open": "Otwórz przykład: {title}"
@@ -403,6 +421,23 @@
         "text": "Najpierw krótki wynik, a jeśli chcesz, wszystkie szczegóły i źródła."
       }
     },
+    "results": {
+      "title": "Wynik w dwóch widokach i na papierze",
+      "text": "Większości wystarczy widok „Prosto”. „Szczegółowo” jest dla tych, którzy chcą wiedzieć więcej albo pokazać wynik doradcy.",
+      "open": "Zobacz na przykładzie",
+      "simple": {
+        "title": "Prosto",
+        "text": "Czy jest sucho, ile wody zostało w glebie, ile dni zostało do stresu roślin i co zrobić najpierw."
+      },
+      "detailed": {
+        "title": "Szczegółowo",
+        "text": "Liczby z odniesieniem, 10 ostatnich lat, zdjęcia z satelity, miejsca na polu, wszystkie zalecenia i źródła."
+      },
+      "print": {
+        "title": "Wydruk i PDF",
+        "text": "Raport na kartce A4 dla doradcy albo do segregatora. Link do raportu możesz też skopiować i wysłać."
+      }
+    },
     "data": {
       "title": "Skąd bierzemy dane",
       "text": "Tylko publiczne, bezpłatne źródła. Nie musisz niczego instalować ani znać się na mapach.",
@@ -419,7 +454,12 @@
       "soil": {
         "label": "Gleba:",
         "text": "ile wody może zatrzymać w zasięgu korzeni",
-        "source": "ISRIC SoilGrids"
+        "source": "ISRIC SoilGrids, progi suszy wg IUNG"
+      },
+      "terrain": {
+        "label": "Teren:",
+        "text": "spadki i zagłębienia, którędy spływa i gdzie zbiera się woda",
+        "source": "model terenu ok. 30 m (EU-DEM / SRTM)"
       },
       "water": {
         "label": "Rowy i wody:",
@@ -447,19 +487,19 @@
       },
       "number": {
         "q": "Skąd wziąć numer działki?",
-        "a": "Z wypisu z rejestru gruntów albo decyzji o podatku rolnym. Wystarczy nazwa wsi i numer. Możesz też kliknąć działkę na mapie."
+        "a": "Z wypisu z rejestru gruntów albo z decyzji o podatku rolnym. Wystarczy nazwa wsi i numer, np. „Dąbrowa 12”. Możesz też wskazać działkę na mapie."
+      },
+      "aid": {
+        "q": "Czy to wniosek o pomoc suszową?",
+        "a": "Nie. To podpowiedź dla Ciebie i Twojego doradcy, co zrobić z wodą na polu. Nie zastępuje oceny komisji ani wniosku o pomoc."
       },
       "accuracy": {
         "q": "Jak dokładny jest wynik?",
         "a": "Zdjęcia satelitarne pokazują Twoje pole, ale nie w każdy dzień (chmury). Pogoda pochodzi z modelu dla okolicy, a mapy gleby są ogólne. Przy wyniku podajemy pewność i to, czego nie wiemy."
       },
-      "phone": {
-        "q": "Czy działa na telefonie?",
-        "a": "Tak, w zwykłej przeglądarce, bez instalowania."
-      },
-      "aid": {
-        "q": "Czy to wniosek o pomoc suszową?",
-        "a": "Nie. To podpowiedź dla Ciebie i Twojego doradcy, co zrobić z wodą na polu."
+      "privacy": {
+        "q": "Co z moimi danymi?",
+        "a": "Nie zbieramy danych osobowych: nie pytamy o imię, adres ani telefon. Zapisujemy tylko wynik dla działki (numer, uprawę i dzień), żeby działał link do raportu."
       }
     },
     "cta": {

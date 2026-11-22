@@ -15,8 +15,15 @@ import { cn } from '@/lib/utils/cn';
  * - `wet`: Lyse 39/2 (laki i grunty orne), laka, 20.09.2017 - nadmiar wody (KBW ok. +97 mm);
  * - `today`: Sterdyn 178, pszenica ozima, dzisiejsza data - poza sezonem raport mowi to wprost.
  */
+/** Parametry przykladu `ditch` - z niego sa tez liczby w karcie "Przyklad wyniku" na stronie glownej. */
+export const DITCH_EXAMPLE = {
+  dzialki: '080904_5.0001.349/1',
+  uprawa: 'winter_wheat',
+  data: '2018-06-15',
+} as const;
+
 export const EXAMPLE_REPORTS = {
-  ditch: routes.report({ dzialki: '080904_5.0001.349/1', uprawa: 'winter_wheat', data: '2018-06-15' }),
+  ditch: routes.report(DITCH_EXAMPLE),
   dry: routes.report({ dzialki: '141507_2.0019.254', uprawa: 'spring_barley', data: '2023-06-20' }),
   wet: routes.report({ dzialki: '141507_2.0010.39/2', uprawa: 'grassland', data: '2017-09-20' }),
 } as const;
@@ -24,8 +31,8 @@ export const EXAMPLE_REPORTS = {
 const TODAY_EXAMPLE = { dzialki: '142909_2.0013.178', uprawa: 'winter_wheat' } as const;
 
 /**
- * Przyklady wyniku na stronie glownej: cztery ciemne karty "Przyklad", kazda jednym kliknieciem otwiera gotowy raport
- * z jednym zdaniem "co tu zobaczysz". Teksty z `parcels.firstSteps.examples`.
+ * "Zobacz inne przyklady" na stronie glownej: cztery jasne karty "Przyklad", kazda jednym kliknieciem otwiera gotowy
+ * raport z jednym zdaniem "co tu zobaczysz". Teksty z `parcels.firstSteps.examples`.
  */
 export function ExampleReports({ className }: { className?: string }) {
   const t = useTranslations('parcels');
@@ -47,7 +54,7 @@ export function ExampleReports({ className }: { className?: string }) {
         <li key={key} className="flex">
           <Link
             href={href}
-            className="group surface-panel flex flex-1 flex-col gap-3 rounded-2xl p-5 shadow-showcase transition-transform motion-safe:hover:-translate-y-0.5"
+            className="group flex flex-1 flex-col gap-3 rounded-2xl border bg-card p-5 transition-[border-color,transform] hover:border-foreground/40 motion-safe:hover:-translate-y-0.5"
             data-example={key}
           >
             <span className="w-fit rounded-full bg-accent px-3 py-0.5 text-sm font-semibold text-accent-foreground">

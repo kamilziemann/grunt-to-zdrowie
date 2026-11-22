@@ -360,9 +360,7 @@
       "placeholder": "e.g. Dąbrowa 12",
       "submit": "Check parcel",
       "searching": "Looking for the parcel…",
-      "hint": "Full number (e.g. 141201_1.0001.6509), village name and parcel number, or an address.",
-      "whereNumber": "Where do I find the parcel number?",
-      "whereNumberText": "On the land register extract, in the agricultural tax decision or in the subsidy application. The village (cadastral district) name and number are enough, e.g. “Dąbrowa 12”."
+      "hint": "Full number (e.g. 141201_1.0001.6509), village name and parcel number, or an address."
     },
     "noNumber": "I don't know the number – I'll point on the map",
     "noNumberShort": "I don't know the number – show the map",
@@ -370,6 +368,26 @@
       "free": "Free",
       "noAccount": "No account needed",
       "fast": "Result in seconds"
+    },
+    "whereNumber": "The parcel number is on the land register extract and in the agricultural tax decision.",
+    "showcase": {
+      "title": "Example result",
+      "badge": "Example result",
+      "steps": "Steps",
+      "find": "Find",
+      "check": "Check",
+      "analyze": "Analyse",
+      "parcel": "Parcel {label}",
+      "place": "{area} ha · winter wheat · {date}",
+      "verdict": "Very dry",
+      "nowLabel": "Now:",
+      "now": "about {mm} l/m² of water missing, soil reservoir {percent}% full",
+      "historyLabel": "10 years:",
+      "history": "water was short in {dry} of {seasons} seasons",
+      "firstLabel": "First:",
+      "first": "a weir on the ditch",
+      "open": "See the full result",
+      "sketch": "Sketch of the parcel with ditches. Point 1: a weir on the ditch in the middle of the field."
     },
     "states": {
       "notFoundTitle": "We could not find a parcel with this number",
@@ -383,7 +401,7 @@
       "placesText": "An address points to an area, not a parcel. Pick a place – we will show it on the map and you click your parcel."
     },
     "examples": {
-      "title": "See an example result",
+      "title": "See other examples",
       "text": "Real farm parcels on days when something was happening. One click opens a ready result.",
       "badge": "Example",
       "open": "Open example: {title}"
@@ -403,6 +421,23 @@
         "text": "First a short result, then, if you want, all the details and sources."
       }
     },
+    "results": {
+      "title": "The result in two views and on paper",
+      "text": "Most people only need the “Simple” view. “Detailed” is for those who want to know more or show the result to an adviser.",
+      "open": "See an example",
+      "simple": {
+        "title": "Simple",
+        "text": "Whether it is dry, how much water is left in the soil, how many days until the plants are stressed and what to do first."
+      },
+      "detailed": {
+        "title": "Detailed",
+        "text": "Numbers with a reference, the last 10 years, satellite images, places in the field, all recommendations and sources."
+      },
+      "print": {
+        "title": "Print and PDF",
+        "text": "The report on an A4 sheet for an adviser or for your files. You can also copy the report link and send it."
+      }
+    },
     "data": {
       "title": "Where the data comes from",
       "text": "Only public, free sources. You do not need to install anything or know maps.",
@@ -419,7 +454,12 @@
       "soil": {
         "label": "Soil:",
         "text": "how much water it can hold within root reach",
-        "source": "ISRIC SoilGrids"
+        "source": "ISRIC SoilGrids, IUNG drought thresholds"
+      },
+      "terrain": {
+        "label": "Terrain:",
+        "text": "slopes and hollows where water runs off and collects",
+        "source": "terrain model approx. 30 m (EU-DEM / SRTM)"
       },
       "water": {
         "label": "Ditches and water:",
@@ -447,19 +487,19 @@
       },
       "number": {
         "q": "Where do I get the parcel number?",
-        "a": "From the land register extract or the agricultural tax decision. The village name and number are enough. You can also click the parcel on the map."
+        "a": "From the land register extract or the agricultural tax decision. The village name and number are enough, e.g. “Dąbrowa 12”. You can also point to the parcel on the map."
+      },
+      "aid": {
+        "q": "Is this a drought aid application?",
+        "a": "No. It is a hint for you and your adviser on what to do with water in the field. It does not replace the committee assessment or an aid application."
       },
       "accuracy": {
         "q": "How accurate is the result?",
         "a": "Satellite images show your field, but not every day (clouds). Weather comes from a model for the area and soil maps are general. With the result we give the confidence and what we don't know."
       },
-      "phone": {
-        "q": "Does it work on a phone?",
-        "a": "Yes, in a normal browser, nothing to install."
-      },
-      "aid": {
-        "q": "Is this a drought aid application?",
-        "a": "No. It is advice for you and your adviser on what to do with water in the field."
+      "privacy": {
+        "q": "What about my data?",
+        "a": "We do not collect personal data: we do not ask for your name, address or phone. We only store the result for the parcel (number, crop and day) so the report link works."
       }
     },
     "cta": {

@@ -6,26 +6,21 @@ import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 
 import { ExampleReports } from '../example-reports';
+import { ExampleResult } from '../example-result';
+import { HomeResults } from './home-results';
 import { HomeSearch } from './home-search';
+import { SectionTitle } from './section-title';
 
 const PROMISES = ['free', 'noAccount', 'fast'] as const;
 const STEPS = ['find', 'check', 'analyze'] as const;
-const SOURCES = ['weather', 'satellite', 'soil', 'water', 'parcel'] as const;
-const QUESTIONS = ['cost', 'account', 'number', 'accuracy', 'phone', 'aid'] as const;
-
-/** Naglowek sekcji strony glownej (ta sama skala wszedzie). */
-function SectionTitle({ id, children }: { id: string; children: string }) {
-  return (
-    <h2 id={id} className="text-3xl font-medium tracking-tight md:text-4xl">
-      {children}
-    </h2>
-  );
-}
+const SOURCES = ['weather', 'satellite', 'soil', 'terrain', 'water', 'parcel'] as const;
+const QUESTIONS = ['cost', 'account', 'number', 'aid', 'accuracy', 'privacy'] as const;
 
 /**
- * Strona glowna wg makiety "Propozycja A": na pierwszym ekranie pole na numer dzialki, "Nie znam numeru - wskaze na
- * mapie" i trzy obietnice (bezplatnie, bez konta, wynik w kilkanascie sekund); nizej przyklady wyniku, trzy kroki,
- * zrodla danych, pytania rolnikow. Jedno glowne dzialanie: sprawdzic dzialke.
+ * Strona glowna wg makiety "Propozycja A" (`Main.dc.html`, telefon `K2-telefon.dc.html`): na pierwszym ekranie pole
+ * na numer dzialki, "Nie znam numeru - wskaze na mapie", trzy zapewnienia i gdzie jest numer; pod spodem karta
+ * "Przyklad wyniku" z prawdziwymi liczbami, inne przyklady, trzy kroki, co dostaniesz, zrodla danych i pytania.
+ * Jedno glowne dzialanie: sprawdzic dzialke. Kotwice `#jak`, `#wynik`, `#pytania`, `#szukaj` zna naglowek.
  */
 export function HomeScreen() {
   const t = useTranslations('parcels.home');
@@ -34,7 +29,7 @@ export function HomeScreen() {
     <div className="flex flex-col">
       <section
         aria-labelledby="home-title"
-        className="flex flex-col items-center px-gutter pt-8 pb-12 text-center md:pt-16"
+        className="flex flex-col items-center px-gutter pt-7 text-center md:pt-14"
       >
         <h1
           id="home-title"
@@ -42,51 +37,61 @@ export function HomeScreen() {
         >
           {t('title')}
         </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted-foreground md:text-xl md:leading-normal">
+        <p className="mt-3 max-w-2xl text-lg text-pretty text-muted-foreground md:mt-4 md:text-xl md:leading-normal">
           {t('lead')}
         </p>
-        <div className="mt-8 flex w-full max-w-3xl flex-col items-center gap-4">
+        <div className="mt-5 flex w-full max-w-3xl flex-col items-center md:mt-7">
           <HomeSearch />
-          <div className="flex w-full flex-col items-center gap-3">
-            <Button asChild variant="secondary" size="lg" className="max-md:w-full">
-              <Link href={routes.map()}>
-                <MapPinned aria-hidden="true" />
-                <span className="md:hidden">{t('noNumberShort')}</span>
-                <span className="max-md:hidden">{t('noNumber')}</span>
-              </Link>
-            </Button>
-            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-1">
-              {PROMISES.map((key) => (
-                <li key={key} className="flex items-center gap-2">
-                  <Check aria-hidden="true" className="size-5 text-success" strokeWidth={2.6} />
-                  {t(`promises.${key}`)}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <details className="group w-full max-w-2xl text-left">
-            <summary className="mx-auto flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-full px-4 font-medium underline underline-offset-4 marker:content-none">
-              {t('search.whereNumber')}
-            </summary>
-            <p className="mt-2 rounded-2xl bg-muted px-5 py-4">{t('search.whereNumberText')}</p>
-          </details>
         </div>
+        <div className="mt-3 flex w-full max-w-5xl flex-wrap items-center justify-center gap-x-7 gap-y-2">
+          <Link
+            href={routes.map()}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full font-medium max-md:w-full max-md:border max-md:border-secondary-border max-md:bg-secondary md:px-2 md:underline md:underline-offset-4 md:hover:decoration-2"
+          >
+            <MapPinned aria-hidden="true" className="size-5" />
+            <span className="md:hidden">{t('noNumberShort')}</span>
+            <span className="max-md:hidden">{t('noNumber')}</span>
+          </Link>
+          <ul className="flex flex-wrap justify-center gap-x-5 gap-y-1 md:gap-x-7">
+            {PROMISES.map((key) => (
+              <li key={key} className="flex items-center gap-2">
+                <Check aria-hidden="true" className="size-5 text-success" strokeWidth={2.6} />
+                {t(`promises.${key}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p className="mt-2 max-w-2xl text-pretty text-muted-foreground">{t('whereNumber')}</p>
+      </section>
+
+      <section
+        aria-labelledby="showcase-title"
+        className="mt-8 flex justify-center bg-secondary px-gutter pt-6 md:mt-10 md:pt-8"
+      >
+        <h2 id="showcase-title" className="sr-only">
+          {t('showcase.title')}
+        </h2>
+        <ExampleResult />
       </section>
 
       <section
         aria-labelledby="examples-title"
-        className="border-y border-secondary-border bg-secondary px-gutter py-12"
+        className="mx-auto w-full max-w-page px-gutter pt-14 md:pt-16"
       >
-        <div className="mx-auto flex max-w-page flex-col gap-6">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <SectionTitle id="examples-title">{t('examples.title')}</SectionTitle>
-            <p className="max-w-2xl text-lg">{t('examples.text')}</p>
+            <p className="max-w-2xl text-lg text-muted-foreground">{t('examples.text')}</p>
           </div>
           <ExampleReports />
         </div>
       </section>
 
-      <section aria-labelledby="steps-title" className="mx-auto w-full max-w-page px-gutter pt-16">
+      <section
+        id="jak"
+        aria-labelledby="steps-title"
+        className="mx-auto w-full max-w-page scroll-mt-20 px-gutter pt-16 md:pt-20"
+      >
         <div className="flex flex-col gap-6">
           <SectionTitle id="steps-title">{t('steps.title')}</SectionTitle>
           <ol className="grid gap-4 md:grid-cols-3">
@@ -106,9 +111,11 @@ export function HomeScreen() {
         </div>
       </section>
 
+      <HomeResults />
+
       <section
         aria-labelledby="data-title"
-        className="mx-auto grid w-full max-w-page gap-8 px-gutter pt-16 lg:grid-cols-[3fr_2fr]"
+        className="mx-auto grid w-full max-w-page gap-8 px-gutter pt-16 md:pt-20 lg:grid-cols-[3fr_2fr]"
       >
         <div className="flex flex-col gap-4">
           <SectionTitle id="data-title">{t('data.title')}</SectionTitle>
@@ -134,7 +141,11 @@ export function HomeScreen() {
         </aside>
       </section>
 
-      <section aria-labelledby="faq-title" className="mx-auto w-full max-w-page px-gutter pt-16">
+      <section
+        id="pytania"
+        aria-labelledby="faq-title"
+        className="mx-auto w-full max-w-page scroll-mt-20 px-gutter pt-16 md:pt-20"
+      >
         <div className="flex flex-col gap-4">
           <SectionTitle id="faq-title">{t('faq.title')}</SectionTitle>
           <dl className="grid gap-x-8 md:grid-cols-2">
@@ -148,7 +159,7 @@ export function HomeScreen() {
         </div>
       </section>
 
-      <section aria-labelledby="cta-title" className="mt-16 surface-panel px-gutter py-12">
+      <section aria-labelledby="cta-title" className="mt-16 surface-panel px-gutter py-12 md:mt-20">
         <div className="mx-auto flex max-w-page flex-wrap items-center justify-between gap-6">
           <div className="flex flex-col gap-2">
             <h2 id="cta-title" className="text-3xl font-medium tracking-tight md:text-4xl">
