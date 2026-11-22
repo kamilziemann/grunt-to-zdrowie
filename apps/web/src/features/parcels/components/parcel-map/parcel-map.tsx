@@ -953,7 +953,7 @@ export function ParcelMap({
           className={cn(
             'absolute flex items-center justify-center text-center text-sm text-muted-foreground',
             state === 'loading' && placeholder
-              ? 'bottom-3 left-1/2 w-max max-w-[calc(100%-6rem)] -translate-x-1/2 rounded-full bg-card/95 px-3 py-1.5 shadow-md'
+              ? 'bottom-3 left-1/2 z-10 w-max max-w-[calc(100%-6rem)] -translate-x-1/2 rounded-full bg-card/95 px-3 py-1.5 shadow-md'
               : 'inset-0 px-6',
           )}
         >
