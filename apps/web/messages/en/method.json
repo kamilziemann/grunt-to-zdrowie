@@ -6,7 +6,7 @@
   "toc": "On this page",
   "data": {
     "title": "What we take into account",
-    "intro": "Five kinds of data. Every source is free and legal; the full list with licences is at the bottom of the page.",
+    "intro": "Seven kinds of data. Every source is free and legal; the full list with licences is at the bottom of the page.",
     "items": {
       "weather": {
         "title": "Ten years of weather",
@@ -26,7 +26,15 @@
       },
       "parcels": {
         "title": "Parcel boundaries and description",
-        "text": "The parcel outline from ULDK, and its area and land-use classes from the land register (EGiB), both GUGiK services. You can also draw your own field or split a parcel."
+        "text": "The parcel outline from ULDK, and the area, land use (arable land, meadow, forest, road…) and soil classes from the land register (EGiB), both GUGiK services. When the register says it is not arable land, the report warns about it at the very top. You can also draw your own field or split a parcel."
+      },
+      "zones": {
+        "title": "Spots in the field",
+        "text": "Which parts of the field dry out first and where water collects: from one least-cloudy Sentinel-2 image from the last 30 days and a terrain model with a grid of about 30 m (hollows without outflow, water runoff). It shows where to walk in the field – it is not a measurement."
+      },
+      "surroundings": {
+        "title": "Around the field",
+        "text": "From the BDOT10k topographic map (GUGiK): trees and hedges along the field boundary, weirs, dams, locks, levees, springs, water intakes, places where a ditch enters a pipe, and protected areas (parks, reserves, Natura 2000). The map has no ditch weirs or culverts."
       }
     }
   },
@@ -40,7 +48,11 @@
     "historyTitle": "Against 10 years",
     "history": "We run the same calculations for the 10 previous seasons. That is how the report tells whether drought on this field is an exception or comes back every few years, and in which parts of the year most often.",
     "plantsTitle": "Satellite as confirmation",
-    "plants": "A satellite image never gives the verdict on its own. A low index at sowing, ripening or after harvest is normal. We speak of possible water stress only when plant moisture is clearly lower than in previous years and the water balance also shows a deficit."
+    "plants": "A satellite image never gives the verdict on its own. A low index at sowing, ripening or after harvest is normal. We speak of possible water stress only when plant moisture is clearly lower than in previous years and the water balance also shows a deficit.",
+    "heatTitle": "Heat as an explanation",
+    "heat": "We count days of heat in the last 14 and 30 days and compare them with the same days in the 10 previous years. According to the IMGW-PIB glossary, heat means a maximum temperature above 30°C. When there are clearly more hot days than usual, the report says plants lose water faster – but the assessment itself does not change. Temperature comes from the same grid of about 50 km as the rest of the weather.",
+    "validationTitle": "We check ourselves against IUNG announcements",
+    "validation": "We compared our results with agricultural drought announced by IUNG in 21 cases: 9 municipalities in different parts of Poland, years 2018–2025, periods with and without drought. The alarm (or its absence) matched IUNG in 21 of 21 cases, and the 60-day water balance alone fell on the same side of the threshold as IUNG's in 20 of 21."
   },
   "causes": {
     "title": "Where the causes come from",
@@ -81,7 +93,9 @@
       "measurement": "We do not measure moisture on your field. A spade and your hand are the surest check.",
       "boundaries": "Parcel boundaries are today’s – also when you analyse a day several years ago.",
       "ditches": "We know where ditches are on the map, but not whether they are clear or carry water.",
-      "terrain": "If the report marks the terrain or the zones in the field as sample data, treat them as illustrative."
+      "terrain": "If the report marks the terrain or the zones in the field as sample data, treat them as illustrative.",
+      "structures": "Maps do not show weirs or culverts on ditches. Before planning a ditch weir, check on site what is already on the ditch.",
+      "zones": "Spots in the field come from one image and a terrain model with a grid of about 30 m – small dips and furrows may be invisible."
     }
   },
   "confidence": {
@@ -124,7 +138,7 @@
       },
       "bdot": {
         "name": "BDOT10k, GUGiK",
-        "use": "ditches, watercourses, water, wetlands",
+        "use": "ditches, watercourses, water, wetlands; trees by the field, water structures, levees and protected areas",
         "licence": "free of charge and for any use (since 31 July 2020); the Geoportal terms require crediting the source"
       },
       "sentinel": {
@@ -146,6 +160,11 @@
         "name": "OpenStreetMap (OpenFreeMap, Nominatim)",
         "use": "base map and address search",
         "licence": "ODbL (© OpenStreetMap contributors)"
+      },
+      "imgw": {
+        "name": "IMGW-PIB, meteorological glossary",
+        "use": "definition of heat (maximum temperature above 30°C)",
+        "licence": "we quote the glossary definition with the source"
       }
     }
   },
@@ -156,7 +175,10 @@
       "root": "FAO-56 root-zone balance: Penman–Monteith ET₀, single Kc from the crop calendar, TAW/RAW, Ks, 10 seasons.",
       "soil": "Soil: SoilGrids texture → PTG 2008 group → IUNG category; Saxton–Rawls (2006) water store for 0–100 cm.",
       "plants": "Satellite: NDVI and NDMI from the Copernicus Data Space statistics API, SCL cloud mask, at least 5 clear pixels in the field.",
-      "water": "Water: distances from the field outline in PL-1992 (PostGIS), 500 m radius."
+      "water": "Water: distances from the field outline in PL-1992 (PostGIS), 500 m radius.",
+      "zones": "Spots in the field: 10 m grid; NDMI from one least-cloudy Sentinel-2 image from 30 days relative to the field median, wetness index and hollows without outflow from a terrain model of about 30 m (EU-DEM / SRTM).",
+      "surroundings": "Surroundings: trees within a 15 m band along the field boundary (forest and tree rows searched up to 500 m), weirs, dams, locks, levees, springs and intakes up to 3 km, a ditch entering a pipe up to 500 m, protected areas intersecting the field (BDOT10k in PostGIS).",
+      "heat": "Heat: days with a maximum temperature above 30°C (NASA POWER) in 14 and 30 days up to the analysis date; normal = average of the same days in the 10 previous years. The report sentence from 5 days and at least twice the normal."
     }
   },
   "backToMap": "Check your field"

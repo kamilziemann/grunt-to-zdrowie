@@ -3,11 +3,13 @@
 import {
   ArrowRight,
   CloudRain,
+  Crosshair,
   ExternalLink,
   Leaf,
   Map as MapIcon,
   Satellite,
   Sprout,
+  Trees,
   Waves,
   type LucideIcon,
 } from 'lucide-react';
@@ -18,19 +20,33 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/lib/navigation';
 import { routes } from '@/lib/routes';
 
-const DATA: readonly { id: 'weather' | 'soil' | 'water' | 'plants' | 'parcels'; icon: LucideIcon }[] = [
+const DATA: readonly {
+  id: 'weather' | 'soil' | 'water' | 'plants' | 'parcels' | 'zones' | 'surroundings';
+  icon: LucideIcon;
+}[] = [
   { id: 'weather', icon: CloudRain },
   { id: 'soil', icon: Sprout },
   { id: 'water', icon: Waves },
   { id: 'plants', icon: Satellite },
   { id: 'parcels', icon: MapIcon },
+  { id: 'zones', icon: Crosshair },
+  { id: 'surroundings', icon: Trees },
 ];
 
 const CAUSES = ['rain', 'soil', 'ditches', 'retention', 'crop'] as const;
 const STEPS = ['retain', 'farm', 'irrigate'] as const;
-const UNKNOWNS = ['weather', 'soil', 'measurement', 'boundaries', 'ditches', 'terrain'] as const;
+const UNKNOWNS = [
+  'weather',
+  'soil',
+  'measurement',
+  'boundaries',
+  'ditches',
+  'structures',
+  'zones',
+  'terrain',
+] as const;
 const CONFIDENCE = ['grid', 'gaps', 'soil', 'conflict'] as const;
-const METHODS = ['kbw', 'root', 'soil', 'plants', 'water'] as const;
+const METHODS = ['kbw', 'root', 'soil', 'plants', 'water', 'zones', 'surroundings', 'heat'] as const;
 
 const SOURCES = [
   { id: 'nasaPower', href: 'https://power.larc.nasa.gov/' },
@@ -42,6 +58,7 @@ const SOURCES = [
   { id: 'uldk', href: 'https://uldk.gugik.gov.pl/' },
   { id: 'ortho', href: 'https://www.geoportal.gov.pl/pl/dane/ortofotomapa-orto/' },
   { id: 'osm', href: 'https://www.openstreetmap.org/copyright' },
+  { id: 'imgw', href: 'https://imgw.pl/edukacja/slowniki-hydrologiczno-meteorologiczne/' },
 ] as const;
 
 const SECTIONS = [
@@ -104,7 +121,7 @@ export function MethodPage() {
       </Section>
 
       <Section id="assessment" title={t('assessment.title')}>
-        {(['kbw', 'root', 'history', 'plants'] as const).map((id) => (
+        {(['kbw', 'root', 'history', 'plants', 'heat', 'validation'] as const).map((id) => (
           <div key={id} className="flex flex-col gap-1">
             <h3 className="font-semibold">{t(`assessment.${id}Title`)}</h3>
             <p>{t(`assessment.${id}`)}</p>

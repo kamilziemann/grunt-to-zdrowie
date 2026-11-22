@@ -6,7 +6,7 @@ import { renderWithIntl } from '@/test/render-intl';
 import { MethodPage } from './method-page';
 
 describe('MethodPage', () => {
-  it('po polsku: ocena, czego nie wiemy, pewność i 9 źródeł z licencją i linkiem', () => {
+  it('po polsku: ocena, czego nie wiemy, pewność i 10 źródeł z licencją i linkiem', () => {
     renderWithIntl(<MethodPage />);
 
     expect(screen.getByRole('heading', { level: 1, name: 'Jak liczymy' })).toBeInTheDocument();
@@ -16,7 +16,11 @@ describe('MethodPage', () => {
 
     const sources = screen.getByTestId('method-sources').querySelectorAll(':scope > li');
 
-    expect(sources).toHaveLength(9);
+    expect(sources).toHaveLength(10);
+    expect(screen.getByRole('heading', { name: 'Upał jako wyjaśnienie' })).toBeInTheDocument();
+    expect(screen.getByText(/powyżej 30°C/, { selector: 'p' })).toHaveTextContent('IMGW-PIB');
+    expect(screen.getByText(/w 21 przypadkach/)).toBeInTheDocument();
+    expect(screen.getByText(/Zastawek i przepustów na rowach ta mapa nie ma/)).toBeInTheDocument();
 
     for (const source of sources) {
       expect(source.querySelector('a[href^="https://"]')).not.toBeNull();

@@ -6,7 +6,7 @@
   "toc": "Na tej stronie",
   "data": {
     "title": "Co bierzemy pod uwagę",
-    "intro": "Pięć rodzajów danych. Każde źródło jest darmowe i legalne; pełna lista z licencjami jest na dole strony.",
+    "intro": "Siedem rodzajów danych. Każde źródło jest darmowe i legalne; pełna lista z licencjami jest na dole strony.",
     "items": {
       "weather": {
         "title": "Pogoda z 10 lat",
@@ -26,7 +26,15 @@
       },
       "parcels": {
         "title": "Granice i opis działki",
-        "text": "Obrys działki z ULDK, a powierzchnia i klasy użytków z ewidencji gruntów (EGiB), obie usługi GUGiK. Możesz też narysować własne pole albo podzielić działkę."
+        "text": "Obrys działki z ULDK, a powierzchnia, rodzaj użytku (grunt orny, łąka, las, droga…) i klasy gleby z ewidencji gruntów (EGiB), obie usługi GUGiK. Gdy ewidencja mówi, że to nie pole uprawne, raport ostrzega o tym na samej górze. Możesz też narysować własne pole albo podzielić działkę."
+      },
+      "zones": {
+        "title": "Miejsca na polu",
+        "text": "Które części pola przesychają pierwsze, a gdzie zbiera się woda: z jednego, najmniej zachmurzonego zdjęcia Sentinel-2 z ostatnich 30 dni i z modelu terenu o oczkach ok. 30 m (zagłębienia bez odpływu, spływ wody). To podpowiedź, gdzie iść na pole – nie pomiar."
+      },
+      "surroundings": {
+        "title": "Otoczenie pola",
+        "text": "Z mapy topograficznej BDOT10k (GUGiK): drzewa i żywopłoty przy granicy pola, jazy, zapory, śluzy, wały, źródła, ujęcia wody, miejsca, gdzie rów wchodzi w rurę, oraz obszary chronione (parki, rezerwaty, Natura 2000). Zastawek i przepustów na rowach ta mapa nie ma."
       }
     }
   },
@@ -40,7 +48,11 @@
     "historyTitle": "Na tle 10 lat",
     "history": "Te same rachunki robimy dla 10 poprzednich sezonów. Dzięki temu raport mówi, czy susza na tym polu to wyjątek, czy wraca co kilka lat, i w których okresach roku najczęściej.",
     "plantsTitle": "Satelita jako potwierdzenie",
-    "plants": "Zdjęcie satelitarne nie wydaje wyroku samo. Niski wskaźnik przy siewie, dojrzewaniu czy po zbiorze jest normalny. O możliwym stresie wodnym mówimy tylko wtedy, gdy wilgotność roślin jest wyraźnie niższa niż w poprzednich latach i bilans wody też pokazuje niedobór."
+    "plants": "Zdjęcie satelitarne nie wydaje wyroku samo. Niski wskaźnik przy siewie, dojrzewaniu czy po zbiorze jest normalny. O możliwym stresie wodnym mówimy tylko wtedy, gdy wilgotność roślin jest wyraźnie niższa niż w poprzednich latach i bilans wody też pokazuje niedobór.",
+    "heatTitle": "Upał jako wyjaśnienie",
+    "heat": "Liczymy dni z upałem w ostatnich 14 i 30 dniach i porównujemy je z tymi samymi dniami w 10 poprzednich latach. Upał to według słownika IMGW-PIB temperatura maksymalna powyżej 30°C. Gdy dni z upałem jest wyraźnie więcej niż zwykle, raport mówi, że rośliny tracą wodę szybciej – ale samej oceny to nie zmienia. Temperatura pochodzi z tej samej siatki ok. 50 km co reszta pogody.",
+    "validationTitle": "Sprawdzamy się na komunikatach IUNG",
+    "validation": "Porównaliśmy wyniki z suszą rolniczą ogłoszoną przez IUNG w 21 przypadkach: 9 gmin w różnych częściach Polski, lata 2018–2025, okresy z suszą i bez niej. Alarm (albo jego brak) zgadzał się z IUNG w 21 z 21 przypadków, a sam bilans wodny z 60 dni wypadał po tej samej stronie progu co u IUNG w 20 z 21."
   },
   "causes": {
     "title": "Skąd biorą się przyczyny",
@@ -81,7 +93,9 @@
       "measurement": "Nie mierzymy wilgotności na Twoim polu. Najpewniejszy sprawdzian to łopata i ręka.",
       "boundaries": "Granice działek są dzisiejsze – także wtedy, gdy analizujesz dzień sprzed kilku lat.",
       "ditches": "Wiemy, gdzie są rowy na mapie, ale nie wiemy, czy są drożne i czy płynie w nich woda.",
-      "terrain": "Jeśli raport oznacza ukształtowanie terenu albo strefy w polu jako dane przykładowe, traktuj je poglądowo."
+      "terrain": "Jeśli raport oznacza ukształtowanie terenu albo strefy w polu jako dane przykładowe, traktuj je poglądowo.",
+      "structures": "Mapy nie pokazują zastawek ani przepustów na rowach. Zanim zaplanujesz zastawkę, sprawdź na miejscu, co już jest na rowie.",
+      "zones": "Miejsca na polu pochodzą z jednego zdjęcia i z modelu terenu o oczkach ok. 30 m – małe dołki i bruzdy mogą być niewidoczne."
     }
   },
   "confidence": {
@@ -124,7 +138,7 @@
       },
       "bdot": {
         "name": "BDOT10k, GUGiK",
-        "use": "rowy, cieki, wody, mokradła",
+        "use": "rowy, cieki, wody, mokradła; drzewa przy polu, budowle wodne, wały i obszary chronione",
         "licence": "bezpłatne i do dowolnego wykorzystania (od 31 lipca 2020 r.); regulamin Geoportalu wymaga podania źródła"
       },
       "sentinel": {
@@ -146,6 +160,11 @@
         "name": "OpenStreetMap (OpenFreeMap, Nominatim)",
         "use": "podkład mapy i wyszukiwanie adresów",
         "licence": "ODbL (© autorzy OpenStreetMap)"
+      },
+      "imgw": {
+        "name": "IMGW-PIB, słownik meteorologiczny",
+        "use": "definicja upału (temperatura maksymalna powyżej 30°C)",
+        "licence": "przytaczamy definicję ze słownika z podaniem źródła"
       }
     }
   },
@@ -156,7 +175,10 @@
       "root": "Bilans strefy korzeniowej FAO-56: ET₀ Penman–Monteith, pojedynczy Kc z kalendarza uprawy, TAW/RAW, Ks, 10 sezonów.",
       "soil": "Gleba: uziarnienie SoilGrids → grupa PTG 2008 → kategoria IUNG; zapas wody Saxton–Rawls (2006) dla 0–100 cm.",
       "plants": "Satelita: NDVI i NDMI z API statystyk Copernicus Data Space, maska chmur SCL, min. 5 czystych pikseli w polu.",
-      "water": "Woda: odległości od obrysu pola w układzie PL-1992 (PostGIS), promień 500 m."
+      "water": "Woda: odległości od obrysu pola w układzie PL-1992 (PostGIS), promień 500 m.",
+      "zones": "Miejsca na polu: siatka 10 m; NDMI z jednego najmniej zachmurzonego zdjęcia Sentinel-2 z 30 dni względem mediany pola, wskaźnik gromadzenia wody i zagłębienia bez odpływu z modelu terenu ok. 30 m (EU-DEM / SRTM).",
+      "surroundings": "Otoczenie: drzewa w pasie 15 m od granicy pola (las i rząd drzew szukane do 500 m), jazy, zapory, śluzy, wały, źródła i ujęcia do 3 km, rów wchodzący w rurę do 500 m, obszary chronione przecinające pole (BDOT10k w PostGIS).",
+      "heat": "Upał: dni z temperaturą maksymalną powyżej 30°C (NASA POWER) w 14 i 30 dniach do daty analizy; norma = średnia z tych samych dni w 10 poprzednich latach. Zdanie w raporcie od 5 dni i co najmniej dwukrotności normy."
     }
   },
   "backToMap": "Sprawdź swoje pole"

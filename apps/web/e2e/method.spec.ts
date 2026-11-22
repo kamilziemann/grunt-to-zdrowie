@@ -16,7 +16,7 @@ test('stopka prowadzi do „Jak liczymy”: ocena, czego nie wiemy, źródła z 
 
   const sources = page.getByTestId('method-sources').getByRole('listitem');
 
-  await expect(sources).toHaveCount(9);
+  await expect(sources).toHaveCount(10);
   await expect(sources.filter({ hasText: 'NASA POWER' })).toContainText('CC BY 4.0');
   await expect(
     sources.filter({ hasText: 'BDOT10k' }).getByRole('link', { name: /Strona źródła/ }),
